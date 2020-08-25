@@ -16,22 +16,14 @@ import {fetch} from 'frontend-js-web';
 
 import createOdataFilter from './odata';
 
-export function getAcceptLanguageHeaderParam() {
-	const browserLang = navigator.language || navigator.userLanguage;
+function getAcceptLanguageHeaderParam() {
+	const browserLang = navigator.language ?? navigator.userLanguage;
 	const themeLang = Liferay.ThemeDisplay.getLanguageId().replace('_', '-');
 
-	if (browserLang === themeLang) {
-		return browserLang;
-	}
-
-	return `${browserLang}, ${themeLang};q=0.8`;
+	return browserLang === themeLang
+		? browserLang
+		: `${browserLang}, ${themeLang};q=0.8`;
 }
-
-const fetchHeaders = new Headers({
-	Accept: 'application/json',
-	'Accept-Language': getAcceptLanguageHeaderParam(),
-	'Content-Type': 'application/json',
-});
 
 export function getData(apiURL, query) {
 	const url = new URL(apiURL);
@@ -85,7 +77,11 @@ export function getValueFromItem(item, fieldName) {
 
 export function executeAsyncAction(url, method = 'GET') {
 	return fetch(url, {
-		headers: fetchHeaders,
+		headers: {
+			Accept: 'application/json',
+			'Accept-Language': getAcceptLanguageHeaderParam(),
+			'Content-Type': 'application/json',
+		},
 		method,
 	});
 }
