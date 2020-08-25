@@ -135,7 +135,7 @@ function DataSetDisplay({
 	const formRef = useRef(null);
 
 	function updateDataSetItems(dataSetData) {
-		setTotal(dataSetData.total || 0);
+		setTotal(dataSetData.totalCount);
 		updateItems(dataSetData.items);
 	}
 
