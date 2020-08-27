@@ -22,7 +22,7 @@ export function delay(duration) {
 	});
 }
 
-function getAcceptLanguageHeaderParam() {
+export function getAcceptLanguageHeaderParam() {
 	const browserLang = navigator.language ?? navigator.userLanguage;
 	const themeLang = Liferay.ThemeDisplay.getLanguageId().replace('_', '-');
 
@@ -59,6 +59,25 @@ export function liferayNavigate(url) {
 	else {
 		window.location.href = url;
 	}
+}
+
+export function isValuesArrayChanged(prevValue = [], newValue = []) {
+	if (prevValue.length !== newValue.length) {
+		return true;
+	}
+
+	const prevValues = prevValue.map((el) => el.value || el).sort();
+	const newValues = newValue.map((el) => el.value || el).sort();
+
+	let changed = false;
+
+	prevValues.forEach((element, i) => {
+		if (element !== newValues[i]) {
+			changed = true;
+		}
+	});
+
+	return changed;
 }
 
 export function getValueFromItem(item, fieldName) {
