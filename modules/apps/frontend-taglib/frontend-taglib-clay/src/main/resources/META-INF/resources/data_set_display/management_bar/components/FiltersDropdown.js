@@ -37,18 +37,18 @@ function FiltersDropdown() {
 
 	useEffect(() => {
 		const results = state.filters.filter((filter) => {
-			switch (true) {
-				case !!filter.invisible:
-					return false;
-				case query &&
+			if (
+				filter.invisible ||
+				(query &&
 					!(
 						filter.id.toLowerCase().includes(query) ||
 						filter.label.toLowerCase().includes(query)
-					):
-					return false;
-				default:
-					return true;
+					))
+			) {
+				return false;
 			}
+
+			return true;
 		});
 
 		setVisibleFilter(results);
@@ -90,10 +90,7 @@ function FiltersDropdown() {
 					<Filter {...{...activeFilter, actions}} />
 				</>
 			) : (
-				<>
-					<li className="dropdown-subheader">
-						{Liferay.Language.get('filters')}
-					</li>
+				<ClayDropDown.Group header={Liferay.Language.get('filters')}>
 					<ClayDropDown.Search
 						onChange={(e) => setQuery(e.target.value)}
 						value={query}
@@ -115,11 +112,11 @@ function FiltersDropdown() {
 							))}
 						</ClayDropDown.ItemList>
 					) : (
-						<div className="dropdown-section text-muted">
+						<ClayDropDown.Caption>
 							{Liferay.Language.get('no-filters-were-found')}
-						</div>
+						</ClayDropDown.Caption>
 					)}
-				</>
+				</ClayDropDown.Group>
 			)}
 		</ClayDropDown>
 	) : null;

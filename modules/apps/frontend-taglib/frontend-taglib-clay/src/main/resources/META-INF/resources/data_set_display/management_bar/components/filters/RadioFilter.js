@@ -34,7 +34,7 @@ function RadioFilter({actions, id, items, value: valueProp}) {
 	const [itemValue, setItemValue] = useState(
 		valueProp && valueProp.itemValue
 	);
-	const [exclude, setExclude] = useState(valueProp && valueProp.exclude);
+	const [exclude, setExclude] = useState(!!valueProp?.exclude);
 
 	const actionType = valueProp ? 'edit' : 'add';
 

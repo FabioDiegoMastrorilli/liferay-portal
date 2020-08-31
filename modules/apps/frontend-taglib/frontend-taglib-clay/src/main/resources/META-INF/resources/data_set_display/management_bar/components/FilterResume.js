@@ -60,7 +60,7 @@ function FilterResume(props) {
 			trigger={label}
 		>
 			<li className="dropdown-subheader">{props.label}</li>
-			<Filter {...{...props, actions}} />
+			<Filter actions={actions} {...props} />
 		</ClayDropDown>
 	);
 

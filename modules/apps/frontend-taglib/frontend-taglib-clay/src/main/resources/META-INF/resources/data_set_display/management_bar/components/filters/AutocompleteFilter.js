@@ -33,12 +33,17 @@ import {logError} from '../../../utilities/logError';
 const DEFAULT_PAGE_SIZE = 10;
 
 function fetchData(apiURL, searchParam, currentPage = 1) {
+	const url = new URL(apiURL, themeDisplay.getPortalURL());
+
+	url.searchParams.append('page', currentPage);
+	url.searchParams.append('pageSize', DEFAULT_PAGE_SIZE);
+
+	if(searchParam) {
+		url.searchParams.append('search', encodeURIComponent(searchParam));
+	}
+
 	return fetch(
-		`${apiURL}${
-			apiURL.includes('?') ? '&' : '?'
-		}page=${currentPage}&pageSize=${DEFAULT_PAGE_SIZE}${
-			searchParam ? `&search=${encodeURIComponent(searchParam)}` : ''
-		}`,
+		url,
 		{
 			headers: {
 				'Accept-Language': getAcceptLanguageHeaderParam(),
@@ -70,31 +75,37 @@ Item.propTypes = {
 	value: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
 };
 
+function composeMultipleValuesOdataString(key, values, exclude) {
+	return `${key}/any(x:${values
+		.map(
+			(value) =>
+				`(x ${exclude ? 'ne' : 'eq'} ${
+					typeof value === 'string' ? `'${value}'` : value
+				})`
+		)
+		.join(exclude ? ' and ' : ' or ')})`;
+}
+
+function composeSingleValuesOdataString(key, value, exclude) {
+	return `${key} ${exclude ? 'ne' : 'eq'} ${
+		typeof value === 'string' ? `'${value}'` : value
+	}`;
+}
+
 const formatValue = (value, exclude) =>
 	(exclude ? `(${Liferay.Language.get('exclude')}) ` : '') +
 	value.map((el) => el.label).join(', ');
 
-function getOdataString(value, key, selectionType, exclude) {
-	if (!value || !value.length) {
-		return null;
+function getOdataString(selectedItems, key, selectionType, exclude) {
+	if (selectedItems?.length) {
+		const values = selectedItems.map((item) => item.value);
+
+		return selectionType === 'multiple'
+			? composeMultipleValuesOdataString(key, values, exclude)
+			: composeSingleValuesOdataString(key, values[0], exclude);
 	}
 
-	return selectionType === 'multiple'
-		? `${key}/any(x:${value
-				.map(
-					(v) =>
-						`(x ${exclude ? 'ne' : 'eq'} ${
-							typeof v.value === 'string'
-								? `'${v.value}'`
-								: v.value
-						})`
-				)
-				.join(exclude ? ' and ' : ' or ')})`
-		: `${key} ${exclude ? 'ne' : 'eq'} ${
-				typeof value[0].value === 'string'
-					? `'${value[0].value}'`
-					: value[0].value
-		  }`;
+	return null;
 }
 function AutocompleteFilter({
 	actions,
@@ -108,9 +119,7 @@ function AutocompleteFilter({
 }) {
 	const [query, setQuery] = useState('');
 	const [search, setSearch] = useState('');
-	const [selectedItems, setSelectedItems] = useState(
-		(valueProp && valueProp.items) || []
-	);
+	const [selectedItems, setSelectedItems] = useState(valueProp?.items || []);
 	const [items, updateItems] = useState(null);
 	const [loading, setLoading] = useState(false);
 	const [currentPage, setCurrentPage] = useState(1);
@@ -119,14 +128,12 @@ function AutocompleteFilter({
 	const [scrollingAreaRendered, setScrollingAreaRendered] = useState(false);
 	const infiniteLoader = useRef(null);
 	const [infiniteLoaderRendered, setInfiniteLoaderRendered] = useState(false);
-	const [exclude, setExclude] = useState(
-		(valueProp && valueProp.exclude) || false
-	);
+	const [exclude, setExclude] = useState(!!valueProp?.exclude);
 
 	const loaderVisible = items && items.length < total;
 
 	useEffect(() => {
-		setSelectedItems((valueProp && valueProp.items) || []);
+		setSelectedItems(valueProp?.items || []);
 	}, [valueProp]);
 
 	useEffect(() => {
@@ -213,7 +220,7 @@ function AutocompleteFilter({
 
 	let actionType = 'edit';
 
-	if (valueProp && valueProp.items && !selectedItems.length) {
+	if (valueProp?.items && !selectedItems.length) {
 		actionType = 'delete';
 	}
 

@@ -20,13 +20,13 @@ import React, {useEffect, useState} from 'react';
 
 import {isValuesArrayChanged} from '../../../utilities/index';
 
-export const formatValue = (value, items, exclude) => {
-	const formattedValue = value
-		? value
-				.map((v) => {
+export const formatValue = (values, items, exclude) => {
+	const formattedValue = values
+		? values
+				.map((value) => {
 					return items.reduce(
 						(found, item) =>
-							found || (item.value === v ? item.label : null),
+							found || (item.value === value ? item.label : null),
 						null
 					);
 				})
@@ -40,18 +40,18 @@ export const formatValue = (value, items, exclude) => {
 };
 
 function getOdataString(values, key, exclude = false) {
-	if (!values || !values.length) {
-		return null;
+	if (values?.length) {
+		return `${key}/any(x:${values
+			.map(
+				(value) =>
+					`(x ${exclude ? 'ne' : 'eq'} ${
+						typeof value === 'string' ? `'${value}'` : value
+					})`
+			)
+			.join(exclude ? ' and ' : ' or ')})`;
 	}
 
-	return `${key}/any(x:${values
-		.map(
-			(v) =>
-				`(x ${exclude ? 'ne' : 'eq'} ${
-					typeof v === 'string' ? `'${v}'` : v
-				})`
-		)
-		.join(exclude ? ' and ' : ' or ')})`;
+	return null;
 }
 function CheckboxesFilter({actions, id, items, value: valueProp}) {
 	const [itemsValues, setItemsValues] = useState(
@@ -63,7 +63,9 @@ function CheckboxesFilter({actions, id, items, value: valueProp}) {
 
 	function selectCheckbox(selected) {
 		if (itemsValues.includes(selected)) {
-			return setItemsValues(itemsValues.filter((v) => v !== selected));
+			return setItemsValues(
+				itemsValues.filter((value) => value !== selected)
+			);
 		}
 
 		return setItemsValues(itemsValues.concat(selected));
@@ -76,7 +78,7 @@ function CheckboxesFilter({actions, id, items, value: valueProp}) {
 
 	let actionType = 'edit';
 
-	if (valueProp && valueProp.itemsValues && !itemsValues.length) {
+	if (valueProp?.itemsValues && !itemsValues.length) {
 		actionType = 'delete';
 	}
 
