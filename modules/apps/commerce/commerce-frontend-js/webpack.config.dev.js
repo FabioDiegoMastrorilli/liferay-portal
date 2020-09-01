@@ -88,6 +88,16 @@ module.exports = {
 		}),
 	],
 	resolve: {
+		alias: {
+			'frontend-js-react-web': path.resolve(
+				__dirname,
+				'../../../node_modules/frontend-js-react-web/src/main/resources/META-INF/resources/js/index.es.js'
+			),
+			'frontend-js-web': path.resolve(
+				__dirname,
+				'../../../node_modules/frontend-js-web/src/main/resources/META-INF/resources/index.es.js'
+			),
+		},
 		extensions: ['.js', '.jsx'],
 	},
 };
