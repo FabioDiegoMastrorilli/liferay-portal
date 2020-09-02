@@ -38,18 +38,15 @@ function fetchData(apiURL, searchParam, currentPage = 1) {
 	url.searchParams.append('page', currentPage);
 	url.searchParams.append('pageSize', DEFAULT_PAGE_SIZE);
 
-	if(searchParam) {
+	if (searchParam) {
 		url.searchParams.append('search', encodeURIComponent(searchParam));
 	}
 
-	return fetch(
-		url,
-		{
-			headers: {
-				'Accept-Language': getAcceptLanguageHeaderParam(),
-			},
-		}
-	).then((response) => response.json());
+	return fetch(url, {
+		headers: {
+			'Accept-Language': getAcceptLanguageHeaderParam(),
+		},
+	}).then((response) => response.json());
 }
 
 function Item(props) {
