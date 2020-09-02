@@ -128,21 +128,53 @@ export function createSortingString(values) {
 		.join(',');
 }
 
+export function getFiltersString(odataFiltersStrings, providedFilters) {
+	let filtersString = '';
+
+	if (providedFilters) {
+		filtersString += providedFilters;
+	}
+
+	if (providedFilters && odataFiltersStrings.length) {
+		filtersString += ' and ';
+	}
+
+	if (odataFiltersStrings.length) {
+		filtersString += createOdataFilter(odataFiltersStrings);
+	}
+
+	return filtersString;
+}
+
 export function loadData(
 	apiURL,
 	currentURL,
-	filters,
+	odataFiltersStrings,
 	searchParam,
 	delta,
 	page = 1,
 	sorting = []
 ) {
-	const url = new URL(apiURL, themeDisplay.getPortalURL());
+	let providedFilters = '';
+
+	const formattedUrl = apiURL.replace(
+		/[?|&]filter=(.*)[&.+]?/gm,
+		(matched) => {
+			providedFilters = matched.replace(/[?|&]filter=/, '');
+
+			return '';
+		}
+	);
+
+	const url = new URL(formattedUrl, themeDisplay.getPortalURL());
 
 	url.searchParams.append('currentURL', currentURL);
 
-	if (filters.length) {
-		url.searchParams.append('filter', createOdataFilter(filters));
+	if (providedFilters || odataFiltersStrings.length) {
+		url.searchParams.append(
+			'filter',
+			getFiltersString(odataFiltersStrings, providedFilters)
+		);
 	}
 
 	url.searchParams.append('page', page);
