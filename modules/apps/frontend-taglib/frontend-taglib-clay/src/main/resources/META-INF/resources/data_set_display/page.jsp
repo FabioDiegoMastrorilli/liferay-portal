@@ -27,7 +27,13 @@
 
 	dataSetDisplay.default(
 		{
-			actionParameterName: '<%= actionParameterName %>',
+
+			<% if (Validator.isNotNull(actionParameterName)) { %>
+
+				actionParameterName: '<%= actionParameterName %>',
+
+			<% } %>
+
 			activeViewSettings: <%= activeViewSettingsJSON %>,
 			apiURL: '<%= apiURL %>',
 			appURL: '<%= appURL %>',

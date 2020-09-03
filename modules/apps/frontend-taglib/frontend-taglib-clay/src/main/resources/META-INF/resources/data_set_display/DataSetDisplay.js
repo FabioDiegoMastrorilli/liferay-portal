@@ -347,16 +347,14 @@ function DataSetDisplay({
 	const view =
 		!loading && CurrentViewComponent ? (
 			<div className="data-set-display-content-wrapper">
-				{!formId && (
-					<input
-						hidden
-						name={`${namespace || id + '_'}${
-							actionParameterName ?? selectedItemsKey
-						}`}
-						readOnly
-						value={selectedItemsValue.join(',')}
-					/>
-				)}
+				<input
+					hidden
+					name={`${namespace || id + '_'}${
+						actionParameterName ?? selectedItemsKey
+					}`}
+					readOnly
+					value={selectedItemsValue.join(',')}
+				/>
 				{(items?.length ?? 0) || overrideEmptyResultView ? (
 					<CurrentViewComponent
 						dataSetDisplayContext={DataSetDisplayContext}

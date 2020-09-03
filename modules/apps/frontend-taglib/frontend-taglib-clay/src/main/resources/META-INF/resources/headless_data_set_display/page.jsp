@@ -33,7 +33,17 @@ JSONSerializer jsonSerializer = JSONFactoryUtil.createJSONSerializer();
 <aui:script require='<%= module + " as dataSetDisplay" %>'>
 	dataSetDisplay.default(
 		{
-			actionParameterName: '<%= actionParameterName %>',
+
+			<%
+				if (Validator.isNotNull(actionParameterName)) {
+			%>
+
+				actionParameterName: '<%= actionParameterName %>',
+
+			<%
+				}
+			%>
+
 			activeViewSettings: <%= activeViewSettingsJSON %>,
 			apiURL: '<%= apiURL %>',
 			appURL: '<%= appURL %>',
