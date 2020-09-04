@@ -257,39 +257,36 @@ function DataSetDisplay({
 		}
 	}, [wrapperRef]);
 
-	const refreshData = useCallback(
-		(successNotification) => {
-			setLoading(true);
+	function refreshData(successNotification) {
+		setLoading(true);
 
-			return requestData()
-				.then((data) => {
-					const {
-						message,
-						showSuccessNotification,
-					} = successNotification;
+		return requestData()
+			.then((data) => {
+				if (successNotification?.showSuccessNotification) {
+					openToast({
+						message:
+							successNotification.message ||
+							Liferay.Language.get('table-data-updated'),
+						type: 'success',
+					});
+				}
 
-					if (showSuccessNotification) {
-						openToast({
-							message:
-								message ||
-								Liferay.Language.get('table-data-updated'),
-							type: 'success',
-						});
-					}
+				if (isMounted()) {
+					setLoading(false);
+					updateDataSetItems(data);
 
-					if (isMounted()) {
-						setLoading(false);
-						updateDataSetItems(data);
+					Liferay.fire(DATASET_DISPLAY_UPDATED, {id});
+				}
 
-						Liferay.fire(DATASET_DISPLAY_UPDATED, {id});
-					}
+				return data;
+			})
+			.catch((error) => {
+				logError(error);
+				setLoading(false);
 
-					return data;
-				})
-				.catch(() => setLoading(false));
-		},
-		[id, isMounted, requestData]
-	);
+				throw error;
+			});
+	}
 
 	useEffect(() => {
 		function handleRefreshFromTheOutside(event) {
@@ -350,7 +347,7 @@ function DataSetDisplay({
 				<input
 					hidden
 					name={`${namespace || id + '_'}${
-						actionParameterName ?? selectedItemsKey
+						actionParameterName || selectedItemsKey
 					}`}
 					readOnly
 					value={selectedItemsValue.join(',')}
