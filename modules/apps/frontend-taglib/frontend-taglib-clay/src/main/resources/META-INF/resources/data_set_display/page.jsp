@@ -27,13 +27,7 @@
 
 	dataSetDisplay.default(
 		{
-
-			<% if (Validator.isNotNull(actionParameterName)) { %>
-
-				actionParameterName: '<%= actionParameterName %>',
-
-			<% } %>
-
+			actionParameterName: '<%= GetterUtil.getString(actionParameterName) %>',
 			activeViewSettings: <%= activeViewSettingsJSON %>,
 			apiURL: '<%= apiURL %>',
 			appURL: '<%= appURL %>',
@@ -42,27 +36,11 @@
 			creationMenu: <%= jsonSerializer.serializeDeep(creationMenu) %>,
 			currentURL: '<%= PortalUtil.getCurrentURL(request) %>',
 			dataProviderKey: '<%= dataProviderKey %>',
-			formId: '<%= formId %>',
+			formId: '<%= GetterUtil.getString(formId) %>',
 			id: '<%= id %>',
-
-			<%
-			if (Validator.isNotNull(nestedItemsKey)) {
-			%>
-
-				nestedItemsKey: '<%= nestedItemsKey %>',
-
-				<%
-				}
-
-				if (Validator.isNotNull(nestedItemsReferenceKey)) {
-				%>
-
-				nestedItemsReferenceKey: '<%= nestedItemsReferenceKey %>',
-
-			<%
-			}
-			%>
-
+			nestedItemsKey: '<%= GetterUtil.getString(nestedItemsKey) %>',
+			nestedItemsReferenceKey:
+				'<%= GetterUtil.getString(nestedItemsReferenceKey) %>',
 			pagination: {
 				deltas: <%= jsonSerializer.serializeDeep(clayPaginationEntries) %>,
 				initialDelta: <%= itemsPerPage %>,
@@ -75,8 +53,8 @@
 			portletId: '<%= portletDisplay.getRootPortletId() %>',
 			portletURL: '<%= portletURL %>',
 			selectedItems: <%= jsonSerializer.serializeDeep(selectedItems) %>,
-			selectedItemsKey: '<%= selectedItemsKey %>',
-			selectionType: '<%= selectionType %>',
+			selectedItemsKey: '<%= GetterUtil.getString(selectedItemsKey) %>',
+			selectionType: '<%= GetterUtil.getString(selectionType) %>',
 			style: '<%= style %>',
 			views: <%= jsonSerializer.serializeDeep(clayDataSetDisplayViewsContext) %>,
 		},
