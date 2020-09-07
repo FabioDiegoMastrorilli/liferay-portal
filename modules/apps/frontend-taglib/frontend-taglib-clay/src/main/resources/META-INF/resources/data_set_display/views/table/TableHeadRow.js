@@ -94,7 +94,7 @@ const FieldsSelectorDropdown = ({fields}) => {
 							}}
 						>
 							{selectedFieldNames[fieldName] && (
-								<ClayIcon symbol="check" />
+								<ClayIcon className="mr-2" symbol="check" />
 							)}
 							{label}
 						</ClayDropDown.Item>
