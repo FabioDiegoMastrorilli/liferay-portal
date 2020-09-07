@@ -14,8 +14,6 @@
 
 import launcher from '../../../src/main/resources/META-INF/resources/components/side_panel/entry';
 
-import '../../../src/main/resources/META-INF/resources/styles/main.scss';
-
 window.SidePanel = launcher('sidePanel', 'side-panel-root-id', {
 	containerSelector: '.container',
 	id: 'sidePanelTestId',

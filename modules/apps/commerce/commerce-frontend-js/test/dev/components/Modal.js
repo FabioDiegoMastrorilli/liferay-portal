@@ -18,8 +18,6 @@ import modalLauncher from '../../../src/main/resources/META-INF/resources/compon
 import {OPEN_MODAL} from '../../../src/main/resources/META-INF/resources/utilities/eventsDefinitions';
 import launcher from '../../../src/main/resources/META-INF/resources/utilities/launcher';
 
-import '../../../src/main/resources/META-INF/resources/styles/main.scss';
-
 const props = {
 	actions: [
 		{
