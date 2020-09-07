@@ -91,6 +91,7 @@ public class ProcessingCommerceShipmentItemDataSetActionProvider
 						commerceShipmentItem, httpServletRequest));
 				dropdownItem.setLabel(
 					LanguageUtil.get(httpServletRequest, "edit"));
+				dropdownItem.setTarget("sidePanel");
 			}
 		).add(
 			() -> PortalPermissionUtil.contains(
