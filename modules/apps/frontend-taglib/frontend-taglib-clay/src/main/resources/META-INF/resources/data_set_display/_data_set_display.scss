@@ -1,6 +1,14 @@
 .data-set-display {
 	.data-set-display-management-bar-wrapper {
 		border-bottom: 1px solid $border-color;
+
+		& > .management-bar {
+			margin-bottom: 0;
+	
+			& + .management-bar {
+				border-top: 1px solid #eee;
+			}
+		}
 	}
 
 	.data-set-sub-item {
@@ -126,14 +134,6 @@
 
 		.table {
 			border-bottom: 1px solid $border-color;
-		}
-	}
-
-	&.data-set-display-management-bar-wrapper > .management-bar {
-		margin-bottom: 0;
-
-		& + .management-bar {
-			border-top: 1px solid #eee;
 		}
 	}
 
