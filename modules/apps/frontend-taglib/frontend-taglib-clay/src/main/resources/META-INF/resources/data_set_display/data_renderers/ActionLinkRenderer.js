@@ -41,12 +41,12 @@ function ActionLinkRenderer({actions, itemData, itemId, options, value}) {
 		return null;
 	}
 
-	if (currentAction.permissionKey) {
-		if (itemData.actions[currentAction.permissionKey]) {
+	if (currentAction.data?.permissionKey) {
+		if (itemData.actions[currentAction.data.permissionKey]) {
 			if (currentAction.target === 'headless') {
 				currentAction = {
 					...currentAction,
-					...itemData.actions[currentAction.id],
+					...itemData.actions[currentAction.data.id],
 				};
 			}
 		}
@@ -118,6 +118,11 @@ function ActionLinkRenderer({actions, itemData, itemId, options, value}) {
 ActionLinkRenderer.propTypes = {
 	actions: PropTypes.arrayOf(
 		PropTypes.shape({
+			data: PropTypes.shape({
+				href: PropTypes.string,
+				method: PropTypes.oneOf(['get', 'delete']),
+				permissionKey: PropTypes.string,
+			}),
 			disabled: PropTypes.bool,
 			href: PropTypes.string,
 			icon: PropTypes.string,

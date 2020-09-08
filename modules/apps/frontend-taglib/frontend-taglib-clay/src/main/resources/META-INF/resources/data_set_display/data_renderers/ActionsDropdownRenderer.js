@@ -149,14 +149,16 @@ function ActionsDropdownRenderer({actions, itemData, itemId}) {
 
 	const formattedActions = actions
 		? actions.reduce((actions, action) => {
-				if (action.permissionKey) {
-					if (itemData.actions[action.permissionKey]) {
+				if (action.data?.permissionKey) {
+					if (itemData.actions[action.data.permissionKey]) {
 						if (action.target === 'headless') {
 							return [
 								...actions,
 								{
 									...action,
-									...itemData.actions[action.permissionKey],
+									...itemData.actions[
+										action.data.permissionKey
+									],
 								},
 							];
 						}
@@ -219,7 +221,7 @@ function ActionsDropdownRenderer({actions, itemData, itemId}) {
 							itemId,
 							method: actionData?.method,
 							setLoading,
-							url: action.href,
+							url: formatActionURL(action.href, itemData),
 							...action,
 						},
 						context
@@ -290,13 +292,14 @@ ActionsDropdownRenderer.propTypes = {
 	actions: PropTypes.arrayOf(
 		PropTypes.shape({
 			data: PropTypes.shape({
+				href: PropTypes.string,
 				method: PropTypes.oneOf(['get', 'delete']),
+				permissionKey: PropTypes.string,
 			}),
 			href: PropTypes.string,
 			icon: PropTypes.string,
 			label: PropTypes.string.isRequired,
 			onClick: PropTypes.string,
-			permissionKey: PropTypes.string,
 			target: PropTypes.oneOf([
 				'modal',
 				'sidePanel',
