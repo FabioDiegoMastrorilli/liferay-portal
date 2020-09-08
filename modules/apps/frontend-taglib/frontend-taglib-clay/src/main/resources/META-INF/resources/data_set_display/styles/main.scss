@@ -73,26 +73,6 @@
 	}
 }
 
-.row.vertically-divided {
-	overflow: hidden;
-
-	& > [class*='col'] {
-		&::after {
-			border-right: 1px solid #e6e7ed;
-			bottom: 0;
-			content: '';
-			position: absolute;
-			right: -2px;
-			top: 0;
-			z-index: 0;
-		}
-
-		&:last-child::after {
-			border-color: transparent;
-		}
-	}
-}
-
 .sorting-icons-wrapper {
 	.sorting-icon {
 		&:nth-child(2) {
@@ -104,10 +84,4 @@
 			opacity: 0.5;
 		}
 	}
-}
-
-.sticky-header-menu {
-	border-bottom: 1px solid $border-color;
-	position: sticky;
-	z-index: 899;
 }
