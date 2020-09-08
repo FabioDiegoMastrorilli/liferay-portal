@@ -344,7 +344,7 @@ export default class SidePanel extends React.Component {
 				<Modal id={this.iframeHandlerModalId} />
 				<div
 					className={classNames(
-						'side-panel-nav-cover border-bottom',
+						'side-panel-nav-cover navigation-bar border-bottom',
 						visibility
 					)}
 					style={{top: this.state.menuCoverTopDistance}}
@@ -352,7 +352,7 @@ export default class SidePanel extends React.Component {
 					<div
 						className={classNames(!isPageInIframe() && 'container')}
 					>
-						<ul className="nav nav-underline">
+						<ul className="navbar-nav">
 							<li className="nav-item">
 								<button
 									className="btn btn-unstyled nav-link"
