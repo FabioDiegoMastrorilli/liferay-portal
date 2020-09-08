@@ -43,7 +43,7 @@ public class ClayDataSetActionDropdownItem extends DropdownItem {
 	}
 
 	public void setPermissionKey(String permissionKey) {
-		putData("permissionkey", permissionKey);
+		putData("permissionKey", permissionKey);
 	}
 
 }

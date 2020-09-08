@@ -149,14 +149,16 @@ function ActionsDropdownRenderer({actions, itemData, itemId}) {
 
 	const formattedActions = actions
 		? actions.reduce((actions, action) => {
-				if (action.permissionKey) {
-					if (itemData.actions[action.permissionKey]) {
+				if (action.data?.permissionKey) {
+					if (itemData.actions[action.data.permissionKey]) {
 						if (action.target === 'headless') {
 							return [
 								...actions,
 								{
 									...action,
-									...itemData.actions[action.permissionKey],
+									...itemData.actions[
+										action.data.permissionKey
+									],
 								},
 							];
 						}
@@ -219,7 +221,7 @@ function ActionsDropdownRenderer({actions, itemData, itemId}) {
 							itemId,
 							method: actionData?.method,
 							setLoading,
-							url: action.href,
+							url: formatActionURL(action.href, itemData),
 							...action,
 						},
 						context
