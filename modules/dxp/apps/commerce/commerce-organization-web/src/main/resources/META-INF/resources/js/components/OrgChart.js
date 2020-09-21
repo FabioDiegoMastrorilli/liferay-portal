@@ -9,10 +9,13 @@
  * distribution rights of the Software.
  */
 
+/* eslint-disable react/no-string-refs */
+import getCN from 'classnames';
 import {
 	event as d3event,
 	hierarchy as d3hierarchy,
 	select as d3select,
+	tree as d3tree,
 	zoom as d3zoom,
 	zoomIdentity as d3zoomIdentity,
 } from 'd3';
@@ -32,7 +35,14 @@ class OrgChart extends Component {
 	constructor(props) {
 		super(props);
 
-		bindAll(this, 'collapse', 'handleNodeClick', 'zoomIn', 'zoomOut');
+		bindAll(
+			this,
+			'collapse',
+			'handleNodeClick',
+			'updateZoomValue',
+			'zoomIn',
+			'zoomOut'
+		);
 
 		this._nodeLabelWidth = 5;
 		this._currentScale = 0.88;
@@ -89,8 +99,8 @@ class OrgChart extends Component {
 		return (
 			<div className="org-chart-container">
 				<div className="svg-wrapper">
-					<svg ref={chartSVG}>
-						<g ref={tree} />
+					<svg ref="chartSVG">
+						<g ref="tree" />
 					</svg>
 				</div>
 

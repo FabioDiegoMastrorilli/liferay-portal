@@ -9,6 +9,7 @@
  * distribution rights of the Software.
  */
 
+import {debounce} from 'frontend-js-web';
 import PropTypes from 'prop-types';
 import React, {Component} from 'react';
 
@@ -21,12 +22,7 @@ class InfiniteScroll extends Component {
 
 		bindAll(this, 'handleScroll_', 'shouldScroll_');
 
-		const {leading, maxWait, wait} = this.props;
-
-		this.debouncedScrollHandler_ = _.debounce(this.handleScroll_, wait, {
-			leading,
-			maxWait,
-		});
+		this.debouncedScrollHandler_ = debounce(this.handleScroll_, props.wait);
 	}
 
 	componentDidMount() {
@@ -111,9 +107,7 @@ class InfiniteScroll extends Component {
 InfiniteScroll.defaultProps = {
 	attachToElement: () => w,
 	hasMoreResults: true,
-	leading: false,
 	loading_: false,
-	maxWait: 200,
 	scrollOffset: 0,
 	wait: 100,
 };
@@ -121,8 +115,6 @@ InfiniteScroll.defaultProps = {
 InfiniteScroll.propTypes = {
 	attachToElement: PropTypes.func,
 	hasMoreResults: PropTypes.bool,
-	leading: PropTypes.bool,
-	maxWait: PropTypes.number,
 	onScrollEnd: PropTypes.func,
 	scrollOffset: PropTypes.number,
 	wait: PropTypes.number,
