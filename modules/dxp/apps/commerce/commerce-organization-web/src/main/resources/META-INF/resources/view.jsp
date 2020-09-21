@@ -22,13 +22,9 @@ CommerceOrganizationDisplayContext commerceOrganizationDisplayContext = (Commerc
 String viewMode = commerceOrganizationDisplayContext.getViewMode();
 
 request.setAttribute("view.jsp-filterPerOrganization", false);
-
-String wrapperCssClass = "commerce-organization-view-modes row text-right";
-
-wrapperCssClass = viewMode + " " + wrapperCssClass;
 %>
 
-<div class="<%= wrapperCssClass %>">
+<div class="<%= "commerce-organization-view-modes mb-3 text-right" %>">
 
 	<%
 	for (String curViewMode : CommerceOrganizationConstants.VIEW_MODES) {
@@ -38,10 +34,13 @@ wrapperCssClass = viewMode + " " + wrapperCssClass;
 			icon = "organizations";
 		}
 
-		String cssClass = "btn btn-default lfr-portal-tooltip";
+		String cssClass = "btn lfr-portal-tooltip btn-monospaced ml-3";
 
 		if (curViewMode.equals(viewMode)) {
-			cssClass = "active " + cssClass;
+			cssClass = "btn-primary " + cssClass;
+		}
+		else {
+			cssClass = "btn-secondary " + cssClass;
 		}
 
 		Map<String, Object> data = HashMapBuilder.<String, Object>put(
@@ -55,7 +54,7 @@ wrapperCssClass = viewMode + " " + wrapperCssClass;
 
 		<aui:a cssClass="<%= cssClass %>" data="<%= data %>" href="<%= portletURL.toString() %>" id="<%= liferayPortletResponse.getNamespace() + curViewMode %>">
 			<c:if test="<%= Validator.isNotNull(icon) %>">
-				<aui:icon cssClass="icon-monospaced" image="<%= icon %>" markupView="lexicon" />
+				<aui:icon image="<%= icon %>" markupView="lexicon" />
 			</c:if>
 
 			<span class="sr-only"><liferay-ui:message key="<%= curViewMode %>" /></span>
@@ -69,7 +68,7 @@ wrapperCssClass = viewMode + " " + wrapperCssClass;
 
 <c:choose>
 	<c:when test="<%= viewMode.equals(CommerceOrganizationConstants.LIST_VIEW_MODE) %>">
-		<div class="commerce-organization-container container container-fluid" id="<portlet:namespace />entriesContainer">
+		<div class="commerce-organization-container" id="<portlet:namespace />entriesContainer">
 			<clay:data-set-display
 				dataProviderKey="<%= CommerceOrganizationClayTableDataSetDisplayView.NAME %>"
 				id="<%= CommerceOrganizationClayTableDataSetDisplayView.NAME %>"
@@ -82,11 +81,12 @@ wrapperCssClass = viewMode + " " + wrapperCssClass;
 		</div>
 	</c:when>
 	<c:when test="<%= viewMode.equals(CommerceOrganizationConstants.CHART_VIEW_MODE) %>">
+
 		<%
 		String segmentEditRootElementId = liferayPortletResponse.getNamespace() + "org-chart-root";
 		%>
 
-		<div id="<%= segmentEditRootElementId %>" class="orgchart-module">
+		<div class="orgchart-module" id="<%= segmentEditRootElementId %>">
 			<div class="inline-item my-5 p-5 w-100">
 				<span aria-hidden="true" class="loading-animation"></span>
 			</div>
@@ -108,7 +108,7 @@ wrapperCssClass = viewMode + " " + wrapperCssClass;
 
 <c:if test="<%= commerceOrganizationDisplayContext.hasAddOrganizationPermissions() %>">
 	<div class="commerce-cta is-visible">
-		<aui:button cssClass="btn-lg btn-primary" name="addOrganizationButton" value="add-organization" />
+		<aui:button cssClass="btn-lg" name="addOrganizationButton" primary="<%= true %>" value="add-organization" />
 	</div>
 
 	<portlet:actionURL name="editCommerceOrganization" var="editCommerceOrganizationActionURL">
