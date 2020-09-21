@@ -3,7 +3,7 @@ import {
     callApi,
     setupDataset,
     bindAll
-} from '../utils/utils.es';
+} from '../utils/utils';
 
 import OrgChart from './OrgChart';
 import MembersPane from './MembersPane';

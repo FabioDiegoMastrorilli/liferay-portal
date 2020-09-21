@@ -11,7 +11,7 @@
 
 import {fetch} from 'frontend-js-web';
 
-import w from './window.es';
+import w from './window';
 
 function serializeParams(params) {
 	return Object.keys(params)

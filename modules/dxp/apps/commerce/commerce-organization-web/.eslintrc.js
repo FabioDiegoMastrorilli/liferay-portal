@@ -9,7 +9,17 @@
  * distribution rights of the Software.
  */
 
-/* eslint-disable */
 module.exports = {
-	presets: ['@babel/preset-env', '@babel/preset-react'],
+	env: {
+		browser: true,
+		jest: true,
+		node: true,
+	},
+	globals: {
+		AUI: 'readonly',
+		Liferay: 'readonly',
+	},
+	parserOptions: {
+		ecmaVersion: 2018,
+	},
 };

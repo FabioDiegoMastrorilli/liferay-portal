@@ -3,8 +3,8 @@ import PropTypes from 'prop-types';
 
 import PaneHeader from './PaneHeader';
 import MembersList from './MembersList';
-import {LIST_BY} from '../utils/constants.es';
-import {callApi, bindAll} from '../utils/utils.es';
+import {LIST_BY} from '../utils/constants';
+import {callApi, bindAll} from '../utils/utils';
 
 const {USERS} = LIST_BY;
 

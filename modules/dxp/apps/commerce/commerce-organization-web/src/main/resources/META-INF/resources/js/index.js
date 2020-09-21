@@ -9,7 +9,7 @@
  * distribution rights of the Software.
  */
 
-import OrgChartContainer from 'components/OrgChartContainer';
+import OrgChartContainer from './components/OrgChartContainer';
 import {render} from 'frontend-js-react-web';
 import React from 'react';
 

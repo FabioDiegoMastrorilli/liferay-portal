@@ -1,8 +1,12 @@
 import React, {Component} from 'react';
 import PropTypes from 'prop-types';
-import * as d3 from 'd3';
-import getCN from 'classnames';
-import w from '../utils/window.es';
+import {
+    event as d3event,
+    hierarchy as d3hierarchy,
+    select as d3select,
+    zoom as d3zoom,
+    zoomIdentity as d3zoomIdentity
+} from 'd3';
 
 import {
     noop,
@@ -11,7 +15,7 @@ import {
     truncateTextNode,
     bindAll,
     getLocalizedText
-} from '../utils/utils.es';
+} from '../utils/utils';
 
 class OrgChart extends Component {
     constructor(props) {
@@ -95,7 +99,7 @@ class OrgChart extends Component {
     }
 
     addNewNode(newData, parentNode) {
-        const newNode = d3.hierarchy(newData, d => d.children);
+        const newNode = d3hierarchy(newData, d => d.children);
 
         newNode.parent = parentNode;
         newNode.depth = parentNode.depth + 1;
@@ -246,23 +250,25 @@ class OrgChart extends Component {
         const height = this._svgHeight;
         const width = this._svgWidth;
 
-        const svg = d3.select(chartSVG);
+        const svg = d3select(chartSVG);
+
+        
 
         svg.attr('class', 'org-chart');
         svg.attr('height', height);
         svg.attr('viewBox', null);
         svg.attr('width', width);
 
-        const treeNode = d3.select(tree);
+        const treeNode = d3select(tree);
 
         treeNode.attr('transform', this.getTranslateString(this._margin, this._nodeHeight * 2));
 
-        this._zoom = d3.zoom().scaleExtent([0.25, 2]).on(
+        this._zoom = d3zoom().scaleExtent([0.25, 2]).on(
             'zoom',
             () => this.handleZoom(svg, treeNode)
         );
 
-        this._zoomInterface = d3.select(chartSVG);
+        this._zoomInterface = d3select(chartSVG);
 
         this._zoomInterface.call(this._zoom);
 
@@ -347,14 +353,16 @@ class OrgChart extends Component {
         );
     }
 
+    
+
     handleZoom(svg, g) {
-        const {k} = d3.event.transform;
+        const {k} = d3event.transform;
 
         this._currentScale = k;
 
         this.updateZoomValue();
 
-        g.attr('transform', d3.event.transform);
+        g.attr('transform', d3event.transform);
     }
 
     setOldPositions(nodes) {
@@ -390,7 +398,7 @@ class OrgChart extends Component {
     }
 
     setUpRoot(data) {
-        const root = d3.hierarchy(data, d => d.organizations);
+        const root = d3hierarchy(data, d => d.organizations);
 
         const {clientHeight, clientWidth} = this.refs.chartSVG;
 
@@ -400,8 +408,10 @@ class OrgChart extends Component {
         return root;
     }
 
+    
+
     setUpTree() {
-        return d3.tree().nodeSize([this._nodeHeight + this._margin, this._nodeWidth]);
+        return d3tree().nodeSize([this._nodeHeight + this._margin, this._nodeWidth]);
     }
 
     updateChart(source) {
@@ -503,7 +513,7 @@ class OrgChart extends Component {
 
         this._zoomInterface.transition().duration(this._duration).call(
             this._zoom.transform,
-            d3.zoomIdentity.translate(x, y).scale(k)
+            d3zoomIdentity.translate(x, y).scale(k)
         );
     }
 

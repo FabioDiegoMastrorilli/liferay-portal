@@ -1,6 +1,6 @@
 import React, {Component} from 'react';
 import Icon from './Icon';
-import {getLocalizedText} from "../utils/utils.es";
+import {getLocalizedText} from "../utils/utils";
 
 class PaneSearchBar extends Component {
     constructor(props) {

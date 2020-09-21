@@ -1,8 +1,8 @@
-import w from '../utils/window.es';
+import w from '../utils/window';
 
 import React, {Component} from 'react';
 import PropTypes from 'prop-types';
-import { bindAll } from '../utils/utils.es';
+import { bindAll } from '../utils/utils';
 
 class InfiniteScroll extends Component {
 	constructor(props) {

@@ -1,10 +1,9 @@
 import React, {Component} from 'react';
-import PropTypes from 'prop-types';
 
 import PaneOrgInfo from './PaneOrgInfo';
 import PaneViewSelector from './PaneViewSelector';
 import PaneSearchBar from './PaneSearchBar';
-import { bindAll } from '../utils/utils.es';
+import { bindAll } from '../utils/utils';
 
 class PaneHeader extends Component {
 	constructor(props) {

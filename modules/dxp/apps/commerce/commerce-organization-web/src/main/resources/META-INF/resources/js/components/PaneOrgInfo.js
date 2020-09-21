@@ -1,5 +1,5 @@
 import React from 'react';
-import {getLocalizedText} from "../utils/utils.es";
+import {getLocalizedText} from "../utils/utils";
 
 export default function PaneOrgInfo(props) {
     const {showMenu, orgName, childrenNo, colorIdentifier} = props;

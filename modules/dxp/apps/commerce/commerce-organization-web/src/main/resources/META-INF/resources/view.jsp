@@ -23,8 +23,6 @@ String viewMode = commerceOrganizationDisplayContext.getViewMode();
 
 request.setAttribute("view.jsp-filterPerOrganization", false);
 
-NPMResolver npmResolver = NPMResolverProvider.getNPMResolver();
-
 String wrapperCssClass = "commerce-organization-view-modes row text-right";
 
 wrapperCssClass = viewMode + " " + wrapperCssClass;
@@ -95,7 +93,7 @@ wrapperCssClass = viewMode + " " + wrapperCssClass;
 			</div>
 		</div>
 
-		<aui:script require='<%= npmResolver.resolveModuleName("commerce-organization-web/js/index.es") + " as OrgChart" %>'>
+		<aui:script require="commerce-organization-web/js/index as OrgChart">
 			OrgChart.default(
 				'<%= segmentEditRootElementId %>',
 				'<%= segmentEditRootElementId %>',

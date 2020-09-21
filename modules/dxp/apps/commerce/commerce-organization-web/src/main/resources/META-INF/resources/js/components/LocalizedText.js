@@ -1,5 +1,5 @@
 import React, { Fragment } from 'react'
-import { getLocalizedText } from "../utils/utils.es";
+import { getLocalizedText } from "../utils/utils";
 
 export default function LocalizedText(props) {
 	return(

@@ -1,7 +1,7 @@
 import React from 'react';
 
 import Icon from './Icon';
-import {getLocalizedText} from "../utils/utils.es";
+import {getLocalizedText} from "../utils/utils";
 
 function NoMembers(props) {
     return(

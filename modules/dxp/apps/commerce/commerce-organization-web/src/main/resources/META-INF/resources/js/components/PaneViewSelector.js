@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { LIST_BY } from '../utils/constants.es';
+import { LIST_BY } from '../utils/constants';
 
 const {
 	USERS,
