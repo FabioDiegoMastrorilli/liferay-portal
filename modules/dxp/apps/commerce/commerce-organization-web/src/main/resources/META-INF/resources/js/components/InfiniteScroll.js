@@ -1,22 +1,32 @@
-import w from '../utils/window';
+/**
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
+ *
+ * The contents of this file are subject to the terms of the Liferay Enterprise
+ * Subscription License ("License"). You may not use this file except in
+ * compliance with the License. You can obtain a copy of the License by
+ * contacting Liferay, Inc. See the License for the specific language governing
+ * permissions and limitations under the License, including but not limited to
+ * distribution rights of the Software.
+ */
 
-import React, {Component} from 'react';
 import PropTypes from 'prop-types';
-import { bindAll } from '../utils/utils';
+import React, {Component} from 'react';
+
+import {bindAll} from '../utils/utils';
+import w from '../utils/window';
 
 class InfiniteScroll extends Component {
 	constructor(props) {
 		super(props);
 
-		bindAll(
-			this,
-			'handleScroll_',
-			'shouldScroll_'
-		);
+		bindAll(this, 'handleScroll_', 'shouldScroll_');
 
 		const {leading, maxWait, wait} = this.props;
 
-		this.debouncedScrollHandler_ = _.debounce(this.handleScroll_, wait, {leading, maxWait});
+		this.debouncedScrollHandler_ = _.debounce(this.handleScroll_, wait, {
+			leading,
+			maxWait,
+		});
 	}
 
 	componentDidMount() {
@@ -41,25 +51,28 @@ class InfiniteScroll extends Component {
 		const {attachToElement, hasMoreResults} = this.props;
 
 		if (hasMoreResults || forceAttach) {
-			attachToElement().addEventListener('scroll', this.debouncedScrollHandler_);
+			attachToElement().addEventListener(
+				'scroll',
+				this.debouncedScrollHandler_
+			);
 		}
 	}
 
 	detachScrollHandler_() {
-		this.props.attachToElement().removeEventListener('scroll', this.debouncedScrollHandler_);
+		this.props
+			.attachToElement()
+			.removeEventListener('scroll', this.debouncedScrollHandler_);
 	}
 
 	handleScroll_() {
 		const {onScrollEnd} = this.props;
 
 		if (!this.state.loading_ && onScrollEnd && this.shouldScroll_()) {
-			this.state.loading_ = true;
+			this.setState({loading_: true});
 
-			this._request = onScrollEnd().then(
-				() => {
-					this.state.loading_ = false;
-				}
-			);
+			this._request = onScrollEnd().then(() => {
+				this.setState({loading_: false});
+			});
 		}
 	}
 
@@ -69,7 +82,11 @@ class InfiniteScroll extends Component {
 		const scrollContainer = this.element;
 
 		if (scrollContainer && scrollContainer.offsetParent) {
-			shouldScroll = (scrollContainer.getBoundingClientRect().bottom - w.innerHeight - this.props.scrollOffset) < 0;
+			shouldScroll =
+				scrollContainer.getBoundingClientRect().bottom -
+					w.innerHeight -
+					this.props.scrollOffset <
+				0;
 		}
 
 		return shouldScroll;
@@ -95,10 +112,10 @@ InfiniteScroll.defaultProps = {
 	attachToElement: () => w,
 	hasMoreResults: true,
 	leading: false,
+	loading_: false,
 	maxWait: 200,
 	scrollOffset: 0,
 	wait: 100,
-	loading_: false
 };
 
 InfiniteScroll.propTypes = {
@@ -108,7 +125,7 @@ InfiniteScroll.propTypes = {
 	maxWait: PropTypes.number,
 	onScrollEnd: PropTypes.func,
 	scrollOffset: PropTypes.number,
-	wait: PropTypes.number
+	wait: PropTypes.number,
 };
 
 export default InfiniteScroll;

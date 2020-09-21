@@ -9,9 +9,10 @@
  * distribution rights of the Software.
  */
 
-import OrgChartContainer from './components/OrgChartContainer';
 import {render} from 'frontend-js-react-web';
 import React from 'react';
+
+import OrgChartContainer from './components/OrgChartContainer';
 
 export default function (componentId, id, props) {
 	let instance = null;
