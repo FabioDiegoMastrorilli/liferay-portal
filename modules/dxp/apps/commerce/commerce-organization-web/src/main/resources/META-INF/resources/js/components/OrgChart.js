@@ -9,7 +9,6 @@
  * distribution rights of the Software.
  */
 
-/* eslint-disable react/no-string-refs */
 import getCN from 'classnames';
 import {
 	event as d3event,
@@ -99,8 +98,16 @@ class OrgChart extends Component {
 		return (
 			<div className="org-chart-container">
 				<div className="svg-wrapper">
-					<svg ref="chartSVG">
-						<g ref="tree" />
+					<svg
+						ref={(e) => {
+							this.chartSVG = e;
+						}}
+					>
+						<g
+							ref={(e) => {
+								this.tree = e;
+							}}
+						/>
 					</svg>
 				</div>
 
@@ -109,7 +116,12 @@ class OrgChart extends Component {
 						<span className="zoom-button" onClick={this.zoomOut}>
 							&ndash;
 						</span>
-						<span className="zoom-percentage" ref="zoomPercent">
+						<span
+							className="zoom-percentage"
+							ref={(e) => {
+								this.zoomPercent = e;
+							}}
+						>
 							{'100%'}
 						</span>
 						<span className="zoom-button" onClick={this.zoomIn}>
@@ -270,8 +282,8 @@ class OrgChart extends Component {
 	}
 
 	createSVG() {
-		const {chartSVG, tree} = this.refs;
-
+		const chartSVG = this.chartSVG;
+		const tree = this.tree;
 		const height = this._svgHeight;
 		const width = this._svgWidth;
 
@@ -420,7 +432,7 @@ class OrgChart extends Component {
 	setUpRoot(data) {
 		const root = d3hierarchy(data, (d) => d.organizations);
 
-		const {clientHeight, clientWidth} = this.refs.chartSVG;
+		const {clientHeight, clientWidth} = this.chartSVG;
 
 		root.x0 = clientHeight / 2;
 		root.y0 =
@@ -444,15 +456,13 @@ class OrgChart extends Component {
 			d.y = d.depth * this._nodeDepth;
 		});
 
-		const gNodes = this._svg
-			.selectAll('g.node')
-			.data(nodes, (d) => {
-				if(d.id) {
-					d.id = ++this._idCount;
+		const gNodes = this._svg.selectAll('g.node').data(nodes, (d) => {
+			if (d.id) {
+				d.id = ++this._idCount;
 
-					return d.id;
-				}
-			});
+				return d.id;
+			}
+		});
 		const nodeEnter = this.handleNodesEntering(gNodes, source);
 
 		this.handleNodesUpdating(nodeEnter, gNodes);
@@ -517,7 +527,7 @@ class OrgChart extends Component {
 	}
 
 	updateTransform(source) {
-		const {height, width} = this.refs.chartSVG.getBoundingClientRect();
+		const {height, width} = this.chartSVG.getBoundingClientRect();
 
 		const k = this._currentScale;
 		const offset = this._nodeCenterOffset + this._nodeWidth;
@@ -546,9 +556,7 @@ class OrgChart extends Component {
 	}
 
 	updateZoomValue() {
-		this.refs.zoomPercent.innerHTML = `${Math.round(
-			this._currentScale * 100
-		)}%`;
+		this.zoomPercent.innerHTML = `${Math.round(this._currentScale * 100)}%`;
 	}
 
 	zoomIn() {
