@@ -10,27 +10,11 @@
  */
 
 import {render} from 'frontend-js-react-web';
-import React from 'react';
 
 import OrgChartContainer from './components/OrgChartContainer';
 
-export default function (componentId, id, props) {
-	let instance = null;
+export default function (id, props) {
 	const portletFrame = window.document.getElementById(id);
 
-	render(
-		<OrgChartContainer
-			ref={(component) => {
-				instance = component;
-			}}
-			{...props}
-		/>,
-		portletFrame
-	);
-
-	if (window.Liferay) {
-		window.Liferay.component(componentId, instance);
-	}
-
-	return instance;
+	render(OrgChartContainer, props, portletFrame);
 }

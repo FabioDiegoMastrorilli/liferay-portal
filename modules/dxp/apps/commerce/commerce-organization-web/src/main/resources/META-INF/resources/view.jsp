@@ -82,31 +82,26 @@ wrapperCssClass = viewMode + " " + wrapperCssClass;
 		</div>
 	</c:when>
 	<c:when test="<%= viewMode.equals(CommerceOrganizationConstants.CHART_VIEW_MODE) %>">
-
 		<%
-		String segmentEditRootElementId = liferayPortletResponse.getNamespace() + "-org-chart-root";
+		String segmentEditRootElementId = liferayPortletResponse.getNamespace() + "org-chart-root";
 		%>
 
-		<div class="orgchart-module" id="<%= segmentEditRootElementId %>">
+		<div id="<%= segmentEditRootElementId %>" class="orgchart-module">
 			<div class="inline-item my-5 p-5 w-100">
 				<span aria-hidden="true" class="loading-animation"></span>
 			</div>
 		</div>
 
 		<aui:script require="commerce-organization-web/js/index as OrgChart">
-			OrgChart.default(
-				'<%= segmentEditRootElementId %>',
-				'<%= segmentEditRootElementId %>',
-				{
-					assetsPath: '<%= PortalUtil.getPathContext(request) + "/assets" %>',
-					namespace: '<portlet:namespace />',
-					spritemap:
-						'<%= themeDisplay.getPathThemeImages() + "/lexicon/icons.svg" %>',
-					imagesPath: '<%= themeDisplay.getPathThemeImages() %>',
-					apiURL:
-						'<%= PortalUtil.getPortalURL(request) + "/o/commerce-organization" %>',
-				}
-			);
+			OrgChart.default('<%= segmentEditRootElementId %>', {
+				assetsPath: '<%= PortalUtil.getPathContext(request) + "/assets" %>',
+				namespace: '<portlet:namespace/>',
+				spritemap:
+					'<%= themeDisplay.getPathThemeImages() + "/lexicon/icons.svg" %>',
+				imagesPath: '<%= themeDisplay.getPathThemeImages() %>',
+				apiURL:
+					'<%= PortalUtil.getPortalURL(request) + "/o/commerce-organization" %>',
+			});
 		</aui:script>
 	</c:when>
 </c:choose>
