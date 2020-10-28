@@ -225,7 +225,7 @@ if (commerceNotificationTemplate != null) {
 			var bcc = A.one('#<portlet:namespace />bcc').val();
 			var type = A.one('#<portlet:namespace />type').val();
 
-			var portletURL = new Liferay.PortletURL.createURL(
+			var portletURL = Liferay.PortletURL.createURL(
 				'<%= currentURLObj %>'
 			);
 

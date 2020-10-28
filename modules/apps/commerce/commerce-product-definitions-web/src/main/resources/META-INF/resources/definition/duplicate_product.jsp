@@ -81,7 +81,7 @@ CPDefinition cpDefinition = cpDefinitionsDisplayContext.getCPDefinition();
 								method: 'patch',
 							}
 						).then(function () {
-							var redirectURL = new Liferay.PortletURL.createURL(
+							var redirectURL = Liferay.PortletURL.createURL(
 								'<%= editProductDefinitionURL %>'
 							);
 

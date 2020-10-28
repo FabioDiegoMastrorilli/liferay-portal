@@ -84,7 +84,7 @@ List<CommerceCurrency> commerceCurrencies = commerceCatalogDisplayContext.getCom
 
 					FormUtils.apiSubmit(form, API_URL)
 						.then(function (payload) {
-							var redirectURL = new Liferay.PortletURL.createURL(
+							var redirectURL = Liferay.PortletURL.createURL(
 								'<%= editCatalogPortletURL.toString() %>'
 							);
 

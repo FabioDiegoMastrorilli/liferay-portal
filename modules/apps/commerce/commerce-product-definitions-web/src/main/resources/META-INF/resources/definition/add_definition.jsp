@@ -61,7 +61,7 @@
 
 				AdminCatalogResource.createProduct(formattedData)
 					.then(function (cpDefinition) {
-						var redirectURL = new Liferay.PortletURL.createURL(
+						var redirectURL = Liferay.PortletURL.createURL(
 							'<%= editProductDefinitionURL %>'
 						);
 

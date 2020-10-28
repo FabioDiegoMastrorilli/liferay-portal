@@ -78,7 +78,7 @@ SearchContainer<CPCatalogEntry> cpCatalogEntrySearchContainer = cpSearchResultsD
 		window,
 		'<portlet:namespace />changeOrderBy',
 		function (orderBy) {
-			var portletURL = new Liferay.PortletURL.createURL(
+			var portletURL = Liferay.PortletURL.createURL(
 				'<%= themeDisplay.getURLCurrent() %>'
 			);
 

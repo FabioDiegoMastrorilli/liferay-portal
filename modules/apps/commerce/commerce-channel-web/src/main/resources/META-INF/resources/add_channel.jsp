@@ -93,7 +93,7 @@ PortletURL editCommerceChannelRenderURL = commerceChannelDisplayContext.getEditC
 
 				FormUtils.apiSubmit(form, API_URL)
 					.then(function (payload) {
-						var redirectURL = new Liferay.PortletURL.createURL(
+						var redirectURL = Liferay.PortletURL.createURL(
 							'<%= editCommerceChannelRenderURL.toString() %>'
 						);
 

@@ -134,7 +134,7 @@ if (modifierType.equals(CommercePriceModifierConstants.MODIFIER_TYPE_PERCENTAGE)
 
 			var type = A.one('#<portlet:namespace />modifierType').val();
 
-			var portletURL = new Liferay.PortletURL.createURL(
+			var portletURL = Liferay.PortletURL.createURL(
 				'<%= currentURLObj %>'
 			);
 

@@ -257,7 +257,7 @@ if (deliveryMaxSubscriptionCycles > 0) {
 				'#<portlet:namespace />maxSubscriptionCycles'
 			).val();
 
-			var portletURL = new Liferay.PortletURL.createURL(
+			var portletURL = Liferay.PortletURL.createURL(
 				'<%= currentURLObj %>'
 			);
 
@@ -304,7 +304,7 @@ if (deliveryMaxSubscriptionCycles > 0) {
 				'#<portlet:namespace />deliveryMaxSubscriptionCycles'
 			).val();
 
-			var portletURL = new Liferay.PortletURL.createURL(
+			var portletURL = Liferay.PortletURL.createURL(
 				'<%= currentURLObj %>'
 			);
 

@@ -200,7 +200,7 @@ boolean hasPermission = commerceDiscountDisplayContext.hasPermission(ActionKeys.
 
 			var type = A.one('#<portlet:namespace />usePercentage').val();
 
-			var portletURL = new Liferay.PortletURL.createURL(
+			var portletURL = Liferay.PortletURL.createURL(
 				'<%= currentURLObj %>'
 			);
 
@@ -219,7 +219,7 @@ boolean hasPermission = commerceDiscountDisplayContext.hasPermission(ActionKeys.
 
 			var type = A.one('#<portlet:namespace />target').val();
 
-			var portletURL = new Liferay.PortletURL.createURL(
+			var portletURL = Liferay.PortletURL.createURL(
 				'<%= currentURLObj %>'
 			);
 

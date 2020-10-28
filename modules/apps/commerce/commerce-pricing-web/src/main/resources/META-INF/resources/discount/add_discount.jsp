@@ -87,7 +87,7 @@ PortletURL editDiscountPortletURL = commerceDiscountDisplayContext.getEditCommer
 
 					return CommerceDiscountResource.addDiscount(discountData)
 						.then(function (payload) {
-							var redirectURL = new Liferay.PortletURL.createURL(
+							var redirectURL = Liferay.PortletURL.createURL(
 								'<%= editDiscountPortletURL.toString() %>'
 							);
 
