@@ -14,6 +14,11 @@
 
 module.exports = [
 	{
+		entry: 'GlobalSearch',
+		name: 'Global Search',
+		page: 'global-search.html',
+	},
+	{
 		entry: 'DatasetDisplay',
 		name: 'Dataset display',
 		page: 'dataset-display.html',
