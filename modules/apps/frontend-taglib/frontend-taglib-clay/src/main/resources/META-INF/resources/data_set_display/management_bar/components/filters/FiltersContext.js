@@ -12,35 +12,8 @@
  * details.
  */
 
-export const actionsDefinition = {
-	RESET_FILTERS_VALUE: 'resetFiltersValue',
-	UPDATE_FILTER_STATE: 'updateFilterState',
-};
+import {createContext} from 'react';
 
-const updateFilterState = (dispatch) => (
-	id,
-	value = null,
-	formattedValue = null,
-	odataFilterString = null
-) =>
-	dispatch({
-		payload: {
-			formattedValue,
-			id,
-			odataFilterString,
-			value,
-		},
-		type: actionsDefinition.UPDATE_FILTER_STATE,
-	});
+const FiltersContext = createContext();
 
-const resetFiltersValue = (dispatch) => () =>
-	dispatch({
-		type: actionsDefinition.RESET_FILTERS_VALUE,
-	});
-
-export const actions = {
-	resetFiltersValue,
-	updateFilterState,
-};
-
-export default actions;
+export default FiltersContext;

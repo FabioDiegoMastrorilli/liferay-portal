@@ -13,16 +13,17 @@
  */
 
 import PropTypes from 'prop-types';
-import React, {useEffect} from 'react';
+import React, {useEffect, useState} from 'react';
 
 import ActiveFiltersBar from './components/ActiveFiltersBar';
 import BulkActions from './components/BulkActions';
-import {StoreProvider, useAppState} from './components/Context';
 import NavBar from './components/NavBar';
+import FiltersContext from './components/filters/FiltersContext';
 
 function ManagementBar({
 	bulkActions,
 	creationMenu,
+	filters: propFilters,
 	fluid,
 	onFiltersChange,
 	selectAllItems,
@@ -33,16 +34,48 @@ function ManagementBar({
 	total,
 	views,
 }) {
-	const {state} = useAppState();
+	const [filters, updateFilters] = useState(propFilters);
 
 	useEffect(() => {
-		onFiltersChange(state.filters);
+		onFiltersChange(filters);
+	}, [filters, onFiltersChange]);
 
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [state.filters]);
+	const state = {
+		filters,
+		resetFiltersValue: () => {
+			updateFilters((filters) => {
+				return filters.map((element) => ({
+					...element,
+					additionalData: null,
+					odataFilterString: null,
+					resumeCustomLabel: null,
+					value: null,
+				}));
+			});
+		},
+		updateFilterState: (
+			id,
+			value = null,
+			formattedValue = null,
+			odataFilterString = null
+		) => {
+			updateFilters((filters) => {
+				return filters.map((filter) => ({
+					...filter,
+					...(filter.id === id
+						? {
+								formattedValue,
+								odataFilterString,
+								value,
+						  }
+						: {}),
+				}));
+			});
+		},
+	};
 
 	return (
-		<>
+		<FiltersContext.Provider value={state}>
 			{selectionType === 'multiple' && (
 				<BulkActions
 					bulkActions={bulkActions}
@@ -61,19 +94,11 @@ function ManagementBar({
 				/>
 			)}
 			<ActiveFiltersBar disabled={!!selectedItemsValue.length} />
-		</>
+		</FiltersContext.Provider>
 	);
 }
 
-function Wrapper({filters, ...otherProps}) {
-	return (
-		<StoreProvider filters={filters}>
-			<ManagementBar {...otherProps} />
-		</StoreProvider>
-	);
-}
-
-Wrapper.propTypes = {
+ManagementBar.propTypes = {
 	bulkActions: PropTypes.arrayOf(
 		PropTypes.shape({
 			href: PropTypes.string.isRequired,
@@ -98,10 +123,10 @@ Wrapper.propTypes = {
 	views: PropTypes.array.isRequired,
 };
 
-Wrapper.defaultProps = {
+ManagementBar.defaultProps = {
 	filters: [],
 	fluid: false,
 	showSearch: true,
 };
 
-export default Wrapper;
+export default ManagementBar;

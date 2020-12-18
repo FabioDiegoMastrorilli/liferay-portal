@@ -28,7 +28,7 @@ import {AppContext} from './AppContext';
 import DataSetDisplayContext from './DataSetDisplayContext';
 import EmptyResultMessage from './EmptyResultMessage';
 import {updateViewComponent} from './actions/updateViewComponent';
-import ManagementBar from './management_bar/index';
+import ManagementBar from './management_bar/ManagementBar';
 import Modal from './modal/Modal';
 import SidePanel from './side_panel/SidePanel';
 import {
