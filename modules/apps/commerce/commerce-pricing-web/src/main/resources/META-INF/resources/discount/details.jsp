@@ -33,11 +33,11 @@ if (Validator.isBlank(target)) {
 	target = commerceDiscount.getTarget();
 }
 
-String colCssClass = "col-6";
+String colCssClass = "col-12 col-md-6";
 String amountSuffix = HtmlUtil.escape(commerceDiscountDisplayContext.getDefaultCommerceCurrencyCode());
 
 if (usePercentage) {
-	colCssClass = "col-4";
+	colCssClass = "col-12 col-md-4";
 	amountSuffix = StringPool.PERCENT;
 }
 
@@ -56,7 +56,7 @@ boolean hasPermission = commerceDiscountDisplayContext.hasPermission(ActionKeys.
 	<aui:model-context bean="<%= commerceDiscount %>" model="<%= CommerceDiscount.class %>" />
 
 	<div class="row">
-		<div class="col-8">
+		<div class="col-12 col-xl-8">
 			<commerce-ui:panel
 				bodyClasses="flex-fill"
 				collapsed="<%= false %>"
@@ -64,11 +64,11 @@ boolean hasPermission = commerceDiscountDisplayContext.hasPermission(ActionKeys.
 				title='<%= LanguageUtil.get(request, "details") %>'
 			>
 				<div class="row">
-					<div class="col-10">
+					<div class="col">
 						<aui:input autoFocus="<%= true %>" label="name" name="title" />
 					</div>
 
-					<div class="col-2">
+					<div class="col-auto">
 						<aui:input label='<%= HtmlUtil.escape("active") %>' name="active" type="toggle-switch" value="<%= commerceDiscount.isActive() %>" />
 					</div>
 				</div>
@@ -143,7 +143,7 @@ boolean hasPermission = commerceDiscountDisplayContext.hasPermission(ActionKeys.
 			</commerce-ui:panel>
 		</div>
 
-		<div class="col-4">
+		<div class="col-12 col-xl-4">
 			<commerce-ui:panel
 				bodyClasses="flex-fill"
 				title='<%= LanguageUtil.get(request, "schedule") %>'
