@@ -90,6 +90,7 @@ function TooltipSummaryRenderer({itemData, options, value}) {
 							<tbody>
 								{tooltipTableRows.map((rowData) => (
 									<TooltipTableRow
+										itemData={itemData}
 										key={rowData.label}
 										{...rowData}
 									/>

@@ -124,7 +124,7 @@ function DateRangeFilter({
 					disabled={submitDisabled}
 					onClick={() => {
 						if (actionType === 'delete') {
-							updateFilterState(id);
+							updateFilterState();
 						}
 						else {
 							const newValue = {
@@ -136,7 +136,6 @@ function DateRangeFilter({
 									: null,
 							};
 							updateFilterState(
-								id,
 								newValue,
 								formatDateRangeObject(newValue),
 								getOdataString(newValue, id)

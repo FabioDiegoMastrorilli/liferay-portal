@@ -148,7 +148,6 @@ function CheckboxesFilter({id, items, updateFilterState, value: valueProp}) {
 					onClick={() =>
 						actionType !== 'delete'
 							? updateFilterState(
-									id,
 									{
 										exclude,
 										itemsValues,
@@ -156,7 +155,7 @@ function CheckboxesFilter({id, items, updateFilterState, value: valueProp}) {
 									formatValue(itemsValues, items, exclude),
 									getOdataString(itemsValues, id, exclude)
 							  )
-							: updateFilterState(id)
+							: updateFilterState()
 					}
 					small
 				>

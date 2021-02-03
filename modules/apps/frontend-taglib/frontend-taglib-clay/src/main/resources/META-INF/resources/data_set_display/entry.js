@@ -50,6 +50,10 @@ const App = ({
 	);
 };
 
+App.defaultProps = {
+	activeViewSettings: {}
+}
+
 App.proptypes = {
 	activeViewSettings: PropTypes.shape({
 		name: PropTypes.string,

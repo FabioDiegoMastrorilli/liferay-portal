@@ -48,7 +48,7 @@ function NumberFilter({
 								min={min}
 								onChange={(e) => setValue(e.target.value)}
 								type="number"
-								value={value || ''}
+								value={value ?? ''}
 							/>
 						</div>
 						{inputText && (
@@ -67,7 +67,6 @@ function NumberFilter({
 					disabled={Number(value) === valueProp}
 					onClick={() =>
 						updateFilterState(
-							id,
 							Number(value),
 							value,
 							getOdataString(Number(value), id)

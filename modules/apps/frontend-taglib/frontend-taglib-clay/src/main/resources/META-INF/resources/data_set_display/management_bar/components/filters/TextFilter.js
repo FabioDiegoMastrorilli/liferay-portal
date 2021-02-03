@@ -68,7 +68,6 @@ function TextFilter({id, inputText, updateFilterState, value: valueProp}) {
 					disabled={(!valueProp && value) || valueProp !== value}
 					onClick={() =>
 						updateFilterState(
-							id,
 							value,
 							value,
 							getOdataString(value, id)

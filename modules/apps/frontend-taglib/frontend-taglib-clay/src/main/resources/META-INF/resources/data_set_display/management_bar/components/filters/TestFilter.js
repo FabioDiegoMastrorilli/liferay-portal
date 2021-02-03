@@ -18,10 +18,6 @@ import classNames from 'classnames';
 import PropTypes from 'prop-types';
 import React, {useState} from 'react';
 
-function getOdataString() {
-	return `test ne 4`;
-}
-
 function TestFilter({id, inputText, updateFilterState, value: valueProp}) {
 	const [value, setValue] = useState(valueProp);
 
@@ -53,10 +49,9 @@ function TestFilter({id, inputText, updateFilterState, value: valueProp}) {
 						disabled={value === valueProp}
 						onClick={() =>
 							updateFilterState(
-								id,
 								value,
 								value,
-								getOdataString(value, id)
+								`${id} eq ${value}`
 							)
 						}
 						small
@@ -73,7 +68,6 @@ function TestFilter({id, inputText, updateFilterState, value: valueProp}) {
 
 TestFilter.propTypes = {
 	id: PropTypes.string.isRequired,
-	inputText: PropTypes.string,
 	updateFilterState: PropTypes.func.isRequired,
 	value: PropTypes.string,
 };

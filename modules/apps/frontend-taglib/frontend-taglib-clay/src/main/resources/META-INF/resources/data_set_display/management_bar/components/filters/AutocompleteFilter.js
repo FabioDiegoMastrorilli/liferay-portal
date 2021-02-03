@@ -359,7 +359,6 @@ function AutocompleteFilter({
 					onClick={() =>
 						actionType !== 'delete'
 							? updateFilterState(
-									id,
 									{
 										exclude,
 										items: selectedItems,
@@ -372,7 +371,7 @@ function AutocompleteFilter({
 										exclude
 									)
 							  )
-							: updateFilterState(id)
+							: updateFilterState()
 					}
 					small
 				>

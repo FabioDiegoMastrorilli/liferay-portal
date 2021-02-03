@@ -34,7 +34,7 @@ function FilterResume(props) {
 			closeButtonProps={{
 				className: 'filter-resume-close',
 				disabled: props.disabled,
-				onClick: () => props.updateFilterState(props.id),
+				onClick: props.updateFilterState,
 			}}
 			role="button"
 		>

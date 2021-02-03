@@ -55,7 +55,7 @@ function ActiveFiltersBar({disabled}) {
 											key={filter.id}
 											{...filter}
 											updateFilterState={
-												filtersState.updateFilterState
+												(params) => filtersState.updateFilterState(id, ...params)
 											}
 										/>
 									);

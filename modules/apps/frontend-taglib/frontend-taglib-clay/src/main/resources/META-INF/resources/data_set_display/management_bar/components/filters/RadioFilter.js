@@ -71,7 +71,7 @@ function RadioFilter({id, items, updateFilterState, value: valueProp}) {
 				<div className="inline-scroller mb-n2 mx-n2 px-2">
 					<ClayRadioGroup
 						onSelectedValueChange={setItemValue}
-						selectedValue={itemValue || ''}
+						selectedValue={itemValue ?? ''}
 					>
 						{items.map((item) => (
 							<ClayRadio
@@ -90,7 +90,6 @@ function RadioFilter({id, items, updateFilterState, value: valueProp}) {
 					onClick={() =>
 						actionType !== 'delete'
 							? updateFilterState(
-									id,
 									{
 										exclude,
 										itemValue,
@@ -98,7 +97,7 @@ function RadioFilter({id, items, updateFilterState, value: valueProp}) {
 									formatValue(itemValue, items, exclude),
 									getOdataString(itemValue, id, exclude)
 							  )
-							: updateFilterState(id)
+							: updateFilterState()
 					}
 					small
 				>

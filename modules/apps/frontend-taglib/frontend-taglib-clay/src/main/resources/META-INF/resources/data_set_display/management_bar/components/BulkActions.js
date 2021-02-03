@@ -139,11 +139,11 @@ function BulkActions({
 	return selectedItemsValue.length ? (
 		<DataSetDisplayContext.Consumer>
 			{({formId, formRef, loadData, sidePanelId}) => (
-				<nav className="management-bar management-bar-primary navbar navbar-expand-md pb-2 pt-2 subnav-tbar">
+				<nav className="management-bar management-bar-primary navbar navbar-expand-md subnav-tbar">
 					<div
 						className={classNames(
 							'container-fluid container-fluid-max-xl py-1',
-							!fluid && 'px-0'
+							fluid ? 'px-0' : 'px-3'
 						)}
 					>
 						<ul className="navbar-nav">
