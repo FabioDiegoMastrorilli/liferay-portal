@@ -26,7 +26,6 @@ import React, {
 
 import {AppContext} from './AppContext';
 import DataSetDisplayContext from './DataSetDisplayContext';
-import EmptyResultMessage from './EmptyResultMessage';
 import {updateViewComponent} from './actions/updateViewComponent';
 import ManagementBar from './management_bar/ManagementBar';
 import Modal from './modal/Modal';
@@ -67,7 +66,6 @@ function DataSetDisplay({
 	namespace,
 	nestedItemsKey,
 	nestedItemsReferenceKey,
-	overrideEmptyResultView,
 	pagination,
 	selectedItems,
 	selectedItemsKey,
@@ -141,7 +139,9 @@ function DataSetDisplay({
 				type: 'danger',
 			});
 
-			throw error;
+			return {
+				items: [],
+			};
 		});
 	}, [apiURL, currentURL, delta, filters, pageNumber, searchParam, sorting]);
 
@@ -342,7 +342,7 @@ function DataSetDisplay({
 	) : null;
 
 	const view =
-		!dataLoading && !componentLoading ? (
+		!componentLoading && CurrentViewComponent ? (
 			<div className="data-set-display-content-wrapper">
 				<input
 					hidden
@@ -352,19 +352,14 @@ function DataSetDisplay({
 					readOnly
 					value={selectedItemsValue.join(',')}
 				/>
-				{items.length ||
-				overrideEmptyResultView ||
-				inlineAddingSettings ? (
-					<CurrentViewComponent
-						dataSetDisplayContext={DataSetDisplayContext}
-						items={items}
-						itemsActions={itemsActions}
-						style={style}
-						{...currentViewProps}
-					/>
-				) : (
-					<EmptyResultMessage />
-				)}
+				<CurrentViewComponent
+					dataLoading={dataLoading}
+					dataSetDisplayContext={DataSetDisplayContext}
+					items={items}
+					itemsActions={itemsActions}
+					style={style}
+					{...currentViewProps}
+				/>
 			</div>
 		) : (
 			<span aria-hidden="true" className="loading-animation my-7" />

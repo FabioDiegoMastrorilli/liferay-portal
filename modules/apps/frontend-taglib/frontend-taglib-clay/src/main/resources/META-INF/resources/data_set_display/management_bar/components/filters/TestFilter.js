@@ -48,11 +48,7 @@ function TestFilter({id, inputText, updateFilterState, value: valueProp}) {
 					<ClayButton
 						disabled={value === valueProp}
 						onClick={() =>
-							updateFilterState(
-								value,
-								value,
-								`${id} eq ${value}`
-							)
+							updateFilterState(value, value, `${id} eq ${value}`)
 						}
 						small
 					>

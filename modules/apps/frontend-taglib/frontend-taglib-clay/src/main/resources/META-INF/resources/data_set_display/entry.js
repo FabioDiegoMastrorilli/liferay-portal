@@ -51,8 +51,8 @@ const App = ({
 };
 
 App.defaultProps = {
-	activeViewSettings: {}
-}
+	activeViewSettings: {},
+};
 
 App.proptypes = {
 	activeViewSettings: PropTypes.shape({

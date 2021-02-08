@@ -259,7 +259,13 @@ export function loadData(
 		);
 	}
 
-	return executeAsyncAction(url, 'GET').then((response) => response.json());
+	return executeAsyncAction(url, 'GET').then((response) => {
+		return response
+			.json()
+			.then((jsonRes) =>
+				response.ok ? Promise.resolve(jsonRes) : Promise.reject(jsonRes)
+			);
+	});
 }
 
 export function getCurrentItemUpdates(

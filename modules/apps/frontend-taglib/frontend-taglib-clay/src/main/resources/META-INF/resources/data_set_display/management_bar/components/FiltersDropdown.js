@@ -72,7 +72,12 @@ function FiltersDropdown() {
 					</li>
 					<Filter
 						{...activeFilter}
-						updateFilterState={(...params) => filtersState.updateFilterState(activeFilterId, ...params)}
+						updateFilterState={(...params) =>
+							filtersState.updateFilterState(
+								activeFilterId,
+								...params
+							)
+						}
 					/>
 				</>
 			) : (

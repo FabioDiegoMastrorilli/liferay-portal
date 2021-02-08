@@ -17,7 +17,10 @@ import {fetch, openToast} from 'frontend-js-web';
 import {logError} from './logError';
 
 export const saveViewSettings = ({appURL, id, portletId, settings}) => {
-	const url = new URL(`${appURL}/data-set/${id}/save-active-view-settings`);
+	const url = new URL(
+		`${appURL}/data-set/${id}/save-active-view-settings`,
+		themeDisplay.getPortalURL()
+	);
 
 	url.searchParams.append('groupId', themeDisplay.getScopeGroupId());
 	url.searchParams.append('plid', themeDisplay.getPlid());
@@ -30,12 +33,18 @@ export const saveViewSettings = ({appURL, id, portletId, settings}) => {
 			'Content-Type': 'application/json',
 		},
 		method: 'POST',
-	}).catch((error) => {
-		logError(error);
+	})
+		.then((response) => {
+			if (!response.ok) {
+				throw new Error();
+			}
+		})
+		.catch((error) => {
+			logError(error);
 
-		openToast({
-			message: Liferay.Language.get('unexpected-error'),
-			type: 'danger',
+			openToast({
+				message: Liferay.Language.get('unexpected-error'),
+				type: 'danger',
+			});
 		});
-	});
 };

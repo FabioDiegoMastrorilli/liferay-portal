@@ -71,7 +71,11 @@ function RadioFilter({id, items, updateFilterState, value: valueProp}) {
 				<div className="inline-scroller mb-n2 mx-n2 px-2">
 					<ClayRadioGroup
 						onSelectedValueChange={setItemValue}
-						selectedValue={itemValue ?? ''}
+						selectedValue={
+							itemValue !== undefined && itemValue !== null
+								? itemValue
+								: ''
+						}
 					>
 						{items.map((item) => (
 							<ClayRadio
