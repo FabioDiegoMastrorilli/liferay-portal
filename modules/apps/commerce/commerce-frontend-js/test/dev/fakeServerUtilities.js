@@ -13,6 +13,10 @@
  */
 
 function defineServerResponses(app) {
+	app.post('/save-view-api/*', (_, res) => {
+		res.json({});
+	})
+
 	app.post('/account-selector/setCurrentAccounts', (_, res) => {
 		res.json({});
 	});
@@ -243,6 +247,174 @@ function defineServerResponses(app) {
 						},
 					],
 					id: 'sdf',
+					img: {
+						src: '//via.placeholder.com/500x500',
+					},
+					name: 'SBA Sensor',
+					productPage: '/test/link/1',
+					skuId: 345345,
+					testLink: {
+						href: '/test/link/1',
+						label: 'Test 1',
+					},
+					testQuantity: {
+						inputName: 'sdf-quantity',
+						maxQuantity: 1000,
+						minQuantity: 2,
+						multipleQuantity: 2,
+						quantity: 6,
+					},
+					type: {
+						content: 'DOC',
+						displayType: 'danger',
+					},
+				},
+				{
+					id: 'jkl',
+					img: {
+						src: '//via.placeholder.com/500x500',
+					},
+					name: 'SBA Sensor',
+					productPage: '/test/link/1',
+					skuId: 345345,
+					testLink: {
+						href: '/test/link/1',
+						label: 'Test 1',
+					},
+					testQuantity: {
+						inputName: 'sdf-quantity',
+						maxQuantity: 1000,
+						minQuantity: 2,
+						multipleQuantity: 2,
+						quantity: 6,
+					},
+					type: {
+						content: 'DOC',
+						displayType: 'danger',
+					},
+				},
+				{
+					id: 'mbn',
+					img: {
+						src: '//via.placeholder.com/500x500',
+					},
+					name: 'SBA Sensor',
+					productPage: '/test/link/1',
+					skuId: 345345,
+					testLink: {
+						href: '/test/link/1',
+						label: 'Test 1',
+					},
+					testQuantity: {
+						inputName: 'sdf-quantity',
+						maxQuantity: 1000,
+						minQuantity: 2,
+						multipleQuantity: 2,
+						quantity: 6,
+					},
+					type: {
+						content: 'DOC',
+						displayType: 'danger',
+					},
+				},
+				{
+					actionDropdownItems: [
+						{
+							href: '/view/url',
+							icon: 'view',
+							id: 'view',
+							label: 'View',
+						},
+						{
+							href: '/select/url',
+							icon: 'message-boards',
+							id: 'select',
+							label: 'Select',
+							target: 'modal',
+						},
+						{
+							href: '/delete/url',
+							icon: 'trash',
+							id: 'delete',
+							label: 'Delete',
+							method: 'delete',
+							target: 'async',
+						},
+						{
+							href: '/edit/url',
+							icon: 'pencil',
+							id: 'edit',
+							label: 'Edit',
+							target: 'sidePanel',
+						},
+						{
+							icon: 'warning-full',
+							id: 'alert',
+							label: 'Alert',
+							onClick: 'alert("asd")',
+						},
+					],
+					id: 'bnm',
+					img: {
+						src: '//via.placeholder.com/500x500',
+					},
+					name: 'SBA Sensor',
+					productPage: '/test/link/1',
+					skuId: 345345,
+					testLink: {
+						href: '/test/link/1',
+						label: 'Test 1',
+					},
+					testQuantity: {
+						inputName: 'sdf-quantity',
+						maxQuantity: 1000,
+						minQuantity: 2,
+						multipleQuantity: 2,
+						quantity: 6,
+					},
+					type: {
+						content: 'DOC',
+						displayType: 'danger',
+					},
+				},
+				{
+					actionDropdownItems: [
+						{
+							href: '/view/url',
+							icon: 'view',
+							id: 'view',
+							label: 'View',
+						},
+						{
+							href: '/select/url',
+							icon: 'message-boards',
+							id: 'select',
+							label: 'Select',
+							target: 'modal',
+						},
+						{
+							href: '/delete/url',
+							icon: 'trash',
+							id: 'delete',
+							label: 'Delete',
+							method: 'delete',
+							target: 'async',
+						},
+						{
+							href: '/edit/url',
+							icon: 'pencil',
+							id: 'edit',
+							label: 'Edit',
+							target: 'sidePanel',
+						},
+						{
+							icon: 'warning-full',
+							id: 'alert',
+							label: 'Alert',
+							onClick: 'alert("asd")',
+						},
+					],
+					id: 'nji',
 					img: {
 						src: '//via.placeholder.com/500x500',
 					},

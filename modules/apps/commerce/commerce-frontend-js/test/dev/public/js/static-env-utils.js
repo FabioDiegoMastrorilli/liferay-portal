@@ -17,8 +17,9 @@ const Liferay = {
 		get: (key) => {
 			let counter = 0;
 
+			
 			return key.replace(new RegExp('(^x-)|(-x-)|(-x$)', 'gm'), (match) =>
-				match.replace('x', `{${counter++}}`)
+			match.replace('x', `{${counter++}}`)
 			);
 		},
 	},
@@ -27,6 +28,7 @@ const Liferay = {
 		getDefaultLanguageId: () => 'en_US',
 		getLanguageId: () => 'it_IT',
 		getPathThemeImages: () => '/assets',
+		getPlid: () => 222222,
 		getPortalURL: () => window.location.origin,
 		getScopeGroupId: () => '123',
 	},
@@ -65,6 +67,7 @@ window.defaultFetch = fetch;
 window.fetch = (resource, {headers, ...init}) => {
 	headers = new Headers({
 		Accept: 'application/json',
+		'Accept-Language': Liferay.ThemeDisplay.getDefaultLanguageId().replace('_', '-'),
 		Authorization: `Basic ${window.btoa('test@liferay.com:test')}`,
 		'Content-Type': 'application/json',
 	});

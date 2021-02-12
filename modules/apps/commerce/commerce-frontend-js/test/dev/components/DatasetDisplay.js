@@ -24,7 +24,7 @@ import '../../../../../frontend-taglib/frontend-taglib-clay/src/main/resources/M
 const fluidDataSetDisplayProps = {
 	activeViewSettings: {},
 	apiURL: '/dataset-display-nested-items',
-	appURL: '/o/frontend-taglib-clay/app',
+	appURL: '/save-view-api',
 	bulkActions: [
 		{
 			href: '/side-panel/edit.html',
@@ -132,26 +132,9 @@ const fluidDataSetDisplayProps = {
 					{
 						actionId: 'edit',
 						contentRenderer: 'actionLink',
+						fieldName: 'skuId',
 						hideColumnLabel: true,
 						label: 'Edit action',
-					},
-					{
-						actionId: 'delete',
-						contentRenderer: 'actionLink',
-						hideColumnLabel: true,
-						label: 'Delete Action',
-					},
-					{
-						actionId: 'alert',
-						contentRenderer: 'actionLink',
-						hideColumnLabel: true,
-						label: 'Alert',
-					},
-					{
-						actionId: 'select',
-						contentRenderer: 'actionLink',
-						hideColumnLabel: true,
-						label: 'Select',
 					},
 					{
 						contentRenderer: 'tooltipSummary',
@@ -413,7 +396,7 @@ const ordersDataSetDisplayProps = {
 				},
 				{
 					label: 'Not-completed',
-					value: 999,
+					value: 0,
 				},
 			],
 			label: 'Status',
