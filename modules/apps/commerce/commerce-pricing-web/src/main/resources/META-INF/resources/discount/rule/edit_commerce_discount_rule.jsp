@@ -86,7 +86,7 @@ String type = BeanParamUtil.getString(commerceDiscountRule, request, "type");
 	</aui:form>
 </commerce-ui:side-panel-content>
 
-<aui:script require="commerce-frontend-js/utilities/notifications as NotificationUtils, commerce-frontend-js/utilities/slugify as slugify, commerce-frontend-js/utilities/eventsDefinitions as events, commerce-frontend-js/ServiceProvider/index as ServiceProvider">
+<aui:script require="commerce-frontend-js/utilities/notifications as NotificationUtils, commerce-frontend-js/utilities/slugify as slugify, frontend-taglib-clay/data_set_display/utils/eventsDefinitions as events, commerce-frontend-js/ServiceProvider/index as ServiceProvider">
 	var CommerceDiscountRuleResource = ServiceProvider.default.AdminPricingAPI(
 		'v2'
 	);

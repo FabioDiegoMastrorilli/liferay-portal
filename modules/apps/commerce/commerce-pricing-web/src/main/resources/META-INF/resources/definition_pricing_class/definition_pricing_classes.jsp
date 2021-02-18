@@ -28,7 +28,7 @@ CProduct cProduct = cpDefinition.getCProduct();
 	<div class="pt-4" id="<portlet:namespace />productPricingClassRelsContainer">
 		<div id="item-finder-root"></div>
 
-		<aui:script require="commerce-frontend-js/components/item_finder/entry as itemFinder, commerce-frontend-js/utilities/slugify as slugify, commerce-frontend-js/utilities/eventsDefinitions as events, commerce-frontend-js/utilities/index as utilities">
+		<aui:script require="commerce-frontend-js/components/item_finder/entry as itemFinder, commerce-frontend-js/utilities/slugify as slugify, frontend-taglib-clay/data_set_display/utils/eventsDefinitions as events, commerce-frontend-js/utilities/index as utilities">
 			var headers = utilities.fetchParams.headers;
 			var productId = <%= cpDefinition.getCProductId() %>;
 			var productExternalReferenceCode = '<%= cProduct.getExternalReferenceCode() %>';
