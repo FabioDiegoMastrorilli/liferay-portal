@@ -27,6 +27,7 @@ import {
 	resetSelectableItems,
 	updateSelectableItems,
 } from './utils/handleMultiSelect';
+import {highlight, removeHighlight} from './utils/highlight';
 import {
 	changeNodesParentOrganization,
 	formatChild,
@@ -588,7 +589,12 @@ class D3OrganizationChart {
 		children.attr('transform', `translate(${source.y0},${source.x0})`);
 		fillEntityNode(children, this._spritemap, this._nodeMenuActions.open);
 
-		children.on('mousedown', this._handleNodeMouseDown);
+		children
+			.on('mouseenter', (d) => {
+				highlight(d, this._root, this._nodesGroup, this._linksGroup);
+			})
+			.on('mouseleave', removeHighlight)
+			.on('mousedown', this._handleNodeMouseDown);
 
 		this._handleTransition(this.bindedNodes.merge(nodes))
 			.attr('opacity', 1)
