@@ -23,6 +23,7 @@ import {
 	USERS_PROPERTY_NAME_IN_ACCOUNT,
 	USERS_PROPERTY_NAME_IN_ORGANIZATION,
 } from './constants';
+import {ACCOUNTS_ADD_BUTTON_ENABLED} from './flags';
 
 let chartNodesCounter = 0;
 
@@ -32,19 +33,21 @@ export function formatItem(item, type) {
 	item.chartNodeNumber = ++chartNodesCounter;
 	item.chartNodeId = getChartNodeId(item);
 
-	if (type === 'account') {
-		item.children.push(
-			...item[USERS_PROPERTY_NAME_IN_ACCOUNT].map(formatUserChild)
-		);
-	}
+	const definitionsMap = [
+		[item[ORGANIZATIONS_PROPERTY_NAME], formatOrganizationChild],
+		[item.accountInformation?.accounts, formatAccountChild],
+		[
+			item[USERS_PROPERTY_NAME_IN_ORGANIZATION] ||
+				item[USERS_PROPERTY_NAME_IN_ACCOUNT],
+			formatUserChild,
+		],
+	];
 
-	if (type === 'organization') {
-		item.children.push(
-			...item[ORGANIZATIONS_PROPERTY_NAME].map(formatOrganizationChild),
-			...item.accountInformation.accounts.map(formatAccountChild),
-			...item[USERS_PROPERTY_NAME_IN_ORGANIZATION].map(formatUserChild)
-		);
-	}
+	definitionsMap.forEach(([value, formatter]) => {
+		if (value) {
+			item.children.push(...value.map(formatter));
+		}
+	});
 
 	return item;
 }
@@ -153,8 +156,8 @@ export function insertAddButtons(root, selectedNodesIds) {
 	root.each((d) => {
 		if (
 			selectedNodesIds.has(d.data.chartNodeId) &&
-			d.data.type !== 'user' &&
-			d.data.type !== 'account'
+			(d.data.type !== 'user' ||
+				(ACCOUNTS_ADD_BUTTON_ENABLED && d.data.type === 'account'))
 		) {
 			showChildren(d);
 
@@ -197,7 +200,7 @@ export const getEntityId = (data) =>
 	data[ID_PROPERTY_NAME_DEFINITIONS[data.type]];
 
 export const getChartNodeId = (data) => {
-	if (!data.type || !data.id) {
+	if (!(data.id || data.id === 0) || !data.type) {
 		throw new Error(
 			`type or id properties not defined in entity: ${JSON.stringify(
 				data
@@ -209,6 +212,18 @@ export const getChartNodeId = (data) => {
 };
 
 export const formatRootData = (rootData) => {
+	if (Array.isArray(rootData)) {
+		const fakeRoot = {
+			[ORGANIZATIONS_PROPERTY_NAME]: rootData,
+			id: 0,
+		};
+
+		formatItem(fakeRoot, 'fakeRoot');
+		fakeRoot.fetched = true;
+
+		return fakeRoot;
+	}
+
 	formatItem(rootData, 'organization');
 	rootData.fetched = true;
 
