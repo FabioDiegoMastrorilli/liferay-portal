@@ -45,14 +45,7 @@ import {
 } from './utils/index';
 import {fillAddButtons, fillEntityNode, getLinkDiagonal} from './utils/paint';
 class D3OrganizationChart {
-	constructor(
-		rootData,
-		refs,
-		spritemap,
-		modalActions,
-		nodeMenuActions,
-		rootVisible = true
-	) {
+	constructor(rootData, refs, spritemap, modalActions, nodeMenuActions) {
 		this._spritemap = spritemap;
 		this._refs = refs;
 		this._handleZoomInClick = this._handleZoomInClick.bind(this);
@@ -66,10 +59,10 @@ class D3OrganizationChart {
 		this._nodeMenuActions = nodeMenuActions;
 		this._modalActions = modalActions;
 		this._selectedNodes = new Map();
-		this._rootVisible = rootVisible;
 		this._initialiseZoomListeners(this._refs);
 		this._createChart();
-		this._initializeData(formatRootData(rootData, this._rootVisible));
+		this._rootVisible = Array.isArray(rootData) ? false : true;
+		this._initializeData(formatRootData(rootData));
 		this._update(this._root);
 		this._addListeners();
 	}
