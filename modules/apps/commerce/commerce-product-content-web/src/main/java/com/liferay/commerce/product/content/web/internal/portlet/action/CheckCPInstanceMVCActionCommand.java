@@ -24,7 +24,9 @@ import com.liferay.commerce.constants.CommerceConstants;
 import com.liferay.commerce.constants.CommerceWebKeys;
 import com.liferay.commerce.context.CommerceContext;
 import com.liferay.commerce.frontend.model.PriceModel;
+import com.liferay.commerce.frontend.model.ProductSettingsModel;
 import com.liferay.commerce.frontend.util.ProductHelper;
+import com.liferay.commerce.inventory.engine.CommerceInventoryEngine;
 import com.liferay.commerce.product.constants.CPPortletKeys;
 import com.liferay.commerce.product.model.CPInstance;
 import com.liferay.commerce.product.option.CommerceOptionValueHelper;
@@ -143,6 +145,31 @@ public class CheckCPInstanceMVCActionCommand extends BaseMVCActionCommand {
 					_jsonFactory.createJSONObject(
 						_OBJECT_MAPPER.writeValueAsString(priceModel)));
 
+				ProductSettingsModel productSettingsModel =
+					_productHelper.getProductSettingsModel(
+						cpInstance.getCPInstanceId());
+
+				jsonObject.put(
+					"productSettings",
+					_jsonFactory.createJSONObject(
+						_OBJECT_MAPPER.writeValueAsString(
+							productSettingsModel)));
+
+				int stockQuantity = _commerceInventoryEngine.getStockQuantity(
+					_portal.getCompanyId(actionRequest),
+					commerceContext.getCommerceChannelGroupId(),
+					cpInstance.getSku());
+
+				if ((!productSettingsModel.isBackOrders() &&
+					 (stockQuantity <= 0)) ||
+					!cpInstance.isPublished()) {
+
+					jsonObject.put("addToCartDisabled", true);
+				}
+				else {
+					jsonObject.put("addToCartDisabled", false);
+				}
+
 				List<CPContentContributor> cpContentContributors =
 					_cpContentContributorRegistry.getCPContentContributors();
 
@@ -206,6 +233,9 @@ public class CheckCPInstanceMVCActionCommand extends BaseMVCActionCommand {
 
 	private static final Log _log = LogFactoryUtil.getLog(
 		CheckCPInstanceMVCActionCommand.class);
+
+	@Reference
+	private CommerceInventoryEngine _commerceInventoryEngine;
 
 	@Reference
 	private CommerceOptionValueHelper _commerceOptionValueHelper;
