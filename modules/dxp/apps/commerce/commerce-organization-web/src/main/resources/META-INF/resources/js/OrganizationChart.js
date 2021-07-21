@@ -23,7 +23,8 @@ import MenuProvider from './menu/MenuProvider';
 import ModalProvider from './modals/ModalProvider';
 import {VIEWS} from './utils/constants';
 
-function OrganizationChartApp({
+import '../style/main.scss';
+function OrganizationChart({
 	pageSize,
 	rootOrganizationId,
 	spritemap,
@@ -43,7 +44,7 @@ function OrganizationChartApp({
 	const zoomInRef = useRef(null);
 
 	useEffect(() => {
-		if (rootOrganizationId) {
+		if (Number(rootOrganizationId)) {
 			getOrganization(rootOrganizationId).then(updateRootData);
 		}
 		else {
@@ -142,12 +143,12 @@ function OrganizationChartApp({
 	);
 }
 
-OrganizationChartApp.defaultProps = {
+OrganizationChart.defaultProps = {
 	pageSize: 10,
 	rootOrganizationId: 0
 };
 
-OrganizationChartApp.propTypes = {
+OrganizationChart.propTypes = {
 	pageSize: PropTypes.number,
 	rootOrganizationId: PropTypes.number,
 	spritemap: PropTypes.string.isRequired,
@@ -158,4 +159,4 @@ OrganizationChartApp.propTypes = {
 	}),
 };
 
-export default OrganizationChartApp;
+export default OrganizationChart;

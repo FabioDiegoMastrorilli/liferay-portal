@@ -17,7 +17,11 @@ export function fetchFromHeadless(
 	successMessage,
 	showErrorMessage
 ) {
-	return fetch(url, params)
+	return fetch(url, {
+		Accept: 'application/json',
+		'Content-Type': 'application/json',
+		...params
+	})
 		.then(handleFetchResponse)
 		.then((data) => handleResponseOk(data, successMessage))
 		.catch((error) => handleResponseNotOk(error, showErrorMessage));

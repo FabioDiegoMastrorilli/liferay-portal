@@ -154,7 +154,7 @@ export default function AddOrganizationModal({
 	}
 
 	return (
-		<ClayModal observer={observer} size="md">
+		<ClayModal center observer={observer} size="md">
 			<ClayModal.Header>
 				{Liferay.Language.get('add-accounts')}
 			</ClayModal.Header>
@@ -185,8 +185,8 @@ export default function AddOrganizationModal({
 							</label>
 							<ClayInput
 								id="newAccountNameInput"
-								onChange={(e) =>
-									setNewAccountName(e.target.value)
+								onChange={(event) =>
+									setNewAccountName(event.target.value)
 								}
 								value={newAccountName}
 							/>
