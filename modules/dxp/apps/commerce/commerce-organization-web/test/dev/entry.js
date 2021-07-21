@@ -13,8 +13,6 @@ import {render} from '@liferay/frontend-js-react-web';
 
 import OrganizationChart from '../../src/main/resources/META-INF/resources/js/OrganizationChart';
 
-import '../../src/main/resources/META-INF/resources/style/main.scss';
-
 render(
 	OrganizationChart,
 	{
