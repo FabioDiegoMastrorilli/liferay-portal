@@ -12,42 +12,102 @@
  * details.
  */
 
+import classnames from 'classnames';
 import PropTypes from 'prop-types';
-import React from 'react';
+import React, {useEffect, useState} from 'react';
 
+import {CP_INSTANCE_CHANGED} from '../../utilities/eventsDefinitions';
+import QuantitySelector from '../quantity_selector/QuantitySelector';
 import AddToCartButton from './AddToCartButton';
-import WrapperWithQuantity from './WrapperWithQuantity';
 
 function AddToCart(props) {
-	return props?.settings?.withQuantity ? (
-		<WrapperWithQuantity AddToCartButton={AddToCartButton} {...props} />
-	) : (
-		<AddToCartButton {...props} />
+	const {cpInstance, settings} = props;
+
+	const [quantityDefinitions, updateQuantityDefinitions] = useState(
+		settings.quantityDefinitions
 	);
+	const [currentQuantity, setCurrentQuantity] = useState();
+	const [disabled, setDisabled] = useState(
+		settings.disabled || !cpInstance.accountId
+	);
+	const onCPInstanceChange = ({cpInstance}) => {
+		const isPurchasable =
+			cpInstance.purchasable &&
+			(cpInstance.backOrderAllowed || cpInstance.stockQuantity > 0);
+
+		setDisabled(!isPurchasable);
+		debugger;
+		updateQuantityDefinitions(true)
+	};
+
+	useEffect(() => {
+		if (settings.namespace) {
+			Liferay.on(
+				`${settings.namespace}${CP_INSTANCE_CHANGED}`,
+				onCPInstanceChange
+			);
+		}
+
+		return () => {
+			if (settings.namespace) {
+				Liferay.detach(
+					`${settings.namespace}${CP_INSTANCE_CHANGED}`,
+					onCPInstanceChange
+				);
+			}
+		};
+	}, [settings.namespace]);
+
+	const addToCart = <AddToCartButton {...props} quantity={currentQuantity} />
+
+	return quantityDefinitions ? (
+		<div
+			className={classnames({
+				'add-to-cart-wrapper': true,
+				'align-items-center': true,
+				'd-flex': true,
+				'flex-column': props.settings.block,
+			})}
+		>
+			<QuantitySelector
+				{...quantityDefinitions}
+				disabled={disabled}
+				large={!props.settings.block}
+				onUpdate={setCurrentQuantity}
+			/>
+
+			{addToCart}
+		</div>
+	) : addToCart;
 }
 
 AddToCart.defaultProps = {
 	settings: {
-		withQuantity: false,
+		quantityDefinitions: null,
 	},
 };
 
 AddToCart.propTypes = {
+	AddToCartButton: PropTypes.func.isRequired,
+	cpInstance: PropTypes.shape({
+		accountId: PropTypes.number,
+	}),
+	quantity: PropTypes.number,
 	settings: PropTypes.shape({
-		withQuantity: PropTypes.oneOfType([
-			PropTypes.bool,
-			PropTypes.shape({
-				allowedQuantities: PropTypes.arrayOf(PropTypes.number),
-				disabled: PropTypes.bool,
-				large: PropTypes.bool,
-				maxQuantity: PropTypes.number,
-				minQuantity: PropTypes.number,
-				multipleQuantity: PropTypes.number,
-				name: PropTypes.string,
-				onUpdate: PropTypes.func,
-				quantity: PropTypes.number,
-			}),
-		]),
+		block: PropTypes.bool,
+		disabled: PropTypes.bool,
+		namespace: PropTypes.bool,
+		quantityDefinitions: PropTypes.shape({
+			allowedQuantities: PropTypes.arrayOf(PropTypes.number),
+			disabled: PropTypes.bool,
+			large: PropTypes.bool,
+			maxQuantity: PropTypes.number,
+			minQuantity: PropTypes.number,
+			multipleQuantity: PropTypes.number,
+			name: PropTypes.string,
+			onUpdate: PropTypes.func,
+			quantity: PropTypes.number,
+		}),
 	}),
 };
 

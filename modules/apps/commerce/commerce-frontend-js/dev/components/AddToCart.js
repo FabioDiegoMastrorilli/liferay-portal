@@ -34,7 +34,7 @@ for (let i = 1; i <= 15; i++) {
 			block: false,
 			disabled: false,
 			iconOnly: false,
-			withQuantity: {
+			quantityDefinitions: {
 				allowedQuantities: [],
 				maxQuantity: 99,
 				minQuantity: 1,

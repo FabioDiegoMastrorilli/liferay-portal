@@ -66,14 +66,6 @@
 	max-width: 800px;
 }
 
-@media (min-width: 576px) {
-	.modal {
-		.modal-dialog {
-			display: block;
-		}
-	}
-}
-
 .sorting-icons-wrapper {
 	.sorting-icon {
 		&:nth-child(2) {

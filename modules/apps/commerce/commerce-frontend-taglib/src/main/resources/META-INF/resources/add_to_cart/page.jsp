@@ -69,7 +69,7 @@ else {
 		JSONSerializer jsonSerializer = JSONFactoryUtil.createJSONSerializer();
 		%>
 
-		initialProps.settings.withQuantity = <%= jsonSerializer.serializeDeep(productSettingsModel) %>;
+		initialProps.settings.quantityDefinitions = <%= jsonSerializer.serializeDeep(productSettingsModel) %>;
 	</c:if>
 
 	AddToCart.default('<%= addToCartId %>', '<%= addToCartId %>', initialProps);

@@ -44,7 +44,7 @@ describe('AddToCart', () => {
 			const props = {
 				...INITIAL_PROPS,
 				settings: {
-					withQuantity: {
+					quantityDefinitions: {
 						allowedQuantities: [],
 						maxQuantity: 10,
 						minQuantity: 1,
@@ -54,7 +54,7 @@ describe('AddToCart', () => {
 
 			const {container} = render(<AddToCart {...props} />);
 
-			const WrapperWithQuantityContainer = container.querySelector(
+			const WrapperquantityDefinitionsContainer = container.querySelector(
 				'.add-to-cart-wrapper'
 			);
 			const QuantitySelectorInputElement = container.querySelector(
@@ -62,7 +62,7 @@ describe('AddToCart', () => {
 			);
 			const AddToCartButtonElement = container.querySelector('button');
 
-			expect(WrapperWithQuantityContainer).toBeInTheDocument();
+			expect(WrapperquantityDefinitionsContainer).toBeInTheDocument();
 			expect(QuantitySelectorInputElement).toBeInTheDocument();
 			expect(AddToCartButtonElement).toBeInTheDocument();
 		});
@@ -71,7 +71,7 @@ describe('AddToCart', () => {
 			const props = {
 				...INITIAL_PROPS,
 				settings: {
-					withQuantity: false,
+					quantityDefinitions: false,
 				},
 			};
 

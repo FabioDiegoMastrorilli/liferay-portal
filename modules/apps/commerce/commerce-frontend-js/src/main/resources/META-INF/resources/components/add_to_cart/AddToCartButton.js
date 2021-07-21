@@ -202,7 +202,7 @@ AddToCartButton.defaultProps = {
 	settings: {
 		block: false,
 		iconOnly: false,
-		withQuantity: false,
+		quantityDefinitions: false,
 	},
 };
 
