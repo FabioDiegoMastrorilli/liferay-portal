@@ -1003,26 +1003,14 @@ public abstract class BaseUserAccountResourceTestCase {
 
 	@Test
 	public void testPostAccountUsersByEmailAddress() throws Exception {
-		@SuppressWarnings("PMD.UnusedLocalVariable")
-		UserAccount userAccount =
-			testPostAccountUsersByEmailAddress_addUserAccount();
-
-		assertHttpResponseStatusCode(
-			204,
-			userAccountResource.postAccountUsersByEmailAddressHttpResponse(
-				null, null));
-
-		assertHttpResponseStatusCode(
-			404,
-			userAccountResource.postAccountUsersByEmailAddressHttpResponse(
-				null, null));
+		Assert.assertTrue(false);
 	}
 
-	protected UserAccount testPostAccountUsersByEmailAddress_addUserAccount()
+	@Test
+	public void testPostAccountUsersByEmailAddressWithAccountRoleIds()
 		throws Exception {
 
-		throw new UnsupportedOperationException(
-			"This method needs to be implemented");
+		Assert.assertTrue(false);
 	}
 
 	@Test
@@ -1046,22 +1034,17 @@ public abstract class BaseUserAccountResourceTestCase {
 
 	@Test
 	public void testPostAccountUserByEmailAddress() throws Exception {
-		@SuppressWarnings("PMD.UnusedLocalVariable")
-		UserAccount userAccount =
-			testPostAccountUserByEmailAddress_addUserAccount();
+		UserAccount randomUserAccount = randomUserAccount();
 
-		assertHttpResponseStatusCode(
-			204,
-			userAccountResource.postAccountUserByEmailAddressHttpResponse(
-				null, userAccount.getEmailAddress()));
+		UserAccount postUserAccount =
+			testPostAccountUserByEmailAddress_addUserAccount(randomUserAccount);
 
-		assertHttpResponseStatusCode(
-			404,
-			userAccountResource.postAccountUserByEmailAddressHttpResponse(
-				null, userAccount.getEmailAddress()));
+		assertEquals(randomUserAccount, postUserAccount);
+		assertValid(postUserAccount);
 	}
 
-	protected UserAccount testPostAccountUserByEmailAddress_addUserAccount()
+	protected UserAccount testPostAccountUserByEmailAddress_addUserAccount(
+			UserAccount userAccount)
 		throws Exception {
 
 		throw new UnsupportedOperationException(

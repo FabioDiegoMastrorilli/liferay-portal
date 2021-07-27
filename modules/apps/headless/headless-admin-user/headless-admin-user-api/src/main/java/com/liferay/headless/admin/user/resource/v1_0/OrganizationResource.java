@@ -15,6 +15,7 @@
 package com.liferay.headless.admin.user.resource.v1_0;
 
 import com.liferay.headless.admin.user.dto.v1_0.Organization;
+import com.liferay.headless.admin.user.dto.v1_0.UserAccount;
 import com.liferay.portal.kernel.search.Sort;
 import com.liferay.portal.kernel.search.filter.Filter;
 import com.liferay.portal.kernel.service.GroupLocalService;
@@ -89,7 +90,7 @@ public interface OrganizationResource {
 			String organizationId, String[] strings)
 		throws Exception;
 
-	public void postUserAccountsByEmailAddress(
+	public Page<UserAccount> postUserAccountsByEmailAddress(
 			String organizationId, String[] strings)
 		throws Exception;
 
@@ -97,8 +98,14 @@ public interface OrganizationResource {
 			String organizationId, String emailAddress)
 		throws Exception;
 
-	public void postUserAccountByEmailAddress(
+	public UserAccount postUserAccountByEmailAddress(
 			String organizationId, String emailAddress)
+		throws Exception;
+
+	public Page<UserAccount>
+			postOrganizationUsersByEmailAddressWithOrganizationRoleIds(
+				String organizationId, Long[] organizationRoleIds,
+				String[] strings)
 		throws Exception;
 
 	public Page<Organization> getOrganizationOrganizationsPage(

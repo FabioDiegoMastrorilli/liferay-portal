@@ -356,11 +356,46 @@ public abstract class BaseUserAccountResourceImpl
 	@POST
 	@Produces({"application/json", "application/xml"})
 	@Tags(value = {@Tag(name = "UserAccount")})
-	public void postAccountUsersByEmailAddress(
+	public Page<UserAccount> postAccountUsersByEmailAddress(
 			@NotNull @Parameter(hidden = true) @PathParam("accountId") Long
 				accountId,
 			String[] strings)
 		throws Exception {
+
+		return Page.of(Collections.emptyList());
+	}
+
+	/**
+	 * Invoke this method with the command line:
+	 *
+	 * curl -X 'POST' 'http://localhost:8080/o/headless-admin-user/v1.0/accounts/{accountId}/account-users/by-email-address/{accountRoleIds}'  -u 'test@liferay.com:test'
+	 */
+	@Consumes({"application/json", "application/xml"})
+	@Operation(
+		description = "Assigns users to an account by their email addresses assigning a specific account role"
+	)
+	@Override
+	@Parameters(
+		value = {
+			@Parameter(in = ParameterIn.PATH, name = "accountId"),
+			@Parameter(in = ParameterIn.PATH, name = "accountRoleIds")
+		}
+	)
+	@Path(
+		"/accounts/{accountId}/account-users/by-email-address/{accountRoleIds}"
+	)
+	@POST
+	@Produces({"application/json", "application/xml"})
+	@Tags(value = {@Tag(name = "UserAccount")})
+	public Page<UserAccount> postAccountUsersByEmailAddressWithAccountRoleIds(
+			@NotNull @Parameter(hidden = true) @PathParam("accountId") Long
+				accountId,
+			@NotNull @Parameter(hidden = true) @PathParam("accountRoleIds")
+				Long[] accountRoleIds,
+			String[] strings)
+		throws Exception {
+
+		return Page.of(Collections.emptyList());
 	}
 
 	/**
@@ -409,12 +444,14 @@ public abstract class BaseUserAccountResourceImpl
 	@POST
 	@Produces({"application/json", "application/xml"})
 	@Tags(value = {@Tag(name = "UserAccount")})
-	public void postAccountUserByEmailAddress(
+	public UserAccount postAccountUserByEmailAddress(
 			@NotNull @Parameter(hidden = true) @PathParam("accountId") Long
 				accountId,
 			@NotNull @Parameter(hidden = true) @PathParam("emailAddress") String
 				emailAddress)
 		throws Exception {
+
+		return new UserAccount();
 	}
 
 	/**

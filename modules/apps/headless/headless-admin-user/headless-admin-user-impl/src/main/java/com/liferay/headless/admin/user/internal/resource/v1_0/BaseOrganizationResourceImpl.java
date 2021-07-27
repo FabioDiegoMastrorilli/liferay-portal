@@ -15,6 +15,7 @@
 package com.liferay.headless.admin.user.internal.resource.v1_0;
 
 import com.liferay.headless.admin.user.dto.v1_0.Organization;
+import com.liferay.headless.admin.user.dto.v1_0.UserAccount;
 import com.liferay.headless.admin.user.resource.v1_0.OrganizationResource;
 import com.liferay.petra.function.UnsafeFunction;
 import com.liferay.portal.kernel.model.GroupedModel;
@@ -461,11 +462,13 @@ public abstract class BaseOrganizationResourceImpl
 	@POST
 	@Produces({"application/json", "application/xml"})
 	@Tags(value = {@Tag(name = "Organization")})
-	public void postUserAccountsByEmailAddress(
+	public Page<UserAccount> postUserAccountsByEmailAddress(
 			@NotNull @Parameter(hidden = true) @PathParam("organizationId")
 				String organizationId,
 			String[] strings)
 		throws Exception {
+
+		return Page.of(Collections.emptyList());
 	}
 
 	/**
@@ -518,12 +521,49 @@ public abstract class BaseOrganizationResourceImpl
 	@POST
 	@Produces({"application/json", "application/xml"})
 	@Tags(value = {@Tag(name = "Organization")})
-	public void postUserAccountByEmailAddress(
+	public UserAccount postUserAccountByEmailAddress(
 			@NotNull @Parameter(hidden = true) @PathParam("organizationId")
 				String organizationId,
 			@NotNull @Parameter(hidden = true) @PathParam("emailAddress") String
 				emailAddress)
 		throws Exception {
+
+		return new UserAccount();
+	}
+
+	/**
+	 * Invoke this method with the command line:
+	 *
+	 * curl -X 'POST' 'http://localhost:8080/o/headless-admin-user/v1.0/organizations/{organizationId}/user-accounts/by-email-address/{organizationRoleIds}'  -u 'test@liferay.com:test'
+	 */
+	@Consumes({"application/json", "application/xml"})
+	@Operation(
+		description = "Assigns a user to an organization by their email address"
+	)
+	@Override
+	@Parameters(
+		value = {
+			@Parameter(in = ParameterIn.PATH, name = "organizationId"),
+			@Parameter(in = ParameterIn.PATH, name = "organizationRoleIds")
+		}
+	)
+	@Path(
+		"/organizations/{organizationId}/user-accounts/by-email-address/{organizationRoleIds}"
+	)
+	@POST
+	@Produces({"application/json", "application/xml"})
+	@Tags(value = {@Tag(name = "Organization")})
+	public Page<UserAccount>
+			postOrganizationUsersByEmailAddressWithOrganizationRoleIds(
+				@NotNull @Parameter(hidden = true) @PathParam("organizationId")
+					String organizationId,
+				@NotNull @Parameter(hidden = true)
+				@PathParam("organizationRoleIds")
+				Long[] organizationRoleIds,
+				String[] strings)
+		throws Exception {
+
+		return Page.of(Collections.emptyList());
 	}
 
 	/**
