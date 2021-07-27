@@ -17,42 +17,33 @@ package com.liferay.headless.admin.user.internal.resource.v1_0;
 import com.liferay.account.model.AccountEntryUserRel;
 import com.liferay.account.service.AccountEntryUserRelLocalService;
 import com.liferay.announcements.kernel.service.AnnouncementsDeliveryLocalService;
-import com.liferay.asset.kernel.model.AssetTag;
-import com.liferay.asset.kernel.service.AssetTagLocalService;
 import com.liferay.headless.admin.user.dto.v1_0.Account;
-import com.liferay.headless.admin.user.dto.v1_0.EmailAddress;
+import com.liferay.headless.admin.user.dto.v1_0.AccountBrief;
 import com.liferay.headless.admin.user.dto.v1_0.OrganizationBrief;
-import com.liferay.headless.admin.user.dto.v1_0.Phone;
-import com.liferay.headless.admin.user.dto.v1_0.PostalAddress;
-import com.liferay.headless.admin.user.dto.v1_0.RoleBrief;
-import com.liferay.headless.admin.user.dto.v1_0.SiteBrief;
 import com.liferay.headless.admin.user.dto.v1_0.UserAccount;
 import com.liferay.headless.admin.user.dto.v1_0.UserAccountContactInformation;
-import com.liferay.headless.admin.user.dto.v1_0.WebUrl;
 import com.liferay.headless.admin.user.internal.dto.v1_0.converter.AccountResourceDTOConverter;
 import com.liferay.headless.admin.user.internal.dto.v1_0.converter.OrganizationResourceDTOConverter;
+import com.liferay.headless.admin.user.internal.dto.v1_0.converter.UserResourceDTOConverter;
 import com.liferay.headless.admin.user.internal.dto.v1_0.util.CustomFieldsUtil;
-import com.liferay.headless.admin.user.internal.dto.v1_0.util.EmailAddressUtil;
-import com.liferay.headless.admin.user.internal.dto.v1_0.util.PhoneUtil;
-import com.liferay.headless.admin.user.internal.dto.v1_0.util.PostalAddressUtil;
 import com.liferay.headless.admin.user.internal.dto.v1_0.util.ServiceBuilderAddressUtil;
 import com.liferay.headless.admin.user.internal.dto.v1_0.util.ServiceBuilderEmailAddressUtil;
 import com.liferay.headless.admin.user.internal.dto.v1_0.util.ServiceBuilderListTypeUtil;
 import com.liferay.headless.admin.user.internal.dto.v1_0.util.ServiceBuilderPhoneUtil;
 import com.liferay.headless.admin.user.internal.dto.v1_0.util.ServiceBuilderWebsiteUtil;
-import com.liferay.headless.admin.user.internal.dto.v1_0.util.WebUrlUtil;
 import com.liferay.headless.admin.user.internal.odata.entity.v1_0.UserAccountEntityModel;
+import com.liferay.headless.admin.user.resource.v1_0.AccountRoleResource;
 import com.liferay.headless.admin.user.resource.v1_0.UserAccountResource;
 import com.liferay.headless.common.spi.service.context.ServiceContextRequestUtil;
 import com.liferay.petra.function.UnsafeConsumer;
+import com.liferay.petra.string.CharPool;
 import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.model.Address;
 import com.liferay.portal.kernel.model.Contact;
-import com.liferay.portal.kernel.model.Group;
-import com.liferay.portal.kernel.model.GroupConstants;
+import com.liferay.portal.kernel.model.EmailAddress;
 import com.liferay.portal.kernel.model.ListTypeConstants;
 import com.liferay.portal.kernel.model.Organization;
-import com.liferay.portal.kernel.model.Role;
+import com.liferay.portal.kernel.model.Phone;
 import com.liferay.portal.kernel.model.User;
 import com.liferay.portal.kernel.model.Website;
 import com.liferay.portal.kernel.search.BooleanClauseOccur;
@@ -66,25 +57,21 @@ import com.liferay.portal.kernel.security.auth.PrincipalException;
 import com.liferay.portal.kernel.security.permission.PermissionChecker;
 import com.liferay.portal.kernel.security.permission.PermissionThreadLocal;
 import com.liferay.portal.kernel.service.ContactLocalService;
-import com.liferay.portal.kernel.service.GroupService;
-import com.liferay.portal.kernel.service.RoleService;
 import com.liferay.portal.kernel.service.ServiceContext;
 import com.liferay.portal.kernel.service.UserGroupRoleLocalService;
 import com.liferay.portal.kernel.service.UserLocalService;
 import com.liferay.portal.kernel.service.UserService;
-import com.liferay.portal.kernel.theme.ThemeDisplay;
 import com.liferay.portal.kernel.util.CalendarFactoryUtil;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.ListUtil;
-import com.liferay.portal.kernel.util.Portal;
 import com.liferay.portal.odata.entity.EntityModel;
 import com.liferay.portal.vulcan.fields.NestedField;
 import com.liferay.portal.vulcan.fields.NestedFieldSupport;
 import com.liferay.portal.vulcan.pagination.Page;
 import com.liferay.portal.vulcan.pagination.Pagination;
-import com.liferay.portal.vulcan.util.LocalizedMapUtil;
 import com.liferay.portal.vulcan.util.SearchUtil;
 
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.List;
@@ -202,7 +189,7 @@ public class UserAccountResourceImpl
 			searchContext -> searchContext.setCompanyId(
 				contextCompany.getCompanyId()),
 			sorts,
-			document -> _toUserAccount(
+			document -> _userResourceDTOConverter.toDTO(
 				_userLocalService.getUserById(
 					GetterUtil.getLong(document.get(Field.ENTRY_CLASS_PK)))));
 	}
@@ -217,7 +204,7 @@ public class UserAccountResourceImpl
 		PermissionChecker permissionChecker =
 			PermissionThreadLocal.getPermissionChecker();
 
-		return _toUserAccount(
+		return _userResourceDTOConverter.toDTO(
 			_userService.getUserById(permissionChecker.getUserId()));
 	}
 
@@ -270,7 +257,8 @@ public class UserAccountResourceImpl
 
 	@Override
 	public UserAccount getUserAccount(Long userAccountId) throws Exception {
-		return _toUserAccount(_userService.getUserById(userAccountId));
+		return _userResourceDTOConverter.toDTO(
+			_userService.getUserById(userAccountId));
 	}
 
 	@Override
@@ -278,9 +266,16 @@ public class UserAccountResourceImpl
 			String externalReferenceCode)
 		throws Exception {
 
-		return _toUserAccount(
-			_userService.getUserByExternalReferenceCode(
-				contextCompany.getCompanyId(), externalReferenceCode));
+		User user = _userService.getUserByExternalReferenceCode(
+			contextCompany.getCompanyId(), externalReferenceCode);
+
+		return _userResourceDTOConverter.toDTO(
+			new DefaultDTOConverterContext(
+				contextAcceptLanguage.isAcceptAllLanguages(), null,
+				_dtoConverterRegistry, user.getUserId(),
+				contextAcceptLanguage.getPreferredLocale(), contextUriInfo,
+				contextUser),
+			user);
 	}
 
 	@Override
@@ -322,11 +317,11 @@ public class UserAccountResourceImpl
 		User user = _userLocalService.getUser(
 			accountEntryUserRel.getAccountUserId());
 
-		return _toUserAccount(user);
+		return _userResourceDTOConverter.toDTO(user);
 	}
 
 	@Override
-	public void postAccountUserAccountByEmailAddress(
+	public UserAccount postAccountUserAccountByEmailAddress(
 			Long accountId, String emailAddress)
 		throws Exception {
 
@@ -337,8 +332,14 @@ public class UserAccountResourceImpl
 			contextAcceptLanguage.getPreferredLanguageId());
 		serviceContext.setUserId(contextUser.getUserId());
 
-		_accountEntryUserRelService.addAccountEntryUserRelByEmailAddress(
-			accountId, emailAddress, new long[0], null, serviceContext);
+		AccountEntryUserRel accountEntryUserRel =
+			_accountEntryUserRelService.addAccountEntryUserRelByEmailAddress(
+				accountId, emailAddress, new long[0], null, serviceContext);
+
+		User user = _userLocalService.getUser(
+			accountEntryUserRel.getAccountUserId());
+
+		return _userResourceDTOConverter.toDTO(user);
 	}
 
 	@Override
@@ -364,13 +365,51 @@ public class UserAccountResourceImpl
 	}
 
 	@Override
-	public void postAccountUserAccountsByEmailAddress(
-			Long accountId, String[] emailAddresses)
+	public Page<UserAccount> postAccountUserAccountsByEmailAddress(
+			Long accountId, String accountRoleIds, String[] emailAddresses)
 		throws Exception {
 
+		List<UserAccount> userAccounts = new ArrayList<>();
+
 		for (String emailAddress : emailAddresses) {
-			postAccountUserAccountByEmailAddress(accountId, emailAddress);
+			userAccounts.add(
+				postAccountUserAccountByEmailAddress(accountId, emailAddress));
 		}
+
+		if (!accountRoleIds.isEmpty()) {
+			String[] accRoleIds = StringUtil.split(
+				accountRoleIds, CharPool.COMMA);
+
+			for (UserAccount userAccount : userAccounts) {
+				for (String accountRoleId : accRoleIds) {
+					_accountRoleResource.
+						postAccountAccountRoleUserAccountAssociation(
+							accountId, Long.valueOf(accountRoleId),
+							userAccount.getId());
+				}
+			}
+
+			List<UserAccount> userAccountList = new ArrayList<>();
+
+			for (UserAccount userAccount : userAccounts) {
+				User userByEmailAddress = _userService.getUserByEmailAddress(
+					contextCompany.getCompanyId(),
+					userAccount.getEmailAddress());
+
+				userAccountList.add(
+					_userResourceDTOConverter.toDTO(
+						new DefaultDTOConverterContext(
+							contextAcceptLanguage.isAcceptAllLanguages(), null,
+							_dtoConverterRegistry, userAccount.getId(),
+							contextAcceptLanguage.getPreferredLocale(),
+							contextUriInfo, contextUser),
+						userByEmailAddress));
+			}
+
+			return Page.of(userAccountList);
+		}
+
+		return Page.of(userAccounts);
 	}
 
 	@Override
@@ -425,7 +464,14 @@ public class UserAccountResourceImpl
 			user = _userService.getUserById(user.getUserId());
 		}
 
-		return _toUserAccount(user);
+		if (userAccount.getExternalReferenceCode() != null) {
+			user.setExternalReferenceCode(
+				userAccount.getExternalReferenceCode());
+
+			user = _userLocalService.updateUser(user);
+		}
+
+		return _userResourceDTOConverter.toDTO(user);
 	}
 
 	@Override
@@ -452,7 +498,7 @@ public class UserAccountResourceImpl
 			twitter = userAccountContactInformation.getTwitter();
 		}
 
-		return _toUserAccount(
+		return _userResourceDTOConverter.toDTO(
 			_userService.updateUser(
 				userAccountId, null, null, null, false, null, null,
 				userAccount.getAlternateName(), userAccount.getEmailAddress(),
@@ -523,7 +569,13 @@ public class UserAccountResourceImpl
 			user = _userService.getUserById(user.getUserId());
 		}
 
-		return _toUserAccount(user);
+		return _userResourceDTOConverter.toDTO(
+			new DefaultDTOConverterContext(
+				contextAcceptLanguage.isAcceptAllLanguages(), null,
+				_dtoConverterRegistry, user.getUserId(),
+				contextAcceptLanguage.getPreferredLocale(), contextUriInfo,
+				contextUser),
+			user);
 	}
 
 	@Override
@@ -655,8 +707,8 @@ public class UserAccountResourceImpl
 		);
 	}
 
-	private List<com.liferay.portal.kernel.model.EmailAddress>
-		_getServiceBuilderEmailAddresses(UserAccount userAccount) {
+	private List<EmailAddress> _getServiceBuilderEmailAddresses(
+		UserAccount userAccount) {
 
 		return Optional.ofNullable(
 			userAccount.getUserAccountContactInformation()
@@ -677,9 +729,7 @@ public class UserAccountResourceImpl
 		);
 	}
 
-	private List<com.liferay.portal.kernel.model.Phone>
-		_getServiceBuilderPhones(UserAccount userAccount) {
-
+	private List<Phone> _getServiceBuilderPhones(UserAccount userAccount) {
 		return Optional.ofNullable(
 			userAccount.getUserAccountContactInformation()
 		).map(
@@ -707,18 +757,6 @@ public class UserAccountResourceImpl
 		);
 	}
 
-	private ThemeDisplay _getThemeDisplay(Group group) {
-		return new ThemeDisplay() {
-			{
-				setPortalURL(StringPool.BLANK);
-
-				if (group != null) {
-					setSiteGroupId(group.getGroupId());
-				}
-			}
-		};
-	}
-
 	private Page<UserAccount> _getUserAccountsPage(
 			Map<String, Map<String, String>> actions,
 			UnsafeConsumer<BooleanQuery, Exception> booleanQueryUnsafeConsumer,
@@ -733,7 +771,7 @@ public class UserAccountResourceImpl
 			searchContext -> searchContext.setCompanyId(
 				contextCompany.getCompanyId()),
 			sorts,
-			document -> _toUserAccount(
+			document -> _userResourceDTOConverter.toDTO(
 				_userService.getUserById(
 					GetterUtil.getLong(document.get(Field.ENTRY_CLASS_PK)))));
 	}
@@ -755,154 +793,6 @@ public class UserAccountResourceImpl
 		);
 	}
 
-	private OrganizationBrief _toOrganizationBrief(Organization organization) {
-		return new OrganizationBrief() {
-			{
-				id = organization.getOrganizationId();
-				name = organization.getName();
-			}
-		};
-	}
-
-	private RoleBrief _toRoleBrief(Role role) {
-		return new RoleBrief() {
-			{
-				id = role.getRoleId();
-				name = role.getTitle(
-					contextAcceptLanguage.getPreferredLocale());
-				name_i18n = LocalizedMapUtil.getI18nMap(
-					contextAcceptLanguage.isAcceptAllLanguages(),
-					role.getTitleMap());
-			}
-		};
-	}
-
-	private SiteBrief _toSiteBrief(Group group) {
-		return new SiteBrief() {
-			{
-				id = group.getGroupId();
-				name = group.getName(
-					contextAcceptLanguage.getPreferredLocale());
-				name_i18n = LocalizedMapUtil.getI18nMap(
-					contextAcceptLanguage.isAcceptAllLanguages(),
-					group.getNameMap());
-			}
-		};
-	}
-
-	private UserAccount _toUserAccount(User user) throws Exception {
-		Contact contact = user.getContact();
-
-		return new UserAccount() {
-			{
-				additionalName = user.getMiddleName();
-				alternateName = user.getScreenName();
-				birthDate = user.getBirthday();
-				customFields = CustomFieldsUtil.toCustomFields(
-					contextAcceptLanguage.isAcceptAllLanguages(),
-					User.class.getName(), user.getUserId(), user.getCompanyId(),
-					contextAcceptLanguage.getPreferredLocale());
-				dateCreated = user.getCreateDate();
-				dateModified = user.getModifiedDate();
-				emailAddress = user.getEmailAddress();
-				externalReferenceCode = user.getExternalReferenceCode();
-				familyName = user.getLastName();
-				givenName = user.getFirstName();
-				honorificPrefix =
-					ServiceBuilderListTypeUtil.getServiceBuilderListTypeMessage(
-						contact.getPrefixId(),
-						contextAcceptLanguage.getPreferredLocale());
-				honorificSuffix =
-					ServiceBuilderListTypeUtil.getServiceBuilderListTypeMessage(
-						contact.getSuffixId(),
-						contextAcceptLanguage.getPreferredLocale());
-				id = user.getUserId();
-				jobTitle = user.getJobTitle();
-				keywords = ListUtil.toArray(
-					_assetTagLocalService.getTags(
-						User.class.getName(), user.getUserId()),
-					AssetTag.NAME_ACCESSOR);
-				name = user.getFullName();
-				organizationBriefs = transformToArray(
-					user.getOrganizations(),
-					organization -> _toOrganizationBrief(organization),
-					OrganizationBrief.class);
-				roleBriefs = transformToArray(
-					_roleService.getUserRoles(user.getUserId()),
-					role -> _toRoleBrief(role), RoleBrief.class);
-				siteBriefs = transformToArray(
-					_groupService.getGroups(
-						contextCompany.getCompanyId(),
-						GroupConstants.DEFAULT_PARENT_GROUP_ID, true),
-					group -> _toSiteBrief(group), SiteBrief.class);
-				userAccountContactInformation =
-					new UserAccountContactInformation() {
-						{
-							emailAddresses = transformToArray(
-								user.getEmailAddresses(),
-								EmailAddressUtil::toEmailAddress,
-								EmailAddress.class);
-							facebook = contact.getFacebookSn();
-							jabber = contact.getJabberSn();
-							postalAddresses = transformToArray(
-								user.getAddresses(),
-								address -> PostalAddressUtil.toPostalAddress(
-									contextAcceptLanguage.
-										isAcceptAllLanguages(),
-									address, user.getCompanyId(),
-									contextAcceptLanguage.getPreferredLocale()),
-								PostalAddress.class);
-							skype = contact.getSkypeSn();
-							sms = contact.getSmsSn();
-							telephones = transformToArray(
-								user.getPhones(), PhoneUtil::toPhone,
-								Phone.class);
-							twitter = contact.getTwitterSn();
-							webUrls = transformToArray(
-								user.getWebsites(), WebUrlUtil::toWebUrl,
-								WebUrl.class);
-						}
-					};
-
-				setDashboardURL(
-					() -> {
-						Group group = user.getGroup();
-
-						if (group == null) {
-							return null;
-						}
-
-						return group.getDisplayURL(
-							_getThemeDisplay(group), true);
-					});
-				setImage(
-					() -> {
-						if (user.getPortraitId() == 0) {
-							return null;
-						}
-
-						ThemeDisplay themeDisplay = new ThemeDisplay() {
-							{
-								setPathImage(_portal.getPathImage());
-							}
-						};
-
-						return user.getPortraitURL(themeDisplay);
-					});
-				setProfileURL(
-					() -> {
-						Group group = user.getGroup();
-
-						if (group == null) {
-							return null;
-						}
-
-						return group.getDisplayURL(_getThemeDisplay(group));
-					});
-			}
-		};
-	}
-
 	private static final EntityModel _entityModel =
 		new UserAccountEntityModel();
 
@@ -916,32 +806,26 @@ public class UserAccountResourceImpl
 	private AccountResourceDTOConverter _accountResourceDTOConverter;
 
 	@Reference
-	private AnnouncementsDeliveryLocalService
-		_announcementsDeliveryLocalService;
+	private AccountRoleResource _accountRoleResource;
 
 	@Reference
-	private AssetTagLocalService _assetTagLocalService;
+	private AnnouncementsDeliveryLocalService
+		_announcementsDeliveryLocalService;
 
 	@Reference
 	private ContactLocalService _contactLocalService;
 
 	@Reference
-	private GroupService _groupService;
-
-	@Reference
 	private OrganizationResourceDTOConverter _organizationResourceDTOConverter;
-
-	@Reference
-	private Portal _portal;
-
-	@Reference
-	private RoleService _roleService;
 
 	@Reference
 	private UserGroupRoleLocalService _userGroupRoleLocalService;
 
 	@Reference
 	private UserLocalService _userLocalService;
+
+	@Reference
+	private UserResourceDTOConverter _userResourceDTOConverter;
 
 	@Reference
 	private UserService _userService;
