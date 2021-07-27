@@ -14,6 +14,7 @@ import {hierarchy, tree as d3Tree} from 'd3';
 import {changeOrganizationParent} from '../data/accounts';
 import {updateOrganization} from '../data/organizations';
 import {
+	ACCOUNTS_PROPERTY_NAME,
 	DX,
 	DY,
 	ID_PROPERTY_NAME_DEFINITIONS,
@@ -35,7 +36,7 @@ export function formatItem(item, type) {
 
 	const definitionsMap = [
 		[item[ORGANIZATIONS_PROPERTY_NAME], formatOrganizationChild],
-		[item.accountInformation?.accounts, formatAccountChild],
+		[item[ACCOUNTS_PROPERTY_NAME], formatAccountChild],
 		[
 			item[USERS_PROPERTY_NAME_IN_ORGANIZATION] ||
 				item[USERS_PROPERTY_NAME_IN_ACCOUNT],
@@ -231,11 +232,11 @@ export const formatRootData = (rootData) => {
 };
 
 export const formatOrganizationDescription = (d) => {
-	return `${d.data.numberOfOrganizations} ${Liferay.Language.get('org')} | ${
-		d.data.numberOfAccounts
-	} ${Liferay.Language.get('acc')} | ${
-		d.data.numberOfUsers
-	} ${Liferay.Language.get('users')}`;
+	return `${d.data.numberOfOrganizations} ${Liferay.Language.get(
+		'organizations-short-name'
+	)} | ${d.data.numberOfAccounts} ${Liferay.Language.get(
+		'accounts-short-name'
+	)} | ${d.data.numberOfUsers} ${Liferay.Language.get('users-short-name')}`;
 };
 
 export const formatAccountDescription = (d) => {
@@ -282,7 +283,7 @@ export function changeNodesParentOrganization(nodes, target) {
 			case 'organization':
 				movings.push(
 					updateOrganization(node.data.id, {
-						parentOrganization: {id: target.data.id},
+						parentOrganization: {id: Number(target.data.id)},
 					})
 				);
 				break;
