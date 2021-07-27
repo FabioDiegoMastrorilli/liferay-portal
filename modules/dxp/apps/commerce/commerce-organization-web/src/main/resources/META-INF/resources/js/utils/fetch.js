@@ -11,6 +11,11 @@
 
 import {fetch, openToast} from 'frontend-js-web';
 
+const headers = new Headers({
+	Accept: 'application/json',
+	'Content-Type': 'application/json',
+});
+
 export function fetchFromHeadless(
 	url,
 	params = {},
@@ -18,9 +23,8 @@ export function fetchFromHeadless(
 	showErrorMessage
 ) {
 	return fetch(url, {
-		Accept: 'application/json',
-		'Content-Type': 'application/json',
-		...params
+		headers,
+		...params,
 	})
 		.then(handleFetchResponse)
 		.then((data) => handleResponseOk(data, successMessage))

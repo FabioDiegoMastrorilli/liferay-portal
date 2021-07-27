@@ -145,7 +145,7 @@ function OrganizationChart({
 
 OrganizationChart.defaultProps = {
 	pageSize: 10,
-	rootOrganizationId: 0
+	rootOrganizationId: 0,
 };
 
 OrganizationChart.propTypes = {

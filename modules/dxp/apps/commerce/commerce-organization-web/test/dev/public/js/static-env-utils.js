@@ -14,12 +14,17 @@ const Liferay = {
 		get: (key) => {
 			let counter = 0;
 
+			if (key.includes('short-name')) {
+				key = key.substring(0, 3);
+			}
+
 			return key.replace(new RegExp('(^x-)|(-x-)|(-x$)', 'gm'), (match) =>
 				match.replace('x', `{${counter++}}`)
 			);
 		},
 	},
 	ThemeDisplay: {
+		getBCP47LanguageId: () => 'en-US',
 		getCanonicalURL: () => '/',
 		getDefaultLanguageId: () => 'en_US',
 		getLanguageId: () => 'it_IT',
@@ -40,14 +45,16 @@ const Liferay = {
 		window.removeEventListener(name, fn);
 	},
 	fire: (name, payload) => {
-		var e = document.createEvent('CustomEvent');
-		e.initCustomEvent(name);
+		var event = document.createEvent('CustomEvent');
+		event.initCustomEvent(name);
+
 		if (payload) {
 			Object.keys(payload).forEach((key) => {
-				e[key] = payload[key];
+				event[key] = payload[key];
 			});
 		}
-		window.dispatchEvent(e);
+
+		window.dispatchEvent(event);
 	},
 	on: (name, fn) => {
 		window.addEventListener(name, fn);
