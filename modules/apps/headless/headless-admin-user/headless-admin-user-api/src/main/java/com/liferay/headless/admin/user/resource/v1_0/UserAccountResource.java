@@ -88,14 +88,19 @@ public interface UserAccountResource {
 			Long accountId, String[] strings)
 		throws Exception;
 
-	public void postAccountUsersByEmailAddress(Long accountId, String[] strings)
+	public Page<UserAccount> postAccountUsersByEmailAddress(
+			Long accountId, String[] strings)
+		throws Exception;
+
+	public Page<UserAccount> postAccountUsersByEmailAddressWithAccountRoleIds(
+			Long accountId, Long[] accountRoleIds, String[] strings)
 		throws Exception;
 
 	public void deleteAccountUserByEmailAddress(
 			Long accountId, String emailAddress)
 		throws Exception;
 
-	public void postAccountUserByEmailAddress(
+	public UserAccount postAccountUserByEmailAddress(
 			Long accountId, String emailAddress)
 		throws Exception;
 
