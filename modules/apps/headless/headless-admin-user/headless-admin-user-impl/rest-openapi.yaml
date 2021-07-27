@@ -1855,10 +1855,74 @@ paths:
                     A list of user email addresses to assign to the account
                 required: true
             responses:
-                204:
+                200:
                     content:
-                        application/json: {}
-                        application/xml: {}
+                        application/json:
+                            schema:
+                                items:
+                                    $ref: "#/components/schemas/UserAccount"
+                                type: array
+                        application/xml:
+                            schema:
+                                items:
+                                    $ref: "#/components/schemas/UserAccount"
+                                type: array
+                    description:
+                        ""
+            tags: ["UserAccount"]
+    "/accounts/{accountId}/account-users/by-email-address/{accountRoleIds}":
+        post:
+            # @review
+            description:
+                Assigns users to an account by their email addresses assigning a specific account role
+            operationId: postAccountUsersByEmailAddressWithAccountRoleIds
+            parameters:
+                - in: path
+                  name: accountId
+                  required: true
+                  schema:
+                      format: int64
+                      type: integer
+                - in: path
+                  name: accountRoleIds
+                  required: true
+                  schema:
+                      items:
+                          format: int64
+                          type: integer
+                      minItems: 1
+                      type: array
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            items:
+                                format: email
+                                type: string
+                            type: array
+                    application/xml:
+                        schema:
+                            items:
+                                format: email
+                                type: string
+                            type: array
+                # @review
+                description:
+                    A list of user email addresses to assign to the account with an account role
+                required: true
+            responses:
+                200:
+                    content:
+                        application/json:
+                            schema:
+                                items:
+                                    $ref: "#/components/schemas/UserAccount"
+                                type: array
+                        application/xml:
+                            schema:
+                                items:
+                                    $ref: "#/components/schemas/UserAccount"
+                                type: array
                     description:
                         ""
             tags: ["UserAccount"]
@@ -1906,10 +1970,14 @@ paths:
                   schema:
                       type: string
             responses:
-                204:
+                200:
                     content:
-                        application/json: {}
-                        application/xml: {}
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/UserAccount"
+                        application/xml:
+                            schema:
+                                $ref: "#/components/schemas/UserAccount"
                     description:
                         ""
             tags: ["UserAccount"]
@@ -2739,10 +2807,18 @@ paths:
                     A list of user email addresses to assign to the organization
                 required: true
             responses:
-                204:
+                200:
                     content:
-                        application/json: {}
-                        application/xml: {}
+                        application/json:
+                            schema:
+                                items:
+                                    $ref: "#/components/schemas/UserAccount"
+                                type: array
+                        application/xml:
+                            schema:
+                                items:
+                                    $ref: "#/components/schemas/UserAccount"
+                                type: array
                     description:
                         ""
             tags: ["Organization"]
@@ -2788,10 +2864,69 @@ paths:
                   schema:
                       type: string
             responses:
-                204:
+                200:
                     content:
-                        application/json: {}
-                        application/xml: {}
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/UserAccount"
+                        application/xml:
+                            schema:
+                                $ref: "#/components/schemas/UserAccount"
+                    description:
+                        ""
+            tags: ["Organization"]
+    "/organizations/{organizationId}/user-accounts/by-email-address/{organizationRoleIds}":
+        post:
+            # @review
+            description:
+                Assigns a user to an organization by their email address
+            operationId: postOrganizationUsersByEmailAddressWithOrganizationRoleIds
+            parameters:
+                - in: path
+                  name: organizationId
+                  required: true
+                  schema:
+                      type: string
+                - in: path
+                  name: organizationRoleIds
+                  required: true
+                  schema:
+                      items:
+                          format: int64
+                          type: integer
+                      minItems: 1
+                      type: array
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            items:
+                                format: email
+                                type: string
+                            type: array
+                    application/xml:
+                        schema:
+                            items:
+                                format: email
+                                type: string
+                            type: array
+                # @review
+                description:
+                    A list of user email addresses to assign to an organization with an organization role
+                required: true
+            responses:
+                200:
+                    content:
+                        application/json:
+                            schema:
+                                items:
+                                    $ref: "#/components/schemas/UserAccount"
+                                type: array
+                        application/xml:
+                            schema:
+                                items:
+                                    $ref: "#/components/schemas/UserAccount"
+                                type: array
                     description:
                         ""
             tags: ["Organization"]
