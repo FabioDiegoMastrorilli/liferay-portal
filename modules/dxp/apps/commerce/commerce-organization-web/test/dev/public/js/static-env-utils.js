@@ -14,12 +14,17 @@ const Liferay = {
 		get: (key) => {
 			let counter = 0;
 
+			if (key.includes('short-name')) {
+				key = key.substring(0, 3);
+			}
+
 			return key.replace(new RegExp('(^x-)|(-x-)|(-x$)', 'gm'), (match) =>
 				match.replace('x', `{${counter++}}`)
 			);
 		},
 	},
 	ThemeDisplay: {
+		getBCP47LanguageId: () => 'en-US',
 		getCanonicalURL: () => '/',
 		getDefaultLanguageId: () => 'en_US',
 		getLanguageId: () => 'it_IT',
