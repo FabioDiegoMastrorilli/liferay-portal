@@ -14,9 +14,14 @@
 
 package com.liferay.headless.admin.user.internal.dto.v1_0.converter;
 
+import com.liferay.account.model.AccountEntry;
+import com.liferay.account.model.AccountEntryUserRel;
+import com.liferay.account.service.AccountEntryLocalService;
+import com.liferay.account.service.AccountEntryUserRelLocalService;
 import com.liferay.asset.kernel.model.AssetTag;
 import com.liferay.asset.kernel.service.AssetTagLocalService;
 import com.liferay.headless.admin.user.dto.v1_0.Account;
+import com.liferay.headless.admin.user.dto.v1_0.AccountBrief;
 import com.liferay.headless.admin.user.dto.v1_0.EmailAddress;
 import com.liferay.headless.admin.user.dto.v1_0.OrganizationBrief;
 import com.liferay.headless.admin.user.dto.v1_0.Phone;
@@ -33,6 +38,7 @@ import com.liferay.headless.admin.user.internal.dto.v1_0.util.PostalAddressUtil;
 import com.liferay.headless.admin.user.internal.dto.v1_0.util.ServiceBuilderListTypeUtil;
 import com.liferay.headless.admin.user.internal.dto.v1_0.util.WebUrlUtil;
 import com.liferay.petra.string.StringPool;
+import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.model.Contact;
 import com.liferay.portal.kernel.model.Group;
 import com.liferay.portal.kernel.model.GroupConstants;
@@ -102,6 +108,12 @@ public class UserResourceDTOConverter
 
 		return new UserAccount() {
 			{
+				accountBriefs = TransformUtil.transformToArray(
+					_accountEntryUserRelService.
+						getAccountEntryUserRelsByAccountUserId(
+							user.getUserId()),
+					accountEntryUserRel -> _toAccountBrief(accountEntryUserRel),
+					AccountBrief.class);
 				additionalName = user.getMiddleName();
 				alternateName = user.getScreenName();
 				birthDate = user.getBirthday();
@@ -221,6 +233,21 @@ public class UserResourceDTOConverter
 		};
 	}
 
+	private AccountBrief _toAccountBrief(
+			AccountEntryUserRel accountEntryUserRel)
+		throws PortalException {
+
+		AccountEntry accountEntry = _accountEntryLocalService.getAccountEntry(
+			accountEntryUserRel.getAccountEntryId());
+
+		return new AccountBrief() {
+			{
+				id = accountEntry.getAccountEntryId();
+				name = accountEntry.getName();
+			}
+		};
+	}
+
 	private OrganizationBrief _toOrganizationBrief(Organization organization) {
 		return new OrganizationBrief() {
 			{
@@ -257,6 +284,12 @@ public class UserResourceDTOConverter
 			}
 		};
 	}
+
+	@Reference
+	private AccountEntryLocalService _accountEntryLocalService;
+
+	@Reference
+	private AccountEntryUserRelLocalService _accountEntryUserRelService;
 
 	@Reference
 	private AssetTagLocalService _assetTagLocalService;

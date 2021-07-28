@@ -174,7 +174,7 @@ public class UserAccountResourceImpl
 						"accountEntryIds", String.valueOf(accountId)),
 					BooleanClauseOccur.MUST);
 			},
-			filter, User.class, search, pagination,
+			filter, User.class.getName(), search, pagination,
 			queryConfig -> queryConfig.setSelectedFieldNames(
 				Field.ENTRY_CLASS_PK),
 			searchContext -> searchContext.setCompanyId(
@@ -514,6 +514,19 @@ public class UserAccountResourceImpl
 	@Override
 	protected void preparePatch(
 		UserAccount userAccount, UserAccount existingUserAccount) {
+
+		AccountBrief[] accountBriefs = userAccount.getAccountBriefs();
+
+		if (accountBriefs != null) {
+			existingUserAccount.setAccountBriefs(accountBriefs);
+		}
+
+		OrganizationBrief[] organizationBriefs =
+			userAccount.getOrganizationBriefs();
+
+		if (organizationBriefs != null) {
+			existingUserAccount.setOrganizationBriefs(organizationBriefs);
+		}
 
 		UserAccountContactInformation userAccountContactInformation =
 			userAccount.getUserAccountContactInformation();
