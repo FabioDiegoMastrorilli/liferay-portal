@@ -140,7 +140,7 @@ public class AccountResourceImpl
 			).build(),
 			booleanQuery -> {
 			},
-			filter, AccountEntry.class, keywords, pagination,
+			filter, AccountEntry.class.getName(), keywords, pagination,
 			queryConfig -> {
 			},
 			searchContext -> {
@@ -379,8 +379,8 @@ public class AccountResourceImpl
 		throws Exception {
 
 		return SearchUtil.search(
-			actions, booleanQueryUnsafeConsumer, filter, AccountEntry.class,
-			search, pagination,
+			actions, booleanQueryUnsafeConsumer, filter,
+			AccountEntry.class.getName(), search, pagination,
 			queryConfig -> queryConfig.setSelectedFieldNames(
 				Field.ENTRY_CLASS_PK),
 			searchContext -> searchContext.setCompanyId(
