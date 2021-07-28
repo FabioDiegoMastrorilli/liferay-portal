@@ -42,13 +42,12 @@ export function addUserEmailsToOrganization(organizationId, roleId, emails) {
 	const url = new URL(
 		`${ORGANIZATIONS_ROOT_ENDPOINT}/${organizationId}/user-accounts/by-email-address/${roleId}`,
 		themeDisplay.getPortalURL()
-	)
+	);
 
 	return fetchFromHeadless(url, {
 		body: JSON.stringify(emails),
 		method: 'POST',
-	})
-		.then(response => response.items)
+	}).then((response) => response.items);
 }
 
 export function getOrganization(id) {

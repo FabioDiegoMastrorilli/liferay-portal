@@ -27,7 +27,7 @@ export const MAX_NAME_LENGTH = {
 	account: 16,
 	organization: 18,
 	user: 14,
-} 
+};
 
 export const VIEWS = [
 	{
