@@ -16,8 +16,10 @@ package com.liferay.headless.admin.user.internal.dto.v1_0.converter;
 
 import com.liferay.account.model.AccountEntry;
 import com.liferay.account.model.AccountEntryUserRel;
+import com.liferay.account.model.AccountRole;
 import com.liferay.account.service.AccountEntryLocalService;
 import com.liferay.account.service.AccountEntryUserRelLocalService;
+import com.liferay.account.service.AccountRoleLocalService;
 import com.liferay.asset.kernel.model.AssetTag;
 import com.liferay.asset.kernel.service.AssetTagLocalService;
 import com.liferay.headless.admin.user.dto.v1_0.Account;
@@ -112,7 +114,8 @@ public class UserResourceDTOConverter
 					_accountEntryUserRelService.
 						getAccountEntryUserRelsByAccountUserId(
 							user.getUserId()),
-					accountEntryUserRel -> _toAccountBrief(accountEntryUserRel),
+					accountEntryUserRel -> _toAccountBrief(
+						user, dtoConverterContext, accountEntryUserRel),
 					AccountBrief.class);
 				additionalName = user.getMiddleName();
 				alternateName = user.getScreenName();
@@ -142,7 +145,8 @@ public class UserResourceDTOConverter
 				name = user.getFullName();
 				organizationBriefs = TransformUtil.transformToArray(
 					user.getOrganizations(),
-					organization -> _toOrganizationBrief(organization),
+					organization -> _toOrganizationBrief(
+						user, dtoConverterContext, organization),
 					OrganizationBrief.class);
 				roleBriefs = TransformUtil.transformToArray(
 					_roleService.getUserRoles(user.getUserId()),
@@ -234,6 +238,7 @@ public class UserResourceDTOConverter
 	}
 
 	private AccountBrief _toAccountBrief(
+			User user, DTOConverterContext dtoConverterContext,
 			AccountEntryUserRel accountEntryUserRel)
 		throws PortalException {
 
@@ -244,15 +249,47 @@ public class UserResourceDTOConverter
 			{
 				id = accountEntry.getAccountEntryId();
 				name = accountEntry.getName();
+				roleBriefs = TransformUtil.transformToArray(
+					_accountRoleLocalService.getAccountRoles(
+						accountEntry.getAccountEntryId(), user.getUserId()),
+					accountRole -> _toRoleBrief(
+						dtoConverterContext, accountRole),
+					RoleBrief.class);
 			}
 		};
 	}
 
-	private OrganizationBrief _toOrganizationBrief(Organization organization) {
+	private OrganizationBrief _toOrganizationBrief(
+			User user, DTOConverterContext dtoConverterContext,
+			Organization organization)
+		throws PortalException {
+
 		return new OrganizationBrief() {
 			{
 				id = organization.getOrganizationId();
 				name = organization.getName();
+				roleBriefs = TransformUtil.transformToArray(
+					_roleService.getUserGroupRoles(
+						user.getUserId(), organization.getGroupId()),
+					role -> _toRoleBrief(dtoConverterContext, role),
+					RoleBrief.class);
+			}
+		};
+	}
+
+	private RoleBrief _toRoleBrief(
+			DTOConverterContext dtoConverterContext, AccountRole accountRole)
+		throws PortalException {
+
+		Role role = accountRole.getRole();
+
+		return new RoleBrief() {
+			{
+				id = accountRole.getAccountRoleId();
+				name = accountRole.getRoleName();
+				name_i18n = LocalizedMapUtil.getI18nMap(
+					dtoConverterContext.isAcceptAllLanguages(),
+					role.getTitleMap());
 			}
 		};
 	}
@@ -290,6 +327,9 @@ public class UserResourceDTOConverter
 
 	@Reference
 	private AccountEntryUserRelLocalService _accountEntryUserRelService;
+
+	@Reference
+	private AccountRoleLocalService _accountRoleLocalService;
 
 	@Reference
 	private AssetTagLocalService _assetTagLocalService;
