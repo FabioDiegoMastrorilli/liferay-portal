@@ -45,53 +45,55 @@ export default function AddOrganizationModal({
 			return;
 		}
 
-		createOrganizations(organizationNames, parentData.id).then((results) => {
-			const newOrganizationsDetails = [];
-			const newErrors = new Set();
-			const failedOrganizations = [];
+		createOrganizations(organizationNames, parentData.id).then(
+			(results) => {
+				const newOrganizationsDetails = [];
+				const newErrors = new Set();
+				const failedOrganizations = [];
 
-			results.forEach((result, fetchNumber) => {
-				if (result.status === 'rejected') {
-					failedOrganizations.push(newOrganizations[fetchNumber]);
-					newErrors.add(result.reason.title);
-				}
-				else {
-					newOrganizationsDetails.push(result.value);
-				}
-			});
-
-			setItems(failedOrganizations);
-			setErrors(Array.from(newErrors));
-			setQuery('');
-
-			if (newOrganizationsDetails.length) {
-				openToast({
-					message: Liferay.Util.sub(
-						Liferay.Language.get('x-organizations-added-to-x'),
-						newOrganizationsDetails.length,
-						parentData.name
-					),
-					type: 'success',
+				results.forEach((result, fetchNumber) => {
+					if (result.status === 'rejected') {
+						failedOrganizations.push(newOrganizations[fetchNumber]);
+						newErrors.add(result.reason.title);
+					}
+					else {
+						newOrganizationsDetails.push(result.value);
+					}
 				});
 
-				chartInstanceRef.current.addNodes(
-					newOrganizationsDetails,
-					'organization',
-					parentData
-				);
+				setItems(failedOrganizations);
+				setErrors(Array.from(newErrors));
+				setQuery('');
 
-				chartInstanceRef.current.updateNodeContent({
-					...parentData,
-					numberOfOrganizations:
-						parentData.numberOfOrganizations +
-						newOrganizationsDetails.length,
-				});
-			}
+				if (newOrganizationsDetails.length) {
+					openToast({
+						message: Liferay.Util.sub(
+							Liferay.Language.get('x-organizations-added-to-x'),
+							newOrganizationsDetails.length,
+							parentData.name
+						),
+						type: 'success',
+					});
 
-			if (!failedOrganizations.length) {
-				closeModal();
+					chartInstanceRef.current.addNodes(
+						newOrganizationsDetails,
+						'organization',
+						parentData
+					);
+
+					chartInstanceRef.current.updateNodeContent({
+						...parentData,
+						numberOfOrganizations:
+							parentData.numberOfOrganizations +
+							newOrganizationsDetails.length,
+					});
+				}
+
+				if (!failedOrganizations.length) {
+					closeModal();
+				}
 			}
-		});
+		);
 	}
 
 	return (
