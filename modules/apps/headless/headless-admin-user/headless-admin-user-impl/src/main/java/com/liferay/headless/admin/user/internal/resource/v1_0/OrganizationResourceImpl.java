@@ -354,9 +354,7 @@ public class OrganizationResourceImpl
 
 		Organization parentOrganization = organization.getParentOrganization();
 
-		if ((parentOrganization != null) &&
-			!Validator.isBlank(parentOrganization.getId())) {
-
+		if (parentOrganization != null) {
 			try {
 				existingOrganization.setParentOrganization(
 					_toOrganization(parentOrganization.getId()));
@@ -607,6 +605,10 @@ public class OrganizationResourceImpl
 
 	private Organization _toOrganization(String organizationId)
 		throws Exception {
+
+		if (Validator.isBlank(organizationId)) {
+			return null;
+		}
 
 		return _organizationResourceDTOConverter.toDTO(
 			_getDTOConverterContext(organizationId));

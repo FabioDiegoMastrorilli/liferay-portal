@@ -65,6 +65,8 @@ import com.liferay.portal.kernel.util.CalendarFactoryUtil;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.ListUtil;
 import com.liferay.portal.odata.entity.EntityModel;
+import com.liferay.portal.vulcan.dto.converter.DTOConverterRegistry;
+import com.liferay.portal.vulcan.dto.converter.DefaultDTOConverterContext;
 import com.liferay.portal.vulcan.fields.NestedField;
 import com.liferay.portal.vulcan.fields.NestedFieldSupport;
 import com.liferay.portal.vulcan.pagination.Page;
@@ -192,9 +194,9 @@ public class UserAccountResourceImpl
 			searchContext -> searchContext.setCompanyId(
 				contextCompany.getCompanyId()),
 			sorts,
-			document -> _userResourceDTOConverter.toDTO(
-				_userLocalService.getUserById(
-					GetterUtil.getLong(document.get(Field.ENTRY_CLASS_PK)))));
+			document -> _toUserAccount(
+				Collections.emptyMap(),
+				GetterUtil.getLong(document.get(Field.ENTRY_CLASS_PK))));
 	}
 
 	@Override
@@ -813,9 +815,9 @@ public class UserAccountResourceImpl
 			searchContext -> searchContext.setCompanyId(
 				contextCompany.getCompanyId()),
 			sorts,
-			document -> _userResourceDTOConverter.toDTO(
-				_userService.getUserById(
-					GetterUtil.getLong(document.get(Field.ENTRY_CLASS_PK)))));
+			document -> _toUserAccount(
+				actions,
+				GetterUtil.getLong(document.get(Field.ENTRY_CLASS_PK))));
 	}
 
 	private List<Website> _getWebsites(UserAccount userAccount) {
@@ -833,6 +835,18 @@ public class UserAccountResourceImpl
 		).orElse(
 			Collections.emptyList()
 		);
+	}
+
+	private UserAccount _toUserAccount(
+			Map<String, Map<String, String>> actions, long userId)
+		throws Exception {
+
+		return _userResourceDTOConverter.toDTO(
+			new DefaultDTOConverterContext(
+				contextAcceptLanguage.isAcceptAllLanguages(), actions,
+				_dtoConverterRegistry, userId,
+				contextAcceptLanguage.getPreferredLocale(), contextUriInfo,
+				contextUser));
 	}
 
 	private static final EntityModel _entityModel =
@@ -856,6 +870,9 @@ public class UserAccountResourceImpl
 
 	@Reference
 	private ContactLocalService _contactLocalService;
+
+	@Reference
+	private DTOConverterRegistry _dtoConverterRegistry;
 
 	@Reference
 	private OrganizationResourceDTOConverter _organizationResourceDTOConverter;
