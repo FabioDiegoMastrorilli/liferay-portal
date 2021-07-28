@@ -392,8 +392,8 @@ public class AccountResourceImpl
 		throws Exception {
 
 		return SearchUtil.search(
-			actions, booleanQueryUnsafeConsumer, filter, AccountEntry.class,
-			search, pagination,
+			actions, booleanQueryUnsafeConsumer, filter,
+			AccountEntry.class.getName(), search, pagination,
 			queryConfig -> queryConfig.setSelectedFieldNames(
 				Field.ENTRY_CLASS_PK),
 			searchContext -> searchContext.setCompanyId(
