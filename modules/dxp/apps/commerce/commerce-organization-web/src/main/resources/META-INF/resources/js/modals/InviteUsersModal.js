@@ -34,9 +34,10 @@ export default function InviteUserModal({closeModal, observer, parentData}) {
 
 	useEffect(() => {
 		if (parentData) {
-			const getRoles = parentData.type === 'organization' 
-				? getOrganizationRoles()
-				: getAccountRoles(parentData.id)
+			const getRoles =
+				parentData.type === 'organization'
+					? getOrganizationRoles()
+					: getAccountRoles(parentData.id);
 
 			getRoles.then(setRoles);
 		}
@@ -47,40 +48,38 @@ export default function InviteUserModal({closeModal, observer, parentData}) {
 			.map((email) => email.emailAddress)
 			.sort();
 
-		if(emailsQuery) {
+		if (emailsQuery) {
 			typedEmails.push(emailsQuery);
 		}
 
-		const postUsers = parentData.type === 'organization' 
-			? addUserEmailsToOrganization(parentData.id, selectedRoleIds[0], typedEmails)
-			: Promise.reject()
-		
-		postUsers
-			.then((users) => {
-				openToast({
-					message: Liferay.Util.sub(
-						Liferay.Language.get('x-users-added-to-x'),
-						users.length,
-						parentData.name
-					),
-					type: 'success',
-				});
+		const postUsers =
+			parentData.type === 'organization'
+				? addUserEmailsToOrganization(
+						parentData.id,
+						selectedRoleIds[0],
+						typedEmails
+				  )
+				: Promise.reject();
 
-				chartInstanceRef.current.addNodes(
-					users,
-					'user',
-					parentData
-				);
+		postUsers.then((users) => {
+			openToast({
+				message: Liferay.Util.sub(
+					Liferay.Language.get('x-users-added-to-x'),
+					users.length,
+					parentData.name
+				),
+				type: 'success',
+			});
 
-				chartInstanceRef.current.updateNodeContent({
-					...parentData,
-					numberOfUsers:
-						parentData.numberOfUsers +
-						users.length,
-				});
+			chartInstanceRef.current.addNodes(users, 'user', parentData);
 
-				closeModal();
-			})
+			chartInstanceRef.current.updateNodeContent({
+				...parentData,
+				numberOfUsers: parentData.numberOfUsers + users.length,
+			});
+
+			closeModal();
+		});
 	}
 
 	return (
