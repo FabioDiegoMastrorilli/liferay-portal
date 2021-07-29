@@ -559,7 +559,7 @@ public abstract class BaseOrganizationResourceImpl
 					String organizationId,
 				@NotNull @Parameter(hidden = true)
 				@PathParam("organizationRoleIds")
-				Long[] organizationRoleIds,
+				String[] organizationRoleIds,
 				String[] strings)
 		throws Exception {
 

@@ -1926,9 +1926,7 @@ paths:
                   required: true
                   schema:
                       items:
-                          format: int64
-                          type: integer
-                      minItems: 1
+                          type: string
                       type: array
             requestBody:
                 content:
@@ -2930,9 +2928,7 @@ paths:
                   required: true
                   schema:
                       items:
-                          format: int64
-                          type: integer
-                      minItems: 1
+                          type: string
                       type: array
             requestBody:
                 content:

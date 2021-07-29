@@ -32,6 +32,7 @@ import com.liferay.headless.admin.user.internal.dto.v1_0.util.ServiceBuilderWebs
 import com.liferay.headless.admin.user.internal.odata.entity.v1_0.OrganizationEntityModel;
 import com.liferay.headless.admin.user.resource.v1_0.OrganizationResource;
 import com.liferay.headless.admin.user.resource.v1_0.RoleResource;
+import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.model.Address;
@@ -64,6 +65,7 @@ import com.liferay.portal.kernel.util.ListUtil;
 import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.odata.entity.EntityModel;
+import com.liferay.portal.vulcan.dto.converter.DTOConverterRegistry;
 import com.liferay.portal.vulcan.dto.converter.DefaultDTOConverterContext;
 import com.liferay.portal.vulcan.fields.NestedField;
 import com.liferay.portal.vulcan.fields.NestedFieldSupport;
@@ -227,17 +229,20 @@ public class OrganizationResourceImpl
 	@Override
 	public Page<UserAccount>
 			postOrganizationUsersByEmailAddressWithOrganizationRoleIds(
-				String organizationId, Long[] organizationRoleIds,
+				String organizationId, String[] organizationRoleIds,
 				String[] strings)
 		throws Exception {
 
 		Page<UserAccount> userAccountPage = postUserAccountsByEmailAddress(
 			organizationId, strings);
 
+		String[] orgRoleIds = StringUtil.split(
+			organizationRoleIds[0], StringPool.COMMA);
+
 		for (UserAccount userAccount : userAccountPage.getItems()) {
-			for (Long organizationRoleId : organizationRoleIds) {
+			for (String organizationRoleId : orgRoleIds) {
 				_roleResource.postOrganizationRoleUserAccountAssociation(
-					organizationRoleId, userAccount.getId(),
+					Long.valueOf(organizationRoleId), userAccount.getId(),
 					Long.valueOf(organizationId));
 			}
 		}
@@ -261,7 +266,13 @@ public class OrganizationResourceImpl
 			emailAddress, _getServiceBuilderOrganizationId(organizationId),
 			serviceContext);
 
-		return _userResourceDTOConverter.toDTO(user);
+		return _userResourceDTOConverter.toDTO(
+			new DefaultDTOConverterContext(
+				contextAcceptLanguage.isAcceptAllLanguages(), null,
+				_dtoConverterRegistry, user.getUserId(),
+				contextAcceptLanguage.getPreferredLocale(), contextUriInfo,
+				contextUser),
+			user);
 	}
 
 	@Override
@@ -710,6 +721,9 @@ public class OrganizationResourceImpl
 
 	private static final EntityModel _entityModel =
 		new OrganizationEntityModel();
+
+	@Reference
+	private DTOConverterRegistry _dtoConverterRegistry;
 
 	@Reference
 	private OrganizationResourceDTOConverter _organizationResourceDTOConverter;
