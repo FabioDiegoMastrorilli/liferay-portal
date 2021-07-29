@@ -104,7 +104,7 @@ public interface OrganizationResource {
 
 	public Page<UserAccount>
 			postOrganizationUsersByEmailAddressWithOrganizationRoleIds(
-				String organizationId, Long[] organizationRoleIds,
+				String organizationId, String[] organizationRoleIds,
 				String[] strings)
 		throws Exception;
 
