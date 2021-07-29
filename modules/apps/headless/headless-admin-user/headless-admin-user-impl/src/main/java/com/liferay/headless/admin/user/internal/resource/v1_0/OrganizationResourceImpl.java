@@ -65,6 +65,7 @@ import com.liferay.portal.kernel.util.ListUtil;
 import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.odata.entity.EntityModel;
+import com.liferay.portal.vulcan.dto.converter.DTOConverterRegistry;
 import com.liferay.portal.vulcan.dto.converter.DefaultDTOConverterContext;
 import com.liferay.portal.vulcan.fields.NestedField;
 import com.liferay.portal.vulcan.fields.NestedFieldSupport;
@@ -242,7 +243,13 @@ public class OrganizationResourceImpl
 			emailAddress, _getServiceBuilderOrganizationId(organizationId),
 			serviceContext);
 
-		return _userResourceDTOConverter.toDTO(user);
+		return _userResourceDTOConverter.toDTO(
+			new DefaultDTOConverterContext(
+				contextAcceptLanguage.isAcceptAllLanguages(), null,
+				_dtoConverterRegistry, user.getUserId(),
+				contextAcceptLanguage.getPreferredLocale(), contextUriInfo,
+				contextUser),
+			user);
 	}
 
 	@Override
@@ -724,6 +731,9 @@ public class OrganizationResourceImpl
 
 	private static final EntityModel _entityModel =
 		new OrganizationEntityModel();
+
+	@Reference
+	private DTOConverterRegistry _dtoConverterRegistry;
 
 	@Reference
 	private OrganizationResourceDTOConverter _organizationResourceDTOConverter;
