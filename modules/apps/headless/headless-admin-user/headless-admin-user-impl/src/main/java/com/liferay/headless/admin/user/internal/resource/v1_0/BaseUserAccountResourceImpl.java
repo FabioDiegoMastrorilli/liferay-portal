@@ -391,7 +391,7 @@ public abstract class BaseUserAccountResourceImpl
 			@NotNull @Parameter(hidden = true) @PathParam("accountId") Long
 				accountId,
 			@NotNull @Parameter(hidden = true) @PathParam("accountRoleIds")
-				Long[] accountRoleIds,
+				String[] accountRoleIds,
 			String[] strings)
 		throws Exception {
 

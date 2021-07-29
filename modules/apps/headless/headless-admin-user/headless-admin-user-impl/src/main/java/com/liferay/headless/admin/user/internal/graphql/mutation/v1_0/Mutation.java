@@ -614,7 +614,8 @@ public class Mutation {
 	public java.util.Collection<UserAccount>
 			createOrganizationUsersByEmailAddressWithOrganizationRoleIds(
 				@GraphQLName("organizationId") String organizationId,
-				@GraphQLName("organizationRoleIds") Long[] organizationRoleIds,
+				@GraphQLName("organizationRoleIds") String[]
+					organizationRoleIds,
 				@GraphQLName("strings") String[] strings)
 		throws Exception {
 
@@ -897,7 +898,7 @@ public class Mutation {
 	public java.util.Collection<UserAccount>
 			createAccountUsersByEmailAddressWithAccountRoleIds(
 				@GraphQLName("accountId") Long accountId,
-				@GraphQLName("accountRoleIds") Long[] accountRoleIds,
+				@GraphQLName("accountRoleIds") String[] accountRoleIds,
 				@GraphQLName("strings") String[] strings)
 		throws Exception {
 

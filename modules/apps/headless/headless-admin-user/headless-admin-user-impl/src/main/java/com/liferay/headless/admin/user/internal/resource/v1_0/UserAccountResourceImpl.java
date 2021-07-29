@@ -63,6 +63,7 @@ import com.liferay.portal.kernel.service.UserService;
 import com.liferay.portal.kernel.util.CalendarFactoryUtil;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.ListUtil;
+import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.odata.entity.EntityModel;
 import com.liferay.portal.vulcan.dto.converter.DTOConverterRegistry;
 import com.liferay.portal.vulcan.dto.converter.DefaultDTOConverterContext;
@@ -198,6 +199,11 @@ public class UserAccountResourceImpl
 			PermissionThreadLocal.getPermissionChecker();
 
 		return _userResourceDTOConverter.toDTO(
+			new DefaultDTOConverterContext(
+				contextAcceptLanguage.isAcceptAllLanguages(), null,
+				_dtoConverterRegistry, permissionChecker.getUserId(),
+				contextAcceptLanguage.getPreferredLocale(), contextUriInfo,
+				contextUser),
 			_userService.getUserById(permissionChecker.getUserId()));
 	}
 
@@ -251,6 +257,11 @@ public class UserAccountResourceImpl
 	@Override
 	public UserAccount getUserAccount(Long userAccountId) throws Exception {
 		return _userResourceDTOConverter.toDTO(
+			new DefaultDTOConverterContext(
+				contextAcceptLanguage.isAcceptAllLanguages(), null,
+				_dtoConverterRegistry, userAccountId,
+				contextAcceptLanguage.getPreferredLocale(), contextUriInfo,
+				contextUser),
 			_userService.getUserById(userAccountId));
 	}
 
@@ -292,7 +303,13 @@ public class UserAccountResourceImpl
 		User user = _userLocalService.getUser(
 			accountEntryUserRel.getAccountUserId());
 
-		return _userResourceDTOConverter.toDTO(user);
+		return _userResourceDTOConverter.toDTO(
+			new DefaultDTOConverterContext(
+				contextAcceptLanguage.isAcceptAllLanguages(), null,
+				_dtoConverterRegistry, user.getUserId(),
+				contextAcceptLanguage.getPreferredLocale(), contextUriInfo,
+				contextUser),
+			user);
 	}
 
 	@Override
@@ -314,7 +331,13 @@ public class UserAccountResourceImpl
 		User user = _userLocalService.getUser(
 			accountEntryUserRel.getAccountUserId());
 
-		return _userResourceDTOConverter.toDTO(user);
+		return _userResourceDTOConverter.toDTO(
+			new DefaultDTOConverterContext(
+				contextAcceptLanguage.isAcceptAllLanguages(), null,
+				_dtoConverterRegistry, user.getUserId(),
+				contextAcceptLanguage.getPreferredLocale(), contextUriInfo,
+				contextUser),
+			user);
 	}
 
 	@Override
@@ -356,16 +379,20 @@ public class UserAccountResourceImpl
 
 	@Override
 	public Page<UserAccount> postAccountUsersByEmailAddressWithAccountRoleIds(
-			Long accountId, Long[] accountRoleIds, String[] strings)
+			Long accountId, String[] accountRoleIds, String[] strings)
 		throws Exception {
 
 		Page<UserAccount> userAccountPage = postAccountUsersByEmailAddress(
 			accountId, strings);
 
+		String[] accRoleIds = StringUtil.split(
+			accountRoleIds[0], StringPool.COMMA);
+
 		for (UserAccount userAccount : userAccountPage.getItems()) {
-			for (Long accountRoleId : accountRoleIds) {
+			for (String accountRoleId : accRoleIds) {
 				_accountRoleResource.postAccountRoleUserAssociation(
-					accountId, accountRoleId, userAccount.getId());
+					accountId, Long.valueOf(accountRoleId),
+					userAccount.getId());
 			}
 		}
 
@@ -431,7 +458,13 @@ public class UserAccountResourceImpl
 			user = _userLocalService.updateUser(user);
 		}
 
-		return _userResourceDTOConverter.toDTO(user);
+		return _userResourceDTOConverter.toDTO(
+			new DefaultDTOConverterContext(
+				contextAcceptLanguage.isAcceptAllLanguages(), null,
+				_dtoConverterRegistry, user.getUserId(),
+				contextAcceptLanguage.getPreferredLocale(), contextUriInfo,
+				contextUser),
+			user);
 	}
 
 	@Override
@@ -485,6 +518,11 @@ public class UserAccountResourceImpl
 		}
 
 		return _userResourceDTOConverter.toDTO(
+			new DefaultDTOConverterContext(
+				contextAcceptLanguage.isAcceptAllLanguages(), null,
+				_dtoConverterRegistry, userAccountId,
+				contextAcceptLanguage.getPreferredLocale(), contextUriInfo,
+				contextUser),
 			_userService.updateUser(
 				userAccountId, null, null, null, false, null, null,
 				userAccount.getAlternateName(), userAccount.getEmailAddress(),
