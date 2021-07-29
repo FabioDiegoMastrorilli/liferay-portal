@@ -156,13 +156,13 @@ public interface OrganizationResource {
 
 	public Page<UserAccount>
 			postOrganizationUsersByEmailAddressWithOrganizationRoleIds(
-				String organizationId, Long[] organizationRoleIds,
+				String organizationId, String[] organizationRoleIds,
 				String[] strings)
 		throws Exception;
 
 	public HttpInvoker.HttpResponse
 			postOrganizationUsersByEmailAddressWithOrganizationRoleIdsHttpResponse(
-				String organizationId, Long[] organizationRoleIds,
+				String organizationId, String[] organizationRoleIds,
 				String[] strings)
 		throws Exception;
 
@@ -1460,7 +1460,7 @@ public interface OrganizationResource {
 
 		public Page<UserAccount>
 				postOrganizationUsersByEmailAddressWithOrganizationRoleIds(
-					String organizationId, Long[] organizationRoleIds,
+					String organizationId, String[] organizationRoleIds,
 					String[] strings)
 			throws Exception {
 
@@ -1507,7 +1507,7 @@ public interface OrganizationResource {
 
 		public HttpInvoker.HttpResponse
 				postOrganizationUsersByEmailAddressWithOrganizationRoleIdsHttpResponse(
-					String organizationId, Long[] organizationRoleIds,
+					String organizationId, String[] organizationRoleIds,
 					String[] strings)
 			throws Exception {
 

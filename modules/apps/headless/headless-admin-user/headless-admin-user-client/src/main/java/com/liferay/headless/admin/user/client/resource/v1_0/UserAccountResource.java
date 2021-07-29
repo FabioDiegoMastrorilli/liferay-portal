@@ -133,12 +133,12 @@ public interface UserAccountResource {
 		throws Exception;
 
 	public Page<UserAccount> postAccountUsersByEmailAddressWithAccountRoleIds(
-			Long accountId, Long[] accountRoleIds, String[] strings)
+			Long accountId, String[] accountRoleIds, String[] strings)
 		throws Exception;
 
 	public HttpInvoker.HttpResponse
 			postAccountUsersByEmailAddressWithAccountRoleIdsHttpResponse(
-				Long accountId, Long[] accountRoleIds, String[] strings)
+				Long accountId, String[] accountRoleIds, String[] strings)
 		throws Exception;
 
 	public void deleteAccountUserByEmailAddress(
@@ -1247,7 +1247,7 @@ public interface UserAccountResource {
 
 		public Page<UserAccount>
 				postAccountUsersByEmailAddressWithAccountRoleIds(
-					Long accountId, Long[] accountRoleIds, String[] strings)
+					Long accountId, String[] accountRoleIds, String[] strings)
 			throws Exception {
 
 			HttpInvoker.HttpResponse httpResponse =
@@ -1293,7 +1293,7 @@ public interface UserAccountResource {
 
 		public HttpInvoker.HttpResponse
 				postAccountUsersByEmailAddressWithAccountRoleIdsHttpResponse(
-					Long accountId, Long[] accountRoleIds, String[] strings)
+					Long accountId, String[] accountRoleIds, String[] strings)
 			throws Exception {
 
 			HttpInvoker httpInvoker = HttpInvoker.newHttpInvoker();
