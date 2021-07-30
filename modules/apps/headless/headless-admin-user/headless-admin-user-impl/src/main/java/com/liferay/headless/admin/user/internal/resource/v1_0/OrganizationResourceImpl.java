@@ -56,6 +56,7 @@ import com.liferay.portal.kernel.service.OrgLaborLocalService;
 import com.liferay.portal.kernel.service.OrganizationService;
 import com.liferay.portal.kernel.service.ServiceContext;
 import com.liferay.portal.kernel.service.ServiceContextFactory;
+import com.liferay.portal.kernel.service.UserService;
 import com.liferay.portal.kernel.util.ArrayUtil;
 import com.liferay.portal.kernel.util.DateFormatFactoryUtil;
 import com.liferay.portal.kernel.util.FastDateFormatFactoryUtil;
@@ -749,5 +750,8 @@ public class OrganizationResourceImpl
 
 	@Reference
 	private UserResourceDTOConverter _userResourceDTOConverter;
+
+	@Reference
+	private UserService _userService;
 
 }
