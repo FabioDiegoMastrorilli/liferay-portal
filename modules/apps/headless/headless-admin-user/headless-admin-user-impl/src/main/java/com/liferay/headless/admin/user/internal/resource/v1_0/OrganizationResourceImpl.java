@@ -56,6 +56,7 @@ import com.liferay.portal.kernel.service.OrgLaborLocalService;
 import com.liferay.portal.kernel.service.OrganizationService;
 import com.liferay.portal.kernel.service.ServiceContext;
 import com.liferay.portal.kernel.service.ServiceContextFactory;
+import com.liferay.portal.kernel.service.UserService;
 import com.liferay.portal.kernel.util.ArrayUtil;
 import com.liferay.portal.kernel.util.DateFormatFactoryUtil;
 import com.liferay.portal.kernel.util.FastDateFormatFactoryUtil;
@@ -247,7 +248,23 @@ public class OrganizationResourceImpl
 			}
 		}
 
-		return userAccountPage;
+		List<UserAccount> userAccountList = new ArrayList<>();
+
+		for (UserAccount userAccount : userAccountPage.getItems()) {
+			User userByEmailAddress = _userService.getUserByEmailAddress(
+				contextCompany.getCompanyId(), userAccount.getEmailAddress());
+
+			userAccountList.add(
+				_userResourceDTOConverter.toDTO(
+					new DefaultDTOConverterContext(
+						contextAcceptLanguage.isAcceptAllLanguages(), null,
+						_dtoConverterRegistry, userAccount.getId(),
+						contextAcceptLanguage.getPreferredLocale(),
+						contextUriInfo, contextUser),
+					userByEmailAddress));
+		}
+
+		return Page.of(userAccountList);
 	}
 
 	@Override
@@ -739,5 +756,8 @@ public class OrganizationResourceImpl
 
 	@Reference
 	private UserResourceDTOConverter _userResourceDTOConverter;
+
+	@Reference
+	private UserService _userService;
 
 }
