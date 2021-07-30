@@ -19,6 +19,7 @@ import {openToast} from 'frontend-js-web';
 import React, {useContext, useEffect, useState} from 'react';
 
 import ChartContext from '../ChartContext';
+import { addUserEmailsToAccount } from '../data/accounts';
 import {addUserEmailsToOrganization} from '../data/organizations';
 import {getAccountRoles, getOrganizationRoles} from '../data/users';
 import {USER_ROLES_DEFINITION_ENABLED} from '../utils/flags';
@@ -52,16 +53,16 @@ export default function InviteUserModal({closeModal, observer, parentData}) {
 			typedEmails.push(emailsQuery);
 		}
 
-		const postUsers =
+		const inviteUser =
 			parentData.type === 'organization'
-				? addUserEmailsToOrganization(
-						parentData.id,
-						selectedRoleIds[0],
-						typedEmails
-				  )
-				: Promise.reject();
+				? addUserEmailsToOrganization
+				: addUserEmailsToAccount;
 
-		postUsers.then((users) => {
+		inviteUser(
+			parentData.id,
+			selectedRoleIds.join(','),
+			typedEmails
+		).then((users) => {
 			openToast({
 				message: Liferay.Util.sub(
 					Liferay.Language.get('x-users-added-to-x'),
