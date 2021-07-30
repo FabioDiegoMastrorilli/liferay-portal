@@ -396,7 +396,23 @@ public class UserAccountResourceImpl
 			}
 		}
 
-		return userAccountPage;
+		List<UserAccount> userAccountList = new ArrayList<>();
+
+		for (UserAccount userAccount : userAccountPage.getItems()) {
+			User userByEmailAddress = _userService.getUserByEmailAddress(
+				contextCompany.getCompanyId(), userAccount.getEmailAddress());
+
+			userAccountList.add(
+				_userResourceDTOConverter.toDTO(
+					new DefaultDTOConverterContext(
+						contextAcceptLanguage.isAcceptAllLanguages(), null,
+						_dtoConverterRegistry, userAccount.getId(),
+						contextAcceptLanguage.getPreferredLocale(),
+						contextUriInfo, contextUser),
+					userByEmailAddress));
+		}
+
+		return Page.of(userAccountList);
 	}
 
 	@Override
