@@ -38,18 +38,6 @@ export const createOrganizations = (names, parentOrganizationId) => {
 	);
 };
 
-export function addUserEmailsToOrganization(organizationId, roleIds, emails) {
-	const url = new URL(
-		`${ORGANIZATIONS_ROOT_ENDPOINT}/${organizationId}/user-accounts/by-email-address/${roleIds}`,
-		themeDisplay.getPortalURL()
-	);
-
-	return fetchFromHeadless(url, {
-		body: JSON.stringify(emails),
-		method: 'POST',
-	}).then((response) => response.items);
-}
-
 export function getOrganization(id) {
 	const url = new URL(
 		`${ORGANIZATIONS_ROOT_ENDPOINT}/${id}`,

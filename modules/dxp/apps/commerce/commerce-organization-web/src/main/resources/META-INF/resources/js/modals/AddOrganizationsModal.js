@@ -101,6 +101,7 @@ export default function AddOrganizationModal({
 			<ClayModal.Header>
 				{Liferay.Language.get('add-organizations')}
 			</ClayModal.Header>
+
 			<ClayModal.Body>
 				<ClayForm.Group
 					className={classNames(errors.length && 'has-error')}
@@ -112,6 +113,7 @@ export default function AddOrganizationModal({
 							symbol="asterisk"
 						/>
 					</label>
+
 					<ClayInput.Group>
 						<ClayInput.GroupItem>
 							<ClayMultiSelect
@@ -124,6 +126,7 @@ export default function AddOrganizationModal({
 									'organization-name'
 								)}
 							/>
+
 							{!!errors.length && (
 								<ClayForm.FeedbackGroup>
 									{errors.map((error, i) => (
@@ -138,6 +141,7 @@ export default function AddOrganizationModal({
 					</ClayInput.Group>
 				</ClayForm.Group>
 			</ClayModal.Body>
+
 			<ClayModal.Footer
 				last={
 					<ClayButton.Group spaced>

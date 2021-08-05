@@ -27,7 +27,7 @@ export default function ({
 			inputName: `${namespace}preferences--rootOrganizationId--`,
 			itemsKey: 'id',
 			itemsLabel: 'name',
-			required: true,
+			required: false,
 		},
 		document.getElementById(wrapperId)
 	);

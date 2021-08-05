@@ -40,7 +40,7 @@ export function handleFetchResponse(response) {
 		.catch((error) =>
 			response.ok
 				? Promise.resolve(null)
-				: Promise.reject({...error, title: error.status})
+				: Promise.reject({...error, title: error.title || error.status})
 		);
 }
 

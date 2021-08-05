@@ -17,8 +17,9 @@ import {fetchFromHeadless} from '../utils/fetch';
 
 export const USERS_ROOT_ENDPOINT = '/o/headless-admin-user/v1.0/user-accounts';
 export const ROLES_ROOT_ENDPOINT = '/o/headless-admin-user/v1.0/roles';
-export const ACCOUNT_ROLES_ROOT_ENDPOINT =
-	'/o/headless-admin-user/v1.0/accounts';
+export const ACCOUNTS_ROOT_ENDPOINT = '/o/headless-admin-user/v1.0/accounts';
+export const ORGANIZATIONS_ROOT_ENDPOINT =
+	'/o/headless-admin-user/v1.0/organizations';
 
 export function getUsersByEmails(emails) {
 	const filterString = emails
@@ -52,7 +53,7 @@ export function getAccountRoles(accountId) {
 	genericRolesUrl.searchParams.append('types', ACCOUNTS_ROLE_TYPE_ID);
 
 	const specificRolesUrl = new URL(
-		`${ACCOUNT_ROLES_ROOT_ENDPOINT}/${accountId}/account-roles`,
+		`${ACCOUNTS_ROOT_ENDPOINT}/${accountId}/account-roles`,
 		themeDisplay.getPortalURL()
 	);
 
@@ -83,4 +84,51 @@ export function deleteUser(id) {
 	);
 
 	return fetchFromHeadless(url, {method: 'DELETE'}, null, true);
+}
+
+export function removeUserFromOrganization(userEmail, organizationId) {
+	const url = new URL(
+		`${ORGANIZATIONS_ROOT_ENDPOINT}/${organizationId}/user-accounts/by-email-address/${userEmail}`,
+		themeDisplay.getPortalURL()
+	);
+
+	return fetchFromHeadless(url, {
+		method: 'DELETE',
+	});
+}
+
+export function addUserEmailsToAccount(accountId, roleIds, emails) {
+	const url = new URL(
+		`${ACCOUNTS_ROOT_ENDPOINT}/${accountId}/account-users/by-email-address/${roleIds}`,
+		themeDisplay.getPortalURL()
+	);
+
+	return fetchFromHeadless(url, {
+		body: JSON.stringify(emails),
+		method: 'POST',
+	}).then((response) => response.items);
+}
+
+export function addUserEmailsToOrganization(organizationId, roleIds, emails) {
+	const url = new URL(
+		`${ORGANIZATIONS_ROOT_ENDPOINT}/${organizationId}/user-accounts/by-email-address/${roleIds}`,
+		themeDisplay.getPortalURL()
+	);
+
+	return fetchFromHeadless(url, {
+		body: JSON.stringify(emails),
+		method: 'POST',
+	}).then((response) => response.items);
+}
+
+export function removeUserFromAccount(userEmail, accountId) {
+	const url = new URL(
+		`${ACCOUNTS_ROOT_ENDPOINT}/${accountId}/account-users/by-email-address`,
+		themeDisplay.getPortalURL()
+	);
+
+	return fetchFromHeadless(url, {
+		body: JSON.stringify([userEmail]),
+		method: 'DELETE',
+	});
 }

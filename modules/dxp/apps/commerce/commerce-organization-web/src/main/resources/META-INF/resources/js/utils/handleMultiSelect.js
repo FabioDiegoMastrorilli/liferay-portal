@@ -9,7 +9,8 @@
  * distribution rights of the Software.
  */
 
-import {ACCOUNTS_DND_ENABLED} from './flags';
+import {hasPermission} from '.';
+import {ACTION_KEYS} from './constants';
 
 let items = null;
 
@@ -34,7 +35,7 @@ export function updateSelectableItems(selectedNodes, nodesGroup) {
 		if (
 			unselectableItemIds.has(d.data.chartNodeId) ||
 			d.data.type === 'user' ||
-			(d.data.type === 'account' && !ACCOUNTS_DND_ENABLED)
+			hasPermission(d.data, ACTION_KEYS[d.data.type].MOVE)
 		) {
 			nodeList[index].classList.add('unselectable');
 			d.data.selectable = false;

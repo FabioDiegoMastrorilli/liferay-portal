@@ -138,7 +138,6 @@ function OrganizationChart({
 					parentData={modalData?.parentData}
 					type={modalData?.type}
 				/>
-
 			</ChartContext.Provider>
 		</ClayIconSpriteContext.Provider>
 	);

@@ -19,7 +19,6 @@ import React, {useContext, useEffect, useMemo, useState} from 'react';
 
 import ChartContext from '../ChartContext';
 import {createAccount, getAccounts, updateAccount} from '../data/accounts';
-import {ACCOUNTS_CREATION_ENABLED} from '../utils/flags';
 
 function showNotFoundError(name) {
 	openToast({
@@ -174,25 +173,24 @@ export default function AddOrganizationModal({
 			<ClayModal.Header>
 				{Liferay.Language.get('add-accounts')}
 			</ClayModal.Header>
+
 			<ClayModal.Body>
-				{ACCOUNTS_CREATION_ENABLED && (
-					<ClayRadioGroup
-						className="mb-4"
-						onSelectedValueChange={updateNewAccountMode}
-						selectedValue={newAccountMode}
-					>
-						<ClayRadio
-							label={Liferay.Language.get(
-								'select-existing-accounts'
-							)}
-							value={false}
-						/>
-						<ClayRadio
-							label={Liferay.Language.get('create-new-account')}
-							value={true}
-						/>
-					</ClayRadioGroup>
-				)}
+				<ClayRadioGroup
+					className="mb-4"
+					onSelectedValueChange={updateNewAccountMode}
+					selectedValue={newAccountMode}
+				>
+					<ClayRadio
+						label={Liferay.Language.get('select-existing-accounts')}
+						value={false}
+					/>
+
+					<ClayRadio
+						label={Liferay.Language.get('create-new-account')}
+						value={true}
+					/>
+				</ClayRadioGroup>
+
 				{newAccountMode ? (
 					<ClayForm.Group
 						className={classNames(errors.length && 'has-error')}
@@ -200,6 +198,7 @@ export default function AddOrganizationModal({
 						<label htmlFor="newAccountNameInput">
 							{Liferay.Language.get('name')}
 						</label>
+
 						<ClayInput
 							id="newAccountNameInput"
 							onChange={(event) =>
@@ -207,6 +206,7 @@ export default function AddOrganizationModal({
 							}
 							value={newAccountName}
 						/>
+
 						{errorsContainer}
 					</ClayForm.Group>
 				) : (
@@ -216,6 +216,7 @@ export default function AddOrganizationModal({
 						<label htmlFor="searchAccountInput">
 							{Liferay.Language.get('search-account')}
 						</label>
+
 						<ClayMultiSelect
 							id="searchAccountInput"
 							inputValue={accountsQuery}
@@ -225,6 +226,7 @@ export default function AddOrganizationModal({
 							onItemsChange={handleItemsChange}
 							sourceItems={accountOptions}
 						/>
+
 						{errorsContainer}
 					</ClayForm.Group>
 				)}
@@ -238,6 +240,7 @@ export default function AddOrganizationModal({
 						>
 							{Liferay.Language.get('cancel')}
 						</ClayButton>
+
 						<ClayButton displayType="primary" onClick={handleSave}>
 							{Liferay.Language.get('save')}
 						</ClayButton>
