@@ -245,23 +245,23 @@ export const formatAccountDescription = (d) => {
 
 const briefsMap = {
 	account: 'accountBriefs',
-	organization: 'organizationBriefs'
-}
+	organization: 'organizationBriefs',
+};
 
 export const formatUserDescription = (d) => {
 	const parentBriefsKey = briefsMap[d.parent.data.type];
 	const parentBrief = d.data[parentBriefsKey].find(
-		parent => Number(parent.id) === Number(d.parent.data.id)
+		(parent) => Number(parent.id) === Number(d.parent.data.id)
 	);
 
-	let description = Liferay.Language.get('guest')
+	let description = Liferay.Language.get('guest');
 
 	if (parentBrief.roleBriefs.length) {
-		description = trimString(parentBrief.roleBriefs[0].name, 'user')
-	} 
+		description = trimString(parentBrief.roleBriefs[0].name, 'user');
+	}
 
 	if (parentBrief.roleBriefs.length > 1) {
-		description += ` (+${parentBrief.roleBriefs.length - 1})`
+		description += ` (+${parentBrief.roleBriefs.length - 1})`;
 	}
 
 	return description;
@@ -273,9 +273,10 @@ const formatDescriptionMap = {
 	user: formatUserDescription,
 };
 
-export const trimString = (string, nodeType) => string.length > MAX_NAME_LENGTH[nodeType] 
-	? string.slice(0, MAX_NAME_LENGTH[nodeType] - 1).trim() + '…' 
-	: string;
+export const trimString = (string, nodeType) =>
+	string.length > MAX_NAME_LENGTH[nodeType]
+		? string.slice(0, MAX_NAME_LENGTH[nodeType] - 1).trim() + '…'
+		: string;
 
 export const formatItemName = (d) => {
 	const name = d.data.name || d.data.emailAddress;

@@ -10,6 +10,7 @@
  */
 
 import ClayButton, {ClayButtonWithIcon} from '@clayui/button';
+import {ClayIconSpriteContext} from '@clayui/icon';
 import classnames from 'classnames';
 import PropTypes from 'prop-types';
 import React, {useEffect, useLayoutEffect, useRef, useState} from 'react';
@@ -91,38 +92,40 @@ function OrganizationChart({
 	}, [pageSize, rootData, spritemap]);
 
 	return (
-		<ChartContext.Provider
-			value={{
-				chartInstanceRef,
-				currentView,
-				templatesURL,
-				updateCurrentView,
-			}}
-		>
-			<ManagementBar />
-			<div className={classnames('org-chart-container', {expanded})}>
-				<svg className="svg-chart" ref={chartSVGRef} />
-				<div className="zoom-controls">
-					<ClayButtonWithIcon
-						displayType="secondary"
-						onClick={() => updateExpanded(!expanded)}
-						small
-						symbol="expand"
-					/>
-					<ClayButton.Group className="ml-3">
+		<ClayIconSpriteContext.Provider value={spritemap}>
+			<ChartContext.Provider
+				value={{
+					chartInstanceRef,
+					currentView,
+					templatesURL,
+					updateCurrentView,
+				}}
+			>
+				<ManagementBar />
+				<div className={classnames('org-chart-container', {expanded})}>
+					<svg className="svg-chart" ref={chartSVGRef} />
+					<div className="zoom-controls">
 						<ClayButtonWithIcon
 							displayType="secondary"
-							ref={zoomOutRef}
+							onClick={() => updateExpanded(!expanded)}
 							small
-							symbol="hr"
+							symbol="expand"
 						/>
-						<ClayButtonWithIcon
-							displayType="secondary"
-							ref={zoomInRef}
-							small
-							symbol="plus"
-						/>
-					</ClayButton.Group>
+						<ClayButton.Group className="ml-3">
+							<ClayButtonWithIcon
+								displayType="secondary"
+								ref={zoomOutRef}
+								small
+								symbol="hr"
+							/>
+							<ClayButtonWithIcon
+								displayType="secondary"
+								ref={zoomInRef}
+								small
+								symbol="plus"
+							/>
+						</ClayButton.Group>
+					</div>
 				</div>
 				<MenuProvider
 					alignElementRef={clickedMenuButtonRef}
@@ -135,7 +138,6 @@ function OrganizationChart({
 					parentData={modalData?.parentData}
 					type={modalData?.type}
 				/>
-
 			</ChartContext.Provider>
 		</ClayIconSpriteContext.Provider>
 	);
