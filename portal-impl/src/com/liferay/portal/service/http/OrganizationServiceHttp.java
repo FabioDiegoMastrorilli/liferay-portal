@@ -182,43 +182,6 @@ public class OrganizationServiceHttp {
 		}
 	}
 
-	public static void addPasswordPolicyOrganizations(
-			HttpPrincipal httpPrincipal, long passwordPolicyId,
-			long[] organizationIds)
-		throws com.liferay.portal.kernel.exception.PortalException {
-
-		try {
-			MethodKey methodKey = new MethodKey(
-				OrganizationServiceUtil.class, "addPasswordPolicyOrganizations",
-				_addPasswordPolicyOrganizationsParameterTypes3);
-
-			MethodHandler methodHandler = new MethodHandler(
-				methodKey, passwordPolicyId, organizationIds);
-
-			try {
-				TunnelUtil.invoke(httpPrincipal, methodHandler);
-			}
-			catch (Exception exception) {
-				if (exception instanceof
-						com.liferay.portal.kernel.exception.PortalException) {
-
-					throw (com.liferay.portal.kernel.exception.PortalException)
-						exception;
-				}
-
-				throw new com.liferay.portal.kernel.exception.SystemException(
-					exception);
-			}
-		}
-		catch (com.liferay.portal.kernel.exception.SystemException
-					systemException) {
-
-			_log.error(systemException, systemException);
-
-			throw systemException;
-		}
-	}
-
 	public static com.liferay.portal.kernel.model.User
 			addOrganizationUserByEmailAddress(
 				HttpPrincipal httpPrincipal, String emailAddress,
@@ -230,7 +193,7 @@ public class OrganizationServiceHttp {
 			MethodKey methodKey = new MethodKey(
 				OrganizationServiceUtil.class,
 				"addOrganizationUserByEmailAddress",
-				_addOrganizationUserByEmailAddressParameterTypes4);
+				_addOrganizationUserByEmailAddressParameterTypes3);
 
 			MethodHandler methodHandler = new MethodHandler(
 				methodKey, emailAddress, organizationId, serviceContext);
@@ -253,6 +216,43 @@ public class OrganizationServiceHttp {
 			}
 
 			return (com.liferay.portal.kernel.model.User)returnObj;
+		}
+		catch (com.liferay.portal.kernel.exception.SystemException
+					systemException) {
+
+			_log.error(systemException, systemException);
+
+			throw systemException;
+		}
+	}
+
+	public static void addPasswordPolicyOrganizations(
+			HttpPrincipal httpPrincipal, long passwordPolicyId,
+			long[] organizationIds)
+		throws com.liferay.portal.kernel.exception.PortalException {
+
+		try {
+			MethodKey methodKey = new MethodKey(
+				OrganizationServiceUtil.class, "addPasswordPolicyOrganizations",
+				_addPasswordPolicyOrganizationsParameterTypes4);
+
+			MethodHandler methodHandler = new MethodHandler(
+				methodKey, passwordPolicyId, organizationIds);
+
+			try {
+				TunnelUtil.invoke(httpPrincipal, methodHandler);
+			}
+			catch (Exception exception) {
+				if (exception instanceof
+						com.liferay.portal.kernel.exception.PortalException) {
+
+					throw (com.liferay.portal.kernel.exception.PortalException)
+						exception;
+				}
+
+				throw new com.liferay.portal.kernel.exception.SystemException(
+					exception);
+			}
 		}
 		catch (com.liferay.portal.kernel.exception.SystemException
 					systemException) {
@@ -375,7 +375,8 @@ public class OrganizationServiceHttp {
 
 	public static void deleteUserOrganizationByEmailAddress(
 			HttpPrincipal httpPrincipal, String emailAddress,
-			long organizationId)
+			long organizationId,
+			com.liferay.portal.kernel.service.ServiceContext serviceContext)
 		throws com.liferay.portal.kernel.exception.PortalException {
 
 		try {
@@ -385,7 +386,7 @@ public class OrganizationServiceHttp {
 				_deleteUserOrganizationByEmailAddressParameterTypes8);
 
 			MethodHandler methodHandler = new MethodHandler(
-				methodKey, emailAddress, organizationId);
+				methodKey, emailAddress, organizationId, serviceContext);
 
 			try {
 				TunnelUtil.invoke(httpPrincipal, methodHandler);
@@ -1019,13 +1020,13 @@ public class OrganizationServiceHttp {
 			com.liferay.portal.kernel.service.ServiceContext.class
 		};
 	private static final Class<?>[]
-		_addPasswordPolicyOrganizationsParameterTypes3 = new Class[] {
-			long.class, long[].class
-		};
-	private static final Class<?>[]
-		_addOrganizationUserByEmailAddressParameterTypes4 = new Class[] {
+		_addOrganizationUserByEmailAddressParameterTypes3 = new Class[] {
 			String.class, long.class,
 			com.liferay.portal.kernel.service.ServiceContext.class
+		};
+	private static final Class<?>[]
+		_addPasswordPolicyOrganizationsParameterTypes4 = new Class[] {
+			long.class, long[].class
 		};
 	private static final Class<?>[]
 		_addUserOrganizationByEmailAddressParameterTypes5 = new Class[] {
@@ -1038,7 +1039,8 @@ public class OrganizationServiceHttp {
 		new Class[] {long.class};
 	private static final Class<?>[]
 		_deleteUserOrganizationByEmailAddressParameterTypes8 = new Class[] {
-			String.class, long.class
+			String.class, long.class,
+			com.liferay.portal.kernel.service.ServiceContext.class
 		};
 	private static final Class<?>[] _fetchOrganizationParameterTypes9 =
 		new Class[] {long.class};
