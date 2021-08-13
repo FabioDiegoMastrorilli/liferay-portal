@@ -14,6 +14,7 @@
 
 package com.liferay.portal.service.impl;
 
+import com.google.common.primitives.Longs;
 import com.liferay.petra.string.StringBundler;
 import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.dao.orm.QueryDefinition;
@@ -539,7 +540,7 @@ public class OrganizationLocalServiceImpl
 
 	@Override
 	public void deleteUserOrganizationByEmailAddress(
-			String emailAddress, long organizationId)
+			String emailAddress, long organizationId, ServiceContext serviceContext)
 		throws PortalException {
 
 		Organization organization = organizationPersistence.findByPrimaryKey(
@@ -548,7 +549,11 @@ public class OrganizationLocalServiceImpl
 		User user = userPersistence.findByC_EA(
 			organization.getCompanyId(), emailAddress);
 
-		deleteUserOrganization(user.getUserId(), organizationId);
+		List<Long> organizationIdList = ListUtil.fromArray(user.getOrganizationIds());
+
+		organizationIdList.remove(organizationId);
+
+		userLocalService.updateOrganizations(user.getUserId(), Longs.toArray(organizationIdList), serviceContext);
 	}
 
 	/**
