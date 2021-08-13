@@ -23,6 +23,7 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.util.ISO8601DateFormat;
 
 import com.liferay.headless.admin.user.client.dto.v1_0.Organization;
+import com.liferay.headless.admin.user.client.dto.v1_0.UserAccount;
 import com.liferay.headless.admin.user.client.http.HttpInvoker;
 import com.liferay.headless.admin.user.client.pagination.Page;
 import com.liferay.headless.admin.user.client.pagination.Pagination;
@@ -1036,26 +1037,7 @@ public abstract class BaseOrganizationResourceTestCase {
 
 	@Test
 	public void testPostUserAccountsByEmailAddress() throws Exception {
-		@SuppressWarnings("PMD.UnusedLocalVariable")
-		Organization organization =
-			testPostUserAccountsByEmailAddress_addOrganization();
-
-		assertHttpResponseStatusCode(
-			204,
-			organizationResource.postUserAccountsByEmailAddressHttpResponse(
-				organization.getId(), null));
-
-		assertHttpResponseStatusCode(
-			404,
-			organizationResource.postUserAccountsByEmailAddressHttpResponse(
-				"-", null));
-	}
-
-	protected Organization testPostUserAccountsByEmailAddress_addOrganization()
-		throws Exception {
-
-		throw new UnsupportedOperationException(
-			"This method needs to be implemented");
+		Assert.assertTrue(false);
 	}
 
 	@Test
@@ -1071,30 +1053,6 @@ public abstract class BaseOrganizationResourceTestCase {
 	}
 
 	protected Organization testDeleteUserAccountByEmailAddress_addOrganization()
-		throws Exception {
-
-		throw new UnsupportedOperationException(
-			"This method needs to be implemented");
-	}
-
-	@Test
-	public void testPostUserAccountByEmailAddress() throws Exception {
-		@SuppressWarnings("PMD.UnusedLocalVariable")
-		Organization organization =
-			testPostUserAccountByEmailAddress_addOrganization();
-
-		assertHttpResponseStatusCode(
-			204,
-			organizationResource.postUserAccountByEmailAddressHttpResponse(
-				organization.getId(), null));
-
-		assertHttpResponseStatusCode(
-			404,
-			organizationResource.postUserAccountByEmailAddressHttpResponse(
-				"-", null));
-	}
-
-	protected Organization testPostUserAccountByEmailAddress_addOrganization()
 		throws Exception {
 
 		throw new UnsupportedOperationException(
@@ -1432,6 +1390,11 @@ public abstract class BaseOrganizationResourceTestCase {
 	@Rule
 	public SearchTestRule searchTestRule = new SearchTestRule();
 
+	@Test
+	public void testPostUserAccountByEmailAddress() throws Exception {
+		Assert.assertTrue(true);
+	}
+
 	protected Organization testGraphQLOrganization_addOrganization()
 		throws Exception {
 
@@ -1466,6 +1429,14 @@ public abstract class BaseOrganizationResourceTestCase {
 
 			assertEquals(organization1, organization2);
 		}
+	}
+
+	protected void assertEquals(
+		UserAccount userAccount1, UserAccount userAccount2) {
+
+		Assert.assertTrue(
+			userAccount1 + " does not equal " + userAccount2,
+			equals(userAccount1, userAccount2));
 	}
 
 	protected void assertEqualsIgnoringOrder(
@@ -1672,7 +1643,220 @@ public abstract class BaseOrganizationResourceTestCase {
 		Assert.assertTrue(valid);
 	}
 
+	protected void assertValid(UserAccount userAccount) {
+		boolean valid = true;
+
+		if (userAccount.getDateCreated() == null) {
+			valid = false;
+		}
+
+		if (userAccount.getDateModified() == null) {
+			valid = false;
+		}
+
+		if (userAccount.getId() == null) {
+			valid = false;
+		}
+
+		for (String additionalAssertFieldName :
+				getAdditionalUserAccountAssertFieldNames()) {
+
+			if (Objects.equals("accountBriefs", additionalAssertFieldName)) {
+				if (userAccount.getAccountBriefs() == null) {
+					valid = false;
+				}
+
+				continue;
+			}
+
+			if (Objects.equals("actions", additionalAssertFieldName)) {
+				if (userAccount.getActions() == null) {
+					valid = false;
+				}
+
+				continue;
+			}
+
+			if (Objects.equals("additionalName", additionalAssertFieldName)) {
+				if (userAccount.getAdditionalName() == null) {
+					valid = false;
+				}
+
+				continue;
+			}
+
+			if (Objects.equals("alternateName", additionalAssertFieldName)) {
+				if (userAccount.getAlternateName() == null) {
+					valid = false;
+				}
+
+				continue;
+			}
+
+			if (Objects.equals("birthDate", additionalAssertFieldName)) {
+				if (userAccount.getBirthDate() == null) {
+					valid = false;
+				}
+
+				continue;
+			}
+
+			if (Objects.equals("customFields", additionalAssertFieldName)) {
+				if (userAccount.getCustomFields() == null) {
+					valid = false;
+				}
+
+				continue;
+			}
+
+			if (Objects.equals("dashboardURL", additionalAssertFieldName)) {
+				if (userAccount.getDashboardURL() == null) {
+					valid = false;
+				}
+
+				continue;
+			}
+
+			if (Objects.equals("emailAddress", additionalAssertFieldName)) {
+				if (userAccount.getEmailAddress() == null) {
+					valid = false;
+				}
+
+				continue;
+			}
+
+			if (Objects.equals(
+					"externalReferenceCode", additionalAssertFieldName)) {
+
+				if (userAccount.getExternalReferenceCode() == null) {
+					valid = false;
+				}
+
+				continue;
+			}
+
+			if (Objects.equals("familyName", additionalAssertFieldName)) {
+				if (userAccount.getFamilyName() == null) {
+					valid = false;
+				}
+
+				continue;
+			}
+
+			if (Objects.equals("givenName", additionalAssertFieldName)) {
+				if (userAccount.getGivenName() == null) {
+					valid = false;
+				}
+
+				continue;
+			}
+
+			if (Objects.equals("honorificPrefix", additionalAssertFieldName)) {
+				if (userAccount.getHonorificPrefix() == null) {
+					valid = false;
+				}
+
+				continue;
+			}
+
+			if (Objects.equals("honorificSuffix", additionalAssertFieldName)) {
+				if (userAccount.getHonorificSuffix() == null) {
+					valid = false;
+				}
+
+				continue;
+			}
+
+			if (Objects.equals("image", additionalAssertFieldName)) {
+				if (userAccount.getImage() == null) {
+					valid = false;
+				}
+
+				continue;
+			}
+
+			if (Objects.equals("jobTitle", additionalAssertFieldName)) {
+				if (userAccount.getJobTitle() == null) {
+					valid = false;
+				}
+
+				continue;
+			}
+
+			if (Objects.equals("keywords", additionalAssertFieldName)) {
+				if (userAccount.getKeywords() == null) {
+					valid = false;
+				}
+
+				continue;
+			}
+
+			if (Objects.equals("name", additionalAssertFieldName)) {
+				if (userAccount.getName() == null) {
+					valid = false;
+				}
+
+				continue;
+			}
+
+			if (Objects.equals(
+					"organizationBriefs", additionalAssertFieldName)) {
+
+				if (userAccount.getOrganizationBriefs() == null) {
+					valid = false;
+				}
+
+				continue;
+			}
+
+			if (Objects.equals("profileURL", additionalAssertFieldName)) {
+				if (userAccount.getProfileURL() == null) {
+					valid = false;
+				}
+
+				continue;
+			}
+
+			if (Objects.equals("roleBriefs", additionalAssertFieldName)) {
+				if (userAccount.getRoleBriefs() == null) {
+					valid = false;
+				}
+
+				continue;
+			}
+
+			if (Objects.equals("siteBriefs", additionalAssertFieldName)) {
+				if (userAccount.getSiteBriefs() == null) {
+					valid = false;
+				}
+
+				continue;
+			}
+
+			if (Objects.equals(
+					"userAccountContactInformation",
+					additionalAssertFieldName)) {
+
+				if (userAccount.getUserAccountContactInformation() == null) {
+					valid = false;
+				}
+
+				continue;
+			}
+
+			throw new IllegalArgumentException(
+				"Invalid additional assert field name " +
+					additionalAssertFieldName);
+		}
+
+		Assert.assertTrue(valid);
+	}
+
 	protected String[] getAdditionalAssertFieldNames() {
+		return new String[0];
+	}
+
+	protected String[] getAdditionalUserAccountAssertFieldNames() {
 		return new String[0];
 	}
 
@@ -1990,6 +2174,302 @@ public abstract class BaseOrganizationResourceTestCase {
 		return false;
 	}
 
+	protected boolean equals(
+		UserAccount userAccount1, UserAccount userAccount2) {
+
+		if (userAccount1 == userAccount2) {
+			return true;
+		}
+
+		for (String additionalAssertFieldName :
+				getAdditionalUserAccountAssertFieldNames()) {
+
+			if (Objects.equals("accountBriefs", additionalAssertFieldName)) {
+				if (!Objects.deepEquals(
+						userAccount1.getAccountBriefs(),
+						userAccount2.getAccountBriefs())) {
+
+					return false;
+				}
+
+				continue;
+			}
+
+			if (Objects.equals("actions", additionalAssertFieldName)) {
+				if (!Objects.deepEquals(
+						userAccount1.getActions(), userAccount2.getActions())) {
+
+					return false;
+				}
+
+				continue;
+			}
+
+			if (Objects.equals("additionalName", additionalAssertFieldName)) {
+				if (!Objects.deepEquals(
+						userAccount1.getAdditionalName(),
+						userAccount2.getAdditionalName())) {
+
+					return false;
+				}
+
+				continue;
+			}
+
+			if (Objects.equals("alternateName", additionalAssertFieldName)) {
+				if (!Objects.deepEquals(
+						userAccount1.getAlternateName(),
+						userAccount2.getAlternateName())) {
+
+					return false;
+				}
+
+				continue;
+			}
+
+			if (Objects.equals("birthDate", additionalAssertFieldName)) {
+				if (!Objects.deepEquals(
+						userAccount1.getBirthDate(),
+						userAccount2.getBirthDate())) {
+
+					return false;
+				}
+
+				continue;
+			}
+
+			if (Objects.equals("customFields", additionalAssertFieldName)) {
+				if (!Objects.deepEquals(
+						userAccount1.getCustomFields(),
+						userAccount2.getCustomFields())) {
+
+					return false;
+				}
+
+				continue;
+			}
+
+			if (Objects.equals("dashboardURL", additionalAssertFieldName)) {
+				if (!Objects.deepEquals(
+						userAccount1.getDashboardURL(),
+						userAccount2.getDashboardURL())) {
+
+					return false;
+				}
+
+				continue;
+			}
+
+			if (Objects.equals("dateCreated", additionalAssertFieldName)) {
+				if (!Objects.deepEquals(
+						userAccount1.getDateCreated(),
+						userAccount2.getDateCreated())) {
+
+					return false;
+				}
+
+				continue;
+			}
+
+			if (Objects.equals("dateModified", additionalAssertFieldName)) {
+				if (!Objects.deepEquals(
+						userAccount1.getDateModified(),
+						userAccount2.getDateModified())) {
+
+					return false;
+				}
+
+				continue;
+			}
+
+			if (Objects.equals("emailAddress", additionalAssertFieldName)) {
+				if (!Objects.deepEquals(
+						userAccount1.getEmailAddress(),
+						userAccount2.getEmailAddress())) {
+
+					return false;
+				}
+
+				continue;
+			}
+
+			if (Objects.equals(
+					"externalReferenceCode", additionalAssertFieldName)) {
+
+				if (!Objects.deepEquals(
+						userAccount1.getExternalReferenceCode(),
+						userAccount2.getExternalReferenceCode())) {
+
+					return false;
+				}
+
+				continue;
+			}
+
+			if (Objects.equals("familyName", additionalAssertFieldName)) {
+				if (!Objects.deepEquals(
+						userAccount1.getFamilyName(),
+						userAccount2.getFamilyName())) {
+
+					return false;
+				}
+
+				continue;
+			}
+
+			if (Objects.equals("givenName", additionalAssertFieldName)) {
+				if (!Objects.deepEquals(
+						userAccount1.getGivenName(),
+						userAccount2.getGivenName())) {
+
+					return false;
+				}
+
+				continue;
+			}
+
+			if (Objects.equals("honorificPrefix", additionalAssertFieldName)) {
+				if (!Objects.deepEquals(
+						userAccount1.getHonorificPrefix(),
+						userAccount2.getHonorificPrefix())) {
+
+					return false;
+				}
+
+				continue;
+			}
+
+			if (Objects.equals("honorificSuffix", additionalAssertFieldName)) {
+				if (!Objects.deepEquals(
+						userAccount1.getHonorificSuffix(),
+						userAccount2.getHonorificSuffix())) {
+
+					return false;
+				}
+
+				continue;
+			}
+
+			if (Objects.equals("id", additionalAssertFieldName)) {
+				if (!Objects.deepEquals(
+						userAccount1.getId(), userAccount2.getId())) {
+
+					return false;
+				}
+
+				continue;
+			}
+
+			if (Objects.equals("image", additionalAssertFieldName)) {
+				if (!Objects.deepEquals(
+						userAccount1.getImage(), userAccount2.getImage())) {
+
+					return false;
+				}
+
+				continue;
+			}
+
+			if (Objects.equals("jobTitle", additionalAssertFieldName)) {
+				if (!Objects.deepEquals(
+						userAccount1.getJobTitle(),
+						userAccount2.getJobTitle())) {
+
+					return false;
+				}
+
+				continue;
+			}
+
+			if (Objects.equals("keywords", additionalAssertFieldName)) {
+				if (!Objects.deepEquals(
+						userAccount1.getKeywords(),
+						userAccount2.getKeywords())) {
+
+					return false;
+				}
+
+				continue;
+			}
+
+			if (Objects.equals("name", additionalAssertFieldName)) {
+				if (!Objects.deepEquals(
+						userAccount1.getName(), userAccount2.getName())) {
+
+					return false;
+				}
+
+				continue;
+			}
+
+			if (Objects.equals(
+					"organizationBriefs", additionalAssertFieldName)) {
+
+				if (!Objects.deepEquals(
+						userAccount1.getOrganizationBriefs(),
+						userAccount2.getOrganizationBriefs())) {
+
+					return false;
+				}
+
+				continue;
+			}
+
+			if (Objects.equals("profileURL", additionalAssertFieldName)) {
+				if (!Objects.deepEquals(
+						userAccount1.getProfileURL(),
+						userAccount2.getProfileURL())) {
+
+					return false;
+				}
+
+				continue;
+			}
+
+			if (Objects.equals("roleBriefs", additionalAssertFieldName)) {
+				if (!Objects.deepEquals(
+						userAccount1.getRoleBriefs(),
+						userAccount2.getRoleBriefs())) {
+
+					return false;
+				}
+
+				continue;
+			}
+
+			if (Objects.equals("siteBriefs", additionalAssertFieldName)) {
+				if (!Objects.deepEquals(
+						userAccount1.getSiteBriefs(),
+						userAccount2.getSiteBriefs())) {
+
+					return false;
+				}
+
+				continue;
+			}
+
+			if (Objects.equals(
+					"userAccountContactInformation",
+					additionalAssertFieldName)) {
+
+				if (!Objects.deepEquals(
+						userAccount1.getUserAccountContactInformation(),
+						userAccount2.getUserAccountContactInformation())) {
+
+					return false;
+				}
+
+				continue;
+			}
+
+			throw new IllegalArgumentException(
+				"Invalid additional assert field name " +
+					additionalAssertFieldName);
+		}
+
+		return true;
+	}
+
 	protected Field[] getDeclaredFields(Class clazz) throws Exception {
 		Stream<Field> stream = Stream.of(
 			ReflectionUtil.getDeclaredFields(clazz));
@@ -2279,6 +2759,30 @@ public abstract class BaseOrganizationResourceTestCase {
 
 	protected Organization randomPatchOrganization() throws Exception {
 		return randomOrganization();
+	}
+
+	protected UserAccount randomUserAccount() throws Exception {
+		return new UserAccount() {
+			{
+				additionalName = RandomTestUtil.randomString();
+				alternateName = RandomTestUtil.randomString();
+				birthDate = RandomTestUtil.nextDate();
+				dashboardURL = RandomTestUtil.randomString();
+				dateCreated = RandomTestUtil.nextDate();
+				dateModified = RandomTestUtil.nextDate();
+				emailAddress = RandomTestUtil.randomString();
+				externalReferenceCode = RandomTestUtil.randomString();
+				familyName = RandomTestUtil.randomString();
+				givenName = RandomTestUtil.randomString();
+				honorificPrefix = RandomTestUtil.randomString();
+				honorificSuffix = RandomTestUtil.randomString();
+				id = RandomTestUtil.randomLong();
+				image = RandomTestUtil.randomString();
+				jobTitle = RandomTestUtil.randomString();
+				name = RandomTestUtil.randomString();
+				profileURL = RandomTestUtil.randomString();
+			}
+		};
 	}
 
 	protected OrganizationResource organizationResource;

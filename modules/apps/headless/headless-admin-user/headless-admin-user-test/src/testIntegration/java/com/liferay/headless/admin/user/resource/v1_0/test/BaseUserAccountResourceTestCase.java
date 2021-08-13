@@ -1048,27 +1048,7 @@ public abstract class BaseUserAccountResourceTestCase {
 
 	@Test
 	public void testPostAccountUserAccountsByEmailAddress() throws Exception {
-		@SuppressWarnings("PMD.UnusedLocalVariable")
-		UserAccount userAccount =
-			testPostAccountUserAccountsByEmailAddress_addUserAccount();
-
-		assertHttpResponseStatusCode(
-			204,
-			userAccountResource.
-				postAccountUserAccountsByEmailAddressHttpResponse(null, null));
-
-		assertHttpResponseStatusCode(
-			404,
-			userAccountResource.
-				postAccountUserAccountsByEmailAddressHttpResponse(null, null));
-	}
-
-	protected UserAccount
-			testPostAccountUserAccountsByEmailAddress_addUserAccount()
-		throws Exception {
-
-		throw new UnsupportedOperationException(
-			"This method needs to be implemented");
+		Assert.assertTrue(false);
 	}
 
 	@Test
@@ -1094,25 +1074,19 @@ public abstract class BaseUserAccountResourceTestCase {
 
 	@Test
 	public void testPostAccountUserAccountByEmailAddress() throws Exception {
-		@SuppressWarnings("PMD.UnusedLocalVariable")
-		UserAccount userAccount =
-			testPostAccountUserAccountByEmailAddress_addUserAccount();
+		UserAccount randomUserAccount = randomUserAccount();
 
-		assertHttpResponseStatusCode(
-			204,
-			userAccountResource.
-				postAccountUserAccountByEmailAddressHttpResponse(
-					null, userAccount.getEmailAddress()));
+		UserAccount postUserAccount =
+			testPostAccountUserAccountByEmailAddress_addUserAccount(
+				randomUserAccount);
 
-		assertHttpResponseStatusCode(
-			404,
-			userAccountResource.
-				postAccountUserAccountByEmailAddressHttpResponse(
-					null, userAccount.getEmailAddress()));
+		assertEquals(randomUserAccount, postUserAccount);
+		assertValid(postUserAccount);
 	}
 
 	protected UserAccount
-			testPostAccountUserAccountByEmailAddress_addUserAccount()
+			testPostAccountUserAccountByEmailAddress_addUserAccount(
+				UserAccount userAccount)
 		throws Exception {
 
 		throw new UnsupportedOperationException(
@@ -2475,6 +2449,14 @@ public abstract class BaseUserAccountResourceTestCase {
 		for (String additionalAssertFieldName :
 				getAdditionalAssertFieldNames()) {
 
+			if (Objects.equals("accountBriefs", additionalAssertFieldName)) {
+				if (userAccount.getAccountBriefs() == null) {
+					valid = false;
+				}
+
+				continue;
+			}
+
 			if (Objects.equals("actions", additionalAssertFieldName)) {
 				if (userAccount.getActions() == null) {
 					valid = false;
@@ -2741,6 +2723,17 @@ public abstract class BaseUserAccountResourceTestCase {
 
 		for (String additionalAssertFieldName :
 				getAdditionalAssertFieldNames()) {
+
+			if (Objects.equals("accountBriefs", additionalAssertFieldName)) {
+				if (!Objects.deepEquals(
+						userAccount1.getAccountBriefs(),
+						userAccount2.getAccountBriefs())) {
+
+					return false;
+				}
+
+				continue;
+			}
 
 			if (Objects.equals("actions", additionalAssertFieldName)) {
 				if (!equals(
@@ -3104,6 +3097,11 @@ public abstract class BaseUserAccountResourceTestCase {
 		sb.append(" ");
 		sb.append(operator);
 		sb.append(" ");
+
+		if (entityFieldName.equals("accountBriefs")) {
+			throw new IllegalArgumentException(
+				"Invalid entity field " + entityFieldName);
+		}
 
 		if (entityFieldName.equals("actions")) {
 			throw new IllegalArgumentException(

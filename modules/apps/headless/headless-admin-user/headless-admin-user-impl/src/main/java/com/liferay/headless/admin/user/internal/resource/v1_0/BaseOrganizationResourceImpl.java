@@ -15,6 +15,7 @@
 package com.liferay.headless.admin.user.internal.resource.v1_0;
 
 import com.liferay.headless.admin.user.dto.v1_0.Organization;
+import com.liferay.headless.admin.user.dto.v1_0.UserAccount;
 import com.liferay.headless.admin.user.resource.v1_0.OrganizationResource;
 import com.liferay.petra.function.UnsafeFunction;
 import com.liferay.portal.kernel.model.GroupedModel;
@@ -455,17 +456,24 @@ public abstract class BaseOrganizationResourceImpl
 	)
 	@Override
 	@Parameters(
-		value = {@Parameter(in = ParameterIn.PATH, name = "organizationId")}
+		value = {
+			@Parameter(in = ParameterIn.PATH, name = "organizationId"),
+			@Parameter(in = ParameterIn.QUERY, name = "organizationRoleIds")
+		}
 	)
 	@Path("/organizations/{organizationId}/user-accounts/by-email-address")
 	@POST
 	@Produces({"application/json", "application/xml"})
 	@Tags(value = {@Tag(name = "Organization")})
-	public void postUserAccountsByEmailAddress(
+	public Page<UserAccount> postUserAccountsByEmailAddress(
 			@NotNull @Parameter(hidden = true) @PathParam("organizationId")
 				String organizationId,
+			@Parameter(hidden = true) @QueryParam("organizationRoleIds") String
+				organizationRoleIds,
 			String[] strings)
 		throws Exception {
+
+		return Page.of(Collections.emptyList());
 	}
 
 	/**
@@ -518,12 +526,14 @@ public abstract class BaseOrganizationResourceImpl
 	@POST
 	@Produces({"application/json", "application/xml"})
 	@Tags(value = {@Tag(name = "Organization")})
-	public void postUserAccountByEmailAddress(
+	public UserAccount postUserAccountByEmailAddress(
 			@NotNull @Parameter(hidden = true) @PathParam("organizationId")
 				String organizationId,
 			@NotNull @Parameter(hidden = true) @PathParam("emailAddress") String
 				emailAddress)
 		throws Exception {
+
+		return new UserAccount();
 	}
 
 	/**

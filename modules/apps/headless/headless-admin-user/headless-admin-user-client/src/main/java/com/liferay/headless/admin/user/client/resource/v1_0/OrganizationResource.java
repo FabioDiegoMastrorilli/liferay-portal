@@ -15,11 +15,13 @@
 package com.liferay.headless.admin.user.client.resource.v1_0;
 
 import com.liferay.headless.admin.user.client.dto.v1_0.Organization;
+import com.liferay.headless.admin.user.client.dto.v1_0.UserAccount;
 import com.liferay.headless.admin.user.client.http.HttpInvoker;
 import com.liferay.headless.admin.user.client.pagination.Page;
 import com.liferay.headless.admin.user.client.pagination.Pagination;
 import com.liferay.headless.admin.user.client.problem.Problem;
 import com.liferay.headless.admin.user.client.serdes.v1_0.OrganizationSerDes;
+import com.liferay.headless.admin.user.client.serdes.v1_0.UserAccountSerDes;
 
 import java.util.LinkedHashMap;
 import java.util.Locale;
@@ -128,12 +130,12 @@ public interface OrganizationResource {
 				String organizationId, String[] strings)
 		throws Exception;
 
-	public void postUserAccountsByEmailAddress(
-			String organizationId, String[] strings)
+	public Page<UserAccount> postUserAccountsByEmailAddress(
+			String organizationId, String organizationRoleIds, String[] strings)
 		throws Exception;
 
 	public HttpInvoker.HttpResponse postUserAccountsByEmailAddressHttpResponse(
-			String organizationId, String[] strings)
+			String organizationId, String organizationRoleIds, String[] strings)
 		throws Exception;
 
 	public void deleteUserAccountByEmailAddress(
@@ -144,7 +146,7 @@ public interface OrganizationResource {
 			String organizationId, String emailAddress)
 		throws Exception;
 
-	public void postUserAccountByEmailAddress(
+	public UserAccount postUserAccountByEmailAddress(
 			String organizationId, String emailAddress)
 		throws Exception;
 
@@ -1180,13 +1182,14 @@ public interface OrganizationResource {
 			return httpInvoker.invoke();
 		}
 
-		public void postUserAccountsByEmailAddress(
-				String organizationId, String[] strings)
+		public Page<UserAccount> postUserAccountsByEmailAddress(
+				String organizationId, String organizationRoleIds,
+				String[] strings)
 			throws Exception {
 
 			HttpInvoker.HttpResponse httpResponse =
 				postUserAccountsByEmailAddressHttpResponse(
-					organizationId, strings);
+					organizationId, organizationRoleIds, strings);
 
 			String content = httpResponse.getContent();
 
@@ -1214,7 +1217,7 @@ public interface OrganizationResource {
 			}
 
 			try {
-				return;
+				return Page.of(content, UserAccountSerDes::toDTO);
 			}
 			catch (Exception e) {
 				_logger.log(
@@ -1227,7 +1230,8 @@ public interface OrganizationResource {
 
 		public HttpInvoker.HttpResponse
 				postUserAccountsByEmailAddressHttpResponse(
-					String organizationId, String[] strings)
+					String organizationId, String organizationRoleIds,
+					String[] strings)
 			throws Exception {
 
 			HttpInvoker httpInvoker = HttpInvoker.newHttpInvoker();
@@ -1260,6 +1264,11 @@ public interface OrganizationResource {
 			}
 
 			httpInvoker.httpMethod(HttpInvoker.HttpMethod.POST);
+
+			if (organizationRoleIds != null) {
+				httpInvoker.parameter(
+					"organizationRoleIds", String.valueOf(organizationRoleIds));
+			}
 
 			httpInvoker.path(
 				_builder._scheme + "://" + _builder._host + ":" +
@@ -1359,7 +1368,7 @@ public interface OrganizationResource {
 			return httpInvoker.invoke();
 		}
 
-		public void postUserAccountByEmailAddress(
+		public UserAccount postUserAccountByEmailAddress(
 				String organizationId, String emailAddress)
 			throws Exception {
 
@@ -1393,7 +1402,7 @@ public interface OrganizationResource {
 			}
 
 			try {
-				return;
+				return UserAccountSerDes.toDTO(content);
 			}
 			catch (Exception e) {
 				_logger.log(
