@@ -20,11 +20,10 @@ import ZoomController from './ZoomController';
 const PIN_ATTRIBUTES = [
 	'cx',
 	'cy',
-	'draggable',
 	'fill',
 	'id',
 	'label',
-	'linked_to_sku',
+	'linkedToSku',
 	'quantity',
 	'r',
 	'sku',
@@ -92,10 +91,9 @@ const ImagePins = ({
 					cPins.concat({
 						cx: x,
 						cy: y,
-						draggable: true,
 						fill: `#${addNewPinState.fill}`,
 						label: '',
-						linked_to_sku: 'sku',
+						linkedToSku: 'sku',
 						quantity: 0,
 						r: addNewPinState.radius,
 						sku: addNewPinState.sku,
@@ -165,34 +163,30 @@ const ImagePins = ({
 			const newPos = current._groups[0][0].attributes;
 			const beSure = [...newPos];
 			const updatedPin = {};
-			select(this).classed('active', false);
 
-			PIN_ATTRIBUTES.map((element) => {
+			current.classed('active', false);
+
+			PIN_ATTRIBUTES.forEach((element) => {
 				beSure.filter((attr) => {
 					if (attr.name === element) {
 						if (element === 'cx') {
-							updatedPin[`${attr.name}`] = parseFloat(d3event.x);
+							updatedPin[attr.name] = parseFloat(d3event.x);
 						}
 						else if (element === 'cy') {
-							updatedPin[`${attr.name}`] = parseFloat(d3event.y);
+							updatedPin[attr.name] = parseFloat(d3event.y);
 						}
 						else if (
 							element === 'quantity' ||
 							element === 'r' ||
 							element === 'id'
 						) {
-							updatedPin[`${attr.name}`] = parseInt(
+							updatedPin[attr.name] = parseInt(
 								attr.value,
 								10
 							);
 						}
-						else if (element === 'draggable') {
-							updatedPin[`${attr.name}`] = attr.value
-								? true
-								: false;
-						}
 						else {
-							updatedPin[`${attr.name}`] = attr.value;
+							updatedPin[attr.name] = attr.value;
 						}
 					}
 				});
@@ -217,22 +211,19 @@ const ImagePins = ({
 			setCpins(newState);
 		}
 
-		const dragHandler = isAdmin
-			? drag()
-					.on('start', dragStarted)
-					.on('drag', dragged)
-					.on('end', dragEnded)
-			: drag();
+		const dragHandler = drag()
+			.on('start', dragStarted)
+			.on('drag', dragged)
+			.on('end', dragEnded)
 
 		const addPin = () => {
 			setCpins(
 				cPins.concat({
 					cx: 50,
 					cy: 50,
-					draggable: true,
 					fill: '#' + addNewPinState.fill,
 					label: '',
-					linked_to_sku: 'sku',
+					linkedToSku: 'sku',
 					quantity: 0,
 					r: addNewPinState.radius,
 					sku: addNewPinState.sku,
@@ -247,11 +238,10 @@ const ImagePins = ({
 				return {
 					cx: pin.cx,
 					cy: pin.cy,
-					draggable: pin.draggable,
 					fill: pin.fill,
 					id: i,
 					label: pin.label,
-					linked_to_sku: pin.linked_to_sku,
+					linkedToSku: pin.linkedToSku,
 					quantity: pin.quantity,
 					r: pin.r,
 					sku: pin.sku,
@@ -293,14 +283,20 @@ const ImagePins = ({
 				.attr('id', (attr) => attr.id)
 				.attr('label', (attr) => attr.label)
 				.attr('fill', () => `#${addNewPinState.fill}`)
-				.attr('linked_to_sku', (attr) => attr.linked_to_sku)
+				.attr('linkedToSku', (attr) => attr.linkedToSku)
 				.attr('quantity', (attr) => attr.quantity)
 				.attr('r', () => addNewPinState.radius)
 				.attr('sku', (attr) => attr.sku)
 				.attr('id', (attr) => attr.id)
 				.attr('class', 'circle_pin')
-				.attr('draggable', (attr) => (attr.draggable ? true : false))
-				.call(dragHandler);
+				
+			if(isAdmin) {
+				cont.call(dragHandler);
+			} else {
+				cont.on('click', (attr) => {
+					pinClickAction(attr)
+				});
+			}
 
 			cont.append('circle')
 				.attr('fill', () => '#ffffff')
@@ -391,23 +387,16 @@ const ImagePins = ({
 	);
 };
 
-export default ImagePins;
-
-ImagePins.default = {
-	scale: 1,
-};
-
 ImagePins.propTypes = {
 	addPinHandler: PropTypes.bool,
 	cPins: PropTypes.arrayOf(
 		PropTypes.shape({
 			cx: PropTypes.double,
 			cy: PropTypes.double,
-			draggable: PropTypes.bool,
 			fill: PropTypes.string,
 			id: PropTypes.number,
 			label: PropTypes.string,
-			linked_to_sku: PropTypes.oneOf(['sku', 'diagram']),
+			linkedToSku: PropTypes.oneOf(['sku', 'diagram']),
 			quantity: PropTypes.number,
 			r: PropTypes.number,
 			sku: PropTypes.string,
@@ -450,7 +439,7 @@ ImagePins.propTypes = {
 			cy: PropTypes.double,
 			id: PropTypes.number,
 			label: PropTypes.string,
-			linked_to_sku: PropTypes.oneOf(['sku', 'diagram']),
+			linkedToSku: PropTypes.oneOf(['sku', 'diagram']),
 			quantity: PropTypes.number,
 			sku: PropTypes.string,
 		}),
@@ -470,3 +459,5 @@ ImagePins.propTypes = {
 	zoomOut: PropTypes.func,
 	zoomOutHandler: PropTypes.bool,
 };
+
+export default ImagePins;

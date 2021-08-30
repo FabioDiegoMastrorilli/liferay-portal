@@ -31,7 +31,7 @@ const AdminTooltip = ({
 		showTooltip.details.label
 	);
 	const [linkedValue, setLinkedValue] = useState(
-		showTooltip.details.linked_to_sku
+		showTooltip.details.linkedToSku
 	);
 	const [sku, setSku] = useState(showTooltip.details.sku);
 	const [quantity, setQuantity] = useState(showTooltip.details.quantity);
@@ -159,7 +159,7 @@ const AdminTooltip = ({
 									cy: null,
 									id: null,
 									label: null,
-									linked_to_sku: 'sku',
+									linkedToSku: 'sku',
 									quantity: null,
 									sku: '',
 								},
@@ -184,7 +184,7 @@ const AdminTooltip = ({
 									cy: null,
 									id: null,
 									label: '',
-									linked_to_sku: 'sku',
+									linkedToSku: 'sku',
 									quantity: null,
 									sku: '',
 								},
@@ -198,6 +198,12 @@ const AdminTooltip = ({
 						displayType="primary"
 						onClick={() => {
 							updatePin({
+								diagramEntry: {
+									diagram: linkedValue === 'sku',
+									quantity,
+									sequence: pinPositionLabel,
+									sku,
+								},
 								id: showTooltip.details.id,
 								positionX: showTooltip.details.cx,
 								positionY: showTooltip.details.cy,
@@ -209,7 +215,7 @@ const AdminTooltip = ({
 									cy: showTooltip.details.cy,
 									id: showTooltip.details.id,
 									label: pinPositionLabel,
-									linked_to_sku: linkedValue,
+									linkedToSku: linkedValue,
 									quantity,
 									sku,
 								},
@@ -233,7 +239,6 @@ AdminTooltip.propTypes = {
 			cy: PropTypes.double,
 			id: PropTypes.number,
 			label: PropTypes.string,
-			linked_to_sku: PropTypes.oneOf(['sku', 'diagram']),
 			quantity: PropTypes.number,
 			sku: PropTypes.string,
 		}),

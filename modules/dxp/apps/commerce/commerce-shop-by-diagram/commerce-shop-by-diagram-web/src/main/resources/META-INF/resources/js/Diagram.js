@@ -13,7 +13,7 @@ import {ClayIconSpriteContext} from '@clayui/icon';
 import {fetch} from 'frontend-js-web';
 import {UPDATE_DATASET_DISPLAY} from 'frontend-taglib-clay/data_set_display/utils/eventsDefinitions';
 import PropTypes from 'prop-types';
-import React, {useCallback, useEffect, useState} from 'react';
+import React, {useCallback, useEffect, useMemo, useState} from 'react';
 
 import AdminTooltip from './AdminTooltip';
 import DiagramFooter from './DiagramFooter';
@@ -21,6 +21,8 @@ import DiagramHeader from './DiagramHeader';
 import ImagePins from './ImagePins';
 
 import '../css/diagram.scss';
+import BuyerTooltip from './BuyerTooltip';
+
 const PRODUCTS = 'products';
 const PINS = 'pins';
 
@@ -66,12 +68,13 @@ const Diagram = ({
 			cy: 0,
 			id: null,
 			label: '',
-			linked_to_sku: 'sku',
+			linkedToSku: 'sku',
 			quantity: null,
 			sku: '',
 		},
 		tooltip: null,
 	});
+
 	const [addNewPinState, setAddNewPinState] = useState({
 		fill: newPinSettings.colorPicker.selectedColor,
 		radius: newPinSettings.defaultRadius,
@@ -117,7 +120,7 @@ const Diagram = ({
 				headers: HEADERS,
 				method: 'POST',
 			}).then(() => {
-				if (datasetDisplayId?.length > 0) {
+				if (datasetDisplayId) {
 					Liferay.fire(UPDATE_DATASET_DISPLAY, {
 						id: datasetDisplayId,
 					});
@@ -166,7 +169,7 @@ const Diagram = ({
 				cy: updatedPin.cy,
 				id: updatedPin.id,
 				label: updatedPin.label || '',
-				linked_to_sku: updatedPin.linked_to_sku || '',
+				linkedToSku: updatedPin.linkedToSku || '',
 				quantity: updatedPin.quantity || 0,
 				sku: updatedPin.sku,
 			},
@@ -177,6 +180,8 @@ const Diagram = ({
 	useEffect(() => {
 		loadPins();
 	}, [pinsEndpoint, productId, loadPins]);
+
+	const Tooltip = useMemo(() => isAdmin ? AdminTooltip : BuyerTooltip, [isAdmin])
 
 	return imageState ? (
 		<div className="diagram mx-auto">
@@ -230,7 +235,7 @@ const Diagram = ({
 					zoomOutHandler={zoomOutHandler}
 				>
 					{showTooltip.tooltip && (
-						<AdminTooltip
+						<Tooltip
 							deletePin={deletePin}
 							namespace={namespace}
 							pinsEndpoint={pinsEndpoint}
@@ -317,7 +322,7 @@ Diagram.defaultProps = {
 			cy: null,
 			id: null,
 			label: null,
-			linked_to_sku: 'sku',
+			linkedToSku: 'sku',
 			quantity: null,
 			sku: '',
 		},
@@ -340,11 +345,10 @@ Diagram.propTypes = {
 		PropTypes.shape({
 			cx: PropTypes.double,
 			cy: PropTypes.double,
-			draggable: PropTypes.bool,
 			fill: PropTypes.string,
 			id: PropTypes.number,
 			label: PropTypes.string,
-			linked_to_sku: PropTypes.oneOf(['sku', 'diagram']),
+			linkedToSku: PropTypes.oneOf(['sku', 'diagram']),
 			quantity: PropTypes.number,
 			r: PropTypes.number,
 			sku: PropTypes.string,
@@ -388,7 +392,7 @@ Diagram.propTypes = {
 			cy: PropTypes.double,
 			id: PropTypes.number,
 			label: PropTypes.string,
-			linked_to_sku: PropTypes.oneOf(['sku', 'diagram']),
+			linkedToSku: PropTypes.oneOf(['sku', 'diagram']),
 			quantity: PropTypes.number,
 			sku: PropTypes.string,
 		}),
