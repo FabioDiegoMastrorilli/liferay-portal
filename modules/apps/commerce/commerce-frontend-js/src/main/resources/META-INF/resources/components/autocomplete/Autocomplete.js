@@ -165,6 +165,7 @@ function Autocomplete({onItemsUpdated, onValueUpdated, ...props}) {
 		function handleClick(event) {
 			if (
 				node.current.contains(event.target) ||
+				event.target === dropdownNode.current.parentElement ||
 				(dropdownNode.current &&
 					dropdownNode.current.contains(event.target))
 			) {
