@@ -20,14 +20,14 @@ import com.liferay.commerce.shop.by.diagram.constants.CSDiagramCPTypeConstants;
 import com.liferay.commerce.shop.by.diagram.service.CSDiagramEntryLocalService;
 import com.liferay.commerce.shop.by.diagram.service.CSDiagramPinLocalService;
 import com.liferay.commerce.shop.by.diagram.service.CSDiagramSettingLocalService;
+import com.liferay.portal.configuration.metatype.bnd.util.ConfigurableUtil;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.language.LanguageUtil;
 import com.liferay.portal.kernel.util.ResourceBundleUtil;
-import com.liferay.portal.configuration.metatype.bnd.util.ConfigurableUtil;
 
 import java.util.Locale;
-import java.util.ResourceBundle;
 import java.util.Map;
+import java.util.ResourceBundle;
 
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
@@ -48,13 +48,6 @@ import org.osgi.service.component.annotations.Reference;
 	service = CPType.class
 )
 public class CSDiagramCPType implements CPType {
-	@Activate
-	@Modified
-	protected void activate(Map<String, Object> properties) {
-	_csDiagramCPTypeConfiguration =
-		ConfigurableUtil.createConfigurable(
-			CSDiagramCPTypeConfiguration.class, properties);
-	}
 
 	@Override
 	public void deleteCPDefinition(long cpDefinitionId) throws PortalException {
@@ -112,6 +105,13 @@ public class CSDiagramCPType implements CPType {
 	@Override
 	public boolean isSubscriptionEnabled() {
 		return false;
+	}
+
+	@Activate
+	@Modified
+	protected void activate(Map<String, Object> properties) {
+		_csDiagramCPTypeConfiguration = ConfigurableUtil.createConfigurable(
+			CSDiagramCPTypeConfiguration.class, properties);
 	}
 
 	private volatile CSDiagramCPTypeConfiguration _csDiagramCPTypeConfiguration;
