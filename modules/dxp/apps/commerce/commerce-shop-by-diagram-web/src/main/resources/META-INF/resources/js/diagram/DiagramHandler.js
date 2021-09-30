@@ -12,6 +12,7 @@
 import {drag as d3drag, event as d3event, select as d3select, zoom as d3zoom} from 'd3';
 import {openToast} from 'frontend-js-web';
 
+import { getAbsolutePositions, getPercentagePositions, isPinMoving } from './utilities/index';
 import { DEFAULT_PINS_RADIUS, PINS_CIRCLE_RADIUS, ZOOM_VALUES} from './utilities/constants';
 import { savePin } from './utilities/data';
 import { getAbsolutePositions, getPercentagePositions, isPinMoving } from './utilities/index';

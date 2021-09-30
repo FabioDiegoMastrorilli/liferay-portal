@@ -16,4 +16,32 @@
 
 <%@ include file="/init.jsp" %>
 
-<div></div>
+<%
+CSDiagramSettingDisplayContext csDiagramSettingDisplayContext = (CSDiagramSettingDisplayContext)request.getAttribute(WebKeys.PORTLET_DISPLAY_CONTEXT);
+
+CPDefinition cpDefinition = csDiagramSettingDisplayContext.getCPDefinition();
+CSDiagramSetting csDiagramSetting = csDiagramSettingDisplayContext.fetchCSDiagramSetting();
+%>
+
+<div>
+	<span aria-hidden="true" class="loading-animation"></span>
+
+	<react:component
+		module="js/diagram/Diagram"
+		props='<%=
+			HashMapBuilder.<String, Object>put(
+				"diagramId", (csDiagramSetting != null) ? csDiagramSetting.getCSDiagramSettingId() : 0
+			).put(
+				"imageURL", csDiagramSettingDisplayContext.getImageURL()
+			).put(
+				"isAdmin", true
+			).put(
+				 "namespace", liferayPortletResponse.getNamespace()
+			).put(
+				"productId", cpDefinition.getCProductId()
+			).put(
+				"pinsRadius", (csDiagramSetting != null) ? csDiagramSetting.getRadius() : csDiagramSettingDisplayContext.getRadius()
+			).build()
+		%>'
+	/>
+</div>

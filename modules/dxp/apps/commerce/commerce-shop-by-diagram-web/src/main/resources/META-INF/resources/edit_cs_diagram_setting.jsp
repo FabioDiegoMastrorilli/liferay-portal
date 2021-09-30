@@ -35,6 +35,7 @@ CSDiagramType csDiagramType = csDiagramSettingDisplayContext.getCSDiagramType(ty
 		<aui:input name="<%= Constants.CMD %>" type="hidden" value="updateCSDiagramSetting" />
 		<aui:input name="redirect" type="hidden" value="<%= currentURL %>" />
 		<aui:input name="cpDefinitionId" type="hidden" value="<%= cpDefinition.getCPDefinitionId() %>" />
+		<aui:input name="radius" type="hidden" value="<%= (csDiagramSetting != null) ? csDiagramSetting.getRadius() : csDiagramSettingDisplayContext.getRadius() %>" />
 
 		<liferay-ui:error exception="<%= NoSuchCPAttachmentFileEntryException.class %>" message="please-select-an-existing-file" />
 		<liferay-ui:error exception="<%= NoSuchFileEntryException.class %>" message="please-select-an-existing-file" />

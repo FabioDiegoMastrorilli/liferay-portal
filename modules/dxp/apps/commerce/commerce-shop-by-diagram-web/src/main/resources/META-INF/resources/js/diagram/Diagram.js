@@ -13,30 +13,40 @@ import ClayLoadingIndicator from '@clayui/loading-indicator';
 import classNames from 'classnames';
 import PropTypes from 'prop-types';
 import React, {useEffect, useLayoutEffect, useRef, useState} from 'react';
+import {debounce} from 'frontend-js-web';
 
 import DiagramHandler from './DiagramHandler';
 import DiagramFooter from './components/DiagramFooter';
 import DiagramHeader from './components/DiagramHeader';
 import Tooltip from './components/Tooltip';
 import { DEFAULT_PINS_RADIUS } from './utilities/constants';
-import {loadPins} from './utilities/data';
+import {loadPins, updateGlobalPinsRadius} from './utilities/data';
 
 import '../../css/diagram.scss';
 
+const debouncedUpdatePinsRadius = debounce(updateGlobalPinsRadius, 800)
 
-function Diagram({imageURL, productId}) {
+function Diagram({imageURL, productId, diagramId, pinsRadius: initialPinsRadius, namespace}) {
 	const svgRef = useRef(null);
 	const zoomHandlerRef = useRef(null);
 	const wrapperRef = useRef(null);
 	const chartInstance = useRef(null);
 	const [pins, updatePins] = useState(null);
-	const [pinsRadius, updatePinsRadius] = useState(DEFAULT_PINS_RADIUS);
+	const [pinsRadius, updatePinsRadius] = useState(initialPinsRadius);
+	const [pinsNodes, updatePinsNodes] = useState([]);
 	const [tooltipData, setTooltipData] = useState(false);
 	const [currentZoom, updateCurrentZoom] = useState(1);
 	const [expanded, updateExpanded] = useState(false);
+	const [highlightedText, updateHighlightedText] = useState(null);
+  	const didMountRef = useRef(false);
 
 	useEffect(() => {
-		// call debounced radius update;
+		if (didMountRef.current){
+			debouncedUpdatePinsRadius(diagramId, pinsRadius, namespace)
+		}
+		else
+      		didMountRef.current = true;
+		
 	}, [pinsRadius])
 
 	useEffect(() => {
@@ -104,11 +114,17 @@ function Diagram({imageURL, productId}) {
 	);
 }
 
+Diagram.defaultProps = {
+	pinsRadius: DEFAULT_PINS_RADIUS
+}
+
 Diagram.propTypes = {
 	diagramId: PropTypes.string.isRequired,
 	imageURL: PropTypes.string.isRequired,
 	isAdmin: PropTypes.bool.isRequired,
+	pinsRadius: PropTypes.number,
 	productId: PropTypes.string.isRequired,
+
 };
 
 export default Diagram;

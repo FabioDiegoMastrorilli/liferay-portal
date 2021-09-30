@@ -165,11 +165,11 @@
 	
 	.pin-node-text {
 		fill: $primary;
+		paint-order: stroke;
 		stroke: $white;
 		stroke-linecap: round;
 		stroke-linejoin: round;
 		stroke-width: 1.5;
-		paint-order: stroke;
 	}
 	
 	.pin-node-background {
