@@ -10,18 +10,17 @@
  */
 
 import {drag as d3drag, event as d3event, select as d3select, zoom as d3zoom} from 'd3';
+import {openToast} from 'frontend-js-web';
 
-import { getAbsolutePositions, getPercentagePositions, isPinMoving } from './utilities';
 import { DEFAULT_PINS_RADIUS, PINS_CIRCLE_RADIUS, ZOOM_VALUES} from './utilities/constants';
 import { savePin } from './utilities/data';
-import {openToast} from 'frontend-js-web';
+import { getAbsolutePositions, getPercentagePositions, isPinMoving } from './utilities/index';
 
 class DiagramHandler {
 	constructor(
 		diagramWrapper,
 		zoomWrapper,
 		imageURL,
-		updateHtmlPins,
 		updateZoomState,
 		setTooltipData,
 	) {
@@ -30,33 +29,19 @@ class DiagramHandler {
 		this._d3diagramWrapper = d3select(diagramWrapper);
 		this._d3zoomWrapper = d3select(zoomWrapper);
 		this._imageURL = imageURL;
-		this._updateHtmlPins = updateHtmlPins;
 		this._pinBackground = null;
 		this._setTooltipData = setTooltipData;
 		this._updateZoomState = updateZoomState;
 		this._zoomWrapper = zoomWrapper;
 		this._handleZoom = this._handleZoom.bind(this);
-		this._handleWindowResize = this._handleWindowResize.bind(this);
 		this._handleDragStarted = this._handleDragStarted.bind(this);
 		this._handleDragging = this._handleDragging.bind(this);
 		this._handleDragEnded = this._handleDragEnded.bind(this);
+		this._handleImageClick = this._handleImageClick.bind(this);
 		this._pinsRadius = DEFAULT_PINS_RADIUS;
 
 		this._printImage();
 		this._addZoom();
-		this._addListeners();
-	}
-
-	_handleWindowResize() {
-		if(this._imageHeightRatio) {
-			const {width} = this._diagramWrapper.getBoundingClientRect();
-
-			this._diagramWrapper.style.height = `${width * this._imageHeightRatio}px`;
-		}
-	}
-
-	_addListeners() {
-		window.addEventListener('resize', this._handleWindowResize)
 	}
 
 	_addZoom() {
@@ -68,7 +53,11 @@ class DiagramHandler {
 	}
 
 	_handleZoom() {
+		this._resetActivePinsState();
+
 		this._currentScale = d3event.transform.k;
+
+		this._setTooltipData(null);
 
 		if (d3event.sourceEvent) {
 			this._updateZoomState(
@@ -82,7 +71,6 @@ class DiagramHandler {
 	}
 
 	cleanUp() {
-		window.removeEventListener('resize', this._handleWindowResize);
 	}
 
 	updateZoom(scale) {
@@ -108,35 +96,76 @@ class DiagramHandler {
 	}
 
 	_printImage() {
+		const wrappperBoundingClientRect = this._diagramWrapper.getBoundingClientRect();
+
 		this._image = this._d3zoomWrapper
 			.append('image')
 			.attr('href', this._imageURL)
-			.attr('width', '100%')
+			.attr('height', wrappperBoundingClientRect.height)
 			.attr('x', 0)
 			.attr('y', 0)
 			.on('load', (_d, index, nodes) => {
-				const {height, width} = nodes[index].getBoundingClientRect();
-				
-				this._imageHeightRatio = height / width;
+				const imageWidth = nodes[index].getBoundingClientRect().width;
+				const panX = (wrappperBoundingClientRect.width - imageWidth) / 2;
 
-				this._diagramWrapper.style.height = `${height}px`;
-			})
-			.on('click', () => {
-				const [x, y] = getPercentagePositions(
-					d3event.x,
-					d3event.y,
-					d3event.target
-				);
+				this._d3diagramWrapper
+					.call(this._zoom.translateBy, panX, 0);
 
-				this._setTooltipData({sourceEvent: d3event, x, y});
+				this.imageRendered = true;
+
+				if(this._pins) {
+					this._updatePrintedPins();
+				}
+
+				this._diagramWrapper.classList.add('rendered');
 			})
+			.on('click', this._handleImageClick)
 			
+	}
+
+	_resetActivePinsState() {
+		if(this._activePin) {
+			this._activePin.classList.remove('active')
+		}
+
+		if(this._newPinPlaceholder) {
+			this._newPinPlaceholder.remove();
+			this._newPinPlaceholder = null;
+		}
+	}
+
+	_handleImageClick() {
+		this._resetActivePinsState()
+
+		const [x, y] = getPercentagePositions(
+			d3event.x,
+			d3event.y,
+			d3event.target
+		);
+
+		this._newPinPlaceholder = this._d3zoomWrapper
+			.append('g')
+			.attr('class', 'pin-node empty')
+			.attr('transform', `translate(${getAbsolutePositions(x, y, d3event.target)})`)
+			.append('g')
+			.attr('class', 'pin-radius-handler')
+			.attr('transform', `scale(${this._pinsRadius})`)
+			.append('circle')
+			.attr('class', 'pin-node-background')
+			.attr('r', PINS_CIRCLE_RADIUS);
+
+		const target = this._newPinPlaceholder.node();
+
+		this._setTooltipData({target, x, y});
+
 	}
 
 	updatePins(pins) {
 		this._pins = pins;
 
-		this._updatePrintedPins();
+		if(this.imageRendered) {
+			this._updatePrintedPins();
+		}
 	}
 
 	updatePinsRadius(pinsRadius) {
@@ -144,19 +173,23 @@ class DiagramHandler {
 
 		if(this._radiusHandlers) {
 			this._radiusHandlers
-				.attr('transform', `translate(${PINS_CIRCLE_RADIUS / 2}) scale(${this._pinsRadius})`);
+				.attr('transform', `scale(${this._pinsRadius})`);
 		}
 	}
 
 	_updatePrintedPins() {
 		this._pinsGroups = this._d3zoomWrapper
 			.selectAll('g')
-			.data(this._pins, (d) => d.id)
+			.data(this._pins, (d,...asd) => {
+				console.log(d, asd);
+
+				return d.id
+			})
 			.enter()
 			.append('g')
 			.attr('class', 'pin-node')
 			.attr('transform', (d) => 
-				`translate(${getAbsolutePositions(d.positionX, d.positionY, this._diagramWrapper)})`
+				`translate(${getAbsolutePositions(d.positionX, d.positionY, this._image.node())})`
 			)
 			.call(
 				d3drag()
@@ -165,19 +198,23 @@ class DiagramHandler {
 					.on('end', this._handleDragEnded)
 			)
 			.on('click', (d, index, nodes) => {
-				const source = nodes[index];
+				this._resetActivePinsState();
+
+				const target = nodes[index];
+
+				target.classList.add('active');
+				this._activePin = target;
 				
 				this._setTooltipData({
 					selectedPin: d,
-					sequence: d.sequence,
-					source
+					target
 				})
 			})
 
 		this._radiusHandlers = this._pinsGroups
 			.append('g')
 			.attr('class', 'pin-radius-handler')
-			.attr('transform', `translate(${PINS_CIRCLE_RADIUS / 2}) scale(${this._pinsRadius})`);
+			.attr('transform', `scale(${this._pinsRadius})`);
 
 		this._radiusHandlers
 			.append('circle')
@@ -202,6 +239,9 @@ class DiagramHandler {
 		};
 
 		selectedPin.classList.add('drag-started');
+
+		this._resetActivePinsState();
+		this._setTooltipData(null);
 	}
 
 	_handleDragging(_d, index, nodes) {

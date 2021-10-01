@@ -24,7 +24,7 @@ import React, {
 
 import {DEFAULT_LINK_OPTION, LINKING_OPTIONS} from '../utilities/constants';
 import {deletePin, savePin} from '../utilities/data';
-import {calculateTooltipStyleFromEvent, calculateTooltipStyleFromSource, formatMappedProduct} from '../utilities/index';
+import {calculateTooltipStyleFromTarget, formatMappedProduct} from '../utilities/index';
 
 function Tooltip({
 	closeTooltip,
@@ -32,9 +32,7 @@ function Tooltip({
 	productId,
 	readOnlySequence,
 	selectedPin,
-	sequence: initialSequence,
-	source,
-	sourceEvent,
+	target,
 	updatePins,
 	x,
 	y,
@@ -43,12 +41,14 @@ function Tooltip({
 		selectedPin?.mappedProduct.type || DEFAULT_LINK_OPTION
 	);
 	const [quantity, updateQuantity] = useState(
-		selectedPin?.mappedProduct || 1
+		selectedPin?.mappedProduct.quantity || 1
 	);
 	const [linkedProduct, updateLinkedProduct] = useState(
 		selectedPin?.mappedProduct || null
 	);
-	const [sequence, updateSequence] = useState(initialSequence);
+	const [sequence, updateSequence] = useState(
+		selectedPin?.sequence || ''
+	);
 	const [saving, updateSaving] = useState(false);
 	const [deleting, updateDeleting] = useState(false);
 	const [tooltipStyle, updateTooltipStyle] = useState({});
@@ -56,19 +56,17 @@ function Tooltip({
 	const tooltipRef = useRef();
 
 	useLayoutEffect(() => {
-		const style = source 
-			? calculateTooltipStyleFromSource(source, containerRef)
-			: calculateTooltipStyleFromEvent(sourceEvent, containerRef)
+		const style = calculateTooltipStyleFromTarget(target, containerRef)
 
 		updateTooltipStyle(style);
-	}, [source, sourceEvent, containerRef]);
+	}, [target, containerRef]);
 
 	useEffect(() => {
 		updateQuantity(selectedPin?.mappedProduct.quantity || 1);
-		updateSequence(initialSequence);
+		updateSequence(selectedPin?.mappedProduct.sequence || '');
 		updateType(selectedPin?.mappedProduct.type || DEFAULT_LINK_OPTION);
 		updateLinkedProduct(selectedPin?.mappedProduct || null);
-	}, [selectedPin, initialSequence]);
+	}, [selectedPin]);
 
 	useLayoutEffect(() => {
 		function handleWindowClick(event) {
@@ -182,7 +180,7 @@ function Tooltip({
 
 	const loading = saving || deleting;
 
-	const disabled = !linkedProduct || !sequence.length || loading;
+	const disabled = !linkedProduct || !sequence || loading;
 
 	const saveMessage = selectedPin
 		? Liferay.Language.get('update')

@@ -49,13 +49,13 @@ function DiagramWithAutomapping({imageURL, pinsCSSSelectors, productId}) {
 	}, [tooltipData]);
 
 	useEffect(() => {
-		function handleClickOnLabel(event) {
-			const sequence = event.target.textContent;
+		function handleClickOnLabel({target}) {
+			const sequence = target.textContent;
 
 			const selectedPin = pins.find((pin) => pin.sequence === sequence);
 
-			setTooltipData({selectedPin, sequence, source: event.target});
-			updateSelectedText(event.target);
+			setTooltipData({selectedPin, target});
+			updateSelectedText(target);
 		}
 
 		function handleMouseEnterOnLabel(event) {
@@ -104,7 +104,7 @@ function DiagramWithAutomapping({imageURL, pinsCSSSelectors, productId}) {
 
 	return (
 		<div className={classNames('shop-by-diagram', {expanded})}>
-			<div className="bg-white border-bottom border-top view-wrapper" ref={wrapperRef} >
+			<div className="bg-white border-bottom border-top view-wrapper" ref={wrapperRef}>
 				<svg className="svg-wrapper" ref={svgRef}>
 					<g className="zoom-handler" ref={zoomHandlerRef} />
 				</svg>
@@ -113,12 +113,12 @@ function DiagramWithAutomapping({imageURL, pinsCSSSelectors, productId}) {
 					<Sequence
 						containerRef={wrapperRef}
 						highlighted={true}
-						source={highlightedText}
+						target={highlightedText}
 					/>
 				)}
 
 				{selectedText && (
-					<Sequence containerRef={wrapperRef} source={selectedText} />
+					<Sequence containerRef={wrapperRef} target={selectedText} />
 				)}
 
 				{tooltipData && (

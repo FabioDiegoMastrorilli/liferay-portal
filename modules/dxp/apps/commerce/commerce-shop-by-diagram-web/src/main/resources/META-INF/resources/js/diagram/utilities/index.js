@@ -11,16 +11,16 @@
 
 import { DRAG_AND_DROP_THRESHOLD } from "./constants";
 
- export function calculateTooltipStyleFromSource(source, containerRef) {
+ export function calculateTooltipStyleFromTarget(target, containerRef) {
 	const {
-		height: sourceHeight,
-		left: sourceLeft,
-		top: sourceTop,
-		width: sourceWidth,
-	} = source.getBoundingClientRect();
+		height: targetHeight,
+		left: targetLeft,
+		top: targetTop,
+		width: targetWidth,
+	} = target.getBoundingClientRect();
 
-	const sourceRight = window.innerWidth - sourceLeft - sourceWidth;
-	const sourceBottom = window.innerHeight - sourceTop - sourceHeight;
+	const targetRight = window.innerWidth - targetLeft - targetWidth;
+	const targetBottom = window.innerHeight - targetTop - targetHeight;
 
 	const {
 		height: containerHeight,
@@ -34,51 +34,20 @@ import { DRAG_AND_DROP_THRESHOLD } from "./constants";
 
 	const style = {};
 
-	if (sourceLeft + sourceWidth / 2 < window.innerWidth / 2) {
-		style.left = sourceLeft - containerLeft + sourceWidth;
+	if (targetLeft + targetWidth / 2 < window.innerWidth / 2) {
+		style.left = targetLeft - containerLeft + targetWidth;
 	}
 	else {
-		style.right = sourceRight - containerRight + sourceWidth;
+		style.right = targetRight - containerRight + targetWidth;
 	}
 
-	if (sourceTop + sourceHeight / 2 < window.innerHeight / 2) {
-		style.top = sourceTop - containerTop + sourceHeight;
+	if (targetTop + targetHeight / 2 < window.innerHeight / 2) {
+		style.top = targetTop - containerTop + targetHeight;
 	}
 	else {
-		style.bottom = sourceBottom - containerBottom + sourceHeight;
+		style.bottom = targetBottom - containerBottom + targetHeight;
 	}
 
-	return style;
-}
-
-export function calculateTooltipStyleFromEvent(event, containerRef) {
-	const {x: clickX, y: clickY} = event;
-	const {
-		height: containerHeight,
-		left: containerLeft,
-		top: containerTop,
-		width: containerWidth
-	} = containerRef.current.getBoundingClientRect();
-
-	const clickRelativePosition = {
-		x: clickX - containerLeft,
-		y: clickY - containerTop
-	};
-
-	const style = {}
-
-	if(clickX < window.innerWidth / 2) {
-		style.left = `${clickRelativePosition.x}px`
-	} else {
-		style.right = `${containerWidth - clickRelativePosition.x}px`
-	}
-	
-	if(clickY < window.innerHeight / 2) {
-		style.top = `${clickRelativePosition.y}px`
-	} else {
-		style.bottom = `${containerHeight - clickRelativePosition.y}px`
-	}
-	
 	return style;
 }
 

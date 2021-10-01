@@ -9,6 +9,7 @@
  * distribution rights of the Software.
  */
 
+import ClayLoadingIndicator from '@clayui/loading-indicator';
 import classNames from 'classnames';
 import PropTypes from 'prop-types';
 import React, {useEffect, useLayoutEffect, useRef, useState} from 'react';
@@ -22,6 +23,7 @@ import {loadPins} from './utilities/data';
 
 import '../../css/diagram.scss';
 
+
 function Diagram({imageURL, productId}) {
 	const svgRef = useRef(null);
 	const zoomHandlerRef = useRef(null);
@@ -29,14 +31,12 @@ function Diagram({imageURL, productId}) {
 	const chartInstance = useRef(null);
 	const [pins, updatePins] = useState(null);
 	const [pinsRadius, updatePinsRadius] = useState(DEFAULT_PINS_RADIUS);
-	const [pinsNodes, updatePinsNodes] = useState([]);
 	const [tooltipData, setTooltipData] = useState(false);
 	const [currentZoom, updateCurrentZoom] = useState(1);
 	const [expanded, updateExpanded] = useState(false);
-	const [highlightedText, updateHighlightedText] = useState(null);
 
 	useEffect(() => {
-		//call debounced radius update;
+		// call debounced radius update;
 	}, [pinsRadius])
 
 	useEffect(() => {
@@ -53,21 +53,12 @@ function Diagram({imageURL, productId}) {
 		chartInstance.current?.updatePinsRadius(pinsRadius);
 	}, [pinsRadius])
 
-	useEffect(() => {
-		return () => {};
-	}, [pinsNodes]);
-
 	useLayoutEffect(() => {
 		chartInstance.current = new DiagramHandler(
 			svgRef.current,
 			zoomHandlerRef.current,
 			imageURL,
-			updatePinsNodes,
-			(scale) => {
-				setTooltipData(null);
-
-				updateCurrentZoom(scale);
-			},
+			updateCurrentZoom,
 			setTooltipData
 		);
 
@@ -84,6 +75,8 @@ function Diagram({imageURL, productId}) {
 			/>
 
 			<div className="bg-white border-bottom border-top view-wrapper" ref={wrapperRef}>
+				<ClayLoadingIndicator className="svg-loader" />
+
 				<svg className="svg-wrapper" ref={svgRef}>
 					<g className="zoom-handler" ref={zoomHandlerRef} />
 				</svg>
