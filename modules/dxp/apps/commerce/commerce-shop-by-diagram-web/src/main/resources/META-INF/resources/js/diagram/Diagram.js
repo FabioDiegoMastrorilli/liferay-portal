@@ -18,11 +18,10 @@ import DiagramHandler from './DiagramHandler';
 import DiagramFooter from './components/DiagramFooter';
 import DiagramHeader from './components/DiagramHeader';
 import Tooltip from './components/Tooltip';
-import { DEFAULT_PINS_RADIUS } from './utilities/constants';
+import {DEFAULT_PINS_RADIUS} from './utilities/constants';
 import {loadPins} from './utilities/data';
 
 import '../../css/diagram.scss';
-
 
 function Diagram({imageURL, productId}) {
 	const svgRef = useRef(null);
@@ -36,22 +35,24 @@ function Diagram({imageURL, productId}) {
 	const [expanded, updateExpanded] = useState(false);
 
 	useEffect(() => {
+
 		// call debounced radius update;
-	}, [pinsRadius])
+
+	}, [pinsRadius]);
 
 	useEffect(() => {
 		loadPins(productId).then(updatePins);
 	}, [productId]);
 
 	useEffect(() => {
-		if(pins) {
+		if (pins) {
 			chartInstance.current?.updatePins(pins);
 		}
 	}, [pins]);
 
 	useEffect(() => {
 		chartInstance.current?.updatePinsRadius(pinsRadius);
-	}, [pinsRadius])
+	}, [pinsRadius]);
 
 	useLayoutEffect(() => {
 		chartInstance.current = new DiagramHandler(
@@ -64,7 +65,7 @@ function Diagram({imageURL, productId}) {
 
 		return () => {
 			chartInstance.current.cleanUp();
-		}
+		};
 	}, [imageURL]);
 
 	return (
@@ -74,13 +75,16 @@ function Diagram({imageURL, productId}) {
 				updatePinsRadius={updatePinsRadius}
 			/>
 
-			<div className="bg-white border-bottom border-top view-wrapper" ref={wrapperRef}>
+			<div
+				className="bg-white border-bottom border-top view-wrapper"
+				ref={wrapperRef}
+			>
 				<ClayLoadingIndicator className="svg-loader" />
 
 				<svg className="svg-wrapper" ref={svgRef}>
 					<g className="zoom-handler" ref={zoomHandlerRef} />
 				</svg>
-				
+
 				{tooltipData && (
 					<Tooltip
 						closeTooltip={() => setTooltipData(null)}

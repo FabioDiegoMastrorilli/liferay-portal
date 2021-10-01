@@ -50,15 +50,24 @@ export const HEADERS = new Headers({
 });
 
 export const PINS_RADIUS_OPTIONS = {
-	large: 2,
-	medium: 1,
-	small: .5
-}
-export const PINS_RADIUS_MIN = .5;
+	large: {
+		label: Liferay.Language.get('large'),
+		value: 2,
+	},
+	medium: {
+		label: Liferay.Language.get('medium'),
+		value: 1,
+	},
+	small: {
+		label: Liferay.Language.get('small'),
+		value: 0.5,
+	},
+};
+export const PINS_RADIUS_MIN = 0.5;
 export const PINS_RADIUS_MAX = 3;
-export const PINS_RADIUS_STEP = .25;
+export const PINS_RADIUS_STEP = 0.25;
 export const PINS_CIRCLE_RADIUS = 15;
-export const DEFAULT_PINS_RADIUS = PINS_RADIUS_OPTIONS.medium;
+export const DEFAULT_PINS_RADIUS = PINS_RADIUS_OPTIONS.medium.value;
 
 export const DEFAULT_LINK_OPTION = 'sku';
 

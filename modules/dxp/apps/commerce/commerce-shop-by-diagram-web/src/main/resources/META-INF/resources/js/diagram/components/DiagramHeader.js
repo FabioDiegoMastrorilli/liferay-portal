@@ -14,23 +14,50 @@ import ClayDropDown from '@clayui/drop-down';
 import ClayManagementToolbar from '@clayui/management-toolbar';
 import ClaySlider from '@clayui/slider';
 import classNames from 'classnames';
-import React, {useState} from 'react';
+import {debounce} from 'frontend-js-web';
+import React, {useEffect, useState} from 'react';
 
-import { PINS_RADIUS_MAX, PINS_RADIUS_MIN, PINS_RADIUS_OPTIONS, PINS_RADIUS_STEP } from '../utilities/constants';
+import {
+	PINS_RADIUS_MAX,
+	PINS_RADIUS_MIN,
+	PINS_RADIUS_OPTIONS,
+	PINS_RADIUS_STEP,
+} from '../utilities/constants';
+
+function getLabel(pinsRadius) {
+	return Object.values(PINS_RADIUS_OPTIONS).reduce(
+		(label, definition) =>
+			definition.value === pinsRadius ? definition.label : label,
+		Liferay.Language.get('custom')
+	);
+}
+
+function updateLabel(pinsRadius, updateButtonLabel) {
+	const label = getLabel(pinsRadius);
+
+	updateButtonLabel(label);
+}
+
+const debouncedUpdateLabel = debounce(updateLabel, 300);
 
 function DiagramHeader({pinsRadius, updatePinsRadius}) {
 	const [active, setActive] = useState(false);
+	const [buttonLabel, updateButtonLabel] = useState(getLabel(pinsRadius));
 
-	const smallActive = pinsRadius === PINS_RADIUS_OPTIONS.small;
-	const mediumActive = pinsRadius === PINS_RADIUS_OPTIONS.medium;
-	const largeActive = pinsRadius === PINS_RADIUS_OPTIONS.large;
+	const smallActive = pinsRadius === PINS_RADIUS_OPTIONS.small.value;
+	const mediumActive = pinsRadius === PINS_RADIUS_OPTIONS.medium.value;
+	const largeActive = pinsRadius === PINS_RADIUS_OPTIONS.large.value;
+
+	useEffect(() => {
+		debouncedUpdateLabel(pinsRadius, updateButtonLabel);
+	}, [pinsRadius]);
 
 	return (
 		<ClayManagementToolbar className="py-2">
 			<ClayManagementToolbar.ItemList>
 				<ClayManagementToolbar.Item>
 					<label className="mr-1">
-						{Liferay.Language.get('circle-diameter')}
+						{Liferay.Language.get('pin-size')}
 					</label>
 					<ClayDropDown
 						active={active}
@@ -38,7 +65,7 @@ function DiagramHeader({pinsRadius, updatePinsRadius}) {
 						onActiveChange={setActive}
 						trigger={
 							<ClayButton displayType="secondary">
-								{Liferay.Language.get('default-diameter')}
+								{buttonLabel}
 							</ClayButton>
 						}
 					>
@@ -46,30 +73,54 @@ function DiagramHeader({pinsRadius, updatePinsRadius}) {
 							<ClayDropDown.Group
 								header={Liferay.Language.get('standard')}
 							>
-								<ClayDropDown.Item 
+								<ClayDropDown.Item
 									active={smallActive}
-									onClick={() => updatePinsRadius(PINS_RADIUS_OPTIONS.small)}
+									onClick={() =>
+										updatePinsRadius(
+											PINS_RADIUS_OPTIONS.small.value
+										)
+									}
 								>
-									{Liferay.Language.get('small')}
+									{PINS_RADIUS_OPTIONS.small.label}
 								</ClayDropDown.Item>
-								<ClayDropDown.Item 
+								<ClayDropDown.Item
 									active={mediumActive}
-									onClick={() => updatePinsRadius(PINS_RADIUS_OPTIONS.medium)}
+									onClick={() =>
+										updatePinsRadius(
+											PINS_RADIUS_OPTIONS.medium.value
+										)
+									}
 								>
-									{Liferay.Language.get('medium')}
+									{PINS_RADIUS_OPTIONS.medium.label}
 								</ClayDropDown.Item>
-								<ClayDropDown.Item 
+								<ClayDropDown.Item
 									active={largeActive}
-									onClick={() => updatePinsRadius(PINS_RADIUS_OPTIONS.large)}
+									onClick={() =>
+										updatePinsRadius(
+											PINS_RADIUS_OPTIONS.large.value
+										)
+									}
 								>
-									{Liferay.Language.get('large')}
+									{PINS_RADIUS_OPTIONS.large.label}
 								</ClayDropDown.Item>
 
-								<ClayDropDown.Item >
+								<ClayDropDown.Item>
 									<div className="form-group">
-										<label htmlFor="custom-radius-slider">{Liferay.Language.get('custom')}</label>
-											
-										<div className={classNames('slider-wrapper', {disabled: smallActive || mediumActive || largeActive})}>
+										<label htmlFor="custom-radius-slider">
+											{Liferay.Language.get('custom')}
+										</label>
+
+										<div
+											className={classNames(
+												'slider-wrapper',
+												{
+													disabled:
+														smallActive ||
+														mediumActive ||
+														largeActive,
+												}
+											)}
+										>
 											<ClaySlider
 												id="custom-radius-slider"
 												max={PINS_RADIUS_MAX}

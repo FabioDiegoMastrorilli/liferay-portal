@@ -9,9 +9,9 @@
  * distribution rights of the Software.
  */
 
-import { DRAG_AND_DROP_THRESHOLD } from "./constants";
+import {DRAG_AND_DROP_THRESHOLD} from './constants';
 
- export function calculateTooltipStyleFromTarget(target, containerRef) {
+export function calculateTooltipStyleFromTarget(target, containerRef) {
 	const {
 		height: targetHeight,
 		left: targetLeft,
@@ -83,10 +83,7 @@ export function formatMappedProduct(type, quantity, sequence, selectedProduct) {
 export function getAbsolutePositions(x, y, wrapper) {
 	const {height, width} = wrapper.getBoundingClientRect();
 
-	return [
-		x / 100 * width,
-		y / 100 * height,
-	]
+	return [(x / 100) * width, (y / 100) * height];
 }
 
 export function getPercentagePositions(x, y, wrapper) {
@@ -94,24 +91,24 @@ export function getPercentagePositions(x, y, wrapper) {
 		height: wrapperHeight,
 		width: wrapperWidth,
 		x: wrapperX,
-		y: wrapperY
+		y: wrapperY,
 	} = wrapper.getBoundingClientRect();
 
 	const percentagePositions = [
-		(x - wrapperX) / wrapperWidth * 100,
-		(y - wrapperY) / wrapperHeight * 100 
-	]
+		((x - wrapperX) / wrapperWidth) * 100,
+		((y - wrapperY) / wrapperHeight) * 100,
+	];
 
-	return percentagePositions
+	return percentagePositions;
 }
 
 export function isPinMoving(startX, startY, currentX, currentY) {
-	if(
-		(Math.abs(startX - currentX) > DRAG_AND_DROP_THRESHOLD) ||
-		(Math.abs(startY - currentY) > DRAG_AND_DROP_THRESHOLD) 
+	if (
+		Math.abs(startX - currentX) > DRAG_AND_DROP_THRESHOLD ||
+		Math.abs(startY - currentY) > DRAG_AND_DROP_THRESHOLD
 	) {
-		return true
+		return true;
 	}
 
-	return false
+	return false;
 }

@@ -54,18 +54,18 @@ export const savePin = (
 
 	const url = new URL(baseURL, themeDisplay.getPortalURL());
 
-	const body = {}
+	const body = {};
 
-	if(mappedProduct) {
+	if (mappedProduct) {
 		body.mappedProduct = mappedProduct;
 	}
-	
-	if(positionX || positionY) {
+
+	if (positionX || positionY) {
 		body.positionX = positionX;
 		body.positionY = positionY;
 	}
 
-	if(sequence) {
+	if (sequence) {
 		body.sequence = sequence;
 	}
 

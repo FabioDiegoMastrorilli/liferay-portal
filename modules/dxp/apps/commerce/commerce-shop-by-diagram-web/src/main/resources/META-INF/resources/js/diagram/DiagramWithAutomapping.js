@@ -54,7 +54,7 @@ function DiagramWithAutomapping({imageURL, pinsCSSSelectors, productId}) {
 
 			const selectedPin = pins.find((pin) => pin.sequence === sequence);
 
-			setTooltipData({selectedPin, target});
+			setTooltipData({selectedPin, sequence, target});
 			updateSelectedText(target);
 		}
 
@@ -104,7 +104,10 @@ function DiagramWithAutomapping({imageURL, pinsCSSSelectors, productId}) {
 
 	return (
 		<div className={classNames('shop-by-diagram', {expanded})}>
-			<div className="bg-white border-bottom border-top view-wrapper" ref={wrapperRef}>
+			<div
+				className="bg-white border-bottom border-top view-wrapper"
+				ref={wrapperRef}
+			>
 				<ClayLoadingIndicator className="svg-loader" />
 
 				<svg className="svg-wrapper" ref={svgRef}>

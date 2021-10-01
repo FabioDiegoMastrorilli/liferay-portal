@@ -27,7 +27,7 @@
 		background-color: $white;
 		height: 600px;
 		opacity: 0;
-		transition: opacity .1s ease;
+		transition: opacity 0.1s ease;
 		width: 100%;
 
 		&.rendered {
@@ -50,9 +50,9 @@
 			height: auto;
 		}
 	}
-	
+
 	.pin-radius-handler {
-		transition: transform .1s linear;
+		transition: transform 0.1s linear;
 	}
 }
 
@@ -111,7 +111,7 @@
 }
 
 .slider-wrapper.disabled {
-	opacity: .5;
+	opacity: 0.5;
 }
 
 @keyframes zoomIn {
@@ -141,7 +141,7 @@
 		.pin-node-text {
 			fill: $warning;
 		}
-		
+
 		.pin-node-background {
 			stroke: $warning;
 		}
@@ -157,12 +157,6 @@
 		}
 	}
 
-	&.empty {
-		.pin-node-background {
-			fill: $primary
-		}
-	}
-	
 	.pin-node-text {
 		fill: $primary;
 		stroke: $white;
@@ -171,11 +165,20 @@
 		stroke-width: 1.5;
 		paint-order: stroke;
 	}
-	
+
 	.pin-node-background {
 		fill: $white;
 		stroke: $primary;
 		stroke-width: 1;
-		transition: transform .1s ease, fill .1s ease;
+		transition: transform 0.1s ease, fill 0.1s ease;
+	}
+}
+
+.empty-pin-node {
+	.pin-node-background {
+		fill: $primary;
+		stroke-width: 1;
+		stroke: $primary;
+		transition: transform 0.1s ease, fill 0.1s ease;
 	}
 }

@@ -24,7 +24,10 @@ import React, {
 
 import {DEFAULT_LINK_OPTION, LINKING_OPTIONS} from '../utilities/constants';
 import {deletePin, savePin} from '../utilities/data';
-import {calculateTooltipStyleFromTarget, formatMappedProduct} from '../utilities/index';
+import {
+	calculateTooltipStyleFromTarget,
+	formatMappedProduct,
+} from '../utilities/index';
 
 function Tooltip({
 	closeTooltip,
@@ -32,6 +35,7 @@ function Tooltip({
 	productId,
 	readOnlySequence,
 	selectedPin,
+	sequence: sequenceProp,
 	target,
 	updatePins,
 	x,
@@ -47,7 +51,7 @@ function Tooltip({
 		selectedPin?.mappedProduct || null
 	);
 	const [sequence, updateSequence] = useState(
-		selectedPin?.sequence || ''
+		sequenceProp || selectedPin?.sequence || ''
 	);
 	const [saving, updateSaving] = useState(false);
 	const [deleting, updateDeleting] = useState(false);
@@ -56,7 +60,7 @@ function Tooltip({
 	const tooltipRef = useRef();
 
 	useLayoutEffect(() => {
-		const style = calculateTooltipStyleFromTarget(target, containerRef)
+		const style = calculateTooltipStyleFromTarget(target, containerRef);
 
 		updateTooltipStyle(style);
 	}, [target, containerRef]);

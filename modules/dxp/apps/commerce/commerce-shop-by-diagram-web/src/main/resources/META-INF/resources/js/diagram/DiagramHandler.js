@@ -9,12 +9,25 @@
  * distribution rights of the Software.
  */
 
-import {drag as d3drag, event as d3event, select as d3select, zoom as d3zoom} from 'd3';
+import {
+	drag as d3drag,
+	event as d3event,
+	select as d3select,
+	zoom as d3zoom,
+} from 'd3';
 import {openToast} from 'frontend-js-web';
 
-import { DEFAULT_PINS_RADIUS, PINS_CIRCLE_RADIUS, ZOOM_VALUES} from './utilities/constants';
-import { savePin } from './utilities/data';
-import { getAbsolutePositions, getPercentagePositions, isPinMoving } from './utilities/index';
+import {
+	DEFAULT_PINS_RADIUS,
+	PINS_CIRCLE_RADIUS,
+	ZOOM_VALUES,
+} from './utilities/constants';
+import {savePin} from './utilities/data';
+import {
+	getAbsolutePositions,
+	getPercentagePositions,
+	isPinMoving,
+} from './utilities/index';
 
 class DiagramHandler {
 	constructor(
@@ -22,7 +35,7 @@ class DiagramHandler {
 		zoomWrapper,
 		imageURL,
 		updateZoomState,
-		setTooltipData,
+		setTooltipData
 	) {
 		this._currentScale = 1;
 		this._diagramWrapper = diagramWrapper;
@@ -38,6 +51,9 @@ class DiagramHandler {
 		this._handleDragging = this._handleDragging.bind(this);
 		this._handleDragEnded = this._handleDragEnded.bind(this);
 		this._handleImageClick = this._handleImageClick.bind(this);
+		this._handleEnter = this._handleEnter.bind(this);
+		this._handleExit = this._handleExit.bind(this);
+		this._handleUpdate = this._handleUpdate.bind(this);
 		this._pinsRadius = DEFAULT_PINS_RADIUS;
 
 		this._printImage();
@@ -70,8 +86,7 @@ class DiagramHandler {
 		this._d3zoomWrapper.attr('transform', d3event.transform);
 	}
 
-	cleanUp() {
-	}
+	cleanUp() {}
 
 	updateZoom(scale) {
 		this._currentScale = scale;
@@ -106,36 +121,35 @@ class DiagramHandler {
 			.attr('y', 0)
 			.on('load', (_d, index, nodes) => {
 				const imageWidth = nodes[index].getBoundingClientRect().width;
-				const panX = (wrappperBoundingClientRect.width - imageWidth) / 2;
+				const panX =
+					(wrappperBoundingClientRect.width - imageWidth) / 2;
 
-				this._d3diagramWrapper
-					.call(this._zoom.translateBy, panX, 0);
+				this._d3diagramWrapper.call(this._zoom.translateBy, panX, 0);
 
 				this.imageRendered = true;
 
-				if(this._pins) {
+				if (this._pins) {
 					this._updatePrintedPins();
 				}
 
 				this._diagramWrapper.classList.add('rendered');
 			})
-			.on('click', this._handleImageClick)
-			
+			.on('click', this._handleImageClick);
 	}
 
 	_resetActivePinsState() {
-		if(this._activePin) {
-			this._activePin.classList.remove('active')
+		if (this._activePin) {
+			this._activePin.classList.remove('active');
 		}
 
-		if(this._newPinPlaceholder) {
+		if (this._newPinPlaceholder) {
 			this._newPinPlaceholder.remove();
 			this._newPinPlaceholder = null;
 		}
 	}
 
 	_handleImageClick() {
-		this._resetActivePinsState()
+		this._resetActivePinsState();
 
 		const [x, y] = getPercentagePositions(
 			d3event.x,
@@ -145,8 +159,11 @@ class DiagramHandler {
 
 		this._newPinPlaceholder = this._d3zoomWrapper
 			.append('g')
-			.attr('class', 'pin-node empty')
-			.attr('transform', `translate(${getAbsolutePositions(x, y, d3event.target)})`)
+			.attr('class', 'empty-pin-node')
+			.attr(
+				'transform',
+				`translate(${getAbsolutePositions(x, y, d3event.target)})`
+			)
 			.append('g')
 			.attr('class', 'pin-radius-handler')
 			.attr('transform', `scale(${this._pinsRadius})`)
@@ -157,13 +174,13 @@ class DiagramHandler {
 		const target = this._newPinPlaceholder.node();
 
 		this._setTooltipData({target, x, y});
-
 	}
 
 	updatePins(pins) {
 		this._pins = pins;
+		this._resetActivePinsState();
 
-		if(this.imageRendered) {
+		if (this.imageRendered) {
 			this._updatePrintedPins();
 		}
 	}
@@ -171,25 +188,33 @@ class DiagramHandler {
 	updatePinsRadius(pinsRadius) {
 		this._pinsRadius = pinsRadius;
 
-		if(this._radiusHandlers) {
-			this._radiusHandlers
-				.attr('transform', `scale(${this._pinsRadius})`);
+		if (this._radiusHandlers) {
+			this._radiusHandlers.attr(
+				'transform',
+				`scale(${this._pinsRadius})`
+			);
 		}
 	}
 
 	_updatePrintedPins() {
-		this._pinsGroups = this._d3zoomWrapper
-			.selectAll('g')
-			.data(this._pins, (d,...asd) => {
-				console.log(d, asd);
+		this._d3zoomWrapper
+			.selectAll('.pin-node')
+			.data(this._pins, (d) => d.id)
+			.join(this._handleEnter, this._handleUpdate, this._handleExit);
+	}
 
-				return d.id
-			})
-			.enter()
+	_handleEnter(enter) {
+		const pinsWrapper = enter
 			.append('g')
 			.attr('class', 'pin-node')
-			.attr('transform', (d) => 
-				`translate(${getAbsolutePositions(d.positionX, d.positionY, this._image.node())})`
+			.attr(
+				'transform',
+				(d) =>
+					`translate(${getAbsolutePositions(
+						d.positionX,
+						d.positionY,
+						this._image.node()
+					)})`
 			)
 			.call(
 				d3drag()
@@ -204,16 +229,19 @@ class DiagramHandler {
 
 				target.classList.add('active');
 				this._activePin = target;
-				
+
 				this._setTooltipData({
 					selectedPin: d,
-					target
-				})
-			})
+					target,
+				});
+			});
 
-		this._radiusHandlers = this._pinsGroups
+		this._radiusHandlers = pinsWrapper
 			.append('g')
 			.attr('class', 'pin-radius-handler')
+
+			.call((enter) => enter.transition(30).attr('y', 0))
+
 			.attr('transform', `scale(${this._pinsRadius})`);
 
 		this._radiusHandlers
@@ -227,6 +255,20 @@ class DiagramHandler {
 			.attr('text-anchor', 'middle')
 			.attr('class', 'pin-node-text')
 			.text((d) => d.sequence);
+
+		return pinsWrapper;
+	}
+
+	_handleUpdate(update) {
+		update.selectAll('pin-node-text').text((d) => d.sequence);
+
+		return update;
+	}
+
+	_handleExit(exit) {
+		exit.remove();
+
+		return exit;
 	}
 
 	_handleDragStarted(_d, index, nodes) {
@@ -235,7 +277,7 @@ class DiagramHandler {
 		this._dragDetails = {
 			startTransform: selectedPin.getAttribute('transform'),
 			startX: d3event.x,
-			startY: d3event.y
+			startY: d3event.y,
 		};
 
 		selectedPin.classList.add('drag-started');
@@ -247,24 +289,31 @@ class DiagramHandler {
 	_handleDragging(_d, index, nodes) {
 		const selectedPin = nodes[index];
 
-		if(isPinMoving(d3event.x, d3event.y, this._dragDetails.startX, this._dragDetails.startY)) {
+		if (
+			isPinMoving(
+				d3event.x,
+				d3event.y,
+				this._dragDetails.startX,
+				this._dragDetails.startY
+			)
+		) {
 			selectedPin.classList.add('dragging');
 			this._dragDetails.moved = true;
-			
+
 			d3select(selectedPin).attr(
 				'transform',
 				`translate(${d3event.x},${d3event.y})`
 			);
-		} else {
+		}
+		else {
 			selectedPin.classList.remove('dragging');
 			this._dragDetails.moved = false;
 
 			d3select(selectedPin).attr(
 				'transform',
 				this._dragDetails.startTransform
-			);	
+			);
 		}
-
 	}
 
 	_handleDragEnded(d, index, nodes) {
@@ -272,7 +321,7 @@ class DiagramHandler {
 
 		selectedPin.classList.remove('dragging', 'drag-started');
 
-		if(this._dragDetails.moved) {
+		if (this._dragDetails.moved) {
 			const [x, y] = getPercentagePositions(
 				d3event.sourceEvent.x,
 				d3event.sourceEvent.y,
@@ -288,10 +337,12 @@ class DiagramHandler {
 				})
 				.catch(() => {
 					openToast({
-						message: Liferay.Language.get('pin-position-failed-to-be-updated'),
+						message: Liferay.Language.get(
+							'pin-position-failed-to-be-updated'
+						),
 						type: 'danger',
 					});
-				})
+				});
 		}
 	}
 }
