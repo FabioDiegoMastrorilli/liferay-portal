@@ -96,6 +96,7 @@ class AutomappingHandler {
 			.then((response) => response.text())
 			.then((svgContent) => {
 				this._d3zoomWrapper.html(svgContent);
+				this._diagramWrapper.classList.add('rendered')
 			});
 	}
 

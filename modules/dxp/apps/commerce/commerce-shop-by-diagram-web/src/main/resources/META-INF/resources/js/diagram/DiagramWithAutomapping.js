@@ -9,18 +9,18 @@
  * distribution rights of the Software.
  */
 
+import ClayLoadingIndicator from '@clayui/loading-indicator';
 import classNames from 'classnames';
 import PropTypes from 'prop-types';
 import React, {useEffect, useLayoutEffect, useRef, useState} from 'react';
 
 import AutomappingHandler from './AutomappingHandler';
 import DiagramFooter from './components/DiagramFooter';
+import Sequence from './components/Sequence';
 import Tooltip from './components/Tooltip';
 import {loadPins} from './utilities/data';
 
 import '../../css/diagram.scss';
-import Sequence from './components/Sequence';
-
 function DiagramWithAutomapping({imageURL, pinsCSSSelectors, productId}) {
 	const chartInstance = useRef(null);
 	const svgRef = useRef(null);
@@ -105,6 +105,8 @@ function DiagramWithAutomapping({imageURL, pinsCSSSelectors, productId}) {
 	return (
 		<div className={classNames('shop-by-diagram', {expanded})}>
 			<div className="bg-white border-bottom border-top view-wrapper" ref={wrapperRef}>
+				<ClayLoadingIndicator className="svg-loader" />
+
 				<svg className="svg-wrapper" ref={svgRef}>
 					<g className="zoom-handler" ref={zoomHandlerRef} />
 				</svg>
