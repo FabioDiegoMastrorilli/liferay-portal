@@ -34,16 +34,16 @@ function Diagram({
 	pinsRadius: initialPinsRadius,
 	productId,
 }) {
-	const svgRef = useRef(null);
-	const zoomHandlerRef = useRef(null);
-	const wrapperRef = useRef(null);
 	const chartInstance = useRef(null);
+	const pinsRadiusInitialized = useRef(false);
+	const svgRef = useRef(null);
+	const wrapperRef = useRef(null);
+	const zoomHandlerRef = useRef(null);
+	const [currentZoom, updateCurrentZoom] = useState(1);
+	const [expanded, updateExpanded] = useState(false);
 	const [pins, updatePins] = useState(null);
 	const [pinsRadius, updatePinsRadius] = useState(initialPinsRadius);
 	const [tooltipData, setTooltipData] = useState(false);
-	const [currentZoom, updateCurrentZoom] = useState(1);
-	const [expanded, updateExpanded] = useState(false);
-	const pinsRadiusInitialized = useRef(false);
 
 	useEffect(() => {
 		if (pinsRadiusInitialized.current) {

@@ -38,14 +38,15 @@ class DiagramHandler {
 		setTooltipData
 	) {
 		this._currentScale = 1;
-		this._diagramWrapper = diagramWrapper;
 		this._d3diagramWrapper = d3select(diagramWrapper);
 		this._d3zoomWrapper = d3select(zoomWrapper);
+		this._diagramWrapper = diagramWrapper;
 		this._imageURL = imageURL;
 		this._pinBackground = null;
 		this._setTooltipData = setTooltipData;
 		this._updateZoomState = updateZoomState;
 		this._zoomWrapper = zoomWrapper;
+
 		this._handleClickOutside = this._handleClickOutside.bind(this);
 		this._handleDragEnded = this._handleDragEnded.bind(this);
 		this._handleDragStarted = this._handleDragStarted.bind(this);
