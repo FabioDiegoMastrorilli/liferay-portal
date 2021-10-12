@@ -19,7 +19,7 @@ import DiagramHandler from './DiagramHandler';
 import DiagramFooter from './components/DiagramFooter';
 import DiagramHeader from './components/DiagramHeader';
 import Tooltip from './components/Tooltip';
-import {DEFAULT_PINS_RADIUS} from './utilities/constants';
+import {PINS_RADIUS} from './utilities/constants';
 import {loadPins, updateGlobalPinsRadius} from './utilities/data';
 
 import '../../css/diagram.scss';
@@ -124,7 +124,7 @@ function Diagram({
 }
 
 Diagram.defaultProps = {
-	pinsRadius: DEFAULT_PINS_RADIUS,
+	pinsRadius: PINS_RADIUS.DEFAULT,
 };
 
 Diagram.propTypes = {

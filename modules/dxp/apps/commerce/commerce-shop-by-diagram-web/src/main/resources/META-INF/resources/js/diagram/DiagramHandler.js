@@ -18,8 +18,8 @@ import {
 import {openToast} from 'frontend-js-web';
 
 import {
-	DEFAULT_PINS_RADIUS,
 	PINS_CIRCLE_RADIUS,
+	PINS_RADIUS,
 	ZOOM_VALUES,
 } from './utilities/constants';
 import {savePin} from './utilities/data';
@@ -56,7 +56,7 @@ class DiagramHandler {
 		this._handleImageClick = this._handleImageClick.bind(this);
 		this._handleUpdate = this._handleUpdate.bind(this);
 		this._handleZoom = this._handleZoom.bind(this);
-		this._pinsRadius = DEFAULT_PINS_RADIUS;
+		this._pinsRadius = PINS_RADIUS.DEFAULT;
 
 		this._addListeners();
 		this._printImage();
