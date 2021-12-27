@@ -39,6 +39,7 @@ import com.liferay.layout.util.structure.CollectionStyledLayoutStructureItem;
 import com.liferay.layout.util.structure.ColumnLayoutStructureItem;
 import com.liferay.layout.util.structure.ContainerStyledLayoutStructureItem;
 import com.liferay.layout.util.structure.DropZoneLayoutStructureItem;
+import com.liferay.layout.util.structure.FormStyledLayoutStructureItem;
 import com.liferay.layout.util.structure.FragmentStyledLayoutStructureItem;
 import com.liferay.layout.util.structure.LayoutStructure;
 import com.liferay.layout.util.structure.LayoutStructureItem;
@@ -502,6 +503,36 @@ public class RenderLayoutStructureTag extends IncludeTag {
 		}
 	}
 
+	private void _renderFormStyledLayoutStructureItem(
+		LayoutStructureItem layoutStructureItem,
+		RenderLayoutStructureDisplayContext
+			renderLayoutStructureDisplayContext)
+		throws Exception {
+
+		JspWriter jspWriter = pageContext.getOut();
+
+		FormStyledLayoutStructureItem formStyledLayoutStructureItem =
+			(FormStyledLayoutStructureItem)layoutStructureItem;
+
+		jspWriter.write("<div class=\"");
+		jspWriter.write(
+			renderLayoutStructureDisplayContext.getCssClass(
+				formStyledLayoutStructureItem));
+		jspWriter.write("\" style=\"");
+		jspWriter.write(
+			renderLayoutStructureDisplayContext.getStyle(
+				formStyledLayoutStructureItem));
+		jspWriter.write("\">");
+
+		jspWriter.write("<h1> WEEE FORM </h1>");
+
+		_renderLayoutStructure(
+			layoutStructureItem.getChildrenItemIds(),
+			renderLayoutStructureDisplayContext);
+
+		jspWriter.write("</div>");
+	}
+
 	private void _renderDropZoneLayoutStructureItem(
 			LayoutStructureItem layoutStructureItem,
 			RenderLayoutStructureDisplayContext
@@ -671,6 +702,12 @@ public class RenderLayoutStructureTag extends IncludeTag {
 						ContainerStyledLayoutStructureItem) {
 
 				_renderContainerStyledLayoutStructureItem(
+					layoutStructureItem, renderLayoutStructureDisplayContext);
+			}
+			else if (layoutStructureItem instanceof
+				FormStyledLayoutStructureItem) {
+
+				_renderFormStyledLayoutStructureItem(
 					layoutStructureItem, renderLayoutStructureDisplayContext);
 			}
 			else if (layoutStructureItem instanceof
