@@ -43,7 +43,7 @@ import java.util.Locale;
 @Component(
 	service = FragmentRenderer.class
 )
-public class TextFragmentRenderer
+public class RuleHandlerFragmentRenderer
 	implements FragmentRenderer {
 
 	@Reference(
@@ -53,7 +53,7 @@ public class TextFragmentRenderer
 
 	@Override
 	public String getLabel(Locale locale) {
-		return "Input Text";
+		return "Form Rule Handler";
 	}
 
 	@Override
@@ -122,7 +122,7 @@ public class TextFragmentRenderer
 			_reactRenderer.renderReact(
 				new ComponentDescriptor(
 					_npmResolver.resolveModuleName("@liferay/fragment-form") +
-					"/js/components/Input"),
+					"/js/components/RuleHandler"),
 				HashMapBuilder.<String, Object>put(
 					"label", label
 				).put(

@@ -46,6 +46,7 @@ import com.liferay.layout.util.structure.LayoutStructureItem;
 import com.liferay.layout.util.structure.RootLayoutStructureItem;
 import com.liferay.layout.util.structure.RowStyledLayoutStructureItem;
 import com.liferay.petra.string.StringPool;
+import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.io.unsync.UnsyncStringWriter;
 import com.liferay.portal.kernel.language.LanguageUtil;
 import com.liferay.portal.kernel.layoutconfiguration.util.RuntimePageUtil;
@@ -514,7 +515,9 @@ public class RenderLayoutStructureTag extends IncludeTag {
 		FormStyledLayoutStructureItem formStyledLayoutStructureItem =
 			(FormStyledLayoutStructureItem)layoutStructureItem;
 
-		jspWriter.write("<div class=\"");
+		jspWriter.write("<form id=\"");
+		jspWriter.write(StringUtil.randomId()); //TO BE IMPROVED
+		jspWriter.write("\" class=\"page-builder-form ");
 		jspWriter.write(
 			renderLayoutStructureDisplayContext.getCssClass(
 				formStyledLayoutStructureItem));
@@ -530,7 +533,7 @@ public class RenderLayoutStructureTag extends IncludeTag {
 			layoutStructureItem.getChildrenItemIds(),
 			renderLayoutStructureDisplayContext);
 
-		jspWriter.write("</div>");
+		jspWriter.write("</form>");
 	}
 
 	private void _renderDropZoneLayoutStructureItem(

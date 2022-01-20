@@ -12,9 +12,8 @@
  * details.
  */
 
-import React from 'react';
-interface IErrorFeedbackProps extends React.HTMLAttributes<HTMLElement> {
-	error: string;
-}
-declare const ErrorFeedback: React.FC<IErrorFeedbackProps>;
-export default ErrorFeedback;
+import {State} from '@liferay/frontend-js-state-web';
+
+const inputsLibraryAtom = State.atom('formsInputsLibrary', new Map());
+
+export default inputsLibraryAtom;

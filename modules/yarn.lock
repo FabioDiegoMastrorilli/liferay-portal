@@ -997,7 +997,7 @@
     classnames "^2.2.6"
     date-fns "^2.14.0"
 
-"@clayui/drop-down@3.43.0", "@clayui/drop-down@^3.43.0":
+"@clayui/drop-down@3.43.0", "@clayui/drop-down@^3.41.0", "@clayui/drop-down@^3.43.0":
   version "3.43.0"
   resolved "https://registry.yarnpkg.com/@clayui/drop-down/-/drop-down-3.43.0.tgz#c5b028c96eb206fdb1860217bf3b83db765252f3"
   integrity sha512-SKSeGgyj4wMrNMztgMmXPYhh6H6XNFa6licl8ZXd9nSEEcx722gXj990uVesDs4ec7NuxoMEhr+9P9oSzP3dBg==
@@ -1018,7 +1018,7 @@
   dependencies:
     classnames "^2.2.6"
 
-"@clayui/form@3.42.0", "@clayui/form@^3.42.0":
+"@clayui/form@3.42.0", "@clayui/form@^3.40.0", "@clayui/form@^3.42.0":
   version "3.42.0"
   resolved "https://registry.yarnpkg.com/@clayui/form/-/form-3.42.0.tgz#c3cdb166f2b56c07110a9c9df85bf7e6b5919109"
   integrity sha512-j0Z15thowkIKWyTzOr5AM9IQSY8Se8dUWWiNLqMRJtxsXVhfaSdKZB2OloKOARSez3ny8OTvNW8CDd5YZgqojg==
@@ -1080,6 +1080,19 @@
   resolved "https://registry.yarnpkg.com/@clayui/loading-indicator/-/loading-indicator-3.40.0.tgz#0c39745a3f72bbab31344ef17f6590dcd1052471"
   integrity sha512-JCi88NLnjPZwkQLORxKMJDvLMsbZKd4ftWJ1uUIW4xZSi2GzCG+VzkGJpg+90fbtUiMt12tLn4In741JxWHz8w==
   dependencies:
+    classnames "^2.2.6"
+
+"@clayui/localized-input@3.41.0":
+  version "3.41.0"
+  resolved "https://registry.yarnpkg.com/@clayui/localized-input/-/localized-input-3.41.0.tgz#10683f4774336dffe93e2da21c62b29727d062f6"
+  integrity sha512-dMdlkpaXsJEUMIDXGX3cTIGTavk9En4yv6hIhZ/cYFQc+WOFLpU2UuyB/QnA6FfSLdJTcWd+AyZsV3QJmFVjqw==
+  dependencies:
+    "@clayui/button" "^3.40.0"
+    "@clayui/drop-down" "^3.41.0"
+    "@clayui/form" "^3.40.0"
+    "@clayui/icon" "^3.40.0"
+    "@clayui/label" "^3.40.0"
+    "@clayui/layout" "^3.40.0"
     classnames "^2.2.6"
 
 "@clayui/localized-input@3.43.0":

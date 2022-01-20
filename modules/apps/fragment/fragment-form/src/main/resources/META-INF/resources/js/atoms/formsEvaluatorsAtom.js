@@ -12,6 +12,8 @@
  * details.
  */
 
-import React from 'react';
-declare const RequiredMask: React.FC<React.HTMLAttributes<HTMLElement>>;
-export default RequiredMask;
+import {State} from '@liferay/frontend-js-state-web';
+
+const formsEvaluatorsAtom = State.atom('formsEvaluators', new Map());
+
+export default formsEvaluatorsAtom;
