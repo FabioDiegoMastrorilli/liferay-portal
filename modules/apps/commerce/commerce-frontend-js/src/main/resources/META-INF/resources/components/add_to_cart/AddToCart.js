@@ -66,7 +66,7 @@ function AddToCart({
 	const buttonDisabled = useMemo(() => {
 		if (
 			initialDisabled ||
-			!account?.id ||
+			account.id < 0 ||
 			cpInstance.purchasable === false ||
 			!cpInstance.quantity
 		) {
@@ -152,7 +152,7 @@ function AddToCart({
 		>
 			<QuantitySelector
 				{...settings.quantityDetails}
-				disabled={initialDisabled || !account?.id}
+				disabled={initialDisabled || (account.id < 0)}
 				onUpdate={(quantity) =>
 					setCpInstance({...cpInstance, quantity})
 				}
