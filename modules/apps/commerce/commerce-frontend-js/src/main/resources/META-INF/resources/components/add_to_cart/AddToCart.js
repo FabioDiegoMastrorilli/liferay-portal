@@ -152,7 +152,7 @@ function AddToCart({
 		>
 			<QuantitySelector
 				{...settings.quantityDetails}
-				disabled={initialDisabled || (account.id < 0)}
+				disabled={initialDisabled || account.id < 0}
 				onUpdate={(quantity) =>
 					setCpInstance({...cpInstance, quantity})
 				}
