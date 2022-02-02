@@ -12,8 +12,10 @@
  * details.
  */
 
-import {State} from '@liferay/frontend-js-state-web';
-
-const formsEvaluatorsAtom = State.atom('formsEvaluators', new Map());
-
+export declare type TEvaluator = (inputs: any) => void;
+declare const formsEvaluatorsAtom: {
+	readonly 'default': ReadonlyMap<string, TEvaluator>;
+	readonly 'key': string;
+	readonly 'Liferay.State.ATOM': true;
+};
 export default formsEvaluatorsAtom;

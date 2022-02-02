@@ -12,8 +12,16 @@
  * details.
  */
 
-import {State} from '@liferay/frontend-js-state-web';
+/// <reference types="react" />
 
-const inputsLibraryAtom = State.atom('formsInputsLibrary', new Map());
-
-export default inputsLibraryAtom;
+import PropTypes from 'prop-types';
+declare type TFormProps = {
+	reactDOMContainer: HTMLElement;
+};
+declare function Form({reactDOMContainer}: TFormProps): JSX.Element;
+declare namespace Form {
+	var propTypes: {
+		reactDOMContainer: PropTypes.Validator<Element>;
+	};
+}
+export default Form;
