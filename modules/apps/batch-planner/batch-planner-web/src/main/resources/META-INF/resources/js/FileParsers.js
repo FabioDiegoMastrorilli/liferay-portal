@@ -105,10 +105,10 @@ function parseInChunk({chunkParser, file, onComplete, onError, options}) {
 
 		offset += event.target.result.length;
 
-		const fields = chunkParser(event.target.result, options);
+		const result = chunkParser(event.target.result, options);
 
-		if (fields) {
-			return onComplete(fields);
+		if (result) {
+			return onComplete(result);
 		}
 		else if (offset >= fileSize) {
 			return onError();
