@@ -28,7 +28,10 @@ export function extractFieldsFromCSV(content, fieldSeparator = ',') {
 
 		const firstNoEmptyLine = splitLines.find((line) => line.length > 0);
 
-		return firstNoEmptyLine.split(fieldSeparator);
+		return {
+			extension: CSV_FORMAT,
+			fields: firstNoEmptyLine.split(fieldSeparator),
+		};
 	}
 }
 
@@ -47,7 +50,7 @@ export function extractFieldsFromJSONL(content) {
 	try {
 		const data = JSON.parse(contentToParse);
 
-		return Object.keys(data);
+		return {extension: JSONL_FORMAT, fields: Object.keys(data)};
 	}
 	catch (error) {
 		console.error(error);
@@ -69,7 +72,10 @@ export function extractFieldsFromJSON(content) {
 			try {
 				parsedJSON = JSON.parse(partialJson);
 
-				return Object.keys(parsedJSON);
+				return {
+					extension: JSON_FORMAT,
+					fields: Object.keys(parsedJSON),
+				};
 			}
 			catch (error) {
 				console.error(error);

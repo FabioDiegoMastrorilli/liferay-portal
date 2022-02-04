@@ -74,7 +74,7 @@ function ImportForm({
 
 		function handleFileSchemaUpdate(event) {
 			const fileSchema = event.schema;
-			setFileFields(fileSchema);
+			setFileFields(fileSchema.fields);
 		}
 
 		function handleTemplateSelect(event) {
