@@ -12,15 +12,12 @@
  * details.
  */
 
-import {State} from '@liferay/frontend-js-state-web';
-
 import {
 	CSV_FORMAT,
 	JSONL_FORMAT,
 	JSON_FORMAT,
 	PARSE_FILE_CHUNK_SIZE,
 } from './constants';
-import fileFormatAtom from './fileFormatAtom';
 
 export function extractFieldsFromCSV(content, fieldSeparator = ',') {
 	if (content.indexOf('\n') > -1) {
@@ -28,10 +25,7 @@ export function extractFieldsFromCSV(content, fieldSeparator = ',') {
 
 		const firstNoEmptyLine = splitLines.find((line) => line.length > 0);
 
-		return {
-			extension: CSV_FORMAT,
-			fields: firstNoEmptyLine.split(fieldSeparator),
-		};
+		return firstNoEmptyLine.split(fieldSeparator);
 	}
 }
 
@@ -50,7 +44,7 @@ export function extractFieldsFromJSONL(content) {
 	try {
 		const data = JSON.parse(contentToParse);
 
-		return {extension: JSONL_FORMAT, fields: Object.keys(data)};
+		return Object.keys(data);
 	}
 	catch (error) {
 		console.error(error);
@@ -72,10 +66,7 @@ export function extractFieldsFromJSON(content) {
 			try {
 				parsedJSON = JSON.parse(partialJson);
 
-				return {
-					extension: JSON_FORMAT,
-					fields: Object.keys(parsedJSON),
-				};
+				return Object.keys(parsedJSON);
 			}
 			catch (error) {
 				console.error(error);
@@ -84,7 +75,14 @@ export function extractFieldsFromJSON(content) {
 	}
 }
 
-function parseInChunk({chunkParser, file, onComplete, onError, options}) {
+function parseInChunk({
+	chunkParser,
+	extension,
+	file,
+	onComplete,
+	onError,
+	options,
+}) {
 	let abort = false;
 	const fileSize = file.size;
 	let offset = 0;
@@ -105,10 +103,10 @@ function parseInChunk({chunkParser, file, onComplete, onError, options}) {
 
 		offset += event.target.result.length;
 
-		const result = chunkParser(event.target.result, options);
+		const fields = chunkParser(event.target.result, options);
 
-		if (result) {
-			return onComplete(result);
+		if (fields) {
+			return onComplete({extension, fields});
 		}
 		else if (offset >= fileSize) {
 			return onError();
@@ -131,12 +129,13 @@ const parseOperators = {
 };
 
 export default function parseFile({file, onComplete, onError, options}) {
-	const extension = file.name.substring(file.name.lastIndexOf('.') + 1);
+	const extension = file.name
+		.substring(file.name.lastIndexOf('.') + 1)
+		.toLowerCase();
 
-	State.writeAtom(fileFormatAtom, {format: extension});
-
-	return parseInChunk({
+	parseInChunk({
 		chunkParser: parseOperators[extension],
+		extension,
 		file,
 		onComplete,
 		onError,

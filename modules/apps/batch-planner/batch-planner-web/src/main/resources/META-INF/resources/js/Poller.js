@@ -13,7 +13,6 @@
  */
 
 import {useIsMounted} from '@liferay/frontend-js-react-web';
-import {State} from '@liferay/frontend-js-state-web';
 import {fetch} from 'frontend-js-web';
 import {useCallback, useEffect, useReducer} from 'react';
 
@@ -24,7 +23,6 @@ import {
 	PROCESS_COMPLETED,
 	PROCESS_FAILED,
 } from './constants';
-import fileFormatAtom from './fileFormatAtom';
 
 const ERROR = 'ERROR';
 const COMPLETED = 'COMPLETED';
@@ -60,11 +58,8 @@ const setProgress = (contentType, percentage) => ({
 
 export async function startTask(formDataQuerySelector, formSubmitURL) {
 	const mainFormData = document.querySelector(formDataQuerySelector);
+
 	const formData = new FormData(mainFormData);
-
-	const format = State.read(fileFormatAtom);
-
-	formData.append('externalType', format.format);
 
 	const response = await fetch(formSubmitURL, {
 		body: formData,
@@ -201,6 +196,7 @@ const Poller = (
 		dispatchIfMounted({type: LOADING});
 		try {
 			const blobUrl = await requestTaskFile(state.taskId);
+
 			download(blobUrl, EXPORT_FILE_NAME);
 
 			dispatchIfMounted({type: STOP_LOADING});
