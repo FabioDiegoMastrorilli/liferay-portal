@@ -28,6 +28,8 @@ import com.liferay.portal.kernel.util.Constants;
 import com.liferay.portal.kernel.util.FileUtil;
 import com.liferay.portal.kernel.util.ParamUtil;
 import com.liferay.portal.kernel.util.Portal;
+import com.liferay.portal.kernel.util.StringUtil;
+import com.liferay.portal.kernel.util.Validator;
 
 import java.io.File;
 import java.io.IOException;
@@ -74,6 +76,17 @@ public class SubmitBatchPlannerPlanMVCResourceCommand
 		}
 	}
 
+	private String _getExternalType(ResourceRequest resourceRequest) {
+		String externalType = StringUtil.toUpperCase(
+			ParamUtil.getString(resourceRequest, "externalType"));
+
+		if (Validator.isNotNull(externalType)) {
+			return externalType;
+		}
+
+		throw new IllegalArgumentException("External type is required");
+	}
+
 	private void _submitExportBatchPlannerPlan(
 			ResourceRequest resourceRequest, ResourceResponse resourceResponse)
 		throws Exception {
@@ -99,14 +112,12 @@ public class SubmitBatchPlannerPlanMVCResourceCommand
 			ResourceRequest resourceRequest, ResourceResponse resourceResponse)
 		throws Exception {
 
-		String externalType = ParamUtil.getString(
-			resourceRequest, "externalType", "CSV");
-
 		UploadPortletRequest uploadPortletRequest =
 			_portal.getUploadPortletRequest(resourceRequest);
 
 		File importFile = _toBatchPlannerFile(
-			externalType, uploadPortletRequest.getFileAsStream("importFile"));
+			_getExternalType(resourceRequest),
+			uploadPortletRequest.getFileAsStream("importFile"));
 
 		try {
 			URI importFileURI = importFile.toURI();
