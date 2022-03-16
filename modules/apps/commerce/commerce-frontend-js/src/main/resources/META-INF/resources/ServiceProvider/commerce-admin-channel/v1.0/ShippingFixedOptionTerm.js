@@ -14,7 +14,7 @@
 
 import AJAX from '../../../utilities/AJAX/index';
 
-const SHIPPING_FIXED_OPTION_PATH = '/shipping-fixed-options';
+const SHIPPING_FIXED_OPTIONS_PATH = '/shipping-fixed-options';
 
 const SHIPPING_FIXED_OPTION_TERMS_PATH = '/shipping-fixed-option-terms';
 
@@ -25,7 +25,7 @@ function resolvePath(
 	shippingFixedOptionId = '',
 	shippingFixedOptionTermId = ''
 ) {
-	return `${basePath}${VERSION}${SHIPPING_FIXED_OPTION_PATH}/${shippingFixedOptionId}${SHIPPING_FIXED_OPTION_TERMS_PATH}/${shippingFixedOptionTermId}`;
+	return `${basePath}${VERSION}${SHIPPING_FIXED_OPTIONS_PATH}/${shippingFixedOptionId}${SHIPPING_FIXED_OPTION_TERMS_PATH}/${shippingFixedOptionTermId}`;
 }
 
 export default function ShippingFixedOptionTerm(basePath) {

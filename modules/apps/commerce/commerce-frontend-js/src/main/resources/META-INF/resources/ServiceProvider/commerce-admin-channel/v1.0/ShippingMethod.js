@@ -12,9 +12,21 @@
  * details.
  */
 
-export {default as paymentMethodGroupRelOrderTypeAPI} from './PaymentMethodGroupRelOrderType';
-export {default as paymentMethodGroupRelTermAPI} from './PaymentMethodGroupRelTerm';
-export {default as shippingFixedOptionOrderTypeAPI} from './ShippingFixedOptionOrderType';
-export {default as shippingFixedOptionTermAPI} from './ShippingFixedOptionTerm';
-export {default as shippingMethodAPI} from './ShippingMethod';
-export {default as channelAPI} from './Channel';
+import AJAX from '../../../utilities/AJAX/index';
+
+const CHANNELS_PATH = '/channels';
+
+const SHIPPING_METHODS_PATH = '/shipping-methods';
+
+const VERSION = 'v1.0';
+
+function resolvePath(basePath = '', channelId = '') {
+	return `${basePath}${VERSION}${CHANNELS_PATH}/${channelId}${SHIPPING_METHODS_PATH}`;
+}
+
+export default function ShippingMethod(basePath) {
+	return {
+		getShippingMethods: (channelId, params) =>
+			AJAX.GET(resolvePath(basePath, channelId), null, params),
+	};
+}

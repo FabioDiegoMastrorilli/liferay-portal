@@ -1,3 +1,4 @@
+<%--
 /**
  * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
@@ -11,10 +12,22 @@
  * FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for more
  * details.
  */
+--%>
 
-export {default as paymentMethodGroupRelOrderTypeAPI} from './PaymentMethodGroupRelOrderType';
-export {default as paymentMethodGroupRelTermAPI} from './PaymentMethodGroupRelTerm';
-export {default as shippingFixedOptionOrderTypeAPI} from './ShippingFixedOptionOrderType';
-export {default as shippingFixedOptionTermAPI} from './ShippingFixedOptionTerm';
-export {default as shippingMethodAPI} from './ShippingMethod';
-export {default as channelAPI} from './Channel';
+<%@ include file="/init.jsp" %>
+
+<commerce-ui:modal-content
+	submitButtonLabel='<%= LanguageUtil.get(request, "add") %>'
+	title='<%= LanguageUtil.get(request, "add-shipping-option") %>'
+>
+	<portlet:actionURL name="/account_entry/edit_account_entry_shipping_option" var="editAccountEntryShippingOptionActionURL" />
+
+	<react:component
+		module="js/components/ShippingOptionSelector"
+		props='<%=
+			HashMapBuilder.<String, Object>put(
+				"editAccountEntryShippingOptionActionURL", editAccountEntryShippingOptionActionURL
+			).build()
+		%>'
+	/>
+</commerce-ui:modal-content>

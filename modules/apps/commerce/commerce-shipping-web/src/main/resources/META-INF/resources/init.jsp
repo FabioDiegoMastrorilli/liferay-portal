@@ -28,6 +28,7 @@ taglib uri="http://liferay.com/tld/ui" prefix="liferay-ui" %>
 <%@ page import="com.liferay.commerce.exception.CommerceShippingMethodNameException" %><%@
 page import="com.liferay.commerce.model.CommerceShippingMethod" %><%@
 page import="com.liferay.commerce.shipping.web.internal.display.context.CommerceShippingMethodsDisplayContext" %><%@
+page import="com.liferay.commerce.shipping.web.internal.frontend.AccountEntryDefaultShippingOptionClayTable" %><%@
 page import="com.liferay.commerce.shipping.web.internal.frontend.CommerceShippingRestrictionsPageClayTable" %><%@
 page import="com.liferay.commerce.shipping.web.internal.servlet.taglib.ui.constants.CommerceShippingScreenNavigationConstants" %><%@
 page import="com.liferay.petra.string.StringPool" %><%@

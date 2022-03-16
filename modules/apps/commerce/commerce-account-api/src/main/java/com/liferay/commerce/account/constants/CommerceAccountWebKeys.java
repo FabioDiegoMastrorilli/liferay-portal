@@ -12,9 +12,13 @@
  * details.
  */
 
-export {default as paymentMethodGroupRelOrderTypeAPI} from './PaymentMethodGroupRelOrderType';
-export {default as paymentMethodGroupRelTermAPI} from './PaymentMethodGroupRelTerm';
-export {default as shippingFixedOptionOrderTypeAPI} from './ShippingFixedOptionOrderType';
-export {default as shippingFixedOptionTermAPI} from './ShippingFixedOptionTerm';
-export {default as shippingMethodAPI} from './ShippingMethod';
-export {default as channelAPI} from './Channel';
+package com.liferay.commerce.account.constants;
+
+/**
+ * @author Andrea Sbarra
+ */
+public class CommerceAccountWebKeys {
+
+	public static final String COMMERCE_ACCOUNT_DISPLAY_CONTEXT = "COMMERCE_ACCOUNT_DISPLAY_CONTEXT";
+
+}
