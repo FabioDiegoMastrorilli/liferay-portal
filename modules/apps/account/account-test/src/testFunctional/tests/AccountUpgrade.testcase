@@ -4,6 +4,7 @@ definition {
 	property database.types = "db2,mariadb,mysql,oracle,postgresql,sqlserver,sybase";
 	property portal.release = "true";
 	property portal.upstream = "true";
+	property testray.component.names = "Account";
 	property testray.main.component.name = "Upgrades User and System Management";
 
 	setUp {
@@ -27,7 +28,7 @@ definition {
 			Upgrade.addAndViewBusinessAccount(
 				accountDescription = "Adding Account after upgrade",
 				accountName = "Account Name",
-				accountTaxID = "L-123456");
+				accountTaxId = "L-123456");
 		}
 
 		task ("Add an account user to business account after upgrade") {
@@ -57,7 +58,7 @@ definition {
 			Upgrade.addAndViewBusinessAccount(
 				accountDescription = "Adding Account after upgrade",
 				accountName = "Account Name",
-				accountTaxID = "L-123456");
+				accountTaxId = "L-123456");
 		}
 
 		task ("Add an account user to business account after upgrade") {
@@ -87,7 +88,7 @@ definition {
 			Upgrade.addAndViewBusinessAccount(
 				accountDescription = "Adding Account after upgrade",
 				accountName = "Account Name",
-				accountTaxID = "L-123456");
+				accountTaxId = "L-123456");
 		}
 
 		task ("Add an account user to business account after upgrade") {
@@ -117,7 +118,7 @@ definition {
 			Upgrade.addAndViewBusinessAccount(
 				accountDescription = "Adding Account after upgrade",
 				accountName = "Account Name",
-				accountTaxID = "L-123456");
+				accountTaxId = "L-123456");
 		}
 
 		task ("Add an account user to business account after upgrade") {
@@ -147,7 +148,7 @@ definition {
 			Upgrade.addAndViewBusinessAccount(
 				accountDescription = "Adding Account after upgrade",
 				accountName = "Account Name",
-				accountTaxID = "L-123456");
+				accountTaxId = "L-123456");
 		}
 
 		task ("Add an account user to business account after upgrade") {
@@ -177,7 +178,7 @@ definition {
 			Upgrade.addAndViewBusinessAccount(
 				accountDescription = "Adding Account after upgrade",
 				accountName = "Account Name",
-				accountTaxID = "L-123456");
+				accountTaxId = "L-123456");
 		}
 
 		task ("Add an account user to business account after upgrade") {
@@ -207,7 +208,7 @@ definition {
 			Upgrade.addAndViewBusinessAccount(
 				accountDescription = "Adding Account after upgrade",
 				accountName = "Account Name",
-				accountTaxID = "L-123456");
+				accountTaxId = "L-123456");
 		}
 
 		task ("Add an account user to business account after upgrade") {
@@ -237,7 +238,7 @@ definition {
 			Upgrade.addAndViewBusinessAccount(
 				accountDescription = "Adding Account after upgrade",
 				accountName = "Account Name",
-				accountTaxID = "L-123456");
+				accountTaxId = "L-123456");
 		}
 
 		task ("Add an account user to business account after upgrade") {
@@ -267,7 +268,7 @@ definition {
 			Upgrade.addAndViewBusinessAccount(
 				accountDescription = "Adding Account after upgrade",
 				accountName = "Account Name",
-				accountTaxID = "L-123456");
+				accountTaxId = "L-123456");
 		}
 
 		task ("Add an account user to business account after upgrade") {
@@ -297,7 +298,7 @@ definition {
 			Upgrade.addAndViewBusinessAccount(
 				accountDescription = "Adding Account after upgrade",
 				accountName = "Account Name",
-				accountTaxID = "L-123456");
+				accountTaxId = "L-123456");
 		}
 
 		task ("Add an account user to business account after upgrade") {
@@ -327,7 +328,7 @@ definition {
 			Upgrade.addAndViewBusinessAccount(
 				accountDescription = "Adding Account after upgrade",
 				accountName = "Account Name",
-				accountTaxID = "L-123456");
+				accountTaxId = "L-123456");
 		}
 
 		task ("Add an account user to business account after upgrade") {
@@ -357,7 +358,7 @@ definition {
 			Upgrade.addAndViewBusinessAccount(
 				accountDescription = "Adding Account after upgrade",
 				accountName = "Account Name",
-				accountTaxID = "L-123456");
+				accountTaxId = "L-123456");
 		}
 
 		task ("Add an account user to business account after upgrade") {

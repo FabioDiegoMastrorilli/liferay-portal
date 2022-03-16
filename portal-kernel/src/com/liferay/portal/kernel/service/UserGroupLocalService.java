@@ -80,6 +80,11 @@ public interface UserGroupLocalService
 
 	public void addGroupUserGroups(long groupId, long[] userGroupIds);
 
+	public UserGroup addOrUpdateUserGroup(
+			String externalReferenceCode, long userId, long companyId,
+			String name, String description, ServiceContext serviceContext)
+		throws PortalException;
+
 	public void addTeamUserGroup(long teamId, long userGroupId);
 
 	public void addTeamUserGroup(long teamId, UserGroup userGroup);
@@ -751,6 +756,11 @@ public interface UserGroupLocalService
 	 * @param userGroupIds the primary keys of the user groups
 	 */
 	public void unsetTeamUserGroups(long teamId, long[] userGroupIds);
+
+	@Indexable(type = IndexableType.REINDEX)
+	public UserGroup updateExternalReferenceCode(
+			UserGroup userGroup, String externalReferenceCode)
+		throws PortalException;
 
 	/**
 	 * Updates the user group.

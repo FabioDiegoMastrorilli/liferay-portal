@@ -176,6 +176,11 @@
 	<td></td>
 </tr>
 <tr>
+	<td>EXPORT_FOR_TRANSLATION</td>
+	<td>//*[*[name()='svg'][contains(@class,'import-export')]]</td>
+	<td></td>
+</tr>
+<tr>
 	<td>EXPORT_DISABLED</td>
 	<td>//button[*[name()='svg'][contains(@class,'icon-download')] and @disabled]</td>
 	<td></td>
@@ -213,6 +218,11 @@
 <tr>
 	<td>FRIENDLY_URL_HISTORY</td>
 	<td>//button[contains(@class,'history')][*[name()='svg'][contains(@class,'lexicon-icon-restore')]]</td>
+	<td></td>
+</tr>
+<tr>
+	<td>FRIENDLY_URL_HISTORY_DISABLED</td>
+	<td>//button[contains(@class,'history') and @disabled][*[name()='svg'][contains(@class,'lexicon-icon-restore')]]</td>
 	<td></td>
 </tr>
 <tr>
@@ -301,6 +311,11 @@
 	<td></td>
 </tr>
 <tr>
+	<td>SITES_VERTICAL_ELLIPSIS</td>
+	<td>//div[@class='dropdown']//button[contains(@class, 'nav-link')]</td>
+	<td></td>
+</tr>
+<tr>
 	<td>STAR_UNSUBSCRIBED</td>
 	<td>//a[span/*[name()='svg'][contains(@class,'icon-star-o')]]</td>
 	<td></td>
@@ -374,11 +389,6 @@
 <tr>
 	<td>HISTORY_VERTICAL_ELLIPSIS</td>
 	<td>//a[span/*[contains(@class,'lexicon-icon-ellipsis-v')]]</td>
-	<td></td>
-</tr>
-<tr>
-	<td>PAGE_CUSTOMIZATION_ELLIPSIS</td>
-	<td>//div[contains(@class,'control-menu-level-2')]//div[contains(@class,'icon-menu')]</td>
 	<td></td>
 </tr>
 <tr>

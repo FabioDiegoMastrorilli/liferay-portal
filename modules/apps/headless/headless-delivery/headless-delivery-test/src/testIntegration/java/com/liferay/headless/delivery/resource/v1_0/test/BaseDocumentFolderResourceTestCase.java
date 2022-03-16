@@ -25,6 +25,7 @@ import com.fasterxml.jackson.databind.util.ISO8601DateFormat;
 import com.liferay.depot.model.DepotEntry;
 import com.liferay.depot.service.DepotEntryLocalServiceUtil;
 import com.liferay.headless.delivery.client.dto.v1_0.DocumentFolder;
+import com.liferay.headless.delivery.client.dto.v1_0.Field;
 import com.liferay.headless.delivery.client.http.HttpInvoker;
 import com.liferay.headless.delivery.client.pagination.Page;
 import com.liferay.headless.delivery.client.pagination.Pagination;
@@ -308,6 +309,42 @@ public abstract class BaseDocumentFolderResourceTestCase {
 	}
 
 	@Test
+	public void testGetAssetLibraryDocumentFoldersPageWithFilterDoubleEquals()
+		throws Exception {
+
+		List<EntityField> entityFields = getEntityFields(
+			EntityField.Type.DOUBLE);
+
+		if (entityFields.isEmpty()) {
+			return;
+		}
+
+		Long assetLibraryId =
+			testGetAssetLibraryDocumentFoldersPage_getAssetLibraryId();
+
+		DocumentFolder documentFolder1 =
+			testGetAssetLibraryDocumentFoldersPage_addDocumentFolder(
+				assetLibraryId, randomDocumentFolder());
+
+		@SuppressWarnings("PMD.UnusedLocalVariable")
+		DocumentFolder documentFolder2 =
+			testGetAssetLibraryDocumentFoldersPage_addDocumentFolder(
+				assetLibraryId, randomDocumentFolder());
+
+		for (EntityField entityField : entityFields) {
+			Page<DocumentFolder> page =
+				documentFolderResource.getAssetLibraryDocumentFoldersPage(
+					assetLibraryId, null, null, null,
+					getFilterString(entityField, "eq", documentFolder1),
+					Pagination.of(1, 2), null);
+
+			assertEquals(
+				Collections.singletonList(documentFolder1),
+				(List<DocumentFolder>)page.getItems());
+		}
+	}
+
+	@Test
 	public void testGetAssetLibraryDocumentFoldersPageWithFilterStringEquals()
 		throws Exception {
 
@@ -406,6 +443,20 @@ public abstract class BaseDocumentFolderResourceTestCase {
 				BeanUtils.setProperty(
 					documentFolder1, entityField.getName(),
 					DateUtils.addMinutes(new Date(), -2));
+			});
+	}
+
+	@Test
+	public void testGetAssetLibraryDocumentFoldersPageWithSortDouble()
+		throws Exception {
+
+		testGetAssetLibraryDocumentFoldersPageWithSort(
+			EntityField.Type.DOUBLE,
+			(entityField, documentFolder1, documentFolder2) -> {
+				BeanUtils.setProperty(
+					documentFolder1, entityField.getName(), 0.1);
+				BeanUtils.setProperty(
+					documentFolder2, entityField.getName(), 0.5);
 			});
 	}
 
@@ -593,10 +644,12 @@ public abstract class BaseDocumentFolderResourceTestCase {
 	}
 
 	@Test
-	public void testPutAssetLibraryDocumentFolderPermission() throws Exception {
+	public void testPutAssetLibraryDocumentFolderPermissionsPage()
+		throws Exception {
+
 		@SuppressWarnings("PMD.UnusedLocalVariable")
 		DocumentFolder documentFolder =
-			testPutAssetLibraryDocumentFolderPermission_addDocumentFolder();
+			testPutAssetLibraryDocumentFolderPermissionsPage_addDocumentFolder();
 
 		@SuppressWarnings("PMD.UnusedLocalVariable")
 		com.liferay.portal.kernel.model.Role role = RoleTestUtil.addRole(
@@ -605,7 +658,7 @@ public abstract class BaseDocumentFolderResourceTestCase {
 		assertHttpResponseStatusCode(
 			200,
 			documentFolderResource.
-				putAssetLibraryDocumentFolderPermissionHttpResponse(
+				putAssetLibraryDocumentFolderPermissionsPageHttpResponse(
 					testDepotEntry.getDepotEntryId(),
 					new Permission[] {
 						new Permission() {
@@ -619,7 +672,7 @@ public abstract class BaseDocumentFolderResourceTestCase {
 		assertHttpResponseStatusCode(
 			404,
 			documentFolderResource.
-				putAssetLibraryDocumentFolderPermissionHttpResponse(
+				putAssetLibraryDocumentFolderPermissionsPageHttpResponse(
 					testDepotEntry.getDepotEntryId(),
 					new Permission[] {
 						new Permission() {
@@ -632,7 +685,7 @@ public abstract class BaseDocumentFolderResourceTestCase {
 	}
 
 	protected DocumentFolder
-			testPutAssetLibraryDocumentFolderPermission_addDocumentFolder()
+			testPutAssetLibraryDocumentFolderPermissionsPage_addDocumentFolder()
 		throws Exception {
 
 		return documentFolderResource.postAssetLibraryDocumentFolder(
@@ -845,10 +898,10 @@ public abstract class BaseDocumentFolderResourceTestCase {
 	}
 
 	@Test
-	public void testPutDocumentFolderPermission() throws Exception {
+	public void testPutDocumentFolderPermissionsPage() throws Exception {
 		@SuppressWarnings("PMD.UnusedLocalVariable")
 		DocumentFolder documentFolder =
-			testPutDocumentFolderPermission_addDocumentFolder();
+			testPutDocumentFolderPermissionsPage_addDocumentFolder();
 
 		@SuppressWarnings("PMD.UnusedLocalVariable")
 		com.liferay.portal.kernel.model.Role role = RoleTestUtil.addRole(
@@ -856,7 +909,7 @@ public abstract class BaseDocumentFolderResourceTestCase {
 
 		assertHttpResponseStatusCode(
 			200,
-			documentFolderResource.putDocumentFolderPermissionHttpResponse(
+			documentFolderResource.putDocumentFolderPermissionsPageHttpResponse(
 				documentFolder.getId(),
 				new Permission[] {
 					new Permission() {
@@ -869,7 +922,7 @@ public abstract class BaseDocumentFolderResourceTestCase {
 
 		assertHttpResponseStatusCode(
 			404,
-			documentFolderResource.putDocumentFolderPermissionHttpResponse(
+			documentFolderResource.putDocumentFolderPermissionsPageHttpResponse(
 				0L,
 				new Permission[] {
 					new Permission() {
@@ -881,7 +934,8 @@ public abstract class BaseDocumentFolderResourceTestCase {
 				}));
 	}
 
-	protected DocumentFolder testPutDocumentFolderPermission_addDocumentFolder()
+	protected DocumentFolder
+			testPutDocumentFolderPermissionsPage_addDocumentFolder()
 		throws Exception {
 
 		return documentFolderResource.postSiteDocumentFolder(
@@ -1026,6 +1080,42 @@ public abstract class BaseDocumentFolderResourceTestCase {
 	}
 
 	@Test
+	public void testGetDocumentFolderDocumentFoldersPageWithFilterDoubleEquals()
+		throws Exception {
+
+		List<EntityField> entityFields = getEntityFields(
+			EntityField.Type.DOUBLE);
+
+		if (entityFields.isEmpty()) {
+			return;
+		}
+
+		Long parentDocumentFolderId =
+			testGetDocumentFolderDocumentFoldersPage_getParentDocumentFolderId();
+
+		DocumentFolder documentFolder1 =
+			testGetDocumentFolderDocumentFoldersPage_addDocumentFolder(
+				parentDocumentFolderId, randomDocumentFolder());
+
+		@SuppressWarnings("PMD.UnusedLocalVariable")
+		DocumentFolder documentFolder2 =
+			testGetDocumentFolderDocumentFoldersPage_addDocumentFolder(
+				parentDocumentFolderId, randomDocumentFolder());
+
+		for (EntityField entityField : entityFields) {
+			Page<DocumentFolder> page =
+				documentFolderResource.getDocumentFolderDocumentFoldersPage(
+					parentDocumentFolderId, null, null, null,
+					getFilterString(entityField, "eq", documentFolder1),
+					Pagination.of(1, 2), null);
+
+			assertEquals(
+				Collections.singletonList(documentFolder1),
+				(List<DocumentFolder>)page.getItems());
+		}
+	}
+
+	@Test
 	public void testGetDocumentFolderDocumentFoldersPageWithFilterStringEquals()
 		throws Exception {
 
@@ -1124,6 +1214,20 @@ public abstract class BaseDocumentFolderResourceTestCase {
 				BeanUtils.setProperty(
 					documentFolder1, entityField.getName(),
 					DateUtils.addMinutes(new Date(), -2));
+			});
+	}
+
+	@Test
+	public void testGetDocumentFolderDocumentFoldersPageWithSortDouble()
+		throws Exception {
+
+		testGetDocumentFolderDocumentFoldersPageWithSort(
+			EntityField.Type.DOUBLE,
+			(entityField, documentFolder1, documentFolder2) -> {
+				BeanUtils.setProperty(
+					documentFolder1, entityField.getName(), 0.1);
+				BeanUtils.setProperty(
+					documentFolder2, entityField.getName(), 0.5);
 			});
 	}
 
@@ -1377,6 +1481,41 @@ public abstract class BaseDocumentFolderResourceTestCase {
 	}
 
 	@Test
+	public void testGetSiteDocumentFoldersPageWithFilterDoubleEquals()
+		throws Exception {
+
+		List<EntityField> entityFields = getEntityFields(
+			EntityField.Type.DOUBLE);
+
+		if (entityFields.isEmpty()) {
+			return;
+		}
+
+		Long siteId = testGetSiteDocumentFoldersPage_getSiteId();
+
+		DocumentFolder documentFolder1 =
+			testGetSiteDocumentFoldersPage_addDocumentFolder(
+				siteId, randomDocumentFolder());
+
+		@SuppressWarnings("PMD.UnusedLocalVariable")
+		DocumentFolder documentFolder2 =
+			testGetSiteDocumentFoldersPage_addDocumentFolder(
+				siteId, randomDocumentFolder());
+
+		for (EntityField entityField : entityFields) {
+			Page<DocumentFolder> page =
+				documentFolderResource.getSiteDocumentFoldersPage(
+					siteId, null, null, null,
+					getFilterString(entityField, "eq", documentFolder1),
+					Pagination.of(1, 2), null);
+
+			assertEquals(
+				Collections.singletonList(documentFolder1),
+				(List<DocumentFolder>)page.getItems());
+		}
+	}
+
+	@Test
 	public void testGetSiteDocumentFoldersPageWithFilterStringEquals()
 		throws Exception {
 
@@ -1470,6 +1609,20 @@ public abstract class BaseDocumentFolderResourceTestCase {
 				BeanUtils.setProperty(
 					documentFolder1, entityField.getName(),
 					DateUtils.addMinutes(new Date(), -2));
+			});
+	}
+
+	@Test
+	public void testGetSiteDocumentFoldersPageWithSortDouble()
+		throws Exception {
+
+		testGetSiteDocumentFoldersPageWithSort(
+			EntityField.Type.DOUBLE,
+			(entityField, documentFolder1, documentFolder2) -> {
+				BeanUtils.setProperty(
+					documentFolder1, entityField.getName(), 0.1);
+				BeanUtils.setProperty(
+					documentFolder2, entityField.getName(), 0.5);
 			});
 	}
 
@@ -1696,10 +1849,10 @@ public abstract class BaseDocumentFolderResourceTestCase {
 	}
 
 	@Test
-	public void testPutSiteDocumentFolderPermission() throws Exception {
+	public void testPutSiteDocumentFolderPermissionsPage() throws Exception {
 		@SuppressWarnings("PMD.UnusedLocalVariable")
 		DocumentFolder documentFolder =
-			testPutSiteDocumentFolderPermission_addDocumentFolder();
+			testPutSiteDocumentFolderPermissionsPage_addDocumentFolder();
 
 		@SuppressWarnings("PMD.UnusedLocalVariable")
 		com.liferay.portal.kernel.model.Role role = RoleTestUtil.addRole(
@@ -1707,33 +1860,35 @@ public abstract class BaseDocumentFolderResourceTestCase {
 
 		assertHttpResponseStatusCode(
 			200,
-			documentFolderResource.putSiteDocumentFolderPermissionHttpResponse(
-				documentFolder.getSiteId(),
-				new Permission[] {
-					new Permission() {
-						{
-							setActionIds(new String[] {"PERMISSIONS"});
-							setRoleName(role.getName());
+			documentFolderResource.
+				putSiteDocumentFolderPermissionsPageHttpResponse(
+					documentFolder.getSiteId(),
+					new Permission[] {
+						new Permission() {
+							{
+								setActionIds(new String[] {"PERMISSIONS"});
+								setRoleName(role.getName());
+							}
 						}
-					}
-				}));
+					}));
 
 		assertHttpResponseStatusCode(
 			404,
-			documentFolderResource.putSiteDocumentFolderPermissionHttpResponse(
-				documentFolder.getSiteId(),
-				new Permission[] {
-					new Permission() {
-						{
-							setActionIds(new String[] {"-"});
-							setRoleName("-");
+			documentFolderResource.
+				putSiteDocumentFolderPermissionsPageHttpResponse(
+					documentFolder.getSiteId(),
+					new Permission[] {
+						new Permission() {
+							{
+								setActionIds(new String[] {"-"});
+								setRoleName("-");
+							}
 						}
-					}
-				}));
+					}));
 	}
 
 	protected DocumentFolder
-			testPutSiteDocumentFolderPermission_addDocumentFolder()
+			testPutSiteDocumentFolderPermissionsPage_addDocumentFolder()
 		throws Exception {
 
 		return documentFolderResource.postSiteDocumentFolder(
@@ -2490,13 +2645,16 @@ public abstract class BaseDocumentFolderResourceTestCase {
 		}
 
 		if (entityFieldName.equals("numberOfDocumentFolders")) {
-			throw new IllegalArgumentException(
-				"Invalid entity field " + entityFieldName);
+			sb.append(
+				String.valueOf(documentFolder.getNumberOfDocumentFolders()));
+
+			return sb.toString();
 		}
 
 		if (entityFieldName.equals("numberOfDocuments")) {
-			throw new IllegalArgumentException(
-				"Invalid entity field " + entityFieldName);
+			sb.append(String.valueOf(documentFolder.getNumberOfDocuments()));
+
+			return sb.toString();
 		}
 
 		if (entityFieldName.equals("parentDocumentFolderId")) {

@@ -118,7 +118,8 @@ public class NavItemUtil {
 						siteNavigationMenuItem.getType());
 
 			try {
-				if (!siteNavigationMenuItemType.hasPermission(
+				if ((siteNavigationMenuItemType == null) ||
+					!siteNavigationMenuItemType.hasPermission(
 						themeDisplay.getPermissionChecker(),
 						siteNavigationMenuItem)) {
 
@@ -132,7 +133,7 @@ public class NavItemUtil {
 			}
 			catch (PortalException portalException) {
 				if (_log.isDebugEnabled()) {
-					_log.debug(portalException, portalException);
+					_log.debug(portalException);
 				}
 			}
 		}

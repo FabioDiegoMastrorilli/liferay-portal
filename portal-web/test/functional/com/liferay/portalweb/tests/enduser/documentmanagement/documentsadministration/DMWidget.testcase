@@ -44,7 +44,7 @@ definition {
 
 			DMDocumentType.tearDownCP();
 
-			Page.tearDownCP();
+			PagesAdmin.tearDownCP();
 		}
 	}
 
@@ -52,6 +52,8 @@ definition {
 	@priority = "5"
 	@refactordone
 	test CanReferenceDocumentFromOtherSiteAfterSettingRootFolder {
+		property portal.acceptance = "true";
+
 		JSONGroup.addGroup(groupName = "Site Name");
 
 		JSONLayout.addPublicLayout(
@@ -100,6 +102,8 @@ definition {
 	@priority = "4"
 	@refactordone
 	test CanRemoveCurrentDisplayStyleViews {
+		property portal.acceptance = "true";
+
 		Navigator.gotoPage(pageName = "Documents and Media Page");
 
 		DMPortlet.configureDisplaySettingsPG(currentDisplayStyleViews = "");
@@ -118,6 +122,8 @@ definition {
 	@priority = "4"
 	@refactordone
 	test ConfigurationsAreIndependentAcrossPages {
+		property portal.acceptance = "true";
+
 		JSONLayout.addPublicLayout(
 			groupName = "Guest",
 			layoutName = "Documents and Media Page 2");
@@ -142,10 +148,37 @@ definition {
 		DMPortlet.viewDefaultConfigurationDisplaySettingsPG();
 	}
 
+	@description = "This is a use case for LPS-95662. Selecting an asset from the second does not invoke the management toolbar on the first."
+	@priority = "4"
+	test SelectAssetFromSecondWidgetInvokesSecondManagementToolbar {
+		property portal.acceptance = "true";
+		property test.assert.javascript.errors = "true";
+		property test.assert.warning.exceptions = "true";
+
+		JSONLayout.addWidgetToPublicLayout(
+			column = "1",
+			groupName = "Guest",
+			layoutName = "Documents and Media Page",
+			widgetName = "Documents and Media");
+
+		JSONFolder.addFolder(
+			dmFolderDescription = "DM Folder Description",
+			dmFolderName = "Test Folder",
+			groupName = "Guest");
+
+		Navigator.gotoPage(pageName = "Documents and Media Page");
+
+		PortletEntry.SelectAllOnSpecificWidget(widgetPosition = "2");
+
+		AssertNotChecked.assertNotCheckedNotVisible(locator1 = "Checkbox#LEXICON_SELECT_ALL_INPUT");
+	}
+
 	@description = "This test covers LPS-91595. It ensures that the document selection persists when navigating through the pagination in the DM widget."
 	@priority = "4"
 	@refactordone
 	test SelectionPersistsWhenTraversingPages {
+		property portal.acceptance = "true";
+
 		for (var documentName : list "Document_2.doc,Document_1.xls,Document_4.jpg,Document_3.jpg,Document_2.xls,Document_1.txt,Document_4.txt,Document_3.xls,Document_2.jpg,Document_1.doc") {
 			var extension = StringUtil.extractLast("${documentName}", ".");
 
@@ -206,6 +239,25 @@ definition {
 			siteName = "Guest");
 
 		AssertAccessible();
+	}
+
+	@description = "This test checks that the javascript in the user name will not be executed when viewing a document on page."
+	@priority = "3"
+	test XSSIsNotExecutedWhenViewingUsernameInDocument {
+		Navigator.openURL();
+
+		UserBar.gotoDropdownItem(dropdownItem = "Account Settings");
+
+		User.editUserInformation(userLastNameEdit = '''Test<script>alert('hello!')</script>''');
+
+		Navigator.gotoPage(pageName = "Documents and Media Page");
+
+		DMDocument.addPG(
+			dmDocumentDescription = "DM Document Description",
+			dmDocumentFile = "Document_1.txt",
+			dmDocumentTitle = "Document_1.txt");
+
+		AssertAlertNotPresent();
 	}
 
 }

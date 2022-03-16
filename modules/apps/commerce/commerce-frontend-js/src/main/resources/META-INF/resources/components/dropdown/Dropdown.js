@@ -60,11 +60,12 @@ function Dropdown(props) {
 					className="component-action dropdown-toggle"
 					displayType="unstyled"
 				>
-					<ClayIcon spritemap={props.spritemap} symbol="ellipsis-v" />
+					<ClayIcon symbol="ellipsis-v" />
 				</ClayButton>
 			}
 		>
 			<Modal id={dropdownSupportModalId} />
+
 			<ClayDropDown.ItemList>
 				<ClayDropDown.Group>
 					{sortedItems.map((item, i) => {
@@ -92,12 +93,10 @@ function Dropdown(props) {
 							<ClayDropDown.Item key={i} {...dropdownProps}>
 								{item.icon && (
 									<span className="pr-2">
-										<ClayIcon
-											spritemap={props.spritemap}
-											symbol={item.icon}
-										/>
+										<ClayIcon symbol={item.icon} />
 									</span>
 								)}
+
 								{item.label}
 							</ClayDropDown.Item>
 						);
@@ -118,7 +117,6 @@ Dropdown.propTypes = {
 			target: PropTypes.oneOf(['link', 'modal']),
 		})
 	),
-	spritemap: PropTypes.string.isRequired,
 };
 
 export default Dropdown;

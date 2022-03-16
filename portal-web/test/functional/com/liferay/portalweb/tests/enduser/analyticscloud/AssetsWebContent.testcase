@@ -85,6 +85,7 @@ definition {
 
 		task ("Assert appears on metric") {
 			var portalURL = PropsUtil.get("portal.url");
+
 			var siteName = TestCase.getSiteName(siteName = "${siteName}");
 
 			ACAssets.viewAssetAppearsOnMetric(
@@ -153,7 +154,6 @@ definition {
 	@priority = "5"
 	test AudienceCardShowsExpectedAmountKnowAndAnonymousIndividualsInWC {
 		var usernameList = "ac,liferay";
-
 		var emailList = "ac@liferay.com,liferay@liferay.com";
 
 		for (var name : list "${usernameList}") {
@@ -206,7 +206,6 @@ definition {
 	@priority = "5"
 	test AudienceCardShowsExpectedAmountSegmentedAndUnsegmentedInWC {
 		var usernameList = "ac,liferay";
-
 		var emailList = "ac@liferay.com,liferay@liferay.com";
 
 		task ("Create users and sync") {
@@ -249,7 +248,7 @@ definition {
 
 			ACSegments.createStaticSegment();
 
-			ACSegments.nameSegment(segmentName = "Static Segment Test");
+			ACUtils.setItemName(itemName = "Static Segment Test");
 
 			ACSegments.addStaticMember(tableMember = "ac ac");
 
@@ -602,10 +601,10 @@ definition {
 	@description = "Feature ID: Legacy | Automation ID: LRAC-8131 | Test Summary: Web content known individuals shows which individuals interact with the web content"
 	@priority = "5"
 	test KnownIndividualsShowsWhichIndividualsInteractWithWebContent {
+		property portal.upstream = "quarantine";
+
 		var nameList = "ac ac,liferay liferay,dxp dxp";
-
 		var usernameList = "ac,liferay,dxp";
-
 		var emailList = "ac@liferay.com,liferay@liferay.com,dxp@liferay.com";
 
 		var propertyName = ACDXPSettings.connectDXPtoAnalyticsCloud(siteName = "Site Name");
@@ -768,8 +767,8 @@ definition {
 	test WebContentLocationCardShowsViewsByExpectedLocation {
 		property portal.upstream = "quarantine";
 
-		// AC Refactor: Location data issues happen on this ticket because of the bug
-		// AC Bug ticket : LRAC-9345
+		// AC Refactor: The location data should show the name of the country but it's actually showing "Local network"
+		// AC Refactor: Personas
 		// AC Refactor ticket: LRAC-9346
 
 		task ("Add a new user") {

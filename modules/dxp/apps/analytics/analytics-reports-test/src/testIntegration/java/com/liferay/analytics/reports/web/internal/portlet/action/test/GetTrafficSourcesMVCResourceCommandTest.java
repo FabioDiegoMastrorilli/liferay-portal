@@ -81,7 +81,7 @@ public class GetTrafficSourcesMVCResourceCommandTest {
 	public void setUp() throws Exception {
 		_group = GroupTestUtil.addGroup();
 
-		_layout = LayoutTestUtil.addLayout(_group);
+		_layout = LayoutTestUtil.addTypePortletLayout(_group);
 	}
 
 	@Test
@@ -203,8 +203,9 @@ public class GetTrafficSourcesMVCResourceCommandTest {
 
 					Assert.assertEquals("organic", jsonObject2.get("name"));
 					Assert.assertEquals(
-						89.20D, Double.valueOf(jsonObject2.getString("share")),
-						0.0);
+						String.format("%.1f", 89.20D),
+						jsonObject2.getString("share"));
+
 					Assert.assertEquals(3192, jsonObject2.get("value"));
 
 					JSONArray countryKeywordsJSONArray =

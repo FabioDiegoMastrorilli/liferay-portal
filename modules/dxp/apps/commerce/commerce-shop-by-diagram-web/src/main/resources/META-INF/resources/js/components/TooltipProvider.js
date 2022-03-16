@@ -16,14 +16,14 @@ import React, {useLayoutEffect, useRef, useState} from 'react';
 import {calculateTooltipStyleFromTarget} from '../utilities/index';
 
 function TooltipProvider({children, closeTooltip, target}) {
-	const [tooltipStyle, updateTooltipStyle] = useState({});
+	const [tooltipStyle, setTooltipStyle] = useState({});
 	const tooltipRef = useRef();
 	const bodyRef = useRef(document.querySelector('body'));
 
 	useLayoutEffect(() => {
 		const style = calculateTooltipStyleFromTarget(target);
 
-		updateTooltipStyle(style);
+		setTooltipStyle(style);
 	}, [target]);
 
 	useLayoutEffect(() => {
@@ -46,12 +46,8 @@ function TooltipProvider({children, closeTooltip, target}) {
 
 	return (
 		<ReactPortal container={bodyRef.current}>
-			<div className="diagram-tooltip-wrapper">
-				<div
-					className="diagram-tooltip"
-					ref={tooltipRef}
-					style={tooltipStyle}
-				>
+			<div className="diagram-tooltip-wrapper" style={tooltipStyle}>
+				<div className="diagram-tooltip" ref={tooltipRef}>
 					{children}
 				</div>
 			</div>

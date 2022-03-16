@@ -86,8 +86,9 @@ public class OpenSSOFilter extends BaseFilter {
 		HttpServletResponse httpServletResponse) {
 
 		try {
-			OpenSSOConfiguration openSSOConfiguration = getOpenSSOConfiguration(
-				_portal.getCompanyId(httpServletRequest));
+			OpenSSOConfiguration openSSOConfiguration =
+				_getOpenSSOConfiguration(
+					_portal.getCompanyId(httpServletRequest));
 
 			if (openSSOConfiguration.enabled() &&
 				Validator.isNotNull(openSSOConfiguration.loginURL()) &&
@@ -98,7 +99,7 @@ public class OpenSSOFilter extends BaseFilter {
 			}
 		}
 		catch (Exception exception) {
-			_log.error(exception, exception);
+			_log.error(exception);
 		}
 
 		return false;
@@ -109,22 +110,13 @@ public class OpenSSOFilter extends BaseFilter {
 		return _log;
 	}
 
-	protected OpenSSOConfiguration getOpenSSOConfiguration(long companyId)
-		throws Exception {
-
-		return _configurationProvider.getConfiguration(
-			OpenSSOConfiguration.class,
-			new CompanyServiceSettingsLocator(
-				companyId, OpenSSOConstants.SERVICE_NAME));
-	}
-
 	@Override
 	protected void processFilter(
 			HttpServletRequest httpServletRequest,
 			HttpServletResponse httpServletResponse, FilterChain filterChain)
 		throws Exception {
 
-		OpenSSOConfiguration openSSOConfiguration = getOpenSSOConfiguration(
+		OpenSSOConfiguration openSSOConfiguration = _getOpenSSOConfiguration(
 			_portal.getCompanyId(httpServletRequest));
 
 		String requestURI = GetterUtil.getString(
@@ -150,7 +142,7 @@ public class OpenSSOFilter extends BaseFilter {
 				httpServletRequest, openSSOConfiguration.serviceURL());
 		}
 		catch (Exception exception) {
-			_log.error(exception, exception);
+			_log.error(exception);
 
 			processFilter(
 				OpenSSOFilter.class.getName(), httpServletRequest,
@@ -219,6 +211,15 @@ public class OpenSSOFilter extends BaseFilter {
 				URLCodec.encodeURL("?redirect=" + URLCodec.encodeURL(redirect));
 
 		httpServletResponse.sendRedirect(redirect);
+	}
+
+	private OpenSSOConfiguration _getOpenSSOConfiguration(long companyId)
+		throws Exception {
+
+		return _configurationProvider.getConfiguration(
+			OpenSSOConfiguration.class,
+			new CompanyServiceSettingsLocator(
+				companyId, OpenSSOConstants.SERVICE_NAME));
 	}
 
 	private static final String _SUBJECT_ID_KEY = "open.sso.subject.id";

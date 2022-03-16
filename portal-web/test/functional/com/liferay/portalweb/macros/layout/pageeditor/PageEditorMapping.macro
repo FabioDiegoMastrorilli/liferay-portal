@@ -15,6 +15,7 @@ definition {
 		}
 
 		PageEditor.clickEditableField(
+			className = "${className}",
 			contributed = "${contributed}",
 			fragmentName = "${fragmentName}",
 			id = "${id}",
@@ -24,7 +25,7 @@ definition {
 			PageEditor.gotoTab(tabName = "Browser");
 		}
 
-		if ((contains("${id}", "image")) || (contains("${id}", "img"))) {
+		if (contains("${id}", "image") || contains("${id}", "img")) {
 			Navigator.gotoNavTab(navTab = "Image Source");
 
 			if (!(IsSelectedLabel(key_fieldLabel = "Source Selection", locator1 = "Select#GENERIC_SELECT_FIELD", value1 = "Mapping"))) {
@@ -58,7 +59,7 @@ definition {
 				locator1 = "Icon#ANY_ITEM_SELECTOR");
 		}
 
-		if (IsElementPresent(key_menuItem = "Select Item...",locator1 = "MenuItem#ANY_MENU_ITEM")) {
+		if (IsElementPresent(key_menuItem = "Select Item...", locator1 = "MenuItem#ANY_MENU_ITEM")) {
 			if (isSet(contentItem)) {
 				MenuItem.click(menuItem = "${contentItem}");
 			}
@@ -114,19 +115,19 @@ definition {
 
 		Click.clickNoWaitForVisible(
 			key_colPosition = "1",
-			key_element = "//div[contains(@class,'page-editor')]//li[contains(.,'${fragmentName}')]",
+			key_element = "//div[@aria-label='${fragmentName}']",
 			key_fragmentName = "Collection Display",
 			key_rowPosition = "1",
 			locator1 = "PageEditor#COLLECTION_CELL_NESTED_ELEMENT");
 
 		Click(
 			key_colPosition = "1",
-			key_element = "//div[contains(@class,'page-editor__topper__bar') and contains(.,'${fragmentName}')]//following-sibling::div[contains(@class,'page-editor__topper__content')]//*[contains(@data-lfr-editable-id,'${id}')]",
+			key_element = "//div[@aria-label='${fragmentName}']//div[contains(@class,'page-editor__topper__content')]//*[contains(@data-lfr-editable-id,'${id}')]",
 			key_fragmentName = "Collection Display",
 			key_rowPosition = "1",
 			locator1 = "PageEditor#COLLECTION_CELL_NESTED_ELEMENT");
 
-		if ((contains("${id}", "image")) || (contains("${id}", "img"))) {
+		if (contains("${id}", "image") || contains("${id}", "img")) {
 			Navigator.gotoNavTab(navTab = "Image Source");
 
 			if (!(IsSelectedLabel(key_fieldLabel = "Source Selection", locator1 = "Select#GENERIC_SELECT_FIELD", value1 = "Mapping"))) {
@@ -160,6 +161,7 @@ definition {
 
 	macro mapEditableTextToField {
 		PageEditorMapping.gotoEditableFieldMapping(
+			className = "${className}",
 			contributed = "${contributed}",
 			fragmentName = "${fragmentName}",
 			id = "${id}",

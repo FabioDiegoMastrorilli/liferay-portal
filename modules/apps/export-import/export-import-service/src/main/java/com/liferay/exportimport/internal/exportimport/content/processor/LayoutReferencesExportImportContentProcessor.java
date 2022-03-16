@@ -37,6 +37,7 @@ import com.liferay.portal.kernel.model.StagedModel;
 import com.liferay.portal.kernel.model.VirtualLayoutConstants;
 import com.liferay.portal.kernel.module.configuration.ConfigurationException;
 import com.liferay.portal.kernel.module.configuration.ConfigurationProvider;
+import com.liferay.portal.kernel.portlet.constants.FriendlyURLResolverConstants;
 import com.liferay.portal.kernel.security.auth.CompanyThreadLocal;
 import com.liferay.portal.kernel.service.CompanyLocalService;
 import com.liferay.portal.kernel.service.GroupLocalService;
@@ -320,19 +321,17 @@ public class LayoutReferencesExportImportContentProcessor
 					url = url.substring(pathContext.length());
 				}
 
-				if (!url.startsWith(StringPool.SLASH)) {
-					continue;
-				}
-
 				pos = url.indexOf(StringPool.SLASH, 1);
 
-				String localePath = StringPool.BLANK;
+				if (pos == -1) {
+					pos = url.length();
+				}
 
 				Locale locale = null;
 
-				if (pos != -1) {
-					localePath = url.substring(0, pos);
+				String localePath = url.substring(0, pos);
 
+				if (localePath.length() > 1) {
 					locale = LocaleUtil.fromLanguageId(
 						localePath.substring(1), true, false);
 				}
@@ -352,6 +351,35 @@ public class LayoutReferencesExportImportContentProcessor
 
 						url = urlWithoutLocale;
 					}
+					else if (urlWithoutLocale.indexOf(StringPool.SLASH, 1) ==
+								-1) {
+
+						if (!localePath.equals(
+								_PRIVATE_GROUP_SERVLET_MAPPING) &&
+							!localePath.equals(_PRIVATE_USER_SERVLET_MAPPING) &&
+							!localePath.equals(_PUBLIC_GROUP_SERVLET_MAPPING)) {
+
+							urlSB.append(localePath);
+
+							url = urlWithoutLocale;
+						}
+						else {
+							Layout layout =
+								_layoutLocalService.fetchLayoutByFriendlyURL(
+									group.getGroupId(), false,
+									urlWithoutLocale);
+
+							if (layout != null) {
+								urlSB.append(localePath);
+
+								url = urlWithoutLocale;
+							}
+						}
+					}
+				}
+
+				if (!url.startsWith(StringPool.SLASH)) {
+					continue;
 				}
 
 				boolean privateLayout = false;
@@ -846,7 +874,7 @@ public class LayoutReferencesExportImportContentProcessor
 		}
 		catch (ConfigurationException configurationException) {
 			if (_log.isWarnEnabled()) {
-				_log.warn(configurationException.getMessage());
+				_log.warn(configurationException);
 			}
 		}
 
@@ -856,7 +884,11 @@ public class LayoutReferencesExportImportContentProcessor
 
 		Group group = _groupLocalService.getGroup(groupId);
 
-		String[] friendlyURLSeparators = {"/-/", "/b/", "/d/", "/w/"};
+		String[] friendlyURLSeparators = {
+			"/-/", FriendlyURLResolverConstants.URL_SEPARATOR_BLOGS_ENTRY,
+			FriendlyURLResolverConstants.URL_SEPARATOR_FILE_ENTRY,
+			FriendlyURLResolverConstants.URL_SEPARATOR_JOURNAL_ARTICLE
+		};
 		String[] patterns = {"href=", "[[", "{{"};
 
 		int beginPos = -1;
@@ -946,19 +978,17 @@ public class LayoutReferencesExportImportContentProcessor
 				url = url.substring(pathContext.length());
 			}
 
-			if (!url.startsWith(StringPool.SLASH)) {
-				continue;
-			}
-
 			int pos = url.indexOf(StringPool.SLASH, 1);
 
-			String localePath = StringPool.BLANK;
+			if (pos == -1) {
+				pos = url.length();
+			}
 
 			Locale locale = null;
 
-			if (pos != -1) {
-				localePath = url.substring(0, pos);
+			String localePath = url.substring(0, pos);
 
+			if (localePath.length() > 1) {
 				locale = LocaleUtil.fromLanguageId(
 					localePath.substring(1), true, false);
 			}
@@ -976,6 +1006,31 @@ public class LayoutReferencesExportImportContentProcessor
 
 					url = urlWithoutLocale;
 				}
+				else if (urlWithoutLocale.indexOf(StringPool.SLASH, 1) == -1) {
+					if (!localePath.equals(_PRIVATE_GROUP_SERVLET_MAPPING) &&
+						!localePath.equals(_PRIVATE_USER_SERVLET_MAPPING) &&
+						!localePath.equals(_PUBLIC_GROUP_SERVLET_MAPPING)) {
+
+						urlSB.append(localePath);
+
+						url = urlWithoutLocale;
+					}
+					else {
+						Layout layout =
+							_layoutLocalService.fetchLayoutByFriendlyURL(
+								group.getGroupId(), false, urlWithoutLocale);
+
+						if (layout != null) {
+							urlSB.append(localePath);
+
+							url = urlWithoutLocale;
+						}
+					}
+				}
+			}
+
+			if (!url.startsWith(StringPool.SLASH)) {
+				continue;
 			}
 
 			boolean privateLayout = false;
@@ -1130,10 +1185,10 @@ public class LayoutReferencesExportImportContentProcessor
 		}
 		catch (UnknownHostException unknownHostException) {
 			if (_log.isDebugEnabled()) {
-				_log.debug(unknownHostException, unknownHostException);
+				_log.debug(unknownHostException);
 			}
 			else if (_log.isWarnEnabled()) {
-				_log.warn(unknownHostException.getMessage());
+				_log.warn(unknownHostException);
 			}
 		}
 		catch (Exception exception) {

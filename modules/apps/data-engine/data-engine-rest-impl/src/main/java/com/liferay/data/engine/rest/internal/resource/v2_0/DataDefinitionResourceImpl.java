@@ -83,7 +83,7 @@ import com.liferay.frontend.js.loader.modules.extender.npm.NPMResolver;
 import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.change.tracking.CTAware;
 import com.liferay.portal.kernel.editor.configuration.EditorConfiguration;
-import com.liferay.portal.kernel.editor.configuration.EditorConfigurationFactoryUtil;
+import com.liferay.portal.kernel.editor.configuration.EditorConfigurationFactory;
 import com.liferay.portal.kernel.json.JSONArray;
 import com.liferay.portal.kernel.json.JSONFactory;
 import com.liferay.portal.kernel.json.JSONFactoryUtil;
@@ -195,7 +195,7 @@ public class DataDefinitionResourceImpl
 
 		DataLayoutResource dataLayoutResource = _getDataLayoutResource(false);
 
-		dataLayoutResource.deleteDataLayoutsDataDefinition(dataDefinitionId);
+		dataLayoutResource.deleteDataDefinitionDataLayout(dataDefinitionId);
 
 		DataListViewResource.Builder dataListViewResourceBuilder =
 			_dataListViewResourceFactory.create();
@@ -207,8 +207,7 @@ public class DataDefinitionResourceImpl
 				contextUser
 			).build();
 
-		dataListViewResource.deleteDataListViewsDataDefinition(
-			dataDefinitionId);
+		dataListViewResource.deleteDataDefinitionDataListView(dataDefinitionId);
 
 		_ddlRecordSetLocalService.deleteDDMStructureRecordSets(
 			dataDefinitionId);
@@ -781,7 +780,7 @@ public class DataDefinitionResourceImpl
 		}
 		catch (Exception exception) {
 			if (_log.isDebugEnabled()) {
-				_log.debug(exception, exception);
+				_log.debug(exception);
 			}
 		}
 		finally {
@@ -931,7 +930,7 @@ public class DataDefinitionResourceImpl
 			StringUtil.equals(ddmFormFieldType.getName(), "rich_text")) {
 
 			EditorConfiguration editorConfiguration =
-				EditorConfigurationFactoryUtil.getEditorConfiguration(
+				_editorConfigurationFactory.getEditorConfiguration(
 					StringPool.BLANK, ddmFormFieldType.getName(),
 					"ckeditor_classic", new HashMap<String, Object>(),
 					themeDisplay,
@@ -1588,6 +1587,9 @@ public class DataDefinitionResourceImpl
 
 	@Reference
 	private DEDataListViewLocalService _deDataListViewLocalService;
+
+	@Reference
+	private EditorConfigurationFactory _editorConfigurationFactory;
 
 	@Reference
 	private JSONFactory _jsonFactory;

@@ -20,6 +20,7 @@ import com.liferay.frontend.taglib.clay.data.set.view.table.BaseTableClayDataSet
 import com.liferay.frontend.taglib.clay.data.set.view.table.ClayTableSchema;
 import com.liferay.frontend.taglib.clay.data.set.view.table.ClayTableSchemaBuilder;
 import com.liferay.frontend.taglib.clay.data.set.view.table.ClayTableSchemaBuilderFactory;
+import com.liferay.frontend.taglib.clay.data.set.view.table.ClayTableSchemaField;
 
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
@@ -40,7 +41,16 @@ public class PlacedCommerceOrderClayTableDataSetDisplayView
 		ClayTableSchemaBuilder clayTableSchemaBuilder =
 			_clayTableSchemaBuilderFactory.create();
 
-		clayTableSchemaBuilder.addClayTableSchemaField("title", "order-id");
+		ClayTableSchemaField clayTableSchemaField =
+			clayTableSchemaBuilder.addClayTableSchemaField("title", "order-id");
+
+		clayTableSchemaField.setContentRenderer("actionLink");
+
+		clayTableSchemaBuilder.addClayTableSchemaField(
+			"externalReferenceCode", "erc");
+
+		clayTableSchemaBuilder.addClayTableSchemaField(
+			"purchaseOrderNumber", "purchase-order-number");
 
 		clayTableSchemaBuilder.addClayTableSchemaField("date", "order-date");
 

@@ -36,7 +36,6 @@ import com.liferay.portal.kernel.workflow.WorkflowConstants;
 import com.liferay.portal.vulcan.util.TransformUtil;
 
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Objects;
 
 /**
@@ -54,6 +53,17 @@ public class AccountEntryDisplaySearchContainerFactory {
 			new LinkedHashMap<>(), true);
 	}
 
+	public static SearchContainer<AccountEntryDisplay> create(
+			LiferayPortletRequest liferayPortletRequest,
+			LiferayPortletResponse liferayPortletResponse,
+			boolean filterManageableAccountEntries)
+		throws PortalException {
+
+		return _create(
+			liferayPortletRequest, liferayPortletResponse,
+			new LinkedHashMap<>(), filterManageableAccountEntries);
+	}
+
 	public static SearchContainer<AccountEntryDisplay> createWithAccountGroupId(
 			long accountGroupId, LiferayPortletRequest liferayPortletRequest,
 			LiferayPortletResponse liferayPortletResponse)
@@ -65,6 +75,18 @@ public class AccountEntryDisplaySearchContainerFactory {
 				"accountGroupIds", new long[] {accountGroupId}
 			).build(),
 			false);
+	}
+
+	public static SearchContainer<AccountEntryDisplay> createWithParams(
+			LiferayPortletRequest liferayPortletRequest,
+			LiferayPortletResponse liferayPortletResponse,
+			LinkedHashMap<String, Object> params,
+			boolean filterManageableAccountEntries)
+		throws PortalException {
+
+		return _create(
+			liferayPortletRequest, liferayPortletResponse, params,
+			filterManageableAccountEntries);
 	}
 
 	public static SearchContainer<AccountEntryDisplay> createWithUserId(
@@ -106,9 +128,6 @@ public class AccountEntryDisplaySearchContainerFactory {
 
 		accountEntryDisplaySearchContainer.setOrderByType(orderByType);
 
-		accountEntryDisplaySearchContainer.setRowChecker(
-			new EmptyOnClickRowChecker(liferayPortletResponse));
-
 		String keywords = ParamUtil.getString(
 			liferayPortletRequest, "keywords");
 
@@ -149,14 +168,12 @@ public class AccountEntryDisplaySearchContainerFactory {
 					_isReverseOrder(orderByType));
 		}
 
-		List<AccountEntryDisplay> accountEntryDisplays =
-			TransformUtil.transform(
-				baseModelSearchResult.getBaseModels(), AccountEntryDisplay::of);
-
-		accountEntryDisplaySearchContainer.setResults(accountEntryDisplays);
-
-		accountEntryDisplaySearchContainer.setTotal(
+		accountEntryDisplaySearchContainer.setResultsAndTotal(
+			() -> TransformUtil.transform(
+				baseModelSearchResult.getBaseModels(), AccountEntryDisplay::of),
 			baseModelSearchResult.getLength());
+		accountEntryDisplaySearchContainer.setRowChecker(
+			new EmptyOnClickRowChecker(liferayPortletResponse));
 
 		return accountEntryDisplaySearchContainer;
 	}

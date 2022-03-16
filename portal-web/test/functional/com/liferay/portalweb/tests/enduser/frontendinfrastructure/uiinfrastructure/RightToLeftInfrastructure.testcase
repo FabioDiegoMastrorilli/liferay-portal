@@ -19,7 +19,7 @@ definition {
 			PortalInstances.tearDownCP();
 		}
 		else {
-			Page.tearDownCP();
+			PagesAdmin.tearDownCP();
 		}
 	}
 
@@ -35,14 +35,14 @@ definition {
 		property testray.component.names = "WYSIWYG";
 
 		ProductMenu.gotoPortlet(
-			category = "Content &amp; Data",
+			category = "Content & Data",
 			portlet = "Web Content");
 
 		WebContentNavigator.gotoAddCP();
 
 		Navigator.ensureLocaleURL(locale = "ar");
 
-		PortletEntry.changeLocale(locale = "ar_SA");
+		PortletEntry.changeLocale(locale = "ar-SA");
 
 		WebContent.addCP(webContentTitle = "WC Title");
 

@@ -88,7 +88,7 @@ public class LayoutRevisionLocalServiceImpl
 		parentLayoutRevisionId = getParentLayoutRevisionId(
 			layoutSetBranchId, parentLayoutRevisionId, plid);
 
-		long layoutRevisionId = counterLocalService.increment();
+		long layoutRevisionId = getUniqueLayoutRevisionId();
 
 		LayoutRevision layoutRevision = layoutRevisionPersistence.create(
 			layoutRevisionId);
@@ -195,9 +195,7 @@ public class LayoutRevisionLocalServiceImpl
 				// LPS-52675
 
 				if (_log.isDebugEnabled()) {
-					_log.debug(
-						noSuchPortletPreferencesException,
-						noSuchPortletPreferencesException);
+					_log.debug(noSuchPortletPreferencesException);
 				}
 			}
 		}
@@ -272,9 +270,7 @@ public class LayoutRevisionLocalServiceImpl
 			// LPS-52675
 
 			if (_log.isDebugEnabled()) {
-				_log.debug(
-					noSuchLayoutRevisionException,
-					noSuchLayoutRevisionException);
+				_log.debug(noSuchLayoutRevisionException);
 			}
 
 			return null;
@@ -479,10 +475,8 @@ public class LayoutRevisionLocalServiceImpl
 
 			User user = _userPersistence.findByPrimaryKey(userId);
 
-			long newLayoutRevisionId = counterLocalService.increment();
-
 			layoutRevision = layoutRevisionPersistence.create(
-				newLayoutRevisionId);
+				getUniqueLayoutRevisionId());
 
 			layoutRevision.setGroupId(oldLayoutRevision.getGroupId());
 			layoutRevision.setCompanyId(oldLayoutRevision.getCompanyId());
@@ -712,6 +706,16 @@ public class LayoutRevisionLocalServiceImpl
 		}
 
 		return LayoutRevisionConstants.DEFAULT_PARENT_LAYOUT_REVISION_ID;
+	}
+
+	protected long getUniqueLayoutRevisionId() {
+		long layoutRevisionId = counterLocalService.increment();
+
+		while (_layoutLocalService.fetchLayout(layoutRevisionId) != null) {
+			layoutRevisionId = counterLocalService.increment();
+		}
+
+		return layoutRevisionId;
 	}
 
 	protected boolean isWorkflowEnabled(long plid) throws PortalException {

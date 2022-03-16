@@ -14,12 +14,12 @@
 
 import {useResource} from '@clayui/data-provider';
 import {usePrevious} from '@liferay/frontend-js-react-web';
-import {useFormState} from 'data-engine-js-components-web';
-import {getFields} from 'data-engine-js-components-web/js/utils/fields.es';
 import {
+	getFields,
 	getObjectFieldName,
 	getSelectedValue,
-} from 'data-engine-js-components-web/js/utils/objectFields';
+	useFormState,
+} from 'data-engine-js-components-web';
 import {fetch} from 'frontend-js-web';
 import React, {useEffect, useMemo} from 'react';
 
@@ -35,10 +35,6 @@ const normalizeDataType = (type) => {
 	const formattedType = type.toLowerCase();
 
 	return dataTypes[formattedType] ?? formattedType;
-};
-
-const formatLanguageId = (languageId) => {
-	return languageId.replace('_', '-');
 };
 
 const ObjectField = ({
@@ -63,24 +59,30 @@ const ObjectField = ({
 
 	const options = useMemo(() => {
 		const filteredObjectFields = objectFields.filter(
-			({listTypeDefinitionId, type}) => {
+			({listTypeDefinitionId, relationshipType, type}) => {
 				if (
 					!listTypeDefinitionId &&
-					(focusedFieldType == 'radio' ||
-						focusedFieldType == 'select') &&
+					(focusedFieldType === 'radio' ||
+						focusedFieldType === 'select') &&
 					normalizedDataType.includes(type.toLowerCase())
 				) {
 					return false;
 				}
 				else if (
 					listTypeDefinitionId &&
-					(focusedFieldType == 'checkbox_multiple' ||
-						focusedFieldType == 'color' ||
-						focusedFieldType == 'grid' ||
-						focusedFieldType == 'rich_text' ||
-						focusedFieldType == 'text') &&
+					(focusedFieldType === 'checkbox_multiple' ||
+						focusedFieldType === 'color' ||
+						focusedFieldType === 'grid' ||
+						focusedFieldType === 'rich_text' ||
+						focusedFieldType === 'text') &&
 					normalizedDataType.includes(type.toLowerCase())
 				) {
+					return false;
+				}
+				else if (focusedFieldType === 'text' && type === 'Clob') {
+					return true;
+				}
+				else if (relationshipType) {
 					return false;
 				}
 
@@ -102,10 +104,7 @@ const ObjectField = ({
 
 			return filteredObjectFields.map(({label, name}) => ({
 				disabled: !!mappedFields.includes(name),
-				label:
-					label[
-						formatLanguageId(themeDisplay.getDefaultLanguageId())
-					] ?? name,
+				label: label[themeDisplay.getDefaultLanguageId()] ?? name,
 				value: name,
 			}));
 		}
@@ -168,10 +167,7 @@ const ObjectDefinitionObjectField = ({
 	const options =
 		resource?.objectFields?.map(({label, name}) => {
 			return {
-				label:
-					label[
-						formatLanguageId(themeDisplay.getDefaultLanguageId())
-					] ?? name,
+				label: label[themeDisplay.getDefaultLanguageId()] ?? name,
 				value: name,
 			};
 		}) || [];

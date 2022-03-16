@@ -17,6 +17,7 @@ package com.liferay.headless.delivery.internal.resource.v1_0;
 import com.liferay.headless.delivery.dto.v1_0.Document;
 import com.liferay.headless.delivery.dto.v1_0.Rating;
 import com.liferay.headless.delivery.resource.v1_0.DocumentResource;
+import com.liferay.petra.function.UnsafeBiConsumer;
 import com.liferay.petra.function.UnsafeConsumer;
 import com.liferay.petra.function.UnsafeFunction;
 import com.liferay.petra.string.StringPool;
@@ -280,8 +281,9 @@ public abstract class BaseDocumentResourceImpl
 			).put(
 				"replace",
 				addAction(
-					ActionKeys.PERMISSIONS, "putAssetLibraryDocumentPermission",
-					portletName, assetLibraryId)
+					ActionKeys.PERMISSIONS,
+					"putAssetLibraryDocumentPermissionsPage", portletName,
+					assetLibraryId)
 			).build(),
 			assetLibraryId, portletName, roleNames);
 	}
@@ -307,7 +309,7 @@ public abstract class BaseDocumentResourceImpl
 	@javax.ws.rs.PUT
 	@Override
 	public Page<com.liferay.portal.vulcan.permission.Permission>
-			putAssetLibraryDocumentPermission(
+			putAssetLibraryDocumentPermissionsPage(
 				@io.swagger.v3.oas.annotations.Parameter(hidden = true)
 				@javax.validation.constraints.NotNull
 				@javax.ws.rs.PathParam("assetLibraryId")
@@ -339,8 +341,9 @@ public abstract class BaseDocumentResourceImpl
 			).put(
 				"replace",
 				addAction(
-					ActionKeys.PERMISSIONS, "putAssetLibraryDocumentPermission",
-					portletName, assetLibraryId)
+					ActionKeys.PERMISSIONS,
+					"putAssetLibraryDocumentPermissionsPage", portletName,
+					assetLibraryId)
 			).build(),
 			assetLibraryId, portletName, null);
 	}
@@ -909,7 +912,7 @@ public abstract class BaseDocumentResourceImpl
 			).put(
 				"replace",
 				addAction(
-					ActionKeys.PERMISSIONS, "putDocumentPermission",
+					ActionKeys.PERMISSIONS, "putDocumentPermissionsPage",
 					resourceName, resourceId)
 			).build(),
 			resourceId, resourceName, roleNames);
@@ -936,7 +939,7 @@ public abstract class BaseDocumentResourceImpl
 	@javax.ws.rs.PUT
 	@Override
 	public Page<com.liferay.portal.vulcan.permission.Permission>
-			putDocumentPermission(
+			putDocumentPermissionsPage(
 				@io.swagger.v3.oas.annotations.Parameter(hidden = true)
 				@javax.validation.constraints.NotNull
 				@javax.ws.rs.PathParam("documentId")
@@ -969,7 +972,7 @@ public abstract class BaseDocumentResourceImpl
 			).put(
 				"replace",
 				addAction(
-					ActionKeys.PERMISSIONS, "putDocumentPermission",
+					ActionKeys.PERMISSIONS, "putDocumentPermissionsPage",
 					resourceName, resourceId)
 			).build(),
 			resourceId, resourceName, null);
@@ -1353,7 +1356,7 @@ public abstract class BaseDocumentResourceImpl
 			).put(
 				"replace",
 				addAction(
-					ActionKeys.PERMISSIONS, "putSiteDocumentPermission",
+					ActionKeys.PERMISSIONS, "putSiteDocumentPermissionsPage",
 					portletName, siteId)
 			).build(),
 			siteId, portletName, roleNames);
@@ -1380,7 +1383,7 @@ public abstract class BaseDocumentResourceImpl
 	@javax.ws.rs.PUT
 	@Override
 	public Page<com.liferay.portal.vulcan.permission.Permission>
-			putSiteDocumentPermission(
+			putSiteDocumentPermissionsPage(
 				@io.swagger.v3.oas.annotations.Parameter(hidden = true)
 				@javax.validation.constraints.NotNull
 				@javax.ws.rs.PathParam("siteId")
@@ -1411,7 +1414,7 @@ public abstract class BaseDocumentResourceImpl
 			).put(
 				"replace",
 				addAction(
-					ActionKeys.PERMISSIONS, "putSiteDocumentPermission",
+					ActionKeys.PERMISSIONS, "putSiteDocumentPermissionsPage",
 					portletName, siteId)
 			).build(),
 			siteId, portletName, null);
@@ -1440,8 +1443,14 @@ public abstract class BaseDocumentResourceImpl
 				(MultipartBody)parameters.get("multipartBody"));
 		}
 
-		for (Document document : documents) {
-			documentUnsafeConsumer.accept(document);
+		if (contextBatchUnsafeConsumer != null) {
+			contextBatchUnsafeConsumer.accept(
+				documents, documentUnsafeConsumer);
+		}
+		else {
+			for (Document document : documents) {
+				documentUnsafeConsumer.accept(document);
+			}
 		}
 	}
 
@@ -1598,6 +1607,15 @@ public abstract class BaseDocumentResourceImpl
 		this.contextAcceptLanguage = contextAcceptLanguage;
 	}
 
+	public void setContextBatchUnsafeConsumer(
+		UnsafeBiConsumer
+			<java.util.Collection<Document>,
+			 UnsafeConsumer<Document, Exception>, Exception>
+				contextBatchUnsafeConsumer) {
+
+		this.contextBatchUnsafeConsumer = contextBatchUnsafeConsumer;
+	}
+
 	public void setContextCompany(
 		com.liferay.portal.kernel.model.Company contextCompany) {
 
@@ -1746,6 +1764,9 @@ public abstract class BaseDocumentResourceImpl
 	}
 
 	protected AcceptLanguage contextAcceptLanguage;
+	protected UnsafeBiConsumer
+		<java.util.Collection<Document>, UnsafeConsumer<Document, Exception>,
+		 Exception> contextBatchUnsafeConsumer;
 	protected com.liferay.portal.kernel.model.Company contextCompany;
 	protected HttpServletRequest contextHttpServletRequest;
 	protected HttpServletResponse contextHttpServletResponse;

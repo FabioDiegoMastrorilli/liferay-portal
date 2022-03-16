@@ -16,7 +16,9 @@ package com.liferay.commerce.checkout.web.internal.util;
 
 import com.liferay.commerce.checkout.helper.CommerceCheckoutStepHttpHelper;
 import com.liferay.commerce.checkout.web.internal.display.context.OrderSummaryCheckoutStepDisplayContext;
+import com.liferay.commerce.configuration.CommerceOrderCheckoutConfiguration;
 import com.liferay.commerce.constants.CommerceCheckoutWebKeys;
+import com.liferay.commerce.constants.CommerceConstants;
 import com.liferay.commerce.discount.exception.CommerceDiscountLimitationTimesException;
 import com.liferay.commerce.discount.exception.NoSuchDiscountException;
 import com.liferay.commerce.exception.CommerceOrderBillingAddressException;
@@ -34,20 +36,27 @@ import com.liferay.commerce.payment.util.CommercePaymentUtils;
 import com.liferay.commerce.percentage.PercentageFormatter;
 import com.liferay.commerce.price.CommerceOrderPriceCalculation;
 import com.liferay.commerce.price.CommerceProductPriceCalculation;
+import com.liferay.commerce.product.model.CommerceChannel;
 import com.liferay.commerce.product.option.CommerceOptionValueHelper;
 import com.liferay.commerce.product.service.CommerceChannelLocalService;
 import com.liferay.commerce.product.util.CPInstanceHelper;
 import com.liferay.commerce.service.CommerceOrderItemService;
 import com.liferay.commerce.service.CommerceOrderService;
+import com.liferay.commerce.term.service.CommerceTermEntryLocalService;
 import com.liferay.commerce.util.BaseCommerceCheckoutStep;
 import com.liferay.commerce.util.CommerceCheckoutStep;
+import com.liferay.commerce.util.CommerceShippingEngineRegistry;
 import com.liferay.commerce.util.CommerceShippingHelper;
 import com.liferay.frontend.taglib.servlet.taglib.util.JSPRenderer;
 import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
+import com.liferay.portal.kernel.module.configuration.ConfigurationProvider;
+import com.liferay.portal.kernel.service.ServiceContext;
+import com.liferay.portal.kernel.service.ServiceContextFactory;
 import com.liferay.portal.kernel.servlet.SessionErrors;
+import com.liferay.portal.kernel.settings.GroupServiceSettingsLocator;
 import com.liferay.portal.kernel.theme.ThemeDisplay;
 import com.liferay.portal.kernel.util.CookieKeys;
 import com.liferay.portal.kernel.util.ParamUtil;
@@ -107,9 +116,7 @@ public class OrderSummaryCommerceCheckoutStep extends BaseCommerceCheckoutStep {
 
 			_validateCommerceOrder(actionRequest, commerceOrderUuid);
 
-			_checkoutCommerceOrder(
-				_portal.getHttpServletRequest(actionRequest),
-				_portal.getHttpServletResponse(actionResponse));
+			_checkoutCommerceOrder(actionRequest, actionResponse);
 		}
 		catch (Exception exception) {
 			Throwable throwable = exception.getCause();
@@ -142,9 +149,10 @@ public class OrderSummaryCommerceCheckoutStep extends BaseCommerceCheckoutStep {
 				new OrderSummaryCheckoutStepDisplayContext(
 					_commerceChannelLocalService, _commerceOrderHttpHelper,
 					_commerceOrderPriceCalculation,
-					_commerceOrderValidatorRegistry, _commercePaymentEngine,
-					_commerceProductPriceCalculation,
-					_commerceOptionValueHelper, _cpInstanceHelper,
+					_commerceOrderValidatorRegistry, _commerceOptionValueHelper,
+					_commercePaymentEngine, _commerceProductPriceCalculation,
+					_commerceShippingEngineRegistry,
+					_commerceTermEntryLocalService, _cpInstanceHelper,
 					httpServletRequest, _percentageFormatter, _portal);
 
 		CommerceOrder commerceOrder =
@@ -210,29 +218,56 @@ public class OrderSummaryCommerceCheckoutStep extends BaseCommerceCheckoutStep {
 				themeDisplay.getLocale(), commerceOrder);
 		}
 		catch (PortalException portalException) {
-			_log.error(portalException, portalException);
+			_log.error(portalException);
 
 			return false;
 		}
 	}
 
 	private void _checkoutCommerceOrder(
-			HttpServletRequest httpServletRequest,
-			HttpServletResponse httpServletResponse)
+			ActionRequest actionRequest, ActionResponse actionResponse)
 		throws Exception {
+
+		HttpServletRequest httpServletRequest = _portal.getHttpServletRequest(
+			actionRequest);
 
 		CommerceOrder commerceOrder =
 			(CommerceOrder)httpServletRequest.getAttribute(
 				CommerceCheckoutWebKeys.COMMERCE_ORDER);
 
 		if (commerceOrder.isOpen()) {
+			if (_isCheckoutRequestedDeliveryDateEnabled(commerceOrder)) {
+				int requestedDeliveryDateMonth = ParamUtil.getInteger(
+					actionRequest, "requestedDeliveryDateMonth");
+				int requestedDeliveryDateDay = ParamUtil.getInteger(
+					actionRequest, "requestedDeliveryDateDay");
+				int requestedDeliveryDateYear = ParamUtil.getInteger(
+					actionRequest, "requestedDeliveryDateYear");
+
+				if ((requestedDeliveryDateMonth > -1) &&
+					(requestedDeliveryDateDay > 0) &&
+					(requestedDeliveryDateYear > 0)) {
+
+					ServiceContext serviceContext =
+						ServiceContextFactory.getInstance(
+							CommerceOrder.class.getName(), actionRequest);
+
+					_commerceOrderService.updateInfo(
+						commerceOrder.getCommerceOrderId(),
+						commerceOrder.getPrintedNote(),
+						requestedDeliveryDateMonth, requestedDeliveryDateDay,
+						requestedDeliveryDateYear, 0, 0, serviceContext);
+				}
+			}
+
 			CommerceOrder checkedOutCommerceOrder =
 				_commerceOrderEngine.checkoutCommerceOrder(
 					commerceOrder, _portal.getUserId(httpServletRequest));
 
 			if (!checkedOutCommerceOrder.isOpen()) {
 				CookieKeys.deleteCookies(
-					httpServletRequest, httpServletResponse,
+					httpServletRequest,
+					_portal.getHttpServletResponse(actionResponse),
 					CookieKeys.getDomain(httpServletRequest),
 					CommerceOrder.class.getName() + StringPool.POUND +
 						commerceOrder.getGroupId());
@@ -248,6 +283,25 @@ public class OrderSummaryCommerceCheckoutStep extends BaseCommerceCheckoutStep {
 						commerceOrder.getGroupId());
 			}
 		}
+	}
+
+	private boolean _isCheckoutRequestedDeliveryDateEnabled(
+			CommerceOrder commerceOrder)
+		throws Exception {
+
+		CommerceChannel commerceChannel =
+			_commerceChannelLocalService.getCommerceChannelByOrderGroupId(
+				commerceOrder.getGroupId());
+
+		CommerceOrderCheckoutConfiguration commerceOrderCheckoutConfiguration =
+			_configurationProvider.getConfiguration(
+				CommerceOrderCheckoutConfiguration.class,
+				new GroupServiceSettingsLocator(
+					commerceChannel.getGroupId(),
+					CommerceConstants.SERVICE_NAME_COMMERCE_ORDER));
+
+		return commerceOrderCheckoutConfiguration.
+			checkoutRequestedDeliveryDateEnabled();
 	}
 
 	private void _validateCommerceOrder(
@@ -364,7 +418,16 @@ public class OrderSummaryCommerceCheckoutStep extends BaseCommerceCheckoutStep {
 	private CommerceProductPriceCalculation _commerceProductPriceCalculation;
 
 	@Reference
+	private CommerceShippingEngineRegistry _commerceShippingEngineRegistry;
+
+	@Reference
 	private CommerceShippingHelper _commerceShippingHelper;
+
+	@Reference
+	private CommerceTermEntryLocalService _commerceTermEntryLocalService;
+
+	@Reference
+	private ConfigurationProvider _configurationProvider;
 
 	@Reference
 	private CPInstanceHelper _cpInstanceHelper;

@@ -1,6 +1,7 @@
-@component-name = "portal-collaboration"
+@component-name = "portal-lima"
 definition {
 
+	property portal.acceptance = "true";
 	property portal.release = "true";
 	property portal.upstream = "true";
 	property testray.main.component.name = "Blogs";
@@ -32,7 +33,7 @@ definition {
 		}
 	}
 
-	@description = "This test checks that an inline image can be added to a blog."
+	@description = "This is a usecase for LPS-110117. This test checks that an inline image can be added to a blog."
 	@priority = "4"
 	@refactordone
 	@uitest
@@ -43,6 +44,7 @@ definition {
 
 		BlogsEntry.addContentWithInlineImage(
 			entryContent = "Blogs Entry Content",
+			entryInlineImageURL = "www.liferay.com",
 			navTab = "Upload Image",
 			uploadFileName = "Document_1.jpg");
 
@@ -101,7 +103,7 @@ definition {
 	@priority = "4"
 	@refactordone
 	test CanChangeCoverImage {
-		var imageId	= JSONBlog.uploadBlogImage(
+		var imageId = JSONBlog.uploadBlogImage(
 			groupName = "Guest",
 			sourceFileName = "Document_1.jpg");
 
@@ -142,7 +144,7 @@ definition {
 	@priority = "4"
 	@refactordone
 	test CanRemoveCoverImage {
-		var imageId	= JSONBlog.uploadBlogImage(
+		var imageId = JSONBlog.uploadBlogImage(
 			groupName = "Guest",
 			sourceFileName = "Document_1.jpg");
 
@@ -192,7 +194,6 @@ definition {
 	@priority = "5"
 	@refactordone
 	test CanRemoveSmallImage {
-		property portal.acceptance = "true";
 		property testray.component.names = "WYSIWYG";
 
 		BlogsNavigator.openToAddEntry(
@@ -338,7 +339,7 @@ definition {
 	@priority = "4"
 	@refactordone
 	test CanUseBlogImageForDifferentEntries {
-		var imageId	= JSONBlog.uploadBlogImage(
+		var imageId = JSONBlog.uploadBlogImage(
 			groupName = "Guest",
 			sourceFileName = "Document_1.jpg");
 
@@ -409,7 +410,7 @@ definition {
 	@priority = "3"
 	@refactordone
 	test CanViewCoverImageDetails {
-		var imageId	= JSONBlog.uploadBlogImage(
+		var imageId = JSONBlog.uploadBlogImage(
 			groupName = "Guest",
 			sourceFileName = "Document_1.jpg");
 

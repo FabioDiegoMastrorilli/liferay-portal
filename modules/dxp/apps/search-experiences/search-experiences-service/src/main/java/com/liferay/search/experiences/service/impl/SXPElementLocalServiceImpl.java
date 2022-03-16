@@ -28,7 +28,6 @@ import com.liferay.portal.kernel.systemevent.SystemEvent;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.workflow.WorkflowConstants;
 import com.liferay.search.experiences.exception.SXPElementElementDefinitionJSONException;
-import com.liferay.search.experiences.exception.SXPElementReadOnlyException;
 import com.liferay.search.experiences.exception.SXPElementTitleException;
 import com.liferay.search.experiences.model.SXPElement;
 import com.liferay.search.experiences.service.base.SXPElementLocalServiceBaseImpl;
@@ -45,6 +44,7 @@ import org.osgi.service.component.annotations.Reference;
  * @author Brian Wing Shun Chan
  */
 @Component(
+	enabled = false,
 	property = "model.class.name=com.liferay.search.experiences.model.SXPElement",
 	service = AopService.class
 )
@@ -55,7 +55,7 @@ public class SXPElementLocalServiceImpl extends SXPElementLocalServiceBaseImpl {
 	public SXPElement addSXPElement(
 			long userId, Map<Locale, String> descriptionMap,
 			String elementDefinitionJSON, boolean readOnly,
-			Map<Locale, String> titleMap, int type,
+			String schemaVersion, Map<Locale, String> titleMap, int type,
 			ServiceContext serviceContext)
 		throws PortalException {
 
@@ -74,6 +74,7 @@ public class SXPElementLocalServiceImpl extends SXPElementLocalServiceBaseImpl {
 		sxpElement.setElementDefinitionJSON(elementDefinitionJSON);
 		sxpElement.setHidden(false);
 		sxpElement.setReadOnly(readOnly);
+		sxpElement.setSchemaVersion(schemaVersion);
 		sxpElement.setTitleMap(titleMap);
 		sxpElement.setType(type);
 		sxpElement.setStatus(WorkflowConstants.STATUS_APPROVED);
@@ -83,6 +84,18 @@ public class SXPElementLocalServiceImpl extends SXPElementLocalServiceBaseImpl {
 		_resourceLocalService.addModelResources(sxpElement, serviceContext);
 
 		return sxpElement;
+	}
+
+	@Override
+	public void deleteCompanySXPElements(long companyId)
+		throws PortalException {
+
+		List<SXPElement> sxpElements = sxpElementPersistence.findByCompanyId(
+			companyId);
+
+		for (SXPElement sxpElement : sxpElements) {
+			sxpElementLocalService.deleteSXPElement(sxpElement);
+		}
 	}
 
 	@Override
@@ -101,12 +114,6 @@ public class SXPElementLocalServiceImpl extends SXPElementLocalServiceBaseImpl {
 	public SXPElement deleteSXPElement(SXPElement sxpElement)
 		throws PortalException {
 
-		// TODO Who can and delete create read only search experiences elements?
-
-		if (sxpElement.isReadOnly()) {
-			throw new SXPElementReadOnlyException();
-		}
-
 		sxpElement = sxpElementPersistence.remove(sxpElement);
 
 		_resourceLocalService.deleteResource(
@@ -115,8 +122,9 @@ public class SXPElementLocalServiceImpl extends SXPElementLocalServiceBaseImpl {
 		return sxpElement;
 	}
 
-	public List<SXPElement> getSXPElements(long companyId) {
-		return sxpElementPersistence.findByCompanyId(companyId);
+	@Override
+	public List<SXPElement> getSXPElements(long companyId, boolean readOnly) {
+		return sxpElementPersistence.findByC_R(companyId, readOnly);
 	}
 
 	@Indexable(type = IndexableType.REINDEX)
@@ -140,7 +148,7 @@ public class SXPElementLocalServiceImpl extends SXPElementLocalServiceBaseImpl {
 	@Override
 	public SXPElement updateSXPElement(
 			long userId, long sxpElementId, Map<Locale, String> descriptionMap,
-			String elementDefinitionJSON, boolean hidden,
+			String elementDefinitionJSON, boolean hidden, String schemaVersion,
 			Map<Locale, String> titleMap, ServiceContext serviceContext)
 		throws PortalException {
 
@@ -153,6 +161,7 @@ public class SXPElementLocalServiceImpl extends SXPElementLocalServiceBaseImpl {
 		sxpElement.setDescriptionMap(descriptionMap);
 		sxpElement.setElementDefinitionJSON(elementDefinitionJSON);
 		sxpElement.setHidden(hidden);
+		sxpElement.setSchemaVersion(schemaVersion);
 		sxpElement.setTitleMap(titleMap);
 
 		return updateSXPElement(sxpElement);

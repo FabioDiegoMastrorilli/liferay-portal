@@ -30,6 +30,10 @@ public class FriendlyURLEntryLocalServiceWrapper
 	implements FriendlyURLEntryLocalService,
 			   ServiceWrapper<FriendlyURLEntryLocalService> {
 
+	public FriendlyURLEntryLocalServiceWrapper() {
+		this(null);
+	}
+
 	public FriendlyURLEntryLocalServiceWrapper(
 		FriendlyURLEntryLocalService friendlyURLEntryLocalService) {
 
@@ -357,6 +361,15 @@ public class FriendlyURLEntryLocalServiceWrapper
 
 		return _friendlyURLEntryLocalService.fetchFriendlyURLEntryLocalization(
 			friendlyURLEntryId, languageId);
+	}
+
+	@Override
+	public FriendlyURLEntry fetchMainFriendlyURLEntry(
+			long classNameId, long classPK)
+		throws com.liferay.portal.kernel.exception.PortalException {
+
+		return _friendlyURLEntryLocalService.fetchMainFriendlyURLEntry(
+			classNameId, classPK);
 	}
 
 	@Override

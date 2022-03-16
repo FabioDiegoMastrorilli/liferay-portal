@@ -39,7 +39,7 @@ import {BUILDER_INITIAL_STATE, initState} from './config/initialState.es';
 import {AutoSaveProvider} from './hooks/useAutoSave.es';
 import {ToastProvider} from './hooks/useToast.es';
 import {FormBuilder} from './pages/FormBuilder.es';
-import {Report} from './pages/Report.es';
+import {Report} from './pages/Report';
 import {RuleBuilder} from './pages/RuleBuilder.es';
 import {
 	elementSetReducer,
@@ -52,7 +52,7 @@ import {
  * Exporting default application to Forms Admin. Only Providers and
  * routing must be defined.
  */
-export const App = ({autosaveInterval, autosaveURL, ...otherProps}) => {
+export function App({autosaveInterval, autosaveURL, ...otherProps}) {
 	const {config, state} = parseProps(otherProps);
 
 	return (
@@ -79,42 +79,43 @@ export const App = ({autosaveInterval, autosaveURL, ...otherProps}) => {
 						]}
 						value={state}
 					>
-						<AutoSaveProvider
-							interval={autosaveInterval}
-							url={autosaveURL}
-						>
-							<ToastProvider>
-								<Router>
-									<Switch>
+						<ToastProvider>
+							<Router>
+								<Switch>
+									<AutoSaveProvider
+										interval={autosaveInterval}
+										url={autosaveURL}
+									>
 										<Route
 											component={NavigationBar}
 											path="/"
 										/>
-									</Switch>
-									<Switch>
+
 										<Route
 											component={FormBuilder}
 											exact
 											path="/"
 										/>
+
 										<Route
 											component={RuleBuilder}
 											path="/rules"
 										/>
+
 										<Route
 											component={Report}
 											path="/report"
 										/>
-									</Switch>
-								</Router>
-							</ToastProvider>
-						</AutoSaveProvider>
+									</AutoSaveProvider>
+								</Switch>
+							</Router>
+						</ToastProvider>
 					</FormProvider>
 				</ClayModalProvider>
 			</ConfigProvider>
 		</DndProvider>
 	);
-};
+}
 
 App.displayName = 'App';
 

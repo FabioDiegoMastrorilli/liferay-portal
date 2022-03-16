@@ -19,6 +19,7 @@ AUI.add(
 
 		var LString = Lang.String;
 
+		// eslint-disable-next-line @liferay/aui/no-object
 		var AObject = A.Object;
 
 		var BOUNDING_BOX = 'boundingBox';
@@ -241,7 +242,7 @@ AUI.add(
 					var assetType = instance._getTreeNodeAssetType(treeNode);
 
 					if (Lang.isValue(assetId)) {
-						if (assetType == 'category') {
+						if (assetType === 'category') {
 							data.categoryId = assetId;
 
 							if (parentVocabularyId) {
@@ -288,7 +289,7 @@ AUI.add(
 					else {
 						if (
 							!portalModelResource &&
-							themeDisplay.getSiteGroupId() !=
+							themeDisplay.getSiteGroupId() !==
 								themeDisplay.getCompanyGroupId()
 						) {
 							groupIds.push(themeDisplay.getSiteGroupId());
@@ -689,7 +690,7 @@ AUI.add(
 						item.titleCurrentValue
 					);
 
-					if (item.groupId == themeDisplay.getCompanyGroupId()) {
+					if (item.groupId === themeDisplay.getCompanyGroupId()) {
 						vocabularyTitle +=
 							' (' + Liferay.Language.get('global') + ')';
 					}

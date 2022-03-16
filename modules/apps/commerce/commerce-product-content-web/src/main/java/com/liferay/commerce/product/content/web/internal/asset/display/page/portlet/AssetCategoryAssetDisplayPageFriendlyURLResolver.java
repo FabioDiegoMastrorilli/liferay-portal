@@ -24,6 +24,7 @@ import com.liferay.asset.kernel.service.AssetTagLocalService;
 import com.liferay.commerce.product.configuration.CPDisplayLayoutConfiguration;
 import com.liferay.commerce.product.constants.CPConstants;
 import com.liferay.commerce.product.constants.CPPortletKeys;
+import com.liferay.commerce.product.content.web.internal.asset.display.page.portlet.helper.AssetDisplayPageFriendlyURLResolverHelper;
 import com.liferay.commerce.product.model.CPDisplayLayout;
 import com.liferay.commerce.product.model.CommerceChannel;
 import com.liferay.commerce.product.service.CPDisplayLayoutLocalService;
@@ -47,7 +48,7 @@ import com.liferay.portal.kernel.service.GroupLocalService;
 import com.liferay.portal.kernel.service.LayoutLocalService;
 import com.liferay.portal.kernel.settings.GroupServiceSettingsLocator;
 import com.liferay.portal.kernel.theme.ThemeDisplay;
-import com.liferay.portal.kernel.util.FriendlyURLNormalizerUtil;
+import com.liferay.portal.kernel.util.FriendlyURLNormalizer;
 import com.liferay.portal.kernel.util.Http;
 import com.liferay.portal.kernel.util.InheritableMap;
 import com.liferay.portal.kernel.util.ListUtil;
@@ -87,7 +88,7 @@ public class AssetCategoryAssetDisplayPageFriendlyURLResolver
 			_assetDisplayPageFriendlyURLResolverHelper.getURLSeparatorLength(
 				getURLSeparator()));
 
-		urlTitle = FriendlyURLNormalizerUtil.normalizeWithEncoding(urlTitle);
+		urlTitle = _friendlyURLNormalizer.normalizeWithEncoding(urlTitle);
 
 		FriendlyURLEntry friendlyURLEntry =
 			_friendlyURLEntryLocalService.fetchFriendlyURLEntry(
@@ -204,7 +205,7 @@ public class AssetCategoryAssetDisplayPageFriendlyURLResolver
 				requestContext);
 		}
 
-		Layout layout = getAssetCategoryLayout(
+		Layout layout = _getAssetCategoryLayout(
 			groupId, privateLayout, assetCategory.getCategoryId());
 
 		return new LayoutFriendlyURLComposite(
@@ -218,7 +219,7 @@ public class AssetCategoryAssetDisplayPageFriendlyURLResolver
 			CompanyThreadLocal.getCompanyId());
 	}
 
-	protected Layout getAssetCategoryLayout(
+	private Layout _getAssetCategoryLayout(
 			long groupId, boolean privateLayout, long categoryId)
 		throws PortalException {
 
@@ -265,8 +266,15 @@ public class AssetCategoryAssetDisplayPageFriendlyURLResolver
 			return _layoutLocalService.getLayout(plid);
 		}
 
-		return _layoutLocalService.getLayoutByUuidAndGroupId(
+		Layout layout = _layoutLocalService.fetchLayoutByUuidAndGroupId(
 			cpDisplayLayout.getLayoutUuid(), groupId, privateLayout);
+
+		if (layout == null) {
+			layout = _layoutLocalService.fetchLayoutByUuidAndGroupId(
+				cpDisplayLayout.getLayoutUuid(), groupId, !privateLayout);
+		}
+
+		return layout;
 	}
 
 	private String _getBasicLayoutURL(
@@ -275,7 +283,7 @@ public class AssetCategoryAssetDisplayPageFriendlyURLResolver
 			AssetCategory assetCategory)
 		throws PortalException {
 
-		Layout layout = getAssetCategoryLayout(
+		Layout layout = _getAssetCategoryLayout(
 			groupId, privateLayout, assetCategory.getCategoryId());
 
 		String layoutActualURL = _portal.getLayoutActualURL(layout, mainPath);
@@ -367,6 +375,9 @@ public class AssetCategoryAssetDisplayPageFriendlyURLResolver
 
 	@Reference
 	private FriendlyURLEntryLocalService _friendlyURLEntryLocalService;
+
+	@Reference
+	private FriendlyURLNormalizer _friendlyURLNormalizer;
 
 	@Reference
 	private GroupLocalService _groupLocalService;

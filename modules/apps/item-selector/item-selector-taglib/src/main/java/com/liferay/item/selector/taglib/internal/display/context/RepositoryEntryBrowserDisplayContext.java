@@ -15,6 +15,8 @@
 package com.liferay.item.selector.taglib.internal.display.context;
 
 import com.liferay.document.library.constants.DLContentTypes;
+import com.liferay.document.library.kernel.util.ImageProcessorUtil;
+import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.model.Group;
 import com.liferay.portal.kernel.repository.model.FileVersion;
@@ -57,17 +59,44 @@ public class RepositoryEntryBrowserDisplayContext {
 		return group.getDescriptiveName(locale);
 	}
 
+	public String getType(FileVersion fileVersion) {
+		if (fileVersion == null) {
+			return StringPool.BLANK;
+		}
+
+		if (ArrayUtil.contains(
+				PropsValues.DL_FILE_ENTRY_PREVIEW_AUDIO_MIME_TYPES,
+				fileVersion.getMimeType())) {
+
+			return "audio";
+		}
+
+		if (ImageProcessorUtil.isSupported(fileVersion.getMimeType())) {
+			return "image";
+		}
+
+		if (ArrayUtil.contains(
+				PropsValues.DL_FILE_ENTRY_PREVIEW_VIDEO_MIME_TYPES,
+				fileVersion.getMimeType()) ||
+			Objects.equals(
+				DLContentTypes.VIDEO_EXTERNAL_SHORTCUT,
+				fileVersion.getMimeType())) {
+
+			return "video";
+		}
+
+		return StringPool.BLANK;
+	}
+
 	public boolean isPreviewable(FileVersion fileVersion) {
 		if (fileVersion == null) {
 			return false;
 		}
 
 		if (ArrayUtil.contains(
-				PropsValues.DL_FILE_ENTRY_PREVIEW_IMAGE_MIME_TYPES,
-				fileVersion.getMimeType()) ||
-			ArrayUtil.contains(
 				PropsValues.DL_FILE_ENTRY_PREVIEW_VIDEO_MIME_TYPES,
 				fileVersion.getMimeType()) ||
+			ImageProcessorUtil.isImageSupported(fileVersion.getMimeType()) ||
 			Objects.equals(
 				DLContentTypes.VIDEO_EXTERNAL_SHORTCUT,
 				fileVersion.getMimeType())) {

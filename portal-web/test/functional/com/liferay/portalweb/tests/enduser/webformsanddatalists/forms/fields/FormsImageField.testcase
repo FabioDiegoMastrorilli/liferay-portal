@@ -2,6 +2,8 @@
 definition {
 
 	property custom.properties = "minifier.enabled=true";
+	property osgi.module.configuration.file.names = "com.liferay.frontend.js.loader.modules.extender.internal.configuration.Details.config";
+	property osgi.module.configurations = "waitTimeout=&quot;15&quot;";
 	property portal.release = "true";
 	property portal.upstream = "true";
 	property testray.main.component.name = "Forms";
@@ -22,12 +24,12 @@ definition {
 			Navigator.openURL();
 
 			ProductMenu.gotoPortlet(
-				category = "Content &amp; Data",
+				category = "Content & Data",
 				portlet = "Forms");
 
 			FormsAdmin.teardownForms();
 
-			Page.tearDownCP();
+			PagesAdmin.tearDownCP();
 		}
 	}
 
@@ -94,8 +96,6 @@ definition {
 	@description = "Verify that an Image Field can be duplicated"
 	@priority = "5"
 	test CanBeDuplicated {
-		property forms.functional = "true";
-
 		FormsAdmin.addForm();
 
 		Form.editName(formName = "Form 1");
@@ -217,8 +217,6 @@ definition {
 	@description = "Verify that an Image Field can be set to repeatable"
 	@priority = "5"
 	test CanBeSetToRepeatable {
-		property forms.functional = "true";
-
 		FormsAdmin.addForm();
 
 		Form.editName(formName = "Form 1");
@@ -263,7 +261,7 @@ definition {
 	@description = "Verify that an image can be uploaded"
 	@priority = "5"
 	test CanUploadAnImage {
-		property forms.functional = "true";
+		property portal.acceptance = "true";
 
 		FormsAdmin.addForm();
 
@@ -294,12 +292,12 @@ definition {
 	@description = "Verify that an image can be uploaded from Liferay Documents and Media"
 	@priority = "5"
 	test CanUploadFromDocumentsAndMedia {
-		property forms.functional = "true";
+		property portal.acceptance = "true";
 
 		var siteName = TestCase.getSiteName(siteName = "${siteName}");
 
 		ProductMenu.gotoPortlet(
-			category = "Content &amp; Data",
+			category = "Content & Data",
 			portlet = "Documents and Media");
 
 		DMDocument.addCP(
@@ -336,7 +334,6 @@ definition {
 	@ignore = "Test Stub"
 	@priority = "5"
 	test ChangesCanBeCanceled {
-		property forms.functional = "false";
 		property portal.acceptance = "false";
 
 		// TODO LPS-133038 ChangesCanBeCanceled pending implementation
@@ -346,7 +343,7 @@ definition {
 	@description = "Verify that an Image Description can be added to an uploaded Image"
 	@priority = "4"
 	test DescriptionCanBeAdded {
-		property forms.functional = "true";
+		property portal.acceptance = "true";
 
 		FormsAdmin.addForm();
 
@@ -396,8 +393,6 @@ definition {
 	@description = "Verify that a help text can be added to an Image Field"
 	@priority = "5"
 	test HelpTextCanBeAdded {
-		property forms.functional = "true";
-
 		FormsAdmin.addForm();
 
 		Form.editName(formName = "Form 1");
@@ -435,8 +430,6 @@ definition {
 	@description = "Verify that the Field Label can be edited"
 	@priority = "5"
 	test LabelCanBeEdited {
-		property forms.functional = "true";
-
 		FormsAdmin.addForm();
 
 		Form.editName(formName = "Form 1");
@@ -464,7 +457,7 @@ definition {
 	@description = "Veriy that the Field Label can be hidden"
 	@priority = "5"
 	test LabelCanBeHidden {
-		property forms.functional = "true";
+		property portal.acceptance = "true";
 
 		FormsAdmin.addForm();
 
@@ -496,7 +489,7 @@ definition {
 	@description = "Verify that a Predefined Value can be set"
 	@priority = "4"
 	test PredefinedValueCanBeAdded {
-		property forms.functional = "true";
+		property portal.acceptance = "true";
 
 		FormsAdmin.addForm();
 
@@ -531,7 +524,7 @@ definition {
 	@description = "Verify that the Field Reference can be edited"
 	@priority = "5"
 	test ReferenceCanBeEdited {
-		property forms.functional = "true";
+		property portal.acceptance = "true";
 
 		FormsAdmin.addForm();
 
@@ -559,7 +552,7 @@ definition {
 	@description = "Verify that an image added to the Image Field can be removed by clicking the Clear button"
 	@priority = "5"
 	test SelectedImagesCanBeCleared {
-		property forms.functional = "true";
+		property portal.acceptance = "true";
 
 		FormsAdmin.addForm();
 
@@ -599,7 +592,6 @@ definition {
 	@ignore = "Test Stub"
 	@priority = "5"
 	test TypeCanBeChanged {
-		property forms.functional = "false";
 		property portal.acceptance = "false";
 
 		// TODO LPS-133037 TypeCanBeChanged pending implementation

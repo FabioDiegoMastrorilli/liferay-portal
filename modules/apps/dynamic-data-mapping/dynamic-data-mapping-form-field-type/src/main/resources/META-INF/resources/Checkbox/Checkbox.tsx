@@ -20,6 +20,8 @@ import React from 'react';
 
 import {FieldBase} from '../FieldBase/ReactFieldBase.es';
 
+import type {FieldChangeEventHandler} from '../types';
+
 const Switcher: React.FC<ISwitcherProps> = ({
 	checked,
 	disabled,
@@ -43,7 +45,9 @@ const Switcher: React.FC<ISwitcherProps> = ({
 					toggled={checked}
 					value={String(checked)}
 				/>
+
 				{showLabel && label}
+
 				{required && (
 					<ClayIcon className="reference-mark" symbol="asterisk" />
 				)}
@@ -53,6 +57,7 @@ const Switcher: React.FC<ISwitcherProps> = ({
 					<span className="ddm-tooltip">
 						<ClayIcon symbol="info-circle" />
 					</span>
+
 					<div
 						className="ddm-info-text"
 						dangerouslySetInnerHTML={{
@@ -141,6 +146,7 @@ const Main: React.FC<IProps> = ({
 				showMaximumRepetitionsInfo={showMaximumRepetitionsInfo}
 				systemSettingsURL={systemSettingsURL}
 			/>
+
 			<ClayInput name={name} type="hidden" value={`${checked}`} />
 		</FieldBase>
 	);

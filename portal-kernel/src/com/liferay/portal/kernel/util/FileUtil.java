@@ -155,20 +155,14 @@ public class FileUtil {
 	 * @return the extracted text if it is a supported format or an empty string
 	 *         if it is an unsupported format
 	 */
-	public static String extractText(InputStream inputStream, String fileName) {
-		return _file.extractText(inputStream, fileName);
+	public static String extractText(InputStream inputStream) {
+		return _file.extractText(inputStream);
 	}
 
 	public static String extractText(
-		InputStream inputStream, String fileName, int maxStringLength) {
+		InputStream inputStream, int maxStringLength) {
 
-		return _file.extractText(inputStream, fileName, maxStringLength);
-	}
-
-	public static String[] find(
-		String directory, String includes, String excludes) {
-
-		return _file.find(directory, includes, excludes);
+		return _file.extractText(inputStream, maxStringLength);
 	}
 
 	public static String getAbsolutePath(File file) {
@@ -220,10 +214,6 @@ public class FileUtil {
 
 	public static String getShortFileName(String fullFileName) {
 		return _file.getShortFileName(fullFileName);
-	}
-
-	public static boolean isAscii(File file) throws IOException {
-		return _file.isAscii(file);
 	}
 
 	public static boolean isSameContent(File file, byte[] bytes, int length) {

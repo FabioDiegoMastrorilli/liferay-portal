@@ -68,7 +68,9 @@ definition {
 
 			ACNavigation.openItem(itemName = "${dataSource}");
 
-			ACSettings.assertDataSourceStatus(status = "Active");
+			ACSettings.assertDataSourceStatus(
+				section = "Current Status",
+				status = "Active");
 		}
 	}
 
@@ -115,8 +117,12 @@ definition {
 	}
 
 	@description = "Automation ID: LRAC-9094 | Test Summary: Admin can remove data sources"
+	@ignore = "true"
 	@priority = "3"
 	test AdminCanRemoveDataSources {
+
+		// AC Bug ticket: LRAC-10534
+
 		task ("Logout AC and login as an admin user") {
 			ACWorkspace.signOut();
 
@@ -154,7 +160,9 @@ definition {
 
 			ACNavigation.openItem(itemName = "${dataSource}");
 
-			ACSettings.assertDataSourceStatus(status = "Active");
+			ACSettings.assertDataSourceStatus(
+				section = "Current Status",
+				status = "Active");
 		}
 
 		task ("Assert that the data source was removed") {
@@ -340,7 +348,6 @@ definition {
 			var workspaceURL = Navigator.getCurrentURL();
 
 			var workspaceURL = StringUtil.extractFirst("${workspaceURL}", "workspace");
-
 			var workspaceURL = StringUtil.add("${workspaceURL}", "workspace/0000", "");
 		}
 
@@ -551,7 +558,9 @@ definition {
 
 			ACNavigation.openItem(itemName = "${dataSource}");
 
-			ACSettings.assertDataSourceStatus(status = "Active");
+			ACSettings.assertDataSourceStatus(
+				section = "Current Status",
+				status = "Active");
 		}
 	}
 
@@ -599,8 +608,12 @@ definition {
 	}
 
 	@description = "Automation ID: LRAC-9091 | Test Summary: Owner can remove data sources"
+	@ignore = "true"
 	@priority = "5"
 	test OwnerCanRemoveDataSources {
+
+		// AC Bug ticket: LRAC-10534
+
 		task ("Connect DXP to AC") {
 			ACSettings.takeTokenFromAnalyticsCloud();
 
@@ -622,9 +635,9 @@ definition {
 		task ("Delete the data source and check if it has been deleted") {
 			ACSettings.deleteDataSource(dataSourceName = "${dataSource}");
 
-			AssertElementNotPresent(
-				itemName = "${dataSource}",
-				locator1 = "ACSettings#ITEM_ON_LIST");
+			TestUtils.hardRefresh();
+
+			ACUtils.assertItemsNameNotPresent(itemList = "${dataSource}");
 		}
 	}
 
@@ -856,12 +869,12 @@ definition {
 		task ("Assert that the first item on the list was changed") {
 			AssertElementPresent(
 				key_index = "1",
-				key_KeywordName = "test test",
+				key_keywordName = "test test",
 				locator1 = "ACSettings#KEYWORD_NAME_BY_INDEX");
 
 			AssertElementPresent(
 				key_index = "5",
-				key_KeywordName = "bryan cheung",
+				key_keywordName = "bryan cheung",
 				locator1 = "ACSettings#KEYWORD_NAME_BY_INDEX");
 		}
 
@@ -872,12 +885,12 @@ definition {
 		task ("Assert that the first item on the list was changed") {
 			AssertElementPresent(
 				key_index = "1",
-				key_KeywordName = "bryan cheung",
+				key_keywordName = "bryan cheung",
 				locator1 = "ACSettings#KEYWORD_NAME_BY_INDEX");
 
 			AssertElementPresent(
 				key_index = "5",
-				key_KeywordName = "Test Test",
+				key_keywordName = "Test Test",
 				locator1 = "ACSettings#KEYWORD_NAME_BY_INDEX");
 		}
 	}

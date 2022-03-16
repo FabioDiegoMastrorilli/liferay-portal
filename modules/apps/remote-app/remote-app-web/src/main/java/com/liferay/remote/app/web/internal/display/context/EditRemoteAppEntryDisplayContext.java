@@ -106,6 +106,11 @@ public class EditRemoteAppEntryDisplayContext {
 		return customElementURLs;
 	}
 
+	public String getDescription() {
+		return BeanParamUtil.getString(
+			_remoteAppEntry, _portletRequest, "description");
+	}
+
 	public String getName() {
 		return BeanParamUtil.getString(
 			_remoteAppEntry, _portletRequest, "name");
@@ -192,6 +197,11 @@ public class EditRemoteAppEntryDisplayContext {
 		ThemeDisplay themeDisplay = _getThemeDisplay();
 
 		return _remoteAppEntry.getName(themeDisplay.getLocale());
+	}
+
+	public boolean isCustomElementUseESM() {
+		return BeanParamUtil.getBoolean(
+			_remoteAppEntry, _getHttpServletRequest(), "customElementUseESM");
 	}
 
 	public boolean isEditingRemoteAppEntryType(String type) {

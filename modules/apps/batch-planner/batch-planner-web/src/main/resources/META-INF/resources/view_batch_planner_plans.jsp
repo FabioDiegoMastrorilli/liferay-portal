@@ -56,8 +56,9 @@ BatchPlannerPlanManagementToolbarDisplayContext batchPlannerPlanManagementToolba
 
 				<portlet:renderURL var="rowURL">
 					<portlet:param name="mvcRenderCommandName" value='<%= batchPlannerPlan.isExport() ?"/batch_planner/edit_export_batch_planner_plan" : "/batch_planner/edit_import_batch_planner_plan" %>' />
-					<portlet:param name="redirect" value="<%= currentURL %>" />
+					<portlet:param name="backURL" value="<%= currentURL %>" />
 					<portlet:param name="batchPlannerPlanId" value="<%= String.valueOf(batchPlannerPlan.getBatchPlannerPlanId()) %>" />
+					<portlet:param name="editable" value="true" />
 				</portlet:renderURL>
 
 				<liferay-ui:search-container-column-text
@@ -80,6 +81,11 @@ BatchPlannerPlanManagementToolbarDisplayContext batchPlannerPlanManagementToolba
 				<liferay-ui:search-container-column-text
 					name="type"
 					value="<%= batchPlannerPlanDisplayContext.getSimpleInternalClassName(batchPlannerPlan.getInternalClassName()) %>"
+				/>
+
+				<liferay-ui:search-container-column-text
+					name="format"
+					value="<%= batchPlannerPlan.getExternalType() %>"
 				/>
 
 				<liferay-ui:search-container-column-text

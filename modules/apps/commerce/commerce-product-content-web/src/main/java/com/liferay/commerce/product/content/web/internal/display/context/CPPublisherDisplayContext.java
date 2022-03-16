@@ -14,11 +14,14 @@
 
 package com.liferay.commerce.product.content.web.internal.display.context;
 
+import com.liferay.commerce.account.model.CommerceAccount;
+import com.liferay.commerce.constants.CommerceWebKeys;
+import com.liferay.commerce.context.CommerceContext;
 import com.liferay.commerce.product.catalog.CPCatalogEntry;
 import com.liferay.commerce.product.catalog.CPQuery;
 import com.liferay.commerce.product.content.render.list.CPContentListRendererRegistry;
 import com.liferay.commerce.product.content.render.list.entry.CPContentListEntryRendererRegistry;
-import com.liferay.commerce.product.content.web.internal.util.CPPublisherWebHelper;
+import com.liferay.commerce.product.content.web.internal.helper.CPPublisherWebHelper;
 import com.liferay.commerce.product.data.source.CPDataSource;
 import com.liferay.commerce.product.data.source.CPDataSourceRegistry;
 import com.liferay.commerce.product.data.source.CPDataSourceResult;
@@ -90,6 +93,7 @@ public class CPPublisherDisplayContext extends BaseCPPublisherDisplayContext {
 
 		if (isSelectionStyleDynamic()) {
 			cpDataSourceResult = _getDynamicCPDataSourceResult(
+				cpContentRequestHelper.getRequest(),
 				_searchContainer.getStart(), _searchContainer.getEnd());
 		}
 		else if (isSelectionStyleDataSource()) {
@@ -117,11 +121,9 @@ public class CPPublisherDisplayContext extends BaseCPPublisherDisplayContext {
 				end = catalogEntries.size();
 			}
 
-			List<CPCatalogEntry> results = catalogEntries.subList(
-				_searchContainer.getStart(), end);
-
 			cpDataSourceResult = new CPDataSourceResult(
-				results, catalogEntries.size());
+				catalogEntries.subList(_searchContainer.getStart(), end),
+				catalogEntries.size());
 		}
 
 		return cpDataSourceResult;
@@ -159,15 +161,16 @@ public class CPPublisherDisplayContext extends BaseCPPublisherDisplayContext {
 		CPDataSourceResult cpDataSourceResult = getCPDataSourceResult();
 
 		if (cpDataSourceResult != null) {
-			_searchContainer.setTotal(cpDataSourceResult.getLength());
-			_searchContainer.setResults(
-				cpDataSourceResult.getCPCatalogEntries());
+			_searchContainer.setResultsAndTotal(
+				cpDataSourceResult::getCPCatalogEntries,
+				cpDataSourceResult.getLength());
 		}
 
 		return _searchContainer;
 	}
 
-	private CPDataSourceResult _getDynamicCPDataSourceResult(int start, int end)
+	private CPDataSourceResult _getDynamicCPDataSourceResult(
+			HttpServletRequest httpServletRequest, int start, int end)
 		throws Exception {
 
 		SearchContext searchContext = new SearchContext();
@@ -175,6 +178,22 @@ public class CPPublisherDisplayContext extends BaseCPPublisherDisplayContext {
 		searchContext.setAttributes(
 			HashMapBuilder.<String, Serializable>put(
 				Field.STATUS, WorkflowConstants.STATUS_APPROVED
+			).put(
+				"commerceAccountGroupIds",
+				() -> {
+					CommerceContext commerceContext =
+						(CommerceContext)httpServletRequest.getAttribute(
+							CommerceWebKeys.COMMERCE_CONTEXT);
+
+					CommerceAccount commerceAccount =
+						commerceContext.getCommerceAccount();
+
+					if (commerceAccount == null) {
+						return null;
+					}
+
+					return commerceContext.getCommerceAccountGroupIds();
+				}
 			).put(
 				"params", new LinkedHashMap<String, Object>()
 			).build());

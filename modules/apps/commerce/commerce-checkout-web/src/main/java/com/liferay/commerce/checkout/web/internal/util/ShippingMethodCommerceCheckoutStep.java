@@ -28,6 +28,8 @@ import com.liferay.commerce.model.CommerceShippingOption;
 import com.liferay.commerce.service.CommerceOrderLocalService;
 import com.liferay.commerce.service.CommerceOrderService;
 import com.liferay.commerce.service.CommerceShippingMethodLocalService;
+import com.liferay.commerce.shipping.engine.fixed.service.CommerceShippingFixedOptionLocalService;
+import com.liferay.commerce.shipping.engine.fixed.service.CommerceShippingFixedOptionQualifierLocalService;
 import com.liferay.commerce.util.BaseCommerceCheckoutStep;
 import com.liferay.commerce.util.CommerceCheckoutStep;
 import com.liferay.commerce.util.CommerceShippingEngineRegistry;
@@ -42,6 +44,9 @@ import com.liferay.portal.kernel.security.permission.PermissionCheckerFactoryUti
 import com.liferay.portal.kernel.security.permission.resource.ModelResourcePermission;
 import com.liferay.portal.kernel.servlet.SessionErrors;
 import com.liferay.portal.kernel.theme.ThemeDisplay;
+import com.liferay.portal.kernel.transaction.Propagation;
+import com.liferay.portal.kernel.transaction.TransactionConfig;
+import com.liferay.portal.kernel.transaction.TransactionInvokerUtil;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.ParamUtil;
 import com.liferay.portal.kernel.util.Validator;
@@ -114,7 +119,7 @@ public class ShippingMethodCommerceCheckoutStep
 		throws Exception {
 
 		try {
-			updateCommerceOrderShippingMethod(actionRequest);
+			_updateCommerceOrderShippingMethod(actionRequest);
 		}
 		catch (Exception exception) {
 			if (exception instanceof CommerceOrderShippingMethodException) {
@@ -137,7 +142,9 @@ public class ShippingMethodCommerceCheckoutStep
 			shippingMethodCheckoutStepDisplayContext =
 				new ShippingMethodCheckoutStepDisplayContext(
 					_commercePriceFormatter, _commerceShippingEngineRegistry,
-					_commerceShippingMethodLocalService, httpServletRequest);
+					_commerceShippingMethodLocalService,
+					_commerceShippingFixedOptionLocalService,
+					httpServletRequest);
 
 		CommerceOrder commerceOrder =
 			shippingMethodCheckoutStepDisplayContext.getCommerceOrder();
@@ -227,8 +234,7 @@ public class ShippingMethodCommerceCheckoutStep
 		_commerceOrderModelResourcePermission = modelResourcePermission;
 	}
 
-	protected void updateCommerceOrderShippingMethod(
-			ActionRequest actionRequest)
+	private void _updateCommerceOrderShippingMethod(ActionRequest actionRequest)
 		throws Exception {
 
 		String commerceShippingOptionKey = ParamUtil.getString(
@@ -273,10 +279,33 @@ public class ShippingMethodCommerceCheckoutStep
 			commerceContext, commerceOrder, commerceShippingMethodId,
 			commerceShippingOptionName, themeDisplay.getLocale());
 
-		_commerceOrderLocalService.updateCommerceShippingMethod(
-			commerceOrder.getCommerceOrderId(), commerceShippingMethodId,
-			commerceShippingOptionName, shippingAmount, commerceContext);
+		try {
+			CommerceOrder updateCommerceOrder = TransactionInvokerUtil.invoke(
+				_transactionConfig,
+				() -> {
+					_commerceOrderLocalService.updateCommerceShippingMethod(
+						commerceOrder.getCommerceOrderId(),
+						commerceShippingMethodId, commerceShippingOptionName,
+						shippingAmount, commerceContext);
+
+					return _commerceOrderLocalService.recalculatePrice(
+						commerceOrder.getCommerceOrderId(), commerceContext);
+				});
+
+			_commerceOrderLocalService.resetTermsAndConditions(
+				commerceOrder.getCommerceOrderId(), true, false);
+
+			actionRequest.setAttribute(
+				CommerceCheckoutWebKeys.COMMERCE_ORDER, updateCommerceOrder);
+		}
+		catch (Throwable throwable) {
+			throw new PortalException(throwable);
+		}
 	}
+
+	private static final TransactionConfig _transactionConfig =
+		TransactionConfig.Factory.create(
+			Propagation.REQUIRED, new Class<?>[] {Exception.class});
 
 	@Reference
 	private CommerceCheckoutStepHttpHelper _commerceCheckoutStepHttpHelper;
@@ -295,6 +324,14 @@ public class ShippingMethodCommerceCheckoutStep
 
 	@Reference
 	private CommerceShippingEngineRegistry _commerceShippingEngineRegistry;
+
+	@Reference
+	private CommerceShippingFixedOptionLocalService
+		_commerceShippingFixedOptionLocalService;
+
+	@Reference
+	private CommerceShippingFixedOptionQualifierLocalService
+		_commerceShippingFixedOptionQualifierLocalService;
 
 	@Reference
 	private CommerceShippingHelper _commerceShippingHelper;

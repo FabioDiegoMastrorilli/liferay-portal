@@ -13,14 +13,7 @@
  */
 
 import '@testing-library/jest-dom/extend-expect';
-import {
-	act,
-	cleanup,
-	fireEvent,
-	render,
-	wait,
-	waitForElement,
-} from '@testing-library/react';
+import {act, fireEvent, render, screen} from '@testing-library/react';
 import React, {useEffect} from 'react';
 
 import {COLLECTION_FILTER_FRAGMENT_ENTRY_KEY} from '../../../../../../../../../src/main/resources/META-INF/resources/page_editor/app/config/constants/collectionFilterFragmentEntryKey';
@@ -35,6 +28,7 @@ jest.mock(
 	'../../../../../../../../../src/main/resources/META-INF/resources/page_editor/app/config',
 	() => ({
 		config: {
+			commonStyles: [],
 			searchContainerPageMaxDelta: '50',
 		},
 	})
@@ -45,7 +39,7 @@ jest.mock(
 	() => ({
 		getCollectionItemCount: jest.fn(() =>
 			Promise.resolve({
-				totalNumberOfItems: '32',
+				totalNumberOfItems: 32,
 			})
 		),
 	})
@@ -67,10 +61,12 @@ const ITEM_CONFIG = {
 		classPK: '40724',
 		title: 'collection1',
 	},
+	displayAllItems: false,
+	displayAllPages: false,
 	numberOfColumns: 1,
 	numberOfItems: 5,
 	numberOfItemsPerPage: 5,
-	showAllItems: false,
+	numberOfPages: 1,
 };
 
 const renderComponent = ({
@@ -107,15 +103,10 @@ const renderComponent = ({
 };
 
 describe('CollectionGeneralPanel', () => {
-	afterEach(() => {
-		cleanup();
-		CollectionSelector.mockClear();
-		updateItemConfig.mockClear();
-	});
-
 	it('allows changing the Pagination select', async () => {
-		const {getByLabelText} = renderComponent({});
-		const input = getByLabelText('pagination');
+		renderComponent({});
+
+		const input = screen.getByLabelText('pagination');
 
 		await act(async () => {
 			fireEvent.change(input, {
@@ -133,10 +124,9 @@ describe('CollectionGeneralPanel', () => {
 	});
 
 	it('allows changing the Display All Collection Items checkbox', async () => {
-		const {getByLabelText} = renderComponent({
-			config: {...ITEM_CONFIG, paginationType: 'numeric'},
-		});
-		const input = getByLabelText('display-all-collection-items');
+		renderComponent({});
+
+		const input = screen.getByLabelText('display-all-collection-items');
 
 		await act(async () => {
 			fireEvent.click(input);
@@ -144,7 +134,39 @@ describe('CollectionGeneralPanel', () => {
 
 		expect(updateItemConfig).toHaveBeenCalledWith({
 			itemConfig: expect.objectContaining({
-				showAllItems: true,
+				displayAllItems: true,
+			}),
+			itemId: '0',
+			segmentsExperienceId: '0',
+		});
+	});
+
+	it('shows a message saying that enabling Display All Collection Items could affeect performance', async () => {
+		renderComponent({
+			config: {...ITEM_CONFIG, displayAllItems: true},
+		});
+
+		expect(
+			await screen.findByText(
+				'this-setting-can-affect-page-performance-severely-if-the-number-of-collection-items-is-above-x.-we-strongly-recommend-using-pagination-instead-50'
+			)
+		).toBeInTheDocument();
+	});
+
+	it('allows changing the Display All Pages checkbox', async () => {
+		renderComponent({
+			config: {...ITEM_CONFIG, paginationType: 'numeric'},
+		});
+
+		const input = screen.getByLabelText('display-all-pages');
+
+		await act(async () => {
+			fireEvent.click(input);
+		});
+
+		expect(updateItemConfig).toHaveBeenCalledWith({
+			itemConfig: expect.objectContaining({
+				displayAllPages: true,
 			}),
 			itemId: '0',
 			segmentsExperienceId: '0',
@@ -152,20 +174,20 @@ describe('CollectionGeneralPanel', () => {
 	});
 
 	describe('Number of Items Input', () => {
-		afterEach(() => {
-			cleanup();
-			updateItemConfig.mockClear();
-		});
-
 		it('allows changing input value', async () => {
-			const {getByLabelText} = renderComponent({});
-			const input = getByLabelText('maximum-number-of-items');
+			renderComponent({});
 
-			await wait(() => {
+			const input = screen.getByLabelText(
+				'maximum-number-of-items-to-display'
+			);
+
+			await act(async () => {
 				fireEvent.change(input, {
 					target: {value: '3'},
 				});
+			});
 
+			await act(async () => {
 				fireEvent.blur(input);
 			});
 
@@ -178,58 +200,79 @@ describe('CollectionGeneralPanel', () => {
 			});
 		});
 
-		it('shows a warning message when the value is 0', async () => {
-			const {getByText} = renderComponent({
+		it('shows a warning message when the number of items is bigger than the total items of the collection', async () => {
+			renderComponent({
 				config: {
 					...ITEM_CONFIG,
-					...{numberOfItems: '0', paginationType: 'numeric'},
+					numberOfItems: 33,
 				},
 			});
 
 			expect(
-				await waitForElement(() =>
-					getByText(
-						'you-need-at-least-one-item-to-use-this-configuration'
-					)
+				await screen.findByText(
+					'the-current-number-of-items-in-this-collection-is-x-32'
 				)
 			).toBeInTheDocument();
 		});
 
-		it('shows a warning message when the number of items is bigger than the total items of the collection', async () => {
-			const {getByText} = renderComponent({
-				config: {
-					...ITEM_CONFIG,
-					...{numberOfItems: '33', paginationType: 'numeric'},
-				},
-			});
+		it('shows a message saying that exceeding the default max value could affeect performance', async () => {
+			renderComponent({});
 
 			expect(
-				await waitForElement(() =>
-					getByText(
-						'the-current-number-of-items-in-this-collection-is-x-32'
-					)
+				await screen.findByText(
+					'setting-a-value-above-x-can-affect-page-performance-severely-50'
 				)
 			).toBeInTheDocument();
 		});
 	});
 
-	describe('Number of Items per Page Input', () => {
-		afterEach(() => {
-			cleanup();
-			updateItemConfig.mockClear();
-		});
-
-		it('allows changing the input value', async () => {
-			const {getByLabelText} = renderComponent({
+	describe('Number of Pages Input', () => {
+		it('allows changing input value', async () => {
+			renderComponent({
 				config: {...ITEM_CONFIG, paginationType: 'numeric'},
 			});
-			const input = getByLabelText('maximum-number-of-items-per-page');
 
-			await wait(async () => {
+			const input = screen.getByLabelText(
+				'maximum-number-of-pages-to-display'
+			);
+
+			await act(async () => {
+				fireEvent.change(input, {
+					target: {value: '3'},
+				});
+			});
+
+			await act(async () => {
+				fireEvent.blur(input);
+			});
+
+			expect(updateItemConfig).toHaveBeenCalledWith({
+				itemConfig: {
+					numberOfPages: 3,
+				},
+				itemId: '0',
+				segmentsExperienceId: '0',
+			});
+		});
+	});
+
+	describe('Number of Items per Page Input', () => {
+		it('allows changing the input value', async () => {
+			renderComponent({
+				config: {...ITEM_CONFIG, paginationType: 'numeric'},
+			});
+
+			const input = screen.getByLabelText(
+				'maximum-number-of-items-per-page'
+			);
+
+			await act(async () => {
 				fireEvent.change(input, {
 					target: {value: '2'},
 				});
+			});
 
+			await act(async () => {
 				fireEvent.blur(input);
 			});
 
@@ -242,36 +285,17 @@ describe('CollectionGeneralPanel', () => {
 			});
 		});
 
-		it('shows a warning message in the the value is 0', async () => {
-			const {getByText} = renderComponent({
-				config: {
-					...ITEM_CONFIG,
-					...{numberOfItemsPerPage: '0', paginationType: 'numeric'},
-				},
-			});
-
-			expect(
-				await waitForElement(() =>
-					getByText(
-						'you-need-at-least-one-item-to-use-this-configuration'
-					)
-				)
-			).toBeInTheDocument();
-		});
-
 		it('shows a warning message when the number of items per page is bigger than searchContainerPageMaxDelta', async () => {
-			const {getByText} = renderComponent({
+			renderComponent({
 				config: {
 					...ITEM_CONFIG,
-					...{numberOfItemsPerPage: '53', paginationType: 'numeric'},
+					...{numberOfItemsPerPage: 53, paginationType: 'numeric'},
 				},
 			});
 
 			expect(
-				await waitForElement(() =>
-					getByText(
-						'you-can-only-display-a-maximum-of-x-items-per-page-50'
-					)
+				await screen.findByText(
+					'you-can-only-display-a-maximum-of-x-items-per-page-50'
 				)
 			).toBeInTheDocument();
 		});

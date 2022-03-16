@@ -27,6 +27,7 @@ import {
 	nodeTypes,
 } from '../util/util';
 import CurrentNodes from './CurrentNodes';
+import ErrorFeedback from './ErrorFeedback';
 
 const eventObserver = new EventObserver();
 
@@ -92,7 +93,7 @@ export default function WorkflowInstanceTracker({workflowInstanceId}) {
 						data: {
 							current: isCurrent(currentNodes, node),
 							done: isVisited(visitedNodes, node),
-							initial: node.type == 'INITIAL_STATE',
+							initial: node.type === 'INITIAL_STATE',
 							label: node.label,
 							notifyVisibilityChange: (visible) => () => {
 								eventObserver.notify(node.name, () => visible);
@@ -134,6 +135,10 @@ export default function WorkflowInstanceTracker({workflowInstanceId}) {
 	const onLoad = (reactFlowInstance) => {
 		reactFlowInstance.fitView();
 	};
+
+	if (layoutedElements.length === 0) {
+		return <ErrorFeedback />;
+	}
 
 	return (
 		<div className="workflow-instance-tracker">

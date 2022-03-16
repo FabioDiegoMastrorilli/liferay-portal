@@ -208,7 +208,7 @@ AUI.add(
 			styles.forEach((item) => {
 				var rule = item.split(':');
 
-				if (rule.length == 2) {
+				if (rule.length === 2) {
 					var key = camelize(rule[0]);
 					var value = rule[1].trim();
 
@@ -989,12 +989,14 @@ AUI.add(
 
 			var defaultLocale = translationManager.get('defaultLocale');
 
+			// eslint-disable-next-line @liferay/aui/no-object
 			var value = A.Object.getValue(localizationMap, [locale, attribute]);
 
 			if (isValue(value)) {
 				return value;
 			}
 
+			// eslint-disable-next-line @liferay/aui/no-object
 			value = A.Object.getValue(localizationMap, [
 				defaultLocale,
 				attribute,
@@ -1005,6 +1007,7 @@ AUI.add(
 			}
 
 			for (var localizationMapLocale in localizationMap) {
+				// eslint-disable-next-line @liferay/aui/no-object
 				value = A.Object.getValue(localizationMap, [
 					localizationMapLocale,
 					attribute,
@@ -1052,7 +1055,7 @@ AUI.add(
 				'keyword': Liferay.Language.get('yes'),
 			};
 
-			if (type == 'ddm-image' || type == 'text') {
+			if (type === 'ddm-image' || type === 'text') {
 				indexTypeOptions = {
 					'': Liferay.Language.get('not-indexable'),
 					'keyword': Liferay.Language.get('indexable-keyword'),
@@ -1060,7 +1063,7 @@ AUI.add(
 				};
 			}
 
-			if (type == 'ddm-text-html' || type == 'textarea') {
+			if (type === 'ddm-text-html' || type === 'textarea') {
 				indexTypeOptions = {
 					'': Liferay.Language.get('not-indexable'),
 					'text': Liferay.Language.get('indexable-text'),
@@ -1287,7 +1290,7 @@ AUI.add(
 										var domEvent = event.domEvent;
 
 										if (
-											domEvent.keyCode == 9 &&
+											Number(domEvent.keyCode) === 9 &&
 											domEvent.target.hasClass(
 												'yui3-calendar-grid'
 											)

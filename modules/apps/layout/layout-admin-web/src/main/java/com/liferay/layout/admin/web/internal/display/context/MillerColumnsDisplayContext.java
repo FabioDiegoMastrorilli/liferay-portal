@@ -23,6 +23,7 @@ import com.liferay.portal.kernel.json.JSONFactoryUtil;
 import com.liferay.portal.kernel.json.JSONObject;
 import com.liferay.portal.kernel.json.JSONUtil;
 import com.liferay.portal.kernel.language.LanguageUtil;
+import com.liferay.portal.kernel.model.Group;
 import com.liferay.portal.kernel.model.Layout;
 import com.liferay.portal.kernel.model.LayoutConstants;
 import com.liferay.portal.kernel.model.LayoutRevision;
@@ -87,11 +88,15 @@ public class MillerColumnsDisplayContext {
 	}
 
 	public JSONArray getLayoutColumnsJSONArray() throws Exception {
-		JSONArray layoutColumnsJSONArray = JSONUtil.put(
-			_getFirstLayoutColumnJSONArray());
+		JSONArray layoutColumnsJSONArray = JSONFactoryUtil.createJSONArray();
 
-		if (_layoutsAdminDisplayContext.isFirstColumn()) {
-			return layoutColumnsJSONArray;
+		if (_layoutsAdminDisplayContext.isPrivateLayoutsEnabled()) {
+			layoutColumnsJSONArray = JSONUtil.put(
+				_getFirstLayoutColumnJSONArray());
+
+			if (_layoutsAdminDisplayContext.isFirstColumn()) {
+				return layoutColumnsJSONArray;
+			}
 		}
 
 		JSONArray layoutSetBranchesJSONArray = _getLayoutSetBranchesJSONArray();
@@ -140,6 +145,13 @@ public class MillerColumnsDisplayContext {
 				"breadcrumbEntries", _getBreadcrumbEntriesJSONArray()
 			).put(
 				"getItemChildrenURL", getLayoutChildrenURL()
+			).put(
+				"isPrivateLayoutsEnabled",
+				() -> {
+					Group group = _themeDisplay.getScopeGroup();
+
+					return group.isPrivateLayoutsEnabled();
+				}
 			).put(
 				"languageId", _themeDisplay.getLanguageId()
 			).put(
@@ -332,7 +344,7 @@ public class MillerColumnsDisplayContext {
 
 		if (LayoutLocalServiceUtil.hasLayouts(
 				_layoutsAdminDisplayContext.getSelGroup(), false) &&
-			_layoutsAdminDisplayContext.isShowPublicPages()) {
+			_layoutsAdminDisplayContext.isShowPublicLayouts()) {
 
 			boolean active = !_layoutsAdminDisplayContext.isPrivateLayout();
 

@@ -112,7 +112,7 @@ public class EntriesChecker extends EmptyOnClickRowChecker {
 			}
 			catch (Exception exception) {
 				if (_log.isDebugEnabled()) {
-					_log.debug(exception, exception);
+					_log.debug(exception);
 				}
 			}
 		}
@@ -128,7 +128,7 @@ public class EntriesChecker extends EmptyOnClickRowChecker {
 			}
 			catch (Exception exception) {
 				if (_log.isDebugEnabled()) {
-					_log.debug(exception, exception);
+					_log.debug(exception);
 				}
 			}
 		}
@@ -137,7 +137,7 @@ public class EntriesChecker extends EmptyOnClickRowChecker {
 			return StringPool.BLANK;
 		}
 
-		String checkBoxRowIds = getEntryRowIds();
+		String checkBoxRowIds = _getEntryRowIds();
 		String checkBoxAllRowIds = "'#" + getAllRowIds() + "'";
 		String checkBoxPostOnClick =
 			_liferayPortletResponse.getNamespace() + "toggleActionsButton();";
@@ -148,7 +148,7 @@ public class EntriesChecker extends EmptyOnClickRowChecker {
 			primaryKey, checkBoxRowIds, checkBoxAllRowIds, checkBoxPostOnClick);
 	}
 
-	protected String getEntryRowIds() {
+	private String _getEntryRowIds() {
 		return StringBundler.concat(
 			"['", _liferayPortletResponse.getNamespace(), RowChecker.ROW_IDS,
 			KBArticle.class.getSimpleName(), "', '",

@@ -543,6 +543,22 @@ public class AccountEntryUserRelLocalServiceTest {
 	}
 
 	@Test
+	public void testIsAccountEntryUser() throws Exception {
+		User user1 = UserTestUtil.addUser();
+
+		Assert.assertFalse(
+			_accountEntryUserRelLocalService.isAccountEntryUser(
+				user1.getUserId()));
+
+		_accountEntryUserRelLocalService.addAccountEntryUserRel(
+			_accountEntry.getAccountEntryId(), user1.getUserId());
+
+		Assert.assertTrue(
+			_accountEntryUserRelLocalService.isAccountEntryUser(
+				user1.getUserId()));
+	}
+
+	@Test
 	public void testSetPersonTypeAccountEntryUser() throws Exception {
 		AccountEntry personTypeAccountEntry =
 			AccountEntryTestUtil.addPersonAccountEntry(
@@ -668,7 +684,7 @@ public class AccountEntryUserRelLocalServiceTest {
 			accountEntryId, TestPropsValues.getUserId(), _userInfo.screenName,
 			_userInfo.emailAddress, _userInfo.locale, _userInfo.firstName,
 			_userInfo.middleName, _userInfo.lastName, _userInfo.prefixId,
-			_userInfo.suffixId);
+			_userInfo.suffixId, null, null);
 	}
 
 	private AccountEntryUserRel _addPersonTypeAccountEntryUserRel(
@@ -682,7 +698,7 @@ public class AccountEntryUserRelLocalServiceTest {
 				accountEntryId, TestPropsValues.getUserId(),
 				userInfo.screenName, userInfo.emailAddress, userInfo.locale,
 				userInfo.firstName, userInfo.middleName, userInfo.lastName,
-				userInfo.prefixId, userInfo.suffixId);
+				userInfo.prefixId, userInfo.suffixId, null, null);
 	}
 
 	private void _assertPersonTypeAccountEntryUser(

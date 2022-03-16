@@ -55,10 +55,10 @@ import com.liferay.translation.constants.TranslationPortletKeys;
 import com.liferay.translation.info.field.TranslationInfoFieldChecker;
 import com.liferay.translation.model.TranslationEntry;
 import com.liferay.translation.service.TranslationEntryLocalServiceUtil;
-import com.liferay.translation.web.internal.configuration.FFLayoutExperienceSelectorConfiguration;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -82,10 +82,8 @@ public class TranslateDisplayContext {
 		List<String> availableSourceLanguageIds,
 		List<String> availableTargetLanguageIds,
 		UnsafeSupplier<Boolean, PortalException> booleanUnsafeSupplier,
-		String className, long classPK,
-		FFLayoutExperienceSelectorConfiguration
-			ffLayoutExperienceSelectorConfiguration,
-		InfoForm infoForm, LiferayPortletRequest liferayPortletRequest,
+		String className, long classPK, InfoForm infoForm,
+		LiferayPortletRequest liferayPortletRequest,
 		LiferayPortletResponse liferayPortletResponse, Object object,
 		long segmentsExperienceId,
 		InfoItemFieldValues sourceInfoItemFieldValues, String sourceLanguageId,
@@ -97,8 +95,6 @@ public class TranslateDisplayContext {
 		_booleanUnsafeSupplier = booleanUnsafeSupplier;
 		_className = className;
 		_classPK = classPK;
-		_ffLayoutExperienceSelectorConfiguration =
-			ffLayoutExperienceSelectorConfiguration;
 		_infoForm = infoForm;
 		_liferayPortletResponse = liferayPortletResponse;
 		_object = object;
@@ -217,7 +213,7 @@ public class TranslateDisplayContext {
 										infoField, TextInfoFieldType.MULTILINE)
 								).put(
 									"sourceContent",
-									getSourceStringValue(
+									getSourceStringValues(
 										infoField, getSourceLocale())
 								).put(
 									"sourceContentDir",
@@ -225,7 +221,7 @@ public class TranslateDisplayContext {
 										getSourceLocale(), "lang.dir")
 								).put(
 									"targetContent",
-									getTargetStringValue(
+									getTargetStringValues(
 										infoField, getTargetLocale())
 								).put(
 									"targetContentDir",
@@ -353,15 +349,20 @@ public class TranslateDisplayContext {
 		return _sourceLocale;
 	}
 
-	public String getSourceStringValue(InfoField infoField, Locale locale) {
-		InfoFieldValue<Object> infoFieldValue =
-			_sourceInfoItemFieldValues.getInfoFieldValue(infoField.getName());
+	public List<String> getSourceStringValues(
+		InfoField infoField, Locale locale) {
 
-		if (infoFieldValue != null) {
-			return GetterUtil.getString(infoFieldValue.getValue(locale));
-		}
+		Collection<InfoFieldValue<Object>> infoFieldValues =
+			_sourceInfoItemFieldValues.getInfoFieldValues(infoField.getName());
 
-		return null;
+		Stream<InfoFieldValue<Object>> stream = infoFieldValues.stream();
+
+		return stream.map(
+			infoFieldValue -> GetterUtil.getString(
+				infoFieldValue.getValue(locale))
+		).collect(
+			Collectors.toList()
+		);
 	}
 
 	public String getTargetLanguageId() {
@@ -372,15 +373,20 @@ public class TranslateDisplayContext {
 		return _targetLocale;
 	}
 
-	public String getTargetStringValue(InfoField infoField, Locale locale) {
-		InfoFieldValue<Object> infoFieldValue =
-			_targetInfoItemFieldValues.getInfoFieldValue(infoField.getName());
+	public List<String> getTargetStringValues(
+		InfoField infoField, Locale locale) {
 
-		if (infoFieldValue != null) {
-			return GetterUtil.getString(infoFieldValue.getValue(locale));
-		}
+		Collection<InfoFieldValue<Object>> infoFieldValues =
+			_targetInfoItemFieldValues.getInfoFieldValues(infoField.getName());
 
-		return null;
+		Stream<InfoFieldValue<Object>> stream = infoFieldValues.stream();
+
+		return stream.map(
+			infoFieldValue -> GetterUtil.getString(
+				infoFieldValue.getValue(locale))
+		).collect(
+			Collectors.toList()
+		);
 	}
 
 	public String getTitle() {
@@ -482,9 +488,7 @@ public class TranslateDisplayContext {
 	private Map<String, Object> _getExperiencesSelectorData()
 		throws PortalException {
 
-		if (!_ffLayoutExperienceSelectorConfiguration.enabled() ||
-			!Objects.equals(_className, Layout.class.getName())) {
-
+		if (!Objects.equals(_className, Layout.class.getName())) {
 			return null;
 		}
 
@@ -599,8 +603,6 @@ public class TranslateDisplayContext {
 		_booleanUnsafeSupplier;
 	private final String _className;
 	private final long _classPK;
-	private final FFLayoutExperienceSelectorConfiguration
-		_ffLayoutExperienceSelectorConfiguration;
 	private Long _groupId;
 	private final HttpServletRequest _httpServletRequest;
 	private final InfoForm _infoForm;

@@ -17,7 +17,9 @@ package com.liferay.object.admin.rest.client.serdes.v1_0;
 import com.liferay.object.admin.rest.client.dto.v1_0.ObjectAction;
 import com.liferay.object.admin.rest.client.dto.v1_0.ObjectDefinition;
 import com.liferay.object.admin.rest.client.dto.v1_0.ObjectField;
+import com.liferay.object.admin.rest.client.dto.v1_0.ObjectLayout;
 import com.liferay.object.admin.rest.client.dto.v1_0.ObjectRelationship;
+import com.liferay.object.admin.rest.client.dto.v1_0.ObjectView;
 import com.liferay.object.admin.rest.client.json.BaseJSONParser;
 
 import java.text.DateFormat;
@@ -63,7 +65,7 @@ public class ObjectDefinitionSerDes {
 		sb.append("{");
 
 		DateFormat liferayToJSONDateFormat = new SimpleDateFormat(
-			"yyyy-MM-dd'T'HH:mm:ss'Z'");
+			"yyyy-MM-dd'T'HH:mm:ssXX");
 
 		if (objectDefinition.getActions() != null) {
 			if (sb.length() > 1) {
@@ -197,6 +199,29 @@ public class ObjectDefinitionSerDes {
 			sb.append("]");
 		}
 
+		if (objectDefinition.getObjectLayouts() != null) {
+			if (sb.length() > 1) {
+				sb.append(", ");
+			}
+
+			sb.append("\"objectLayouts\": ");
+
+			sb.append("[");
+
+			for (int i = 0; i < objectDefinition.getObjectLayouts().length;
+				 i++) {
+
+				sb.append(
+					String.valueOf(objectDefinition.getObjectLayouts()[i]));
+
+				if ((i + 1) < objectDefinition.getObjectLayouts().length) {
+					sb.append(", ");
+				}
+			}
+
+			sb.append("]");
+		}
+
 		if (objectDefinition.getObjectRelationships() != null) {
 			if (sb.length() > 1) {
 				sb.append(", ");
@@ -216,6 +241,26 @@ public class ObjectDefinitionSerDes {
 				if ((i + 1) <
 						objectDefinition.getObjectRelationships().length) {
 
+					sb.append(", ");
+				}
+			}
+
+			sb.append("]");
+		}
+
+		if (objectDefinition.getObjectViews() != null) {
+			if (sb.length() > 1) {
+				sb.append(", ");
+			}
+
+			sb.append("\"objectViews\": ");
+
+			sb.append("[");
+
+			for (int i = 0; i < objectDefinition.getObjectViews().length; i++) {
+				sb.append(String.valueOf(objectDefinition.getObjectViews()[i]));
+
+				if ((i + 1) < objectDefinition.getObjectViews().length) {
 					sb.append(", ");
 				}
 			}
@@ -261,6 +306,16 @@ public class ObjectDefinitionSerDes {
 			sb.append(_toJSON(objectDefinition.getPluralLabel()));
 		}
 
+		if (objectDefinition.getPortlet() != null) {
+			if (sb.length() > 1) {
+				sb.append(", ");
+			}
+
+			sb.append("\"portlet\": ");
+
+			sb.append(objectDefinition.getPortlet());
+		}
+
 		if (objectDefinition.getScope() != null) {
 			if (sb.length() > 1) {
 				sb.append(", ");
@@ -295,6 +350,16 @@ public class ObjectDefinitionSerDes {
 			sb.append(objectDefinition.getSystem());
 		}
 
+		if (objectDefinition.getTitleObjectFieldId() != null) {
+			if (sb.length() > 1) {
+				sb.append(", ");
+			}
+
+			sb.append("\"titleObjectFieldId\": ");
+
+			sb.append(objectDefinition.getTitleObjectFieldId());
+		}
+
 		sb.append("}");
 
 		return sb.toString();
@@ -315,7 +380,7 @@ public class ObjectDefinitionSerDes {
 		Map<String, String> map = new TreeMap<>();
 
 		DateFormat liferayToJSONDateFormat = new SimpleDateFormat(
-			"yyyy-MM-dd'T'HH:mm:ss'Z'");
+			"yyyy-MM-dd'T'HH:mm:ssXX");
 
 		if (objectDefinition.getActions() == null) {
 			map.put("actions", null);
@@ -390,6 +455,15 @@ public class ObjectDefinitionSerDes {
 				String.valueOf(objectDefinition.getObjectFields()));
 		}
 
+		if (objectDefinition.getObjectLayouts() == null) {
+			map.put("objectLayouts", null);
+		}
+		else {
+			map.put(
+				"objectLayouts",
+				String.valueOf(objectDefinition.getObjectLayouts()));
+		}
+
 		if (objectDefinition.getObjectRelationships() == null) {
 			map.put("objectRelationships", null);
 		}
@@ -397,6 +471,15 @@ public class ObjectDefinitionSerDes {
 			map.put(
 				"objectRelationships",
 				String.valueOf(objectDefinition.getObjectRelationships()));
+		}
+
+		if (objectDefinition.getObjectViews() == null) {
+			map.put("objectViews", null);
+		}
+		else {
+			map.put(
+				"objectViews",
+				String.valueOf(objectDefinition.getObjectViews()));
 		}
 
 		if (objectDefinition.getPanelAppOrder() == null) {
@@ -426,6 +509,13 @@ public class ObjectDefinitionSerDes {
 				String.valueOf(objectDefinition.getPluralLabel()));
 		}
 
+		if (objectDefinition.getPortlet() == null) {
+			map.put("portlet", null);
+		}
+		else {
+			map.put("portlet", String.valueOf(objectDefinition.getPortlet()));
+		}
+
 		if (objectDefinition.getScope() == null) {
 			map.put("scope", null);
 		}
@@ -445,6 +535,15 @@ public class ObjectDefinitionSerDes {
 		}
 		else {
 			map.put("system", String.valueOf(objectDefinition.getSystem()));
+		}
+
+		if (objectDefinition.getTitleObjectFieldId() == null) {
+			map.put("titleObjectFieldId", null);
+		}
+		else {
+			map.put(
+				"titleObjectFieldId",
+				String.valueOf(objectDefinition.getTitleObjectFieldId()));
 		}
 
 		return map;
@@ -534,6 +633,18 @@ public class ObjectDefinitionSerDes {
 						));
 				}
 			}
+			else if (Objects.equals(jsonParserFieldName, "objectLayouts")) {
+				if (jsonParserFieldValue != null) {
+					objectDefinition.setObjectLayouts(
+						Stream.of(
+							toStrings((Object[])jsonParserFieldValue)
+						).map(
+							object -> ObjectLayoutSerDes.toDTO((String)object)
+						).toArray(
+							size -> new ObjectLayout[size]
+						));
+				}
+			}
 			else if (Objects.equals(
 						jsonParserFieldName, "objectRelationships")) {
 
@@ -546,6 +657,18 @@ public class ObjectDefinitionSerDes {
 								(String)object)
 						).toArray(
 							size -> new ObjectRelationship[size]
+						));
+				}
+			}
+			else if (Objects.equals(jsonParserFieldName, "objectViews")) {
+				if (jsonParserFieldValue != null) {
+					objectDefinition.setObjectViews(
+						Stream.of(
+							toStrings((Object[])jsonParserFieldValue)
+						).map(
+							object -> ObjectViewSerDes.toDTO((String)object)
+						).toArray(
+							size -> new ObjectView[size]
 						));
 				}
 			}
@@ -568,6 +691,11 @@ public class ObjectDefinitionSerDes {
 							(String)jsonParserFieldValue));
 				}
 			}
+			else if (Objects.equals(jsonParserFieldName, "portlet")) {
+				if (jsonParserFieldValue != null) {
+					objectDefinition.setPortlet((Boolean)jsonParserFieldValue);
+				}
+			}
 			else if (Objects.equals(jsonParserFieldName, "scope")) {
 				if (jsonParserFieldValue != null) {
 					objectDefinition.setScope((String)jsonParserFieldValue);
@@ -582,6 +710,14 @@ public class ObjectDefinitionSerDes {
 			else if (Objects.equals(jsonParserFieldName, "system")) {
 				if (jsonParserFieldValue != null) {
 					objectDefinition.setSystem((Boolean)jsonParserFieldValue);
+				}
+			}
+			else if (Objects.equals(
+						jsonParserFieldName, "titleObjectFieldId")) {
+
+				if (jsonParserFieldValue != null) {
+					objectDefinition.setTitleObjectFieldId(
+						Long.valueOf((String)jsonParserFieldValue));
 				}
 			}
 		}

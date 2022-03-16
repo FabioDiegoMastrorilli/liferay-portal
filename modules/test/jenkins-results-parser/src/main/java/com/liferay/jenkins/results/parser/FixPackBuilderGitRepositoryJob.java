@@ -21,6 +21,8 @@ import java.util.HashSet;
 import java.util.Properties;
 import java.util.Set;
 
+import org.json.JSONObject;
+
 /**
  * @author Kenji Heigel
  */
@@ -38,38 +40,43 @@ public class FixPackBuilderGitRepositoryJob
 	}
 
 	@Override
+	public JSONObject getJSONObject() {
+		if (jsonObject != null) {
+			return jsonObject;
+		}
+
+		jsonObject = super.getJSONObject();
+
+		jsonObject.put("test_suite_name", _testSuiteName);
+		jsonObject.put("upstream_branch_name", _upstreamBranchName);
+
+		return jsonObject;
+	}
+
+	@Override
 	public String getTestSuiteName() {
 		return _testSuiteName;
 	}
 
 	protected FixPackBuilderGitRepositoryJob(
-		String jobName, BuildProfile buildProfile, String testSuiteName,
+		BuildProfile buildProfile, String jobName, String testSuiteName,
 		String upstreamBranchName) {
 
-		super(jobName, buildProfile);
+		super(buildProfile, jobName);
 
 		_testSuiteName = testSuiteName;
-
 		_upstreamBranchName = upstreamBranchName;
 
-		gitWorkingDirectory = GitWorkingDirectoryFactory.newGitWorkingDirectory(
-			_upstreamBranchName, _getFixPackBuilderGitRepositoryDir(),
-			_getFixPackBuilderRepositoryName());
-
-		setGitRepositoryDir(gitWorkingDirectory.getWorkingDirectory());
-
-		checkGitRepositoryDir();
-
-		jobPropertiesFiles.add(new File(gitRepositoryDir, "test.properties"));
-
-		readJobProperties();
+		_initialize();
 	}
 
-	@Override
-	protected Set<String> getRawBatchNames() {
-		return getSetFromString(
-			JenkinsResultsParserUtil.getProperty(
-				getJobProperties(), "test.batch.names"));
+	protected FixPackBuilderGitRepositoryJob(JSONObject jsonObject) {
+		super(jsonObject);
+
+		_testSuiteName = jsonObject.getString("test_suite_name");
+		_upstreamBranchName = jsonObject.getString("upstream_branch_name");
+
+		_initialize();
 	}
 
 	private File _getFixPackBuilderGitRepositoryDir() {
@@ -119,6 +126,20 @@ public class FixPackBuilderGitRepositoryJob
 		}
 
 		return fixPackBuilderRepository;
+	}
+
+	private void _initialize() {
+		gitWorkingDirectory = GitWorkingDirectoryFactory.newGitWorkingDirectory(
+			_upstreamBranchName, _getFixPackBuilderGitRepositoryDir(),
+			_getFixPackBuilderRepositoryName());
+
+		setGitRepositoryDir(gitWorkingDirectory.getWorkingDirectory());
+
+		checkGitRepositoryDir();
+
+		jobPropertiesFiles.add(
+			new File(
+				gitWorkingDirectory.getWorkingDirectory(), "test.properties"));
 	}
 
 	private final String _testSuiteName;

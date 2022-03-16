@@ -16,11 +16,12 @@ import ClayAlert from '@clayui/alert';
 import ClayButton from '@clayui/button';
 import ClayForm from '@clayui/form';
 import ClayModal, {ClayModalProvider, useModal} from '@clayui/modal';
+import {fetch} from 'frontend-js-web';
 import React, {useEffect, useState} from 'react';
 
 import useForm from '../hooks/useForm';
-import Input from './form/Input';
-import {TName} from './layout/types';
+import Input from './Form/Input';
+import {TName} from './Layout/types';
 
 const defaultLanguageId = Liferay.ThemeDisplay.getDefaultLanguageId();
 
@@ -35,7 +36,7 @@ const ModalAddListTypeDefinition: React.FC<IProps> = ({
 	const [error, setError] = useState<string>('');
 
 	const onSubmit = async ({name_i18n}: TInitialValues) => {
-		const response = await Liferay.Util.fetch(apiURL, {
+		const response = await fetch(apiURL, {
 			body: JSON.stringify({
 				name_i18n,
 			}),
@@ -57,7 +58,7 @@ const ModalAddListTypeDefinition: React.FC<IProps> = ({
 		else {
 			const {
 				title = Liferay.Language.get('an-error-occurred'),
-			} = await response.json();
+			} = (await response.json()) as {title: string};
 
 			setError(title);
 		}
@@ -85,6 +86,7 @@ const ModalAddListTypeDefinition: React.FC<IProps> = ({
 				<ClayModal.Header>
 					{Liferay.Language.get('new-picklist')}
 				</ClayModal.Header>
+
 				<ClayModal.Body>
 					{error && (
 						<ClayAlert displayType="danger">{error}</ClayAlert>
@@ -109,6 +111,7 @@ const ModalAddListTypeDefinition: React.FC<IProps> = ({
 						value={values.name_i18n[defaultLanguageId]}
 					/>
 				</ClayModal.Body>
+
 				<ClayModal.Footer
 					last={
 						<ClayButton.Group key={1} spaced>

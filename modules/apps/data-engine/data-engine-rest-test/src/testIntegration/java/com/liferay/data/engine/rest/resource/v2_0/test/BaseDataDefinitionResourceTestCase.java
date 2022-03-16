@@ -332,6 +332,20 @@ public abstract class BaseDataDefinitionResourceTestCase {
 	}
 
 	@Test
+	public void testGetDataDefinitionByContentTypeContentTypePageWithSortDouble()
+		throws Exception {
+
+		testGetDataDefinitionByContentTypeContentTypePageWithSort(
+			EntityField.Type.DOUBLE,
+			(entityField, dataDefinition1, dataDefinition2) -> {
+				BeanUtils.setProperty(
+					dataDefinition1, entityField.getName(), 0.1);
+				BeanUtils.setProperty(
+					dataDefinition2, entityField.getName(), 0.5);
+			});
+	}
+
+	@Test
 	public void testGetDataDefinitionByContentTypeContentTypePageWithSortInteger()
 		throws Exception {
 
@@ -711,10 +725,10 @@ public abstract class BaseDataDefinitionResourceTestCase {
 	}
 
 	@Test
-	public void testPutDataDefinitionPermission() throws Exception {
+	public void testPutDataDefinitionPermissionsPage() throws Exception {
 		@SuppressWarnings("PMD.UnusedLocalVariable")
 		DataDefinition dataDefinition =
-			testPutDataDefinitionPermission_addDataDefinition();
+			testPutDataDefinitionPermissionsPage_addDataDefinition();
 
 		@SuppressWarnings("PMD.UnusedLocalVariable")
 		com.liferay.portal.kernel.model.Role role = RoleTestUtil.addRole(
@@ -722,7 +736,7 @@ public abstract class BaseDataDefinitionResourceTestCase {
 
 		assertHttpResponseStatusCode(
 			200,
-			dataDefinitionResource.putDataDefinitionPermissionHttpResponse(
+			dataDefinitionResource.putDataDefinitionPermissionsPageHttpResponse(
 				dataDefinition.getId(),
 				new Permission[] {
 					new Permission() {
@@ -735,7 +749,7 @@ public abstract class BaseDataDefinitionResourceTestCase {
 
 		assertHttpResponseStatusCode(
 			404,
-			dataDefinitionResource.putDataDefinitionPermissionHttpResponse(
+			dataDefinitionResource.putDataDefinitionPermissionsPageHttpResponse(
 				0L,
 				new Permission[] {
 					new Permission() {
@@ -747,7 +761,8 @@ public abstract class BaseDataDefinitionResourceTestCase {
 				}));
 	}
 
-	protected DataDefinition testPutDataDefinitionPermission_addDataDefinition()
+	protected DataDefinition
+			testPutDataDefinitionPermissionsPage_addDataDefinition()
 		throws Exception {
 
 		throw new UnsupportedOperationException(
@@ -885,6 +900,20 @@ public abstract class BaseDataDefinitionResourceTestCase {
 				BeanUtils.setProperty(
 					dataDefinition1, entityField.getName(),
 					DateUtils.addMinutes(new Date(), -2));
+			});
+	}
+
+	@Test
+	public void testGetSiteDataDefinitionByContentTypeContentTypePageWithSortDouble()
+		throws Exception {
+
+		testGetSiteDataDefinitionByContentTypeContentTypePageWithSort(
+			EntityField.Type.DOUBLE,
+			(entityField, dataDefinition1, dataDefinition2) -> {
+				BeanUtils.setProperty(
+					dataDefinition1, entityField.getName(), 0.1);
+				BeanUtils.setProperty(
+					dataDefinition2, entityField.getName(), 0.5);
 			});
 	}
 

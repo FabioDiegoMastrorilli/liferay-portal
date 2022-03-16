@@ -17,6 +17,7 @@ package com.liferay.jenkins.results.parser.test.clazz.group;
 import com.liferay.jenkins.results.parser.GitWorkingDirectory;
 import com.liferay.jenkins.results.parser.JenkinsResultsParserUtil;
 import com.liferay.jenkins.results.parser.QAWebsitesGitRepositoryJob;
+import com.liferay.jenkins.results.parser.job.property.JobProperty;
 import com.liferay.poshi.core.PoshiContext;
 import com.liferay.poshi.core.util.PropsUtil;
 
@@ -60,6 +61,7 @@ public class QAWebsitesFunctionalBatchTestClassGroup
 		super(batchName, qaWebsitesGitRepositoryJob);
 	}
 
+	@Override
 	protected String getDefaultTestBatchRunPropertyQuery(
 		File testBaseDir, String testSuiteName) {
 
@@ -73,20 +75,13 @@ public class QAWebsitesFunctionalBatchTestClassGroup
 			return query;
 		}
 
-		Properties testProperties = new Properties(jobProperties);
+		JobProperty jobProperty = getJobProperty(
+			"test.batch.property.query", testBaseDir,
+			JobProperty.Type.QA_WEBSITES_TEST_DIR);
 
-		if ((testBaseDir != null) && testBaseDir.exists()) {
-			File testPropertiesFile = new File(testBaseDir, "test.properties");
+		recordJobProperty(jobProperty);
 
-			if (testPropertiesFile.exists()) {
-				testProperties.putAll(
-					JenkinsResultsParserUtil.getProperties(testPropertiesFile));
-			}
-		}
-
-		return JenkinsResultsParserUtil.getProperty(
-			testProperties, "test.batch.property.query", testBaseDir.getName(),
-			testSuiteName);
+		return jobProperty.getValue();
 	}
 
 	@Override
@@ -107,9 +102,9 @@ public class QAWebsitesFunctionalBatchTestClassGroup
 
 			Properties properties = JenkinsResultsParserUtil.getProperties(
 				new File(testBaseDir.getParentFile(), "test.properties"),
+				new File(testBaseDir, "poshi-ext.properties"),
+				new File(testBaseDir, "poshi.properties"),
 				new File(testBaseDir, "test.properties"));
-
-			properties.setProperty("ignore.errors.util.classes", "true");
 
 			if (!JenkinsResultsParserUtil.isNullOrEmpty(testBaseDirPath)) {
 				properties.setProperty("test.base.dir.name", testBaseDirPath);

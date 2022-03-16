@@ -16,18 +16,16 @@ import ClayAlert from '@clayui/alert';
 import ClayButton from '@clayui/button';
 import ClayForm from '@clayui/form';
 import ClayModal, {ClayModalProvider, useModal} from '@clayui/modal';
+import {fetch} from 'frontend-js-web';
 import React, {useEffect, useState} from 'react';
 
 import useForm from '../hooks/useForm';
+import {ERRORS} from '../utils/errors';
 import {
 	firstLetterUppercase,
 	removeAllSpecialCharacters,
 } from '../utils/string';
-import Input from './form/Input';
-
-declare global {
-	const Liferay: any;
-}
+import Input from './Form/Input';
 
 const headers = new Headers({
 	'Accept': 'application/json',
@@ -59,7 +57,7 @@ const ModalAddObjectDefinition: React.FC<IProps> = ({
 	const defaultLanguageId = Liferay.ThemeDisplay.getDefaultLanguageId();
 
 	const onSubmit = async ({label, name, pluralLabel}: TInitialValues) => {
-		const response = await Liferay.Util.fetch(apiURL, {
+		const response = await fetch(apiURL, {
 			body: JSON.stringify({
 				label: {
 					[defaultLanguageId]: label,
@@ -84,11 +82,13 @@ const ModalAddObjectDefinition: React.FC<IProps> = ({
 			window.location.reload();
 		}
 		else {
-			const {
-				title = Liferay.Language.get('an-error-occurred'),
-			} = await response.json();
+			const {type} = (await response.json()) as any;
+			const isMapped = Object.prototype.hasOwnProperty.call(ERRORS, type);
+			const errorMessage = isMapped
+				? ERRORS[type]
+				: Liferay.Language.get('an-error-occurred');
 
-			setError(title);
+			setError(errorMessage);
 		}
 	};
 
@@ -98,11 +98,9 @@ const ModalAddObjectDefinition: React.FC<IProps> = ({
 		if (!values.label) {
 			errors.label = Liferay.Language.get('required');
 		}
-
 		if (!(values.name ?? values.label)) {
 			errors.name = Liferay.Language.get('required');
 		}
-
 		if (!values.pluralLabel) {
 			errors.pluralLabel = Liferay.Language.get('required');
 		}
@@ -158,6 +156,7 @@ const ModalAddObjectDefinition: React.FC<IProps> = ({
 						value={values.name ?? normalizeName(values.label)}
 					/>
 				</ClayModal.Body>
+
 				<ClayModal.Footer
 					last={
 						<ClayButton.Group key={1} spaced>

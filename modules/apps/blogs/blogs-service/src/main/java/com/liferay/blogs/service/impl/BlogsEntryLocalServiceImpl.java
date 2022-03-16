@@ -89,7 +89,7 @@ import com.liferay.portal.kernel.theme.ThemeDisplay;
 import com.liferay.portal.kernel.util.ArrayUtil;
 import com.liferay.portal.kernel.util.Constants;
 import com.liferay.portal.kernel.util.ContentTypes;
-import com.liferay.portal.kernel.util.FriendlyURLNormalizerUtil;
+import com.liferay.portal.kernel.util.FriendlyURLNormalizer;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.GroupSubscriptionCheckSubscriptionSender;
 import com.liferay.portal.kernel.util.HashMapBuilder;
@@ -585,6 +585,9 @@ public class BlogsEntryLocalServiceImpl extends BlogsEntryLocalServiceBaseImpl {
 		for (BlogsEntry entry : entries) {
 			ServiceContext serviceContext = new ServiceContext();
 
+			serviceContext.setAttribute(
+				_INVOKED_BY_CHECK_ENTRIES, Boolean.TRUE);
+
 			String[] trackbacks = StringUtil.split(entry.getTrackbacks());
 
 			serviceContext.setAttribute("trackbacks", trackbacks);
@@ -735,7 +738,7 @@ public class BlogsEntryLocalServiceImpl extends BlogsEntryLocalServiceBaseImpl {
 		}
 		catch (Exception exception) {
 			if (_log.isDebugEnabled()) {
-				_log.debug(exception, exception);
+				_log.debug(exception);
 			}
 		}
 
@@ -1216,7 +1219,8 @@ public class BlogsEntryLocalServiceImpl extends BlogsEntryLocalServiceBaseImpl {
 		entry.setSubtitle(subtitle);
 
 		if (Validator.isNotNull(urlTitle) &&
-			!urlTitle.equals(entry.getUrlTitle())) {
+			!urlTitle.equals(entry.getUrlTitle()) &&
+			!ExportImportThreadLocal.isImportInProcess()) {
 
 			FriendlyURLEntry friendlyURLEntry =
 				_friendlyURLEntryLocalService.addFriendlyURLEntry(
@@ -1816,7 +1820,7 @@ public class BlogsEntryLocalServiceImpl extends BlogsEntryLocalServiceBaseImpl {
 			}
 			else {
 				urlTitle =
-					FriendlyURLNormalizerUtil.normalizeWithPeriodsAndSlashes(
+					_friendlyURLNormalizer.normalizeWithPeriodsAndSlashes(
 						urlTitle);
 			}
 
@@ -1901,13 +1905,16 @@ public class BlogsEntryLocalServiceImpl extends BlogsEntryLocalServiceBaseImpl {
 		BlogsGroupServiceSettings blogsGroupServiceSettings =
 			BlogsGroupServiceSettings.getInstance(entry.getGroupId());
 
+		boolean invokedByCheckEntries = GetterUtil.getBoolean(
+			serviceContext.getAttribute(_INVOKED_BY_CHECK_ENTRIES));
 		boolean sendEmailEntryUpdated = GetterUtil.getBoolean(
 			serviceContext.getAttribute("sendEmailEntryUpdated"));
 
 		if (serviceContext.isCommandAdd() &&
 			blogsGroupServiceSettings.isEmailEntryAddedEnabled()) {
 		}
-		else if (sendEmailEntryUpdated && serviceContext.isCommandUpdate() &&
+		else if ((invokedByCheckEntries || sendEmailEntryUpdated) &&
+				 serviceContext.isCommandUpdate() &&
 				 blogsGroupServiceSettings.isEmailEntryUpdatedEnabled()) {
 		}
 		else {
@@ -2386,6 +2393,9 @@ public class BlogsEntryLocalServiceImpl extends BlogsEntryLocalServiceBaseImpl {
 
 	private static final String _COVER_IMAGE_FOLDER_NAME = "Cover Image";
 
+	private static final String _INVOKED_BY_CHECK_ENTRIES =
+		BlogsEntry.class.getName() + "#INVOKED_BY_CHECK_ENTRIES";
+
 	private static final String _SMALL_IMAGE_FOLDER_NAME = "Small Image";
 
 	private static final Log _log = LogFactoryUtil.getLog(
@@ -2414,6 +2424,9 @@ public class BlogsEntryLocalServiceImpl extends BlogsEntryLocalServiceBaseImpl {
 
 	@Reference
 	private FriendlyURLEntryLocalService _friendlyURLEntryLocalService;
+
+	@Reference
+	private FriendlyURLNormalizer _friendlyURLNormalizer;
 
 	@Reference
 	private GroupLocalService _groupLocalService;

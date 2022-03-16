@@ -401,6 +401,11 @@ public abstract class BaseCartResourceTestCase {
 	}
 
 	@Test
+	public void testGetCartPaymentURL() throws Exception {
+		Assert.assertTrue(false);
+	}
+
+	@Test
 	public void testGetChannelCartsPage() throws Exception {
 		Long accountId = testGetChannelCartsPage_getAccountId();
 		Long irrelevantAccountId =
@@ -1683,8 +1688,9 @@ public abstract class BaseCartResourceTestCase {
 		}
 
 		if (entityFieldName.equals("paymentStatus")) {
-			throw new IllegalArgumentException(
-				"Invalid entity field " + entityFieldName);
+			sb.append(String.valueOf(cart.getPaymentStatus()));
+
+			return sb.toString();
 		}
 
 		if (entityFieldName.equals("paymentStatusInfo")) {

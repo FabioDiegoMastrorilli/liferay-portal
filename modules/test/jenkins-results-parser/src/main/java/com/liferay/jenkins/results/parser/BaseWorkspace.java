@@ -68,7 +68,7 @@ public abstract class BaseWorkspace implements Workspace {
 					@Override
 					public WorkspaceGitRepository call() {
 						return GitRepositoryFactory.getWorkspaceGitRepository(
-							workspaceRepositoryDirName);
+							workspaceRepositoryDirName.trim());
 					}
 
 				};
@@ -129,6 +129,8 @@ public abstract class BaseWorkspace implements Workspace {
 			callables, threadPoolExecutor);
 
 		parallelExecutor.execute();
+
+		writePropertiesFiles();
 	}
 
 	@Override
@@ -211,6 +213,15 @@ public abstract class BaseWorkspace implements Workspace {
 		_parallelExecutor.waitFor();
 	}
 
+	@Override
+	public void writePropertiesFiles() {
+		for (WorkspaceGitRepository workspaceGitRepository :
+				getWorkspaceGitRepositories()) {
+
+			workspaceGitRepository.writePropertiesFiles();
+		}
+	}
+
 	protected BaseWorkspace(JSONObject jsonObject) {
 		this.jsonObject = jsonObject;
 
@@ -251,12 +262,14 @@ public abstract class BaseWorkspace implements Workspace {
 		try {
 			jsonObject.put(
 				"workspace_repository_dir_names",
-				JenkinsResultsParserUtil.getProperty(
-					JenkinsResultsParserUtil.getBuildProperties(),
-					"workspace.repository.dir.names",
-					_primaryWorkspaceGitRepository.getName(),
-					_primaryWorkspaceGitRepository.getUpstreamBranchName(),
-					jobName));
+				JenkinsResultsParserUtil.removeDuplicates(
+					",",
+					JenkinsResultsParserUtil.getProperty(
+						JenkinsResultsParserUtil.getBuildProperties(),
+						"workspace.repository.dir.names",
+						_primaryWorkspaceGitRepository.getName(),
+						_primaryWorkspaceGitRepository.getUpstreamBranchName(),
+						jobName)));
 		}
 		catch (IOException ioException) {
 			throw new RuntimeException(ioException);

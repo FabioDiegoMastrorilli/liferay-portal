@@ -52,7 +52,7 @@ public class UpgradeKaleoProcessTest {
 
 	@Before
 	public void setUp() throws Exception {
-		setUpUpgradeKaleoProcess();
+		_setUpUpgradeKaleoProcess();
 	}
 
 	@Test
@@ -93,7 +93,7 @@ public class UpgradeKaleoProcessTest {
 		}
 	}
 
-	protected void setUpUpgradeKaleoProcess() {
+	private void _setUpUpgradeKaleoProcess() {
 		_upgradeStepRegistrator.register(
 			new UpgradeStepRegistrator.Registry() {
 
@@ -114,6 +114,11 @@ public class UpgradeKaleoProcessTest {
 								(UpgradeProcess)upgradeStep;
 						}
 					}
+				}
+
+				@Override
+				public void registerInitialUpgradeSteps(
+					UpgradeStep... upgradeSteps) {
 				}
 
 			});

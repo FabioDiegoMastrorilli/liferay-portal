@@ -255,16 +255,6 @@ public class PortalUtil {
 	}
 
 	/**
-	 * @deprecated As of Athanasius (7.3.x), with no direct replacement
-	 */
-	@Deprecated
-	public static void addUserLocaleOptionsMessage(
-		HttpServletRequest httpServletRequest) {
-
-		_portal.addUserLocaleOptionsMessage(httpServletRequest);
-	}
-
-	/**
 	 * Clears the render parameters in the request if the portlet is in the
 	 * action phase.
 	 *
@@ -949,27 +939,11 @@ public class PortalUtil {
 		return _portal.getFullName(firstName, middleName, lastName);
 	}
 
-	public static String getGlobalLibDir() {
-		return _portal.getGlobalLibDir();
-	}
-
 	public static String getGoogleGadgetURL(
 			Portlet portlet, ThemeDisplay themeDisplay)
 		throws PortalException {
 
 		return _portal.getGoogleGadgetURL(portlet, themeDisplay);
-	}
-
-	/**
-	 * @deprecated As of Cavanaugh (7.4.x), replaced by {@link
-	 * #getGroupFriendlyURL(LayoutSet, ThemeDisplay, boolean, boolean)}
-	 */
-	@Deprecated
-	public static String getGroupFriendlyURL(
-			LayoutSet layoutSet, ThemeDisplay themeDisplay)
-		throws PortalException {
-
-		return _portal.getGroupFriendlyURL(layoutSet, themeDisplay);
 	}
 
 	public static String getGroupFriendlyURL(
@@ -1311,10 +1285,6 @@ public class PortalUtil {
 		getPortalInetSocketAddressEventListeners() {
 
 		return _portal.getPortalInetSocketAddressEventListeners();
-	}
-
-	public static String getPortalLibDir() {
-		return _portal.getPortalLibDir();
 	}
 
 	public static InetAddress getPortalLocalInetAddress(boolean secure) {
@@ -1815,15 +1785,6 @@ public class PortalUtil {
 		return _portal.getValidUserId(companyId, userId);
 	}
 
-	/**
-	 * @deprecated As of Mueller (7.2.x), replaced by {@link
-	 *             #getVirtualHostnames(LayoutSet)}
-	 */
-	@Deprecated
-	public static String getVirtualHostname(LayoutSet layoutSet) {
-		return _portal.getVirtualHostname(layoutSet);
-	}
-
 	public static TreeMap<String, String> getVirtualHostnames(
 		LayoutSet layoutSet) {
 
@@ -1986,10 +1947,6 @@ public class PortalUtil {
 
 	public static boolean isSystemRole(String roleName) {
 		return _portal.isSystemRole(roleName);
-	}
-
-	public static boolean isUpdateAvailable() {
-		return _portal.isUpdateAvailable();
 	}
 
 	public static boolean isValidResourceId(String resourceId) {

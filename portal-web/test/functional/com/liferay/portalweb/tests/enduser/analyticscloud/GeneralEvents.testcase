@@ -32,7 +32,6 @@ definition {
 		if ("${testPortalInstance}" == "true") {
 			PortalInstances.tearDownCP();
 		}
-
 		else {
 			JSONGroup.deleteGroupByName(groupName = "Site Name");
 		}
@@ -44,6 +43,7 @@ definition {
 	@priority = "5"
 	test CheckGeneralEventsForUnknownUser {
 		property proxy.server.enabled = "true";
+		property test.name.skip.portal.instance = "GeneralEvents#CheckGeneralEventsForUnknownUser";
 
 		task ("Add widget pages") {
 			for (var layoutName : list "WebContent,Blog,Document,Form") {
@@ -89,7 +89,7 @@ definition {
 		}
 
 		task ("Get fileEntryUUID of document") {
-			var fileEntryUUID = JSONDocument.getFileEntryUUID(
+			var fileEntryUuid = JSONDocument.getFileEntryUUID(
 				dmDocumentTitle = "DM AC Title",
 				groupName = "Site Name");
 		}
@@ -329,7 +329,7 @@ definition {
 				applicationId = "Document",
 				eventId = "documentPreviewed",
 				property = "fileEntryUUID",
-				value = "${fileEntryUUID}");
+				value = "${fileEntryUuid}");
 
 			ACUtils.assertEventPropertyValue(
 				applicationId = "Document",

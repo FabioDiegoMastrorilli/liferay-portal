@@ -376,6 +376,7 @@ const PublicationsSearchContainer = ({
 											symbol="caret-bottom"
 										/>
 									</span>
+
 									<span className="navbar-breakpoint-d-none">
 										<ClayIcon
 											spritemap={spritemap}
@@ -386,6 +387,7 @@ const PublicationsSearchContainer = ({
 							}
 						/>
 					</ClayManagementToolbar.Item>
+
 					<ClayManagementToolbar.Item
 						data-tooltip-align="top"
 						title={Liferay.Language.get('reverse-sort-direction')}
@@ -407,6 +409,7 @@ const PublicationsSearchContainer = ({
 						</ClayButton>
 					</ClayManagementToolbar.Item>
 				</ClayManagementToolbar.ItemList>
+
 				<ClayManagementToolbar.Search
 					onSubmit={(event) => {
 						event.preventDefault();
@@ -430,6 +433,7 @@ const PublicationsSearchContainer = ({
 								type="text"
 								value={searchTerms}
 							/>
+
 							<ClayInput.GroupInsetItem after tag="span">
 								<ClayButtonWithIcon
 									className="navbar-breakpoint-d-none"
@@ -437,6 +441,7 @@ const PublicationsSearchContainer = ({
 									onClick={() => setShowMobile(false)}
 									symbol="times"
 								/>
+
 								<ClayButtonWithIcon
 									disabled={searchDisabled}
 									displayType="unstyled"
@@ -447,6 +452,7 @@ const PublicationsSearchContainer = ({
 						</ClayInput.GroupItem>
 					</ClayInput.Group>
 				</ClayManagementToolbar.Search>
+
 				<ClayManagementToolbar.ItemList>
 					<ClayManagementToolbar.Item className="navbar-breakpoint-d-none">
 						<ClayButton
@@ -540,6 +546,7 @@ const PublicationsSearchContainer = ({
 							</span>
 						</span>
 					</ClayResultsBar.Item>
+
 					<ClayResultsBar.Item>
 						<ClayButton
 							className="component-link tbar-link"
@@ -600,6 +607,7 @@ const PublicationsSearchContainer = ({
 										: 'taglib-empty-result-message-header'
 								}
 							/>
+
 							<div className="sheet-text text-center">
 								{Liferay.Language.get(
 									'no-publications-were-found'
@@ -676,6 +684,7 @@ const PublicationsSearchContainer = ({
 							hover={false}
 						>
 							{getTableHead ? getTableHead() : ''}
+
 							<ClayTable.Body>{rows}</ClayTable.Body>
 						</ClayTable>
 
@@ -697,7 +706,7 @@ const PublicationsSearchContainer = ({
 	);
 };
 
-export default ({
+export default function ChangeTrackingIndicator({
 	checkoutDropdownItem,
 	createDropdownItem,
 	getSelectPublicationsURL,
@@ -710,7 +719,7 @@ export default ({
 	saveDisplayPreferenceURL,
 	spritemap,
 	title,
-}) => {
+}) {
 	const COLUMN_MODIFIED_DATE = 'modifiedDate';
 	const COLUMN_NAME = 'name';
 
@@ -736,10 +745,33 @@ export default ({
 
 	const [showModal, setShowModal] = useState(false);
 
+	const navigate = (url, action) => {
+		AUI().use('liferay-portlet-url', () => {
+			const portletURL = Liferay.PortletURL.createURL(url);
+
+			portletURL.setParameter(
+				'redirect',
+				window.location.pathname + window.location.search
+			);
+
+			if (action) {
+				submitForm(document.hrefFm, portletURL.toString());
+
+				return;
+			}
+
+			Liferay.Util.navigate(portletURL.toString());
+		});
+	};
+
 	const dropdownItems = [];
 
 	if (checkoutDropdownItem) {
-		dropdownItems.push(checkoutDropdownItem);
+		dropdownItems.push({
+			label: checkoutDropdownItem.label,
+			onClick: () => navigate(checkoutDropdownItem.href, true),
+			symbolLeft: checkoutDropdownItem.symbolLeft,
+		});
 	}
 
 	dropdownItems.push({
@@ -874,6 +906,7 @@ export default ({
 				)}
 			>
 				<ClayList.ItemTitle>{entry.name}</ClayList.ItemTitle>
+
 				<ClayList.ItemText subtext>
 					{entry.description}
 				</ClayList.ItemText>
@@ -883,46 +916,15 @@ export default ({
 		if (entry.checkoutURL) {
 			dropdownItems.push({
 				label: Liferay.Language.get('work-on-publication'),
-				onClick: () => {
-					AUI().use('liferay-portlet-url', () => {
-						const portletURL = Liferay.PortletURL.createURL(
-							entry.checkoutURL
-						);
-
-						portletURL.setParameter(
-							'redirect',
-							window.location.pathname + window.location.search
-						);
-
-						submitForm(document.hrefFm, portletURL.toString());
-					});
-				},
+				onClick: () => navigate(entry.checkoutURL, true),
 				symbolLeft: 'radio-button',
 			});
 
 			itemField = (
 				<ClayList.ItemField expand>
-					<a
-						onClick={() => {
-							AUI().use('liferay-portlet-url', () => {
-								const portletURL = Liferay.PortletURL.createURL(
-									entry.checkoutURL
-								);
-
-								portletURL.setParameter(
-									'redirect',
-									window.location.pathname +
-										window.location.search
-								);
-
-								submitForm(
-									document.hrefFm,
-									portletURL.toString()
-								);
-							});
-						}}
-					>
+					<a onClick={() => navigate(entry.checkoutURL, true)}>
 						<ClayList.ItemTitle>{entry.name}</ClayList.ItemTitle>
+
 						<ClayList.ItemText subtext>
 							{entry.description}
 						</ClayList.ItemText>
@@ -942,6 +944,7 @@ export default ({
 						)}
 					>
 						<ClayList.ItemTitle>{entry.name}</ClayList.ItemTitle>
+
 						<ClayList.ItemText subtext>
 							{entry.description}
 						</ClayList.ItemText>
@@ -952,20 +955,7 @@ export default ({
 
 		dropdownItems.push({
 			label: Liferay.Language.get('review-changes'),
-			onClick: () => {
-				AUI().use('liferay-portlet-url', () => {
-					const portletURL = Liferay.PortletURL.createURL(
-						entry.viewURL
-					);
-
-					portletURL.setParameter(
-						'redirect',
-						window.location.pathname + window.location.search
-					);
-
-					submitForm(document.hrefFm, portletURL.toString());
-				});
-			},
+			onClick: () => navigate(entry.viewURL),
 			symbolLeft: 'list-ul',
 		});
 
@@ -974,7 +964,9 @@ export default ({
 				<ClayList.ItemField>
 					{renderUserPortrait(entry, fetchData.userInfo)}
 				</ClayList.ItemField>
+
 				{itemField}
+
 				{entry.viewURL && (
 					<>
 						<ClayList.ItemField>
@@ -982,29 +974,9 @@ export default ({
 								{entry.checkoutURL && (
 									<ClayList.QuickActionMenu.Item
 										data-tooltip-align="top"
-										onClick={() => {
-											AUI().use(
-												'liferay-portlet-url',
-												() => {
-													const portletURL = Liferay.PortletURL.createURL(
-														entry.checkoutURL
-													);
-
-													portletURL.setParameter(
-														'redirect',
-														window.location
-															.pathname +
-															window.location
-																.search
-													);
-
-													submitForm(
-														document.hrefFm,
-														portletURL.toString()
-													);
-												}
-											);
-										}}
+										onClick={() =>
+											navigate(entry.checkoutURL, true)
+										}
 										spritemap={spritemap}
 										symbol="radio-button"
 										title={Liferay.Language.get(
@@ -1012,26 +984,10 @@ export default ({
 										)}
 									/>
 								)}
+
 								<ClayList.QuickActionMenu.Item
 									data-tooltip-align="top"
-									onClick={() => {
-										AUI().use('liferay-portlet-url', () => {
-											const portletURL = Liferay.PortletURL.createURL(
-												entry.viewURL
-											);
-
-											portletURL.setParameter(
-												'redirect',
-												window.location.pathname +
-													window.location.search
-											);
-
-											submitForm(
-												document.hrefFm,
-												portletURL.toString()
-											);
-										});
-									}}
+									onClick={() => navigate(entry.viewURL)}
 									spritemap={spritemap}
 									symbol="list-ul"
 									title={Liferay.Language.get(
@@ -1075,6 +1031,7 @@ export default ({
 				<ClayModal.Header withTitle>
 					{Liferay.Language.get('select-a-publication')}
 				</ClayModal.Header>
+
 				<ClayModal.Body scrollable>
 					<PublicationsSearchContainer
 						ascending={ascending}
@@ -1124,4 +1081,4 @@ export default ({
 			/>
 		</>
 	);
-};
+}

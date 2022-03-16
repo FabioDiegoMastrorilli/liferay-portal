@@ -25,7 +25,6 @@ import com.liferay.portal.kernel.portlet.RequestBackedPortletURLFactory;
 import com.liferay.portal.kernel.theme.ThemeDisplay;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.Validator;
-import com.liferay.portal.kernel.xuggler.XugglerUtil;
 
 import java.util.Locale;
 import java.util.Map;
@@ -60,8 +59,8 @@ public class CKEditorConfigContributor extends BaseCKEditorConfigContributor {
 		);
 
 		String extraPlugins =
-			"addimages,autogrow,autolink,filebrowser,itemselector,lfrpopup," +
-				"media,stylescombo,videoembed";
+			"addimages,autogrow,autolink,colordialog,filebrowser," +
+				"itemselector,lfrpopup,media,stylescombo,videoembed";
 
 		boolean inlineEdit = GetterUtil.getBoolean(
 			(String)inputEditorTaglibAttributes.get(
@@ -83,12 +82,12 @@ public class CKEditorConfigContributor extends BaseCKEditorConfigContributor {
 		).put(
 			"removePlugins", "elementspath"
 		).put(
-			"stylesSet", getStyleFormatsJSONArray(themeDisplay.getLocale())
+			"stylesSet", _getStyleFormatsJSONArray(themeDisplay.getLocale())
 		).put(
 			"title", false
 		);
 
-		JSONArray toolbarSimpleJSONArray = getToolbarSimpleJSONArray(
+		JSONArray toolbarSimpleJSONArray = _getToolbarSimpleJSONArray(
 			inputEditorTaglibAttributes);
 
 		jsonObject.put(
@@ -107,14 +106,14 @@ public class CKEditorConfigContributor extends BaseCKEditorConfigContributor {
 			"toolbar_tablet", toolbarSimpleJSONArray
 		).put(
 			"toolbar_text_advanced",
-			getToolbarTextAdvancedJSONArray(inputEditorTaglibAttributes)
+			_getToolbarTextAdvancedJSONArray(inputEditorTaglibAttributes)
 		).put(
 			"toolbar_text_simple",
-			getToolbarTextSimpleJSONArray(inputEditorTaglibAttributes)
+			_getToolbarTextSimpleJSONArray(inputEditorTaglibAttributes)
 		);
 	}
 
-	protected JSONObject getStyleFormatJSONObject(
+	private JSONObject _getStyleFormatJSONObject(
 		String styleFormatName, String element, String cssClass) {
 
 		return JSONUtil.put(
@@ -133,36 +132,36 @@ public class CKEditorConfigContributor extends BaseCKEditorConfigContributor {
 		);
 	}
 
-	protected JSONArray getStyleFormatsJSONArray(Locale locale) {
+	private JSONArray _getStyleFormatsJSONArray(Locale locale) {
 		return JSONUtil.putAll(
-			getStyleFormatJSONObject(
+			_getStyleFormatJSONObject(
 				LanguageUtil.get(locale, "normal"), "p", null),
-			getStyleFormatJSONObject(
+			_getStyleFormatJSONObject(
 				LanguageUtil.format(locale, "heading-x", "1"), "h1", null),
-			getStyleFormatJSONObject(
+			_getStyleFormatJSONObject(
 				LanguageUtil.format(locale, "heading-x", "2"), "h2", null),
-			getStyleFormatJSONObject(
+			_getStyleFormatJSONObject(
 				LanguageUtil.format(locale, "heading-x", "3"), "h3", null),
-			getStyleFormatJSONObject(
+			_getStyleFormatJSONObject(
 				LanguageUtil.format(locale, "heading-x", "4"), "h4", null),
-			getStyleFormatJSONObject(
+			_getStyleFormatJSONObject(
 				LanguageUtil.get(locale, "preformatted-text"), "pre", null),
-			getStyleFormatJSONObject(
+			_getStyleFormatJSONObject(
 				LanguageUtil.get(locale, "cited-work"), "cite", null),
-			getStyleFormatJSONObject(
+			_getStyleFormatJSONObject(
 				LanguageUtil.get(locale, "computer-code"), "code", null),
-			getStyleFormatJSONObject(
+			_getStyleFormatJSONObject(
 				LanguageUtil.get(locale, "info-message"), "div",
 				"overflow-auto portlet-msg-info"),
-			getStyleFormatJSONObject(
+			_getStyleFormatJSONObject(
 				LanguageUtil.get(locale, "alert-message"), "div",
 				"overflow-auto portlet-msg-alert"),
-			getStyleFormatJSONObject(
+			_getStyleFormatJSONObject(
 				LanguageUtil.get(locale, "error-message"), "div",
 				"overflow-auto portlet-msg-error"));
 	}
 
-	protected JSONArray getToolbarSimpleJSONArray(
+	private JSONArray _getToolbarSimpleJSONArray(
 		Map<String, Object> inputEditorTaglibAttributes) {
 
 		return JSONUtil.putAll(
@@ -173,7 +172,7 @@ public class CKEditorConfigContributor extends BaseCKEditorConfigContributor {
 			toJSONArray("['Table', 'ImageSelector', 'VideoSelector']")
 		).put(
 			() -> {
-				if (AudioProcessorUtil.isEnabled() || XugglerUtil.isEnabled()) {
+				if (AudioProcessorUtil.isEnabled()) {
 					return toJSONArray("['AudioSelector']");
 				}
 
@@ -190,7 +189,7 @@ public class CKEditorConfigContributor extends BaseCKEditorConfigContributor {
 		);
 	}
 
-	protected JSONArray getToolbarTextAdvancedJSONArray(
+	private JSONArray _getToolbarTextAdvancedJSONArray(
 		Map<String, Object> inputEditorTaglibAttributes) {
 
 		return JSONUtil.putAll(
@@ -213,7 +212,7 @@ public class CKEditorConfigContributor extends BaseCKEditorConfigContributor {
 		);
 	}
 
-	protected JSONArray getToolbarTextSimpleJSONArray(
+	private JSONArray _getToolbarTextSimpleJSONArray(
 		Map<String, Object> inputEditorTaglibAttributes) {
 
 		return JSONUtil.putAll(

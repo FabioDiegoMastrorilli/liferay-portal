@@ -23,7 +23,6 @@ definition {
 
 		if (isSet(databaseName)) {
 			var originalDatabaseName = PropsUtil.get("database.mysql.schema");
-
 			var jdbcURL = StringUtil.replace("${jdbcURL}", "${originalDatabaseName}", "${databaseName}");
 		}
 
@@ -84,10 +83,7 @@ definition {
 
 		User.acceptEndUserLicenseAgreement();
 
-		User.resetPassword(
-			resetPassword = "${resetPassword}",
-			setupWizardEnabled = "${setupWizardEnabled}",
-			syntaxCheckingEnabled = "${syntaxCheckingEnabled}");
+		User.resetPassword(newPassword = "${newPassword}");
 
 		User.answerPasswordReminder();
 
@@ -143,16 +139,17 @@ definition {
 
 		User.acceptEndUserLicenseAgreement();
 
-		User.resetPassword(
-			resetPassword = "${resetPassword}",
-			setupWizardEnabled = "${setupWizardEnabled}",
-			syntaxCheckingEnabled = "${syntaxCheckingEnabled}");
+		User.resetPassword(newPassword = "${newPassword}");
 
 		User.answerPasswordReminder();
 
 		AssertElementPresent(locator1 = "UserBar#USER_AVATAR_IMAGE");
 
-		Click(locator1 = "Button#DONE");
+		var testRunEnvironment = PropsUtil.get("test.run.environment");
+
+		if ("${testRunEnvironment}" == "EE") {
+			Click(locator1 = "Button#DONE");
+		}
 
 		User.viewLoggedInPG();
 	}
@@ -186,7 +183,7 @@ definition {
 	}
 
 	macro viewConfigurationSavedPG {
-		if ((isSet(localization)) && ("${localization}" == "ES")) {
+		if (isSet(localization) && ("${localization}" == "ES")) {
 			Alert.viewSuccessMessageText(successMessage = "La configuración fue guardada con éxito.");
 
 			AssertTextEquals.assertPartialText(

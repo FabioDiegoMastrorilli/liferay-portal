@@ -13,7 +13,7 @@
  */
 
 import ClayPanel from '@clayui/panel';
-import {getFieldsGroupedByTypes} from 'data-engine-js-components-web/js/utils/objectFields';
+import {getFieldsGroupedByTypes} from 'data-engine-js-components-web';
 import React from 'react';
 
 const ModalObjectRestrictionsSection = ({children, description, title}) => {
@@ -83,13 +83,7 @@ const UnmappedRequiredObjectFields = ({fields}) => {
 						<ol>
 							{fields.map(({label, name}) => (
 								<li key={name}>
-									{
-										label[
-											themeDisplay
-												.getDefaultLanguageId()
-												.replace('_', '-')
-										]
-									}
+									{label[themeDisplay.getDefaultLanguageId()]}
 								</li>
 							))}
 						</ol>

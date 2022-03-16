@@ -26,6 +26,10 @@ import com.liferay.portal.kernel.model.Organization;
 public class OrganizationServiceWrapper
 	implements OrganizationService, ServiceWrapper<OrganizationService> {
 
+	public OrganizationServiceWrapper() {
+		this(null);
+	}
+
 	public OrganizationServiceWrapper(OrganizationService organizationService) {
 		_organizationService = organizationService;
 	}
@@ -136,6 +140,27 @@ public class OrganizationServiceWrapper
 			emailAddress, organizationId, serviceContext);
 	}
 
+	@Override
+	public Organization addOrUpdateOrganization(
+			String externalReferenceCode, long parentOrganizationId,
+			String name, String type, long regionId, long countryId,
+			long statusId, String comments, boolean hasLogo, byte[] logoBytes,
+			boolean site,
+			java.util.List<com.liferay.portal.kernel.model.Address> addresses,
+			java.util.List<com.liferay.portal.kernel.model.EmailAddress>
+				emailAddresses,
+			java.util.List<com.liferay.portal.kernel.model.OrgLabor> orgLabors,
+			java.util.List<com.liferay.portal.kernel.model.Phone> phones,
+			java.util.List<com.liferay.portal.kernel.model.Website> websites,
+			ServiceContext serviceContext)
+		throws com.liferay.portal.kernel.exception.PortalException {
+
+		return _organizationService.addOrUpdateOrganization(
+			externalReferenceCode, parentOrganizationId, name, type, regionId,
+			countryId, statusId, comments, hasLogo, logoBytes, site, addresses,
+			emailAddresses, orgLabors, phones, websites, serviceContext);
+	}
+
 	/**
 	 * Assigns the password policy to the organizations, removing any other
 	 * currently assigned password policies.
@@ -230,6 +255,15 @@ public class OrganizationServiceWrapper
 		throws com.liferay.portal.kernel.exception.PortalException {
 
 		return _organizationService.getOrganization(organizationId);
+	}
+
+	@Override
+	public Organization getOrganizationByExternalReferenceCode(
+			long companyId, String externalReferenceCode)
+		throws com.liferay.portal.kernel.exception.PortalException {
+
+		return _organizationService.getOrganizationByExternalReferenceCode(
+			companyId, externalReferenceCode);
 	}
 
 	/**

@@ -45,6 +45,14 @@ public class HistoryTag extends IncludeTag {
 		return _elementId;
 	}
 
+	public boolean isDisabled() {
+		return _disabled;
+	}
+
+	public boolean isLocalizable() {
+		return _localizable;
+	}
+
 	public void setClassName(String className) {
 		_className = className;
 	}
@@ -53,8 +61,16 @@ public class HistoryTag extends IncludeTag {
 		_classPK = classPK;
 	}
 
+	public void setDisabled(boolean disabled) {
+		_disabled = disabled;
+	}
+
 	public void setElementId(String elementId) {
 		_elementId = elementId;
+	}
+
+	public void setLocalizable(boolean localizable) {
+		_localizable = localizable;
 	}
 
 	@Override
@@ -70,7 +86,9 @@ public class HistoryTag extends IncludeTag {
 
 		_className = null;
 		_classPK = 0;
+		_disabled = false;
 		_elementId = null;
+		_localizable = true;
 	}
 
 	@Override
@@ -86,10 +104,14 @@ public class HistoryTag extends IncludeTag {
 			"liferay-friendly-url:history:defaultLanguageId",
 			_getDefaultLanguageId(httpServletRequest));
 		httpServletRequest.setAttribute(
+			"liferay-friendly-url:history:disabled", isDisabled());
+		httpServletRequest.setAttribute(
 			"liferay-friendly-url:history:elementId", getElementId());
 		httpServletRequest.setAttribute(
 			"liferay-friendly-url:history:friendlyURLEntryURL",
 			_getFriendlyURLEntryURL(httpServletRequest));
+		httpServletRequest.setAttribute(
+			"liferay-friendly-url:history:localizable", isLocalizable());
 	}
 
 	private String _getDefaultLanguageId(
@@ -121,10 +143,12 @@ public class HistoryTag extends IncludeTag {
 			getClassName(), StringPool.SLASH, getClassPK());
 	}
 
-	private static final String _PAGE = "/page.jsp";
+	private static final String _PAGE = "/history/page.jsp";
 
 	private String _className;
 	private long _classPK;
+	private boolean _disabled;
 	private String _elementId;
+	private boolean _localizable = true;
 
 }

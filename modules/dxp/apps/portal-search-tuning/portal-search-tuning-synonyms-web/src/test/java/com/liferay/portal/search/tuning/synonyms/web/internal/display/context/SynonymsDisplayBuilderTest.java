@@ -51,8 +51,11 @@ public class SynonymsDisplayBuilderTest extends BaseSynonymsWebTestCase {
 		LiferayUnitTestRule.INSTANCE;
 
 	@Before
+	@Override
 	public void setUp() throws Exception {
 		super.setUp();
+
+		setUpPortletPreferencesFactoryUtil();
 
 		_synonymsDisplayBuilder = new SynonymsDisplayBuilder(
 			_documentToSynonymSetTranslatorImpl, _httpServletRequest, _language,

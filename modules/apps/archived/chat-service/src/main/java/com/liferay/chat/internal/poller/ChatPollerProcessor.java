@@ -79,7 +79,29 @@ public class ChatPollerProcessor extends BasePollerProcessor {
 			ChatGroupServiceConfiguration.class, properties);
 	}
 
-	protected void addEntry(PollerRequest pollerRequest) throws Exception {
+	@Override
+	protected PollerResponse doReceive(PollerRequest pollerRequest)
+		throws Exception {
+
+		PollerResponse pollerResponse = pollerRequest.createPollerResponse();
+
+		_getBuddies(pollerRequest, pollerResponse);
+		_getEntries(pollerRequest, pollerResponse);
+
+		return pollerResponse;
+	}
+
+	@Override
+	protected void doSend(PollerRequest pollerRequest) throws Exception {
+		if (pollerRequest.isStartPolling()) {
+			_processedEntryIds.clear();
+		}
+
+		_addEntry(pollerRequest);
+		_updateStatus(pollerRequest);
+	}
+
+	private void _addEntry(PollerRequest pollerRequest) throws Exception {
 		long toUserId = getLong(pollerRequest, "toUserId");
 
 		if (toUserId > 0) {
@@ -91,29 +113,7 @@ public class ChatPollerProcessor extends BasePollerProcessor {
 		}
 	}
 
-	@Override
-	protected PollerResponse doReceive(PollerRequest pollerRequest)
-		throws Exception {
-
-		PollerResponse pollerResponse = pollerRequest.createPollerResponse();
-
-		getBuddies(pollerRequest, pollerResponse);
-		getEntries(pollerRequest, pollerResponse);
-
-		return pollerResponse;
-	}
-
-	@Override
-	protected void doSend(PollerRequest pollerRequest) throws Exception {
-		if (pollerRequest.isStartPolling()) {
-			_processedEntryIds.clear();
-		}
-
-		addEntry(pollerRequest);
-		updateStatus(pollerRequest);
-	}
-
-	protected void getBuddies(
+	private void _getBuddies(
 			PollerRequest pollerRequest, PollerResponse pollerResponse)
 		throws Exception {
 
@@ -149,8 +149,7 @@ public class ChatPollerProcessor extends BasePollerProcessor {
 				// LPS-52675
 
 				if (_log.isDebugEnabled()) {
-					_log.debug(
-						noSuchLayoutSetException, noSuchLayoutSetException);
+					_log.debug(noSuchLayoutSetException);
 				}
 			}
 
@@ -196,7 +195,7 @@ public class ChatPollerProcessor extends BasePollerProcessor {
 		pollerResponse.setParameter("buddies", buddiesJSONArray);
 	}
 
-	protected void getEntries(
+	private void _getEntries(
 			PollerRequest pollerRequest, PollerResponse pollerResponse)
 		throws Exception {
 
@@ -250,7 +249,7 @@ public class ChatPollerProcessor extends BasePollerProcessor {
 					// LPS-52675
 
 					if (_log.isDebugEnabled()) {
-						_log.debug(noSuchUserException, noSuchUserException);
+						_log.debug(noSuchUserException);
 					}
 
 					continue;
@@ -299,7 +298,7 @@ public class ChatPollerProcessor extends BasePollerProcessor {
 		}
 	}
 
-	protected void updateStatus(PollerRequest pollerRequest) throws Exception {
+	private void _updateStatus(PollerRequest pollerRequest) throws Exception {
 		int online = getInteger(pollerRequest, "online");
 		int awake = getInteger(pollerRequest, "awake");
 		String activePanelIds = getString(pollerRequest, "activePanelIds");

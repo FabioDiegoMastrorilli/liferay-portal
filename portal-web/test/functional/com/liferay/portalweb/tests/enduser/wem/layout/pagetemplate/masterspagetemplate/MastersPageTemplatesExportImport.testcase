@@ -110,7 +110,7 @@ definition {
 
 			AssertElementPresent(
 				key_columnNumber = "1",
-				key_elementHeader = "//div[contains(@class,'page-editor')]//li[contains(.,'Button')]",
+				key_elementHeader = "//div[@aria-label='Button']",
 				key_position = "1",
 				locator1 = "PageEditor#GRID_COLUMN_NESTED_ELEMENT");
 
@@ -145,7 +145,7 @@ definition {
 			PageEditor.viewFragment(fragmentName = "Container");
 
 			AssertElementPresent(
-				key_elementHeader = "//div[contains(@class,'page-editor')]//li[contains(.,'Heading')]",
+				key_elementHeader = "//div[@aria-label='Heading']",
 				key_position = "1",
 				locator1 = "PageEditor#CONTAINER_CONTAINER_NESTED_ELEMENT");
 
@@ -153,7 +153,7 @@ definition {
 
 			AssertElementPresent(
 				key_columnNumber = "1",
-				key_elementHeader = "//div[contains(@class,'page-editor')]//li[contains(.,'Button')]",
+				key_elementHeader = "//div[@aria-label='Button']",
 				key_position = "1",
 				locator1 = "PageEditor#GRID_COLUMN_NESTED_ELEMENT");
 		}
@@ -383,7 +383,6 @@ definition {
 
 			PageEditor.editFragmentHTML(
 				fileName = "fragment_static_text.html",
-				filePath = "enduser/wem/layout/pagetemplate/masterspagetemplate",
 				fragmentName = "HTML",
 				id = "element-html");
 
@@ -494,17 +493,17 @@ definition {
 
 			PageEditor.addWidget(
 				dropTarget = "Header",
-				portletName = "Categories Navigation",
+				portletName = "Category Filter",
 				scope = "Master");
 		}
 
 		task ("Configure Organization Role permission settings of Categories Navigation") {
 			MouseOver.mouseOverNotVisible(
-				key_portletName = "Categories Navigation",
+				key_portletName = "Category Filter",
 				locator1 = "Portlet#SPECIFIC_BORDERLESS_ELLIPSIS_ICON");
 
 			Click.waitForMenuToggleJSClick(
-				key_portletName = "Categories Navigation",
+				key_portletName = "Category Filter",
 				locator1 = "Portlet#SPECIFIC_BORDERLESS_ELLIPSIS_ICON");
 
 			WaitForLiferayEvent.initializeLiferayEventLog();
@@ -555,14 +554,14 @@ definition {
 
 			MastersPageTemplatesAdmin.gotoMasters(masterLayoutName = "Custom Masters Page Template");
 
-			PageEditor.viewFragment(fragmentName = "Categories Navigation");
+			PageEditor.viewFragment(fragmentName = "Category Filter");
 
 			MouseOver.mouseOverNotVisible(
-				key_portletName = "Categories Navigation",
+				key_portletName = "Category Filter",
 				locator1 = "Portlet#SPECIFIC_BORDERLESS_ELLIPSIS_ICON");
 
 			Click.waitForMenuToggleJSClick(
-				key_portletName = "Categories Navigation",
+				key_portletName = "Category Filter",
 				locator1 = "Portlet#SPECIFIC_BORDERLESS_ELLIPSIS_ICON");
 
 			WaitForLiferayEvent.initializeLiferayEventLog();
@@ -719,9 +718,7 @@ definition {
 
 			SelectFrame(locator1 = "IFrame#MODAL_BODY");
 
-			UploadFileWithCustomPath.uploadArchiveFile(
-				fileName = "master-page-invalid-value.zip",
-				filePath = "enduser/wem/layout/pagetemplate/masterspagetemplate");
+			UploadDependencyFile.uploadArchiveFile(fileName = "master-page-invalid-value.zip");
 
 			Button.clickImport();
 		}

@@ -27,6 +27,10 @@ public class ObjectRelationshipLocalServiceWrapper
 	implements ObjectRelationshipLocalService,
 			   ServiceWrapper<ObjectRelationshipLocalService> {
 
+	public ObjectRelationshipLocalServiceWrapper() {
+		this(null);
+	}
+
 	public ObjectRelationshipLocalServiceWrapper(
 		ObjectRelationshipLocalService objectRelationshipLocalService) {
 
@@ -36,13 +40,14 @@ public class ObjectRelationshipLocalServiceWrapper
 	@Override
 	public com.liferay.object.model.ObjectRelationship addObjectRelationship(
 			long userId, long objectDefinitionId1, long objectDefinitionId2,
+			String deletionType,
 			java.util.Map<java.util.Locale, String> labelMap, String name,
 			String type)
 		throws com.liferay.portal.kernel.exception.PortalException {
 
 		return _objectRelationshipLocalService.addObjectRelationship(
-			userId, objectDefinitionId1, objectDefinitionId2, labelMap, name,
-			type);
+			userId, objectDefinitionId1, objectDefinitionId2, deletionType,
+			labelMap, name, type);
 	}
 
 	/**
@@ -392,6 +397,14 @@ public class ObjectRelationshipLocalServiceWrapper
 
 		return _objectRelationshipLocalService.getObjectRelationships(
 			start, end);
+	}
+
+	@Override
+	public java.util.List<com.liferay.object.model.ObjectRelationship>
+		getObjectRelationships(long objectDefinitionId1) {
+
+		return _objectRelationshipLocalService.getObjectRelationships(
+			objectDefinitionId1);
 	}
 
 	@Override

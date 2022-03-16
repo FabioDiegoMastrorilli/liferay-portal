@@ -48,13 +48,14 @@ public class SXPElementLocalServiceUtil {
 	public static SXPElement addSXPElement(
 			long userId, Map<java.util.Locale, String> descriptionMap,
 			String elementDefinitionJSON, boolean readOnly,
-			Map<java.util.Locale, String> titleMap, int type,
+			String schemaVersion, Map<java.util.Locale, String> titleMap,
+			int type,
 			com.liferay.portal.kernel.service.ServiceContext serviceContext)
 		throws PortalException {
 
 		return getService().addSXPElement(
-			userId, descriptionMap, elementDefinitionJSON, readOnly, titleMap,
-			type, serviceContext);
+			userId, descriptionMap, elementDefinitionJSON, readOnly,
+			schemaVersion, titleMap, type, serviceContext);
 	}
 
 	/**
@@ -89,6 +90,12 @@ public class SXPElementLocalServiceUtil {
 	 */
 	public static SXPElement createSXPElement(long sxpElementId) {
 		return getService().createSXPElement(sxpElementId);
+	}
+
+	public static void deleteCompanySXPElements(long companyId)
+		throws PortalException {
+
+		getService().deleteCompanySXPElements(companyId);
 	}
 
 	/**
@@ -319,8 +326,10 @@ public class SXPElementLocalServiceUtil {
 		return getService().getSXPElements(start, end);
 	}
 
-	public static List<SXPElement> getSXPElements(long companyId) {
-		return getService().getSXPElements(companyId);
+	public static List<SXPElement> getSXPElements(
+		long companyId, boolean readOnly) {
+
+		return getService().getSXPElements(companyId, readOnly);
 	}
 
 	/**
@@ -342,14 +351,14 @@ public class SXPElementLocalServiceUtil {
 	public static SXPElement updateSXPElement(
 			long userId, long sxpElementId,
 			Map<java.util.Locale, String> descriptionMap,
-			String elementDefinitionJSON, boolean hidden,
+			String elementDefinitionJSON, boolean hidden, String schemaVersion,
 			Map<java.util.Locale, String> titleMap,
 			com.liferay.portal.kernel.service.ServiceContext serviceContext)
 		throws PortalException {
 
 		return getService().updateSXPElement(
 			userId, sxpElementId, descriptionMap, elementDefinitionJSON, hidden,
-			titleMap, serviceContext);
+			schemaVersion, titleMap, serviceContext);
 	}
 
 	/**

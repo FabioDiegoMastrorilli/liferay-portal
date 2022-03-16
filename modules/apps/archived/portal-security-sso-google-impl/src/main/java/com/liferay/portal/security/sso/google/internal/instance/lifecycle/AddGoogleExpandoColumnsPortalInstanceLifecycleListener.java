@@ -28,6 +28,7 @@ import com.liferay.portal.kernel.module.framework.ModuleServiceLifecycle;
 import com.liferay.portal.kernel.security.auth.CompanyThreadLocal;
 import com.liferay.portal.kernel.service.ClassNameLocalService;
 import com.liferay.portal.kernel.util.UnicodeProperties;
+import com.liferay.portal.kernel.util.UnicodePropertiesBuilder;
 
 import java.util.List;
 
@@ -85,15 +86,15 @@ public class AddGoogleExpandoColumnsPortalInstanceLifecycleListener
 					ExpandoTableConstants.DEFAULT_TABLE_NAME);
 			}
 
-			UnicodeProperties unicodeProperties = new UnicodeProperties();
+			UnicodeProperties unicodeProperties = UnicodePropertiesBuilder.put(
+				"hidden", "true"
+			).put(
+				"visible-with-update-permission", "false"
+			).build();
 
-			unicodeProperties.setProperty("hidden", "true");
-			unicodeProperties.setProperty(
-				"visible-with-update-permission", "false");
-
-			addExpandoColumn(
+			_addExpandoColumn(
 				expandoTable, "googleAccessToken", unicodeProperties);
-			addExpandoColumn(
+			_addExpandoColumn(
 				expandoTable, "googleRefreshToken", unicodeProperties);
 		}
 		finally {
@@ -105,7 +106,12 @@ public class AddGoogleExpandoColumnsPortalInstanceLifecycleListener
 	public void portalInstanceUnregistered(Company company) throws Exception {
 	}
 
-	protected void addExpandoColumn(
+	@Reference(target = ModuleServiceLifecycle.PORTAL_INITIALIZED, unbind = "-")
+	protected void setModuleServiceLifecycle(
+		ModuleServiceLifecycle moduleServiceLifecycle) {
+	}
+
+	private void _addExpandoColumn(
 			ExpandoTable expandoTable, String name,
 			UnicodeProperties unicodeProperties)
 		throws Exception {
@@ -122,11 +128,6 @@ public class AddGoogleExpandoColumnsPortalInstanceLifecycleListener
 
 		_expandoColumnLocalService.updateTypeSettings(
 			expandoColumn.getColumnId(), unicodeProperties.toString());
-	}
-
-	@Reference(target = ModuleServiceLifecycle.PORTAL_INITIALIZED, unbind = "-")
-	protected void setModuleServiceLifecycle(
-		ModuleServiceLifecycle moduleServiceLifecycle) {
 	}
 
 	@Reference

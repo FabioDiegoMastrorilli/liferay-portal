@@ -44,6 +44,10 @@ definition {
 	@description = "Feature ID: Legacy | Automation ID: LRAC-8913 | Test Summary: Assert Individual Activities Chart popover follows format"
 	@priority = "3"
 	test AssertIndividualActivitiesChartPopover {
+		property portal.upstream = "quarantine";
+
+		// AC Refactor ticket: LRAC-9707
+
 		task ("Add DM to AC Page") {
 			ACUtils.createDMAndAddToPage();
 		}
@@ -109,7 +113,8 @@ definition {
 
 		task ("Assert chart popover date formatted") {
 			var formattedDate = ACIndividualsDashboard.getChartPopoverDate();
-			var formattedDate = StringUtil.extractFirst("${formattedDate}",",");
+
+			var formattedDate = StringUtil.extractFirst("${formattedDate}", ",");
 
 			ACUtils.assertDatePattern(
 				date = "${formattedDate}",
@@ -184,20 +189,15 @@ definition {
 
 		task ("Get current Date") {
 			var displayDateDay = DateUtil.getCurrentDate();
-
 			var displayDateMonth = DateUtil.getCurrentMonthName();
-
 			var displayDateYear = DateUtil.getCurrentYear();
-
-			individualCurrentDate = selenium.getText(locator1 = "ACIndividualsDashboard#INDIVIDUALS_EVENTS_DATE");
-
-			var monthAndDay = StringUtil.extractFirst("${individualCurrentDate}",",");
-			var currentDay = StringUtil.extractLast("${monthAndDay}"," ");
-
+			var individualCurrentDate = selenium.getText("ACIndividualsDashboard#INDIVIDUALS_EVENTS_DATE");
+			var monthAndDay = StringUtil.extractFirst("${individualCurrentDate}", ",");
+			var currentDay = StringUtil.extractLast("${monthAndDay}", " ");
 			var result = MathUtil.isGreaterThan("${currentDay}", "${displayDateDay}");
 
 			if ("${result}" == "true") {
-				displayDateDay = MathUtil.sum("${displayDateDay}", "1");
+				var displayDateDay = ${displayDateDay} + 1;
 			}
 
 			var displayDate = "${displayDateMonth} ${displayDateDay}, ${displayDateYear}";
@@ -212,10 +212,8 @@ definition {
 		}
 
 		task ("Get the last 24 hours Date") {
-			var previousDay = MathUtil.difference("${displayDateDay}", "1");
-
+			var previousDay = ${displayDateDay} - 1;
 			var previousMonth = DateUtil.getFormattedDate("-1", "MMMM");
-
 			var previousDate = "${previousMonth} ${previousDay}, ${displayDateYear}";
 		}
 
@@ -315,7 +313,7 @@ definition {
 
 		ACSegments.createStaticSegment();
 
-		ACSegments.nameSegment(segmentName = "Static Segment Test");
+		ACUtils.setItemName(itemName = "Static Segment Test");
 
 		ACSegments.addStaticMember(tableMember = "userfn userln");
 
@@ -335,13 +333,15 @@ definition {
 	@description = "Set custom range filter with data for individual activity"
 	@priority = "5"
 	test CanSetDataWithCustomRangeOnIndividualActivitiesCard {
+		property portal.upstream = "quarantine";
+
 		ACUtils.createDMAndAddToPage();
 
 		var propertyName = ACDXPSettings.connectDXPtoAnalyticsCloud(siteName = "Site Name");
 
 		ACUtils.navigateToSitePage(
-			actionType = "View DM",
-			documentTitleList = "DM AC Title,DM AC Title,DM AC Title,DM AC Title",
+			actionType = "Download DM",
+			documentTitleList = "DM AC Title",
 			pageName = "AC Page",
 			siteName = "Site Name");
 

@@ -13,16 +13,31 @@
  */
 
 import ClayButton from '@clayui/button';
+import ClayForm, {ClayInput} from '@clayui/form';
 import ClayIcon from '@clayui/icon';
 import ClayModal from '@clayui/modal';
 import {useIsMounted} from '@liferay/frontend-js-react-web';
-import {fetch} from 'frontend-js-web';
+import {fetch, openToast} from 'frontend-js-web';
 import React, {useState} from 'react';
 
-const HEADERS = new Headers({
-	'Accept': 'application/json',
-	'Accept-Language': Liferay.ThemeDisplay.getBCP47LanguageId(),
-});
+import {HEADERS, TEMPLATE_CREATED_EVENT} from './constants';
+
+async function saveTemplate(formDataQuerySelector, updateData, url) {
+	const mainFormData = document.querySelector(formDataQuerySelector);
+	const formData = new FormData(mainFormData);
+
+	for (const [key, value] of Object.entries(updateData)) {
+		formData.append(key, value);
+	}
+
+	const response = await fetch(url, {
+		body: formData,
+		headers: HEADERS,
+		method: 'POST',
+	});
+
+	return await response.json();
+}
 
 const SaveTemplateModal = ({
 	closeModal,
@@ -37,32 +52,33 @@ const SaveTemplateModal = ({
 	const [loadingResponse, setLoadingResponse] = useState(false);
 	const [inputValue, setInputValue] = useState('');
 
-	const _handleSubmit = async (event) => {
+	const handleSubmit = async (event) => {
 		event.preventDefault();
 
-		const mainFormData = document.querySelector(formDataQuerySelector);
-		const modalFormData = document.getElementById(namespace + 'form');
-		const updateData = {[inputNameId]: modalFormData[inputNameId].value};
-
-		Liferay.Util.setFormValues(mainFormData, updateData);
-
-		const formData = new FormData(mainFormData);
-
 		try {
-			const response = await fetch(formSubmitURL, {
-				body: formData,
-				headers: HEADERS,
-				method: 'POST',
-			});
+			const updateData = {[inputNameId]: inputValue};
 
-			const responseJson = await response.json();
+			const saveTemplateResponse = await saveTemplate(
+				formDataQuerySelector,
+				updateData,
+				formSubmitURL
+			);
 
 			if (isMounted()) {
-				if (responseJson.error) {
+				if (saveTemplateResponse.error) {
 					setLoadingResponse(false);
-					setErrorMessage(responseJson.error);
+					setErrorMessage(saveTemplateResponse.error);
 				}
 				else {
+					Liferay.fire(TEMPLATE_CREATED_EVENT, {
+						template: saveTemplateResponse,
+					});
+
+					openToast({
+						message: Liferay.Language.get('template-was-created'),
+						type: 'success',
+					});
+
 					closeModal();
 				}
 			}
@@ -71,7 +87,7 @@ const SaveTemplateModal = ({
 			setErrorMessage(Liferay.Language.get('unexpected-error'));
 		}
 		finally {
-			setLoadingResponse(true);
+			setLoadingResponse(false);
 		}
 	};
 
@@ -81,14 +97,10 @@ const SaveTemplateModal = ({
 				{Liferay.Language.get('save-as-template')}
 			</ClayModal.Header>
 
-			<form id={`${namespace}form`} onSubmit={_handleSubmit}>
+			<ClayForm id={`${namespace}form`} onSubmit={handleSubmit}>
 				<ClayModal.Body>
-					<div
-						className={`form-group ${
-							errorMessage ? 'has-error' : ''
-						}`}
-					>
-						<label className="control-label" htmlFor={inputNameId}>
+					<ClayForm.Group className={errorMessage ? 'has-error' : ''}>
+						<label htmlFor={inputNameId}>
 							{Liferay.Language.get('name')}
 
 							<span className="reference-mark">
@@ -96,9 +108,8 @@ const SaveTemplateModal = ({
 							</span>
 						</label>
 
-						<input
+						<ClayInput
 							autoFocus
-							className="form-control"
 							disabled={loadingResponse}
 							id={inputNameId}
 							name={inputNameId}
@@ -112,23 +123,21 @@ const SaveTemplateModal = ({
 						/>
 
 						{errorMessage && (
-							<div className="form-feedback-item">
-								<ClayIcon
-									className="inline-item inline-item-before"
-									symbol="exclamation-full"
-								/>
+							<ClayForm.FeedbackGroup>
+								<ClayForm.FeedbackItem>
+									<ClayForm.FeedbackIndicator symbol="exclamation-full" />
 
-								{errorMessage}
-							</div>
+									{errorMessage}
+								</ClayForm.FeedbackItem>
+							</ClayForm.FeedbackGroup>
 						)}
-					</div>
+					</ClayForm.Group>
 				</ClayModal.Body>
 
 				<ClayModal.Footer
 					last={
 						<ClayButton.Group spaced>
 							<ClayButton
-								disabled={loadingResponse}
 								displayType="secondary"
 								onClick={closeModal}
 							>
@@ -137,7 +146,7 @@ const SaveTemplateModal = ({
 
 							<ClayButton
 								disabled={
-									loadingResponse || inputValue.length == 0
+									loadingResponse || inputValue.length === 0
 								}
 								displayType="primary"
 								type="submit"
@@ -156,7 +165,7 @@ const SaveTemplateModal = ({
 						</ClayButton.Group>
 					}
 				/>
-			</form>
+			</ClayForm>
 		</ClayModal>
 	);
 };

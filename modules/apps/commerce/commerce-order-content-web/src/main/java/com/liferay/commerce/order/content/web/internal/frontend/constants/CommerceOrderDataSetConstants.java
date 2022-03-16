@@ -23,6 +23,9 @@ public class CommerceOrderDataSetConstants {
 	public static final String COMMERCE_DATA_SET_KEY_COMMERCE_WISH_LISTS =
 		"commerceWishLists";
 
+	public static final String COMMERCE_DATA_SET_KEY_IMPORT_ORDERS =
+		"commerceImportOrders";
+
 	public static final String COMMERCE_DATA_SET_KEY_PENDING_ORDER_ITEMS =
 		"commercePendingOrderItems";
 

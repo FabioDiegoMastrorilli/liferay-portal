@@ -51,6 +51,7 @@ import com.liferay.portal.test.rule.PermissionCheckerMethodTestRule;
 import java.io.IOException;
 import java.io.InputStream;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -134,8 +135,6 @@ public class DLFileEntryIndexerIndexedFieldsTest extends BaseDLIndexerTestCase {
 		Document document = dlSearchFixture.searchOnlyOneSearchHit(
 			searchTerm, LocaleUtil.JAPAN);
 
-		document = indexedFieldsFixture.postProcessDocument(document);
-
 		Map<String, String> map = new HashMap<>();
 
 		populateExpectedFieldValues(fileEntry, map);
@@ -146,8 +145,7 @@ public class DLFileEntryIndexerIndexedFieldsTest extends BaseDLIndexerTestCase {
 	protected String getContents(FileEntry fileEntry) throws Exception {
 		String contents = FileUtil.extractText(
 			_dlFileEntryLocalService.getFileAsStream(
-				fileEntry.getFileEntryId(), fileEntry.getVersion(), false),
-			fileEntry.getTitle());
+				fileEntry.getFileEntryId(), fileEntry.getVersion(), false));
 
 		return contents.trim();
 	}
@@ -198,13 +196,13 @@ public class DLFileEntryIndexerIndexedFieldsTest extends BaseDLIndexerTestCase {
 	}
 
 	protected void populateDates(FileEntry fileEntry, Map<String, String> map) {
-		indexedFieldsFixture.populateDate(
-			Field.CREATE_DATE, fileEntry.getCreateDate(), map);
+		Date createDate = fileEntry.getCreateDate();
+
+		indexedFieldsFixture.populateDate(Field.CREATE_DATE, createDate, map);
+
 		indexedFieldsFixture.populateDate(
 			Field.MODIFIED_DATE, fileEntry.getModifiedDate(), map);
-		indexedFieldsFixture.populateDate(
-			Field.PUBLISH_DATE, fileEntry.getCreateDate(), map);
-
+		indexedFieldsFixture.populateDate(Field.PUBLISH_DATE, createDate, map);
 		indexedFieldsFixture.populateExpirationDateWithForever(map);
 	}
 
@@ -212,8 +210,12 @@ public class DLFileEntryIndexerIndexedFieldsTest extends BaseDLIndexerTestCase {
 			FileEntry fileEntry, Map<String, String> map)
 		throws Exception {
 
+		long assetEntryId = _getAssetEntryId(_getAssetEntry(fileEntry));
+
+		map.put(Field.ASSET_ENTRY_ID, String.valueOf(assetEntryId));
 		map.put(
-			Field.ASSET_ENTRY_ID, String.valueOf(_getAssetEntryId(fileEntry)));
+			Field.ASSET_ENTRY_ID + "_sortable", String.valueOf(assetEntryId));
+
 		map.put(Field.CLASS_NAME_ID, "0");
 		map.put(Field.CLASS_PK, "0");
 		map.put(Field.COMPANY_ID, String.valueOf(fileEntry.getCompanyId()));
@@ -231,11 +233,10 @@ public class DLFileEntryIndexerIndexedFieldsTest extends BaseDLIndexerTestCase {
 		map.put(Field.USER_ID, String.valueOf(fileEntry.getUserId()));
 		map.put(
 			Field.USER_NAME, StringUtil.toLowerCase(fileEntry.getUserName()));
-		map.put(
-			"assetEntryId_sortable",
-			String.valueOf(_getAssetEntryId(fileEntry)));
 		map.put("classTypeId", "0");
 		map.put("content_ja_JP", getContents(fileEntry));
+		map.put("contentLength_ja_JP", "5");
+		map.put("contentLength_ja_JP_sortable", "5");
 		map.put(
 			"dataRepositoryId", String.valueOf(fileEntry.getRepositoryId()));
 		map.put("ddmContent", "text/plain; charset=UTF-8 UTF-8");
@@ -256,6 +257,10 @@ public class DLFileEntryIndexerIndexedFieldsTest extends BaseDLIndexerTestCase {
 		map.put("readCount", String.valueOf(fileEntry.getReadCount()));
 		map.put("size", String.valueOf(fileEntry.getSize()));
 		map.put("size_sortable", String.valueOf(fileEntry.getSize()));
+		map.put("title_ja_JP", fileEntry.getTitle());
+		map.put("versionCount", String.valueOf(fileEntry.getVersion()));
+		map.put(
+			"versionCount_sortable", String.valueOf(fileEntry.getVersion()));
 		map.put("visible", "true");
 
 		populateDates(fileEntry, map);
@@ -386,10 +391,12 @@ public class DLFileEntryIndexerIndexedFieldsTest extends BaseDLIndexerTestCase {
 
 	protected FileEntrySearchFixture fileEntrySearchFixture;
 
-	private long _getAssetEntryId(FileEntry fileEntry) {
-		AssetEntry assetEntry = _assetEntryLocalService.fetchEntry(
+	private AssetEntry _getAssetEntry(FileEntry fileEntry) {
+		return _assetEntryLocalService.fetchEntry(
 			DLFileEntry.class.getName(), fileEntry.getFileEntryId());
+	}
 
+	private long _getAssetEntryId(AssetEntry assetEntry) {
 		if (assetEntry == null) {
 			return 0;
 		}

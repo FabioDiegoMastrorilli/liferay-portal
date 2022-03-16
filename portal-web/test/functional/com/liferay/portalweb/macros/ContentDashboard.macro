@@ -5,7 +5,13 @@ definition {
 	}
 
 	macro clickOnFirstBar {
-		Click(locator1 = "ContentDashboard#AUDIT_GRAPH_FIRST_BAR");
+		if (!(isSet(fillColor))) {
+			var fillColor = "4B9FFF";
+		}
+
+		Click(
+			fillColor = "${fillColor}",
+			locator1 = "ContentDashboard#BAR_FROM_NO_VOCABULARY_SPECIFIED");
 	}
 
 	macro deleteSecondCategoryFilter {
@@ -145,21 +151,15 @@ definition {
 
 		SelectFrame(locator1 = "IFrame#MODAL_BODY");
 
-		Click(locator1 = "ContentDashboard#AUTHOR_SELECT_DISPLAY_MODE_BUTTON");
+		if (!(isSet(authorNameList))) {
+			var authorNameList = "Test Test";
+		}
 
-		Click(locator1 = "ContentDashboard#AUTHOR_TABLE_DISPLAY_OPTION");
-
-		Click(locator1 = "ContentDashboard#SEARCH_FIELD");
-
-		Type(
-			locator1 = "ContentDashboard#SEARCH_FIELD",
-			value1 = "Test");
-
-		KeyPress(
-			locator1 = "ContentDashboard#SEARCH_FIELD",
-			value1 = "\ENTER");
-
-		Click(locator1 = "ContentDashboard#AUTHOR_ELEMENT_CHECKBOX");
+		for (var authorName : list "${authorNameList}") {
+			Check(
+				key_tableEntry = "${authorName}",
+				locator1 = "LexiconTable#TABLE_ENTRY_CHECKBOX");
+		}
 
 		SelectFrame(value1 = "relative=top");
 
@@ -187,13 +187,67 @@ definition {
 
 		SelectFrame.selectFrameNoLoading(locator1 = "IFrame#IFRAME");
 
-		Click(locator1 = "ContentDashboard#SEARCH_CATEGORY_FIELD");
+		Portlet.expandTree();
 
-		Type(
-			locator1 = "ContentDashboard#SEARCH_CATEGORY_FIELD",
-			value1 = "${categoryName}");
+		for (var categoryName : list "${categoryNameList}") {
+			Click(
+				key_nodeName = "${categoryName}",
+				locator1 = "Treeview#NODE_ITEM");
+		}
 
-		Click(locator1 = "ContentDashboard#CATEGORY_NAME_ELEMENT");
+		SelectFrame(value1 = "relative=top");
+
+		AssertClickNoError(
+			locator1 = "Button#SELECT",
+			value1 = "Select");
+
+		SelectFrame(value1 = "relative=top");
+
+		WaitForElementPresent(locator1 = "ContentDashboard#ASSET_MENU_DROPDOWN_BUTTON");
+	}
+
+	macro filterByExtension {
+		if (IsElementPresent(locator1 = "ContentDashboard#FILTER_AND_ORDER_DROPDOWN")) {
+			AssertClickNoError(
+				locator1 = "ContentDashboard#FILTER_AND_ORDER_DROPDOWN",
+				value1 = "Filter and Order");
+		}
+
+		var key_filterOption = "${filterOption}";
+
+		Click(locator1 = "ContentDashboard#FILTER_BY_OPTION");
+
+		SelectFrame(locator1 = "IFrame#MODAL_BODY");
+
+		if ("${extensionName}" != "") {
+			Click(locator1 = "ContentDashboard#FILTER_EXTENSION_ELEMENT");
+
+			SelectFrame(value1 = "relative=top");
+
+			AssertClickNoError(
+				locator1 = "Button#SELECT",
+				value1 = "Select");
+
+			SelectFrame(value1 = "relative=top");
+
+			WaitForElementPresent(locator1 = "ContentDashboard#ASSET_MENU_DROPDOWN_BUTTON");
+		}
+	}
+
+	macro filterByMimeParent {
+		if (IsElementPresent(locator1 = "ContentDashboard#FILTER_AND_ORDER_DROPDOWN")) {
+			AssertClickNoError(
+				locator1 = "ContentDashboard#FILTER_AND_ORDER_DROPDOWN",
+				value1 = "Filter and Order");
+		}
+
+		var key_filterOption = "${filterOption}";
+
+		Click(locator1 = "ContentDashboard#FILTER_BY_OPTION");
+
+		SelectFrame(locator1 = "IFrame#MODAL_BODY");
+
+		Click(locator1 = "ContentDashboard#FILTER_PARENT_EXTENSION");
 
 		SelectFrame(value1 = "relative=top");
 
@@ -322,27 +376,29 @@ definition {
 				value1 = "Filter and Order");
 		}
 
-		var key_filterOption = "${filterOption}";
+		Click(
+			filterOption = "Type",
+			locator1 = "ContentDashboard#FILTER_BY_OPTION");
 
-		Click(locator1 = "ContentDashboard#FILTER_BY_OPTION");
+		WaitForLiferayEvent.initializeLiferayEventLog();
 
-		SelectFrame.selectFrameNoLoading(locator1 = "IFrame#MODAL_IFRAME");
+		SelectFrame.selectFrameNoLoading(locator1 = "IFrame#IFRAME");
 
-		Click(locator1 = "ContentDashboard#SEARCH_SUBTYPE_FIELD");
+		Portlet.expandTree();
 
-		Type(
-			locator1 = "ContentDashboard#SEARCH_SUBTYPE_FIELD",
-			value1 = "${subtypeName}");
+		for (var typeName : list "${typeNameList}") {
+			Click(
+				key_nodeName = "${typeName}",
+				locator1 = "Treeview#NODE_ITEM");
+		}
 
-		Click(locator1 = "ContentDashboard#SUBTYPE_NAME_ELEMENT");
+		SelectFrame(value1 = "relative=top");
+
+		Button.clickSelect();
 
 		SelectFrame(value1 = "relative=top");
 
-		AssertClickNoError(
-			locator1 = "Button#SELECT",
-			value1 = "Select");
-
-		SelectFrame(value1 = "relative=top");
+		WaitForElementPresent(locator1 = "ContentDashboard#ASSET_MENU_DROPDOWN_BUTTON");
 	}
 
 	macro flipAxesButtonClick {
@@ -443,6 +499,25 @@ definition {
 			value1 = "\ENTER");
 	}
 
+	macro setUpGlobalCategories {
+		var audienceCategory = JSONCategory.addCategory(
+			groupName = "Global",
+			title = "Audience 1",
+			vocabularyName = "Audience");
+
+		var stageCategory = JSONCategory.addCategory(
+			groupName = "Global",
+			title = "Stage 1",
+			vocabularyName = "Stage");
+
+		static var audienceId1 = "${audienceCategory}";
+		static var stageId1 = "${stageCategory}";
+
+		return "${audienceId1}";
+
+		return "${stageId1}";
+	}
+
 	macro setVocabularyInUseSecondPosition {
 		Click(locator1 = "ContentDashboard#AUDIT_GRAPH_CONFIGURATION_BUTTON");
 
@@ -521,6 +596,14 @@ definition {
 		Click.javaScriptClick(
 			checkboxName = "Stage 1",
 			locator1 = "Checkbox#ANY_CHECKBOX");
+	}
+
+	macro viewAppliedFilters {
+		for (var filterLabel : list "${filterLabelList}") {
+			AssertElementPresent(
+				filterLabel = "${filterLabel}",
+				locator1 = "ContentDashboard#FILTER_LABEL");
+		}
 	}
 
 }

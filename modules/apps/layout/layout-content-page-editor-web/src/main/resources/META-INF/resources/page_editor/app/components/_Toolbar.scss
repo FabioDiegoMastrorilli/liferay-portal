@@ -1,11 +1,8 @@
-@import './variables';
-
 html#{$cadmin-selector} {
 	.cadmin {
 		.page-editor__toolbar {
 			background-color: $cadmin-white;
-			border-bottom: $toolbarBorderWidth solid
-				fade_out($cadmin-secondary-l2, 0.5);
+			border-bottom: 1px solid fade_out($cadmin-secondary-l2, 0.5);
 			color: $cadmin-secondary;
 			display: flex;
 			margin-bottom: 0;
@@ -64,6 +61,10 @@ html#{$cadmin-selector} {
 						> .nav-item {
 							margin-left: $pageEditorSpacing;
 						}
+					}
+
+					> .nav-item > .navbar-nav > .nav-item + .nav-item {
+						margin-left: $pageEditorSpacing;
 					}
 				}
 

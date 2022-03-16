@@ -190,11 +190,12 @@ public class ContentLayoutTypeController extends BaseLayoutTypeControllerImpl {
 					layoutFullURL, "p_l_mode", Constants.EDIT);
 
 				long segmentsExperienceId = ParamUtil.getLong(
-					httpServletRequest, "p_s_e_id", -1);
+					httpServletRequest, "segmentsExperienceId", -1);
 
 				if (segmentsExperienceId != -1) {
 					layoutFullURL = _http.setParameter(
-						layoutFullURL, "p_s_e_id", segmentsExperienceId);
+						layoutFullURL, "segmentsExperienceId",
+						segmentsExperienceId);
 				}
 
 				httpServletResponse.sendRedirect(layoutFullURL);
@@ -253,22 +254,6 @@ public class ContentLayoutTypeController extends BaseLayoutTypeControllerImpl {
 	@Override
 	public boolean isURLFriendliable() {
 		return true;
-	}
-
-	/**
-	 * @deprecated As of Athanasius (7.3.x), replaced by {@link
-	 *             #createServletResponse(HttpServletResponse,
-	 *             UnsyncStringWriter)}
-	 */
-	@Deprecated
-	@Override
-	protected ServletResponse createServletResponse(
-		HttpServletResponse httpServletResponse,
-		com.liferay.portal.kernel.io.unsync.UnsyncStringWriter
-			unsyncStringWriter) {
-
-		return new PipingServletResponse(
-			httpServletResponse, unsyncStringWriter);
 	}
 
 	@Override
@@ -337,7 +322,7 @@ public class ContentLayoutTypeController extends BaseLayoutTypeControllerImpl {
 		}
 		catch (PortalException portalException) {
 			if (_log.isDebugEnabled()) {
-				_log.debug(portalException, portalException);
+				_log.debug(portalException);
 			}
 		}
 

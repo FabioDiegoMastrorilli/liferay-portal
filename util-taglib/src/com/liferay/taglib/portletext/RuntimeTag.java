@@ -230,11 +230,18 @@ public class RuntimeTag extends TagSupport implements DirectTag {
 			}
 		}
 
-		queryString = PortletParameterUtil.addNamespace(
-			portletInstanceKey, queryString);
+		if (Validator.isNotNull(queryString)) {
+			queryString = PortletParameterUtil.addNamespace(
+				portletInstanceKey, queryString);
 
-		httpServletRequest = DynamicServletRequest.addQueryString(
-			restrictPortletServletRequest, parameterMap, queryString, false);
+			httpServletRequest = DynamicServletRequest.addQueryString(
+				restrictPortletServletRequest, parameterMap, queryString,
+				false);
+		}
+		else {
+			httpServletRequest = new DynamicServletRequest(
+				restrictPortletServletRequest, parameterMap, false);
+		}
 
 		try {
 			httpServletRequest.setAttribute(
@@ -255,12 +262,20 @@ public class RuntimeTag extends TagSupport implements DirectTag {
 				_embeddedPortletIds.set(embeddedPortletIds);
 			}
 
-			if (embeddedPortletIds.search(portlet.getPortletId()) > -1) {
+			String rootPortletId = portlet.getRootPortletId();
+
+			if (embeddedPortletIds.search(rootPortletId) > -1) {
+				if (_log.isWarnEnabled()) {
+					_log.warn(
+						"The application cannot include itself: " +
+							rootPortletId);
+				}
+
 				String errorMessage = LanguageUtil.get(
-					httpServletRequest,
+					originalHttpServletRequest,
 					"the-application-cannot-include-itself");
 
-				httpServletRequest.setAttribute(
+				originalHttpServletRequest.setAttribute(
 					"liferay-portlet:runtime:errorMessage", errorMessage);
 
 				PortalIncludeUtil.include(pageContext, _ERROR_PAGE);
@@ -304,26 +319,30 @@ public class RuntimeTag extends TagSupport implements DirectTag {
 				writeObject = true;
 			}
 
-			long count =
-				PortletPreferencesLocalServiceUtil.getPortletPreferencesCount(
-					PortletKeys.PREFS_OWNER_TYPE_LAYOUT, themeDisplay.getPlid(),
-					portletInstanceKey);
+			if (persistSettings) {
+				long count =
+					PortletPreferencesLocalServiceUtil.
+						getPortletPreferencesCount(
+							PortletKeys.PREFS_OWNER_TYPE_LAYOUT,
+							themeDisplay.getPlid(), portletInstanceKey);
 
-			if (count < 1) {
-				PortletPreferencesFactoryUtil.getLayoutPortletSetup(
-					layout, portletInstanceKey, defaultPreferences);
-				PortletPreferencesFactoryUtil.getPortletSetup(
-					httpServletRequest, portletInstanceKey, defaultPreferences);
+				if (count < 1) {
+					PortletPreferencesFactoryUtil.getLayoutPortletSetup(
+						layout, portletInstanceKey, defaultPreferences);
+					PortletPreferencesFactoryUtil.getPortletSetup(
+						httpServletRequest, portletInstanceKey,
+						defaultPreferences);
 
-				PortletLayoutListener portletLayoutListener =
-					portlet.getPortletLayoutListenerInstance();
+					PortletLayoutListener portletLayoutListener =
+						portlet.getPortletLayoutListenerInstance();
 
-				if (portletLayoutListener != null) {
-					portletLayoutListener.onAddToLayout(
-						portletInstanceKey, themeDisplay.getPlid());
+					if (portletLayoutListener != null) {
+						portletLayoutListener.onAddToLayout(
+							portletInstanceKey, themeDisplay.getPlid());
+					}
+
+					writeObject = true;
 				}
-
-				writeObject = true;
 			}
 
 			if (writeObject) {
@@ -338,7 +357,7 @@ public class RuntimeTag extends TagSupport implements DirectTag {
 					httpServletResponse, jsonObject);
 			}
 
-			embeddedPortletIds.push(portletInstanceKey);
+			embeddedPortletIds.push(rootPortletId);
 
 			boolean lifecycleRender = themeDisplay.isLifecycleRender();
 
@@ -404,7 +423,7 @@ public class RuntimeTag extends TagSupport implements DirectTag {
 			return EVAL_PAGE;
 		}
 		catch (Exception exception) {
-			_log.error(exception, exception);
+			_log.error(exception);
 
 			throw new JspException(exception);
 		}

@@ -42,6 +42,7 @@ import com.liferay.layout.page.template.model.LayoutPageTemplateStructure;
 import com.liferay.layout.page.template.model.LayoutPageTemplateStructureRel;
 import com.liferay.layout.page.template.service.LayoutPageTemplateStructureLocalServiceUtil;
 import com.liferay.layout.page.template.service.LayoutPageTemplateStructureRelLocalServiceUtil;
+import com.liferay.petra.sql.dsl.DSLQueryFactoryUtil;
 import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.comment.CommentManager;
 import com.liferay.portal.kernel.exception.PortalException;
@@ -69,8 +70,11 @@ import com.liferay.segments.constants.SegmentsExperienceConstants;
 import com.liferay.segments.constants.SegmentsPortletKeys;
 import com.liferay.segments.model.SegmentsEntry;
 import com.liferay.segments.model.SegmentsExperience;
+import com.liferay.segments.model.SegmentsExperimentRel;
+import com.liferay.segments.model.SegmentsExperimentRelTable;
 import com.liferay.segments.service.SegmentsEntryServiceUtil;
 import com.liferay.segments.service.SegmentsExperienceLocalServiceUtil;
+import com.liferay.segments.service.SegmentsExperimentRelLocalServiceUtil;
 import com.liferay.staging.StagingGroupHelper;
 
 import java.util.ArrayList;
@@ -119,9 +123,8 @@ public class ContentPageLayoutEditorDisplayContext
 			fragmentEntryConfigurationParser, fragmentRendererController,
 			fragmentRendererTracker, frontendTokenDefinitionRegistry,
 			httpServletRequest, infoItemServiceTracker, itemSelector,
-			pageEditorConfiguration, portletRequest, renderResponse);
-
-		_stagingGroupHelper = stagingGroupHelper;
+			pageEditorConfiguration, portletRequest, renderResponse,
+			stagingGroupHelper);
 	}
 
 	@Override
@@ -146,9 +149,6 @@ public class ContentPageLayoutEditorDisplayContext
 			"availableSegmentsEntries", _getAvailableSegmentsEntries());
 		configContext.put(
 			"defaultSegmentsEntryId", SegmentsEntryConstants.ID_DEFAULT);
-		configContext.put(
-			"defaultSegmentsExperienceId",
-			String.valueOf(SegmentsExperienceConstants.ID_DEFAULT));
 		configContext.put(
 			"deleteSegmentsExperienceURL",
 			getFragmentEntryActionURL(
@@ -177,8 +177,6 @@ public class ContentPageLayoutEditorDisplayContext
 				httpServletRequest));
 		stateContext.put("layoutDataList", _getLayoutDataList());
 		stateContext.put(
-			"segmentsExperienceId", String.valueOf(getSegmentsExperienceId()));
-		stateContext.put(
 			"segmentsExperimentStatus",
 			SegmentsExperienceUtil.getSegmentsExperimentStatus(
 				themeDisplay, getSegmentsExperienceId()));
@@ -200,26 +198,6 @@ public class ContentPageLayoutEditorDisplayContext
 	protected long getSegmentsExperienceId() {
 		if (_segmentsExperienceId != null) {
 			return _segmentsExperienceId;
-		}
-
-		_segmentsExperienceId = ParamUtil.getLong(
-			PortalUtil.getOriginalServletRequest(httpServletRequest),
-			"p_s_e_id", -1);
-
-		if (_segmentsExperienceId != -1) {
-			if (_segmentsExperienceId ==
-					SegmentsExperienceConstants.ID_DEFAULT) {
-
-				return _segmentsExperienceId;
-			}
-
-			SegmentsExperience segmentsExperience =
-				SegmentsExperienceLocalServiceUtil.fetchSegmentsExperience(
-					_segmentsExperienceId);
-
-			if (segmentsExperience != null) {
-				return _segmentsExperienceId;
-			}
 		}
 
 		_segmentsExperienceId = ParamUtil.getLong(
@@ -287,7 +265,7 @@ public class ContentPageLayoutEditorDisplayContext
 				}
 				catch (PortalException portalException) {
 					if (_log.isDebugEnabled()) {
-						_log.debug(portalException, portalException);
+						_log.debug(portalException);
 					}
 				}
 			}
@@ -619,11 +597,11 @@ public class ContentPageLayoutEditorDisplayContext
 	private long _getStagingAwareGroupId() {
 		long groupId = getGroupId();
 
-		if (_stagingGroupHelper.isStagingGroup(groupId) &&
-			!_stagingGroupHelper.isStagedPortlet(
+		if (stagingGroupHelper.isStagingGroup(groupId) &&
+			!stagingGroupHelper.isStagedPortlet(
 				groupId, SegmentsPortletKeys.SEGMENTS)) {
 
-			Group group = _stagingGroupHelper.fetchLiveGroup(groupId);
+			Group group = stagingGroupHelper.fetchLiveGroup(groupId);
 
 			if (group != null) {
 				groupId = group.getGroupId();
@@ -692,7 +670,39 @@ public class ContentPageLayoutEditorDisplayContext
 			return false;
 		}
 
-		return true;
+		SegmentsExperience segmentsExperience =
+			SegmentsExperienceLocalServiceUtil.fetchSegmentsExperience(
+				segmentsExperienceId);
+
+		if (segmentsExperience != null) {
+			List<SegmentsExperimentRel> segmentsExperimentRels =
+				SegmentsExperimentRelLocalServiceUtil.dslQuery(
+					DSLQueryFactoryUtil.select(
+						SegmentsExperimentRelTable.INSTANCE
+					).from(
+						SegmentsExperimentRelTable.INSTANCE
+					).where(
+						SegmentsExperimentRelTable.INSTANCE.
+							segmentsExperienceId.eq(
+								segmentsExperience.getSegmentsExperienceId())
+					));
+
+			if (segmentsExperimentRels.isEmpty()) {
+				return false;
+			}
+
+			SegmentsExperimentRel segmentsExperimentRel =
+				segmentsExperimentRels.get(0);
+
+			try {
+				return !segmentsExperimentRel.isControl();
+			}
+			catch (PortalException portalException) {
+				_log.error(portalException);
+			}
+		}
+
+		return false;
 	}
 
 	private static final Log _log = LogFactoryUtil.getLog(
@@ -703,6 +713,5 @@ public class ContentPageLayoutEditorDisplayContext
 	private Long _segmentsEntryId;
 	private Long _segmentsExperienceId;
 	private Boolean _showSegmentsExperiences;
-	private final StagingGroupHelper _stagingGroupHelper;
 
 }

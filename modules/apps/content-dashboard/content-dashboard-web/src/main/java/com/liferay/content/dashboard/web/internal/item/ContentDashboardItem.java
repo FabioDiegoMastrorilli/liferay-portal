@@ -21,8 +21,6 @@ import com.liferay.content.dashboard.web.internal.item.type.ContentDashboardItem
 import com.liferay.info.item.InfoItemReference;
 import com.liferay.portal.kernel.json.JSONObject;
 import com.liferay.portal.kernel.json.JSONUtil;
-import com.liferay.portal.kernel.portlet.LiferayPortletResponse;
-import com.liferay.portal.kernel.theme.ThemeDisplay;
 
 import java.util.Date;
 import java.util.List;
@@ -44,6 +42,8 @@ public interface ContentDashboardItem<T> {
 
 	public List<Locale> getAvailableLocales();
 
+	public Clipboard getClipboard();
+
 	public List<ContentDashboardItemAction> getContentDashboardItemActions(
 		HttpServletRequest httpServletRequest,
 		ContentDashboardItemAction.Type... types);
@@ -52,8 +52,6 @@ public interface ContentDashboardItem<T> {
 
 	public Date getCreateDate();
 
-	public Map<String, Object> getData(Locale locale);
-
 	public ContentDashboardItemAction getDefaultContentDashboardItemAction(
 		HttpServletRequest httpServletRequest);
 
@@ -61,20 +59,15 @@ public interface ContentDashboardItem<T> {
 
 	public String getDescription(Locale locale);
 
-	public Object getDisplayFieldValue(String fieldName, Locale locale);
-
 	public InfoItemReference getInfoItemReference();
 
 	public Date getModifiedDate();
 
+	public Preview getPreview();
+
 	public String getScopeName(Locale locale);
 
-	public default JSONObject getSpecificInformationJSONObject(
-		String backURL, LiferayPortletResponse liferayPortletResponse,
-		Locale locale, ThemeDisplay themeDisplay) {
-
-		return null;
-	}
+	public Map<String, Object> getSpecificInformation(Locale locale);
 
 	public String getTitle(Locale locale);
 
@@ -87,6 +80,74 @@ public interface ContentDashboardItem<T> {
 	public List<Version> getVersions(Locale locale);
 
 	public boolean isViewable(HttpServletRequest httpServletRequest);
+
+	public static class Clipboard {
+
+		public static final Clipboard EMPTY = new Clipboard(null, null);
+
+		public Clipboard(String name, String url) {
+			_name = name;
+			_url = url;
+		}
+
+		public String getName() {
+			return _name;
+		}
+
+		public String getUrl() {
+			return _url;
+		}
+
+		public JSONObject toJSONObject() {
+			return JSONUtil.put(
+				"name", getName()
+			).put(
+				"url", getUrl()
+			);
+		}
+
+		private final String _name;
+		private final String _url;
+
+	}
+
+	public static class Preview {
+
+		public static final Preview EMPTY = new Preview(null, null, null);
+
+		public Preview(String downloadURL, String imageURL, String url) {
+			_downloadURL = downloadURL;
+			_imageURL = imageURL;
+			_url = url;
+		}
+
+		public String getDownloadURL() {
+			return _downloadURL;
+		}
+
+		public String getImageURL() {
+			return _imageURL;
+		}
+
+		public String getUrl() {
+			return _url;
+		}
+
+		public JSONObject toJSONObject() {
+			return JSONUtil.put(
+				"downloadURL", getDownloadURL()
+			).put(
+				"imageURL", getImageURL()
+			).put(
+				"url", getUrl()
+			);
+		}
+
+		private final String _downloadURL;
+		private final String _imageURL;
+		private final String _url;
+
+	}
 
 	public static class Version {
 

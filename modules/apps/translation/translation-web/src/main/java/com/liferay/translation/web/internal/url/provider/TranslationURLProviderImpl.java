@@ -48,7 +48,24 @@ public class TranslationURLProviderImpl implements TranslationURLProvider {
 			"classPK", classPK
 		).setParameter(
 			"groupId", groupId
-		).build();
+		).buildPortletURL();
+	}
+
+	@Override
+	public PortletURL getExportTranslationURL(
+		long groupId, long classNameId,
+		RequestBackedPortletURLFactory requestBackedPortletURLFactory) {
+
+		return PortletURLBuilder.create(
+			requestBackedPortletURLFactory.createRenderURL(
+				TranslationPortletKeys.TRANSLATION)
+		).setMVCRenderCommandName(
+			"/translation/export_translation"
+		).setParameter(
+			"classNameId", classNameId
+		).setParameter(
+			"groupId", groupId
+		).buildPortletURL();
 	}
 
 	@Override
@@ -67,6 +84,25 @@ public class TranslationURLProviderImpl implements TranslationURLProvider {
 			"classNameId", classNameId
 		).setParameter(
 			"classPK", classPK
+		).setParameter(
+			"groupId", groupId
+		).buildPortletURL();
+	}
+
+	@Override
+	public PortletURL getImportTranslationURL(
+			long groupId, long classNameId,
+			RequestBackedPortletURLFactory requestBackedPortletURLFactory)
+		throws PortalException {
+
+		return PortletURLBuilder.create(
+			requestBackedPortletURLFactory.createControlPanelRenderURL(
+				TranslationPortletKeys.TRANSLATION,
+				_groupLocalService.getGroup(groupId), 0, 0)
+		).setMVCRenderCommandName(
+			"/translation/import_translation"
+		).setParameter(
+			"classNameId", classNameId
 		).setParameter(
 			"groupId", groupId
 		).buildPortletURL();

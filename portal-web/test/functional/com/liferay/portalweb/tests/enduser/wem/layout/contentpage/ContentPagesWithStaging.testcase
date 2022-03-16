@@ -152,11 +152,11 @@ definition {
 		}
 
 		task ("Navigate to the Pages admin in live site") {
-			SitePages.openPagesAdmin(siteURLKey = "test-site-name");
+			PagesAdmin.openPagesAdmin(siteURLKey = "test-site-name");
 		}
 
 		task ("View the Preview and Discard Draft actions are invisible") {
-			SitePages.clickPageMenu(pageName = "Test Page Name");
+			PagesAdmin.openPageEllipsisMenu(pageName = "Test Page Name");
 
 			for (var itemName : list "Preview Draft,Discard Draft") {
 				MenuItem.viewNotPresent(menuItem = "${itemName}");
@@ -182,16 +182,16 @@ definition {
 			PagesFinder.goToPagesFinder();
 
 			AssertElementNotPresent(
-				key_pageName = "Test Page Name*",
+				key_pageName = "Test Page Name",
 				locator1 = "PagesFinder#PAGE_ELLIPSIS_ICON");
 		}
 
 		task ("Navigate to the Pages admin in staging site") {
-			SitePages.openPagesAdmin(siteURLKey = "test-site-name-staging");
+			PagesAdmin.openPagesAdmin(siteURLKey = "test-site-name-staging");
 		}
 
 		task ("View the Preview and Discard Draft actions are invisible") {
-			SitePages.clickPageMenu(pageName = "Test Page Name");
+			PagesAdmin.openPageEllipsisMenu(pageName = "Test Page Name");
 
 			for (var itemName : list "Preview Draft,Discard Draft") {
 				MenuItem.viewNotPresent(menuItem = "${itemName}");
@@ -217,7 +217,7 @@ definition {
 			PagesFinder.goToPagesFinder();
 
 			Click.mouseOverClick(
-				key_pageName = "Test Page Name*",
+				key_pageName = "Test Page Name",
 				locator1 = "PagesFinder#PAGE_ELLIPSIS_ICON");
 
 			MenuItem.viewNotVisible(menuItem = "Preview Draft");
@@ -256,6 +256,69 @@ definition {
 			Navigator.openSpecificURL(url = "http://www.able.com:8080/sitemap.xml");
 
 			AssertTextPresent(value1 = "You do not have permission to access the requested resource.");
+		}
+	}
+
+	@description = "This is a test for LPS-140483. The site admin could create page template from a content page with elements in staging site."
+	@priority = "4"
+	test CreatePageTemplateFromContentPageInStagingSite {
+		task ("Add a page template collection") {
+			JSONLayoutpagetemplate.addLayoutPageTemplateCollection(
+				groupName = "Test Site Name-staging",
+				layoutPageTemplateCollectionName = "Page Template Collection",
+				site = "false");
+		}
+
+		task ("Add a Heading fragment and an Asset Publisher widget to content page then publish") {
+			JSONLayout.addPublicLayout(
+				groupName = "Test Site Name (Staging)",
+				layoutName = "Test Page Name",
+				site = "false",
+				type = "content");
+
+			ContentPagesNavigator.openEditContentPage(
+				pageName = "Test Page Name",
+				siteName = "Test Site Name Staging");
+
+			PageEditor.addFragment(
+				collectionName = "Basic Components",
+				fragmentName = "Heading");
+
+			PageEditor.addWidget(
+				portletName = "Asset Publisher",
+				targetFragmentName = "Heading");
+
+			PageEditor.clickPublish();
+		}
+
+		task ("Create a content page template from the content page under page template collection") {
+			ContentPagesNavigator.openEditContentPage(
+				pageName = "Test Page Name",
+				siteName = "Test Site Name Staging");
+
+			PageEditor.createPageTemplate(
+				collectionName = "Page Template Collection",
+				pageTemplateName = "Content Page Template Name");
+		}
+
+		task ("View the content page template shown in Page Templates admin") {
+			PageTemplatesAdmin.openPageTemplatesAdmin(siteURLKey = "test-site-name-staging");
+
+			Navigator.gotoNavNested(navNested = "Page Template Collection");
+
+			PageTemplatesAdmin.viewPageTemplatePresent(pageTemplateName = "Content Page Template Name");
+
+			PageTemplatesAdmin.viewEntryWorkflowStatus(
+				entry = "Content Page Template Name",
+				workflowStatus = "Draft");
+		}
+
+		task ("View the Heading and Asset Publisher are shown in content page template") {
+			PageTemplatesAdmin.gotoPageTemplate(pageTemplateName = "Content Page Template Name");
+
+			for (var elementName : list "Heading,Asset Publisher") {
+				PageEditor.viewFragment(fragmentName = "${elementName}");
+			}
 		}
 	}
 
@@ -350,11 +413,9 @@ definition {
 		}
 
 		task ("Select the web content in Web Content Display") {
-			WebContentDisplayPortlet.selectWebContent(
-				contentPage = "true",
-				webContentTitle = "Web Content Title");
+			WebContentDisplayPortlet.selectWebContent(webContentTitle = "Web Content Title");
 
-			Refresh();
+			IFrame.closeFrame();
 		}
 
 		task ("Assert the web content is shown in Web Content Display") {
@@ -364,6 +425,8 @@ definition {
 		}
 
 		task ("Edit the web content via Contents panel") {
+			Refresh();
+
 			WebContent.editViaContentPanel(
 				webContentContentEdit = "Web Content Content Edit",
 				webContentTitle = "Web Content Title",
@@ -422,7 +485,7 @@ definition {
 		task ("View selected page is linked to Heading fragment") {
 			AssertVisible(
 				key_append = "[normalize-space(text())='Heading Example']",
-				key_URL = "/web/test-site-name-staging/test-widget-page-name",
+				key_url = "/web/test-site-name-staging/test-widget-page-name",
 				locator1 = "Fragment#FRAGMENT_LINK");
 		}
 
@@ -447,14 +510,12 @@ definition {
 
 			Click(
 				key_append = "[normalize-space(text())='Heading Example']",
-				key_URL = "/web/test-site-name-staging/test-widget-page-name",
+				key_url = "/web/test-site-name-staging/test-widget-page-name",
 				locator1 = "Fragment#FRAGMENT_LINK");
 		}
 
 		task ("Assert redirect to widget page in staging site") {
-			AssertTextEquals(
-				locator1 = "ControlMenu#HEADING",
-				value1 = "Test Widget Page Name");
+			ControlMenu.viewHeaderTitle(headerTitle = "Test Widget Page Name");
 
 			AssertLocation.assertPartialLocation(value1 = "web/test-site-name-staging/test-widget-page-name");
 		}
@@ -466,14 +527,12 @@ definition {
 
 			Click(
 				key_append = "[normalize-space(text())='Heading Example']",
-				key_URL = "/web/test-site-name/test-widget-page-name",
+				key_url = "/web/test-site-name/test-widget-page-name",
 				locator1 = "Fragment#FRAGMENT_LINK");
 		}
 
 		task ("Assert redirect to widget page in live site") {
-			AssertTextEquals(
-				locator1 = "ControlMenu#HEADING",
-				value1 = "Test Widget Page Name");
+			ControlMenu.viewHeaderTitle(headerTitle = "Test Widget Page Name");
 
 			AssertLocation.assertPartialLocation(value1 = "web/test-site-name/test-widget-page-name");
 		}
@@ -632,7 +691,7 @@ definition {
 			MenuItem.click(menuItem = "Add Heading");
 
 			AssertElementPresent(
-				key_elementHeader = "//div[contains(@class,'page-editor__topper')][1]/div[contains(.,'Heading')]//li[contains(@class,'title')]",
+				key_elementHeader = "//div[@aria-label='Heading']",
 				key_position = "1",
 				locator1 = "PageEditor#CONTAINER_CONTAINER_NESTED_ELEMENT");
 
@@ -700,11 +759,11 @@ definition {
 		}
 
 		task ("Navigate to the Pages admin in live site") {
-			SitePages.openPagesAdmin(siteURLKey = "test-site-name");
+			PagesAdmin.openPagesAdmin(siteURLKey = "test-site-name");
 		}
 
 		task ("View the Preview and Discard Draft actions are invisible") {
-			SitePages.clickPageMenu(pageName = "Test Page Name");
+			PagesAdmin.openPageEllipsisMenu(pageName = "Test Page Name");
 
 			for (var itemName : list "Preview Draft,Discard Draft") {
 				MenuItem.viewNotPresent(menuItem = "${itemName}");
@@ -735,15 +794,15 @@ definition {
 		}
 
 		task ("Preview the draft content page via Pages admin in staging site") {
-			SitePages.openPagesAdmin(siteURLKey = "test-site-name-staging");
+			PagesAdmin.openPagesAdmin(siteURLKey = "test-site-name-staging");
 
-			SitePages.gotoPageMenuItem(
+			PagesAdmin.gotoPageEllipsisMenuItem(
 				menuItem = "Preview Draft",
 				pageName = "Test Page Name");
 
 			SelectWindow.selectPopUp(locator1 = "null");
 
-			ControlMenu.viewHeaderTitle(headerTitle = "Test Page Name");
+			ControlMenu.viewHeaderTitle(headerTitle = "Test Page Name *");
 
 			ContentPages.viewFragmentText(
 				fragmentName = "button",
@@ -767,7 +826,7 @@ definition {
 
 			SelectWindow.selectPopUp(locator1 = "null");
 
-			ControlMenu.viewHeaderTitle(headerTitle = "Test Page Name");
+			ControlMenu.viewHeaderTitle(headerTitle = "Test Page Name *");
 
 			ContentPages.viewFragmentText(
 				fragmentName = "button",
@@ -783,9 +842,9 @@ definition {
 		}
 
 		task ("Discard the draft content page via Pages admin in staging site") {
-			SitePages.openPagesAdmin(siteURLKey = "test-site-name-staging");
+			PagesAdmin.openPagesAdmin(siteURLKey = "test-site-name-staging");
 
-			SitePages.clickPageMenu(pageName = "Test Page Name");
+			PagesAdmin.openPageEllipsisMenu(pageName = "Test Page Name");
 
 			MenuItem.clickNoError(menuItem = "Discard Draft");
 
@@ -795,7 +854,7 @@ definition {
 		}
 
 		task ("View the Preview Draft action is not shown") {
-			SitePages.clickPageMenu(pageName = "Test Page Name");
+			PagesAdmin.openPageEllipsisMenu(pageName = "Test Page Name");
 
 			MenuItem.viewNotPresent(menuItem = "Preview Draft");
 		}
@@ -1139,7 +1198,6 @@ definition {
 
 		task ("Take down the naturalWidth and naturalHeight of image") {
 			var naturalWidth = selenium.getAttribute("//img[contains(@data-lfr-editable-id,'image-square') and contains(@src,'analytics-cloud-hero-image.png')]@naturalWidth");
-
 			var naturalHeight = selenium.getAttribute("//img[contains(@data-lfr-editable-id,'image-square') and contains(@src,'analytics-cloud-hero-image.png')]@naturalHeight");
 		}
 
@@ -1163,7 +1221,6 @@ definition {
 				locator1 = "PageEditor#IMAGE_RESOLUTION_LABEL");
 
 			var editedNaturalWidth = selenium.getAttribute("//img[contains(@data-lfr-editable-id,'image-square') and contains(@src,'analytics-cloud-hero-image.png')]@naturalWidth");
-
 			var editedNaturalHeight = selenium.getAttribute("//img[contains(@data-lfr-editable-id,'image-square') and contains(@src,'analytics-cloud-hero-image.png')]@naturalHeight");
 		}
 
@@ -1192,7 +1249,6 @@ definition {
 				imageFileName = "analytics-cloud-hero-image.png");
 
 			var editedNaturalWidth = selenium.getAttribute("//img[contains(@data-lfr-editable-id,'image-square') and contains(@src,'analytics-cloud-hero-image.png')]@naturalWidth");
-
 			var editedNaturalHeight = selenium.getAttribute("//img[contains(@data-lfr-editable-id,'image-square') and contains(@src,'analytics-cloud-hero-image.png')]@naturalHeight");
 		}
 
@@ -1225,7 +1281,6 @@ definition {
 				imageFileName = "analytics-cloud-hero-image.png");
 
 			var editedNaturalWidth = selenium.getAttribute("//img[contains(@data-lfr-editable-id,'image-square') and contains(@src,'analytics-cloud-hero-image.png')]@naturalWidth");
-
 			var editedNaturalHeight = selenium.getAttribute("//img[contains(@data-lfr-editable-id,'image-square') and contains(@src,'analytics-cloud-hero-image.png')]@naturalHeight");
 		}
 
@@ -1533,6 +1588,174 @@ definition {
 				locator1 = "Fragment#CONTRIBUTED_FRAGMENT_TEXT",
 				locator2 = "background-color",
 				value1 = "rgba(0, 0, 255, 1)");
+		}
+	}
+
+	@description = "This is a test for LPS-141773 and LPS-142348. Able to land in the experience selected at view mode in page editor in staging site."
+	@priority = "4"
+	test ViewExperienceInViewMode {
+		task ("Add a content page") {
+			JSONLayout.addPublicLayout(
+				groupName = "Test Site Name (Staging)",
+				layoutName = "Test Page Name",
+				site = "false",
+				type = "content");
+		}
+
+		task ("Add a Button fragment to page") {
+			ContentPagesNavigator.openEditContentPage(
+				pageName = "Test Page Name",
+				siteName = "Test Site Name Staging");
+
+			PageEditor.addFragment(
+				collectionName = "Basic Components",
+				fragmentName = "Button");
+		}
+
+		task ("Add a new experience") {
+			PageEditor.addExperience(
+				experienceName = "New Experience",
+				segmentName = "Anyone");
+		}
+
+		task ("Add a Heading fragment below the Button then publish") {
+			PageEditor.addFragment(
+				collectionName = "Basic Components",
+				fragmentName = "Heading",
+				targetFragmentName = "Button");
+
+			PageEditor.clickPublish();
+		}
+
+		task ("Change to new experience at view mode") {
+			ContentPagesNavigator.openViewContentPage(
+				pageName = "Test Page Name",
+				siteName = "Test Site Name Staging");
+
+			ContentPages.changeExperience(experienceName = "New Experience");
+		}
+
+		task ("View the new experience shown in experience selector") {
+			ContentPages.viewCurrentExperience(experienceName = "New Experience");
+		}
+
+		task ("Open the preview modal and View the new experience selected in experience selector") {
+			ContentPages.gotoPageEditor();
+
+			PageEditor.openPreviewMode();
+
+			ContentPages.viewCurrentExperience(experienceName = "New Experience");
+		}
+
+		task ("View the Heading and Button fragments are shown in preview modal") {
+			SelectFrame.selectFrameNoLoading(locator1 = "IFrame#MODAL_BODY");
+
+			ContentPages.viewFragmentText(
+				fragmentName = "button",
+				id = "link",
+				text = "Go Somewhere");
+
+			ContentPages.viewFragmentText(
+				fragmentName = "heading",
+				id = "element-text",
+				text = "Heading Example");
+		}
+
+		task ("Back to view page mode and view the new experience still selected in experience selector") {
+			IFrame.closeFrame();
+
+			PageEditor.clickBack();
+
+			ContentPages.viewCurrentExperience(experienceName = "New Experience");
+		}
+	}
+
+	@description = "This is a test for LPS-141773. Able to land in the experience selected at preview draft page in page editor."
+	@priority = "4"
+	test ViewExperienceSelectedInPreviewDraftPage {
+		task ("Add a content page") {
+			JSONLayout.addPublicLayout(
+				groupName = "Test Site Name (Staging)",
+				layoutName = "Test Page Name",
+				site = "false",
+				type = "content");
+		}
+
+		task ("Add a Button fragment to page") {
+			ContentPagesNavigator.openEditContentPage(
+				pageName = "Test Page Name",
+				siteName = "Test Site Name Staging");
+
+			PageEditor.addFragment(
+				collectionName = "Basic Components",
+				fragmentName = "Button");
+		}
+
+		task ("Add a new experience") {
+			PageEditor.addExperience(
+				experienceName = "New Experience",
+				segmentName = "Anyone");
+		}
+
+		task ("Add a Heading fragment below the Button then publish") {
+			PageEditor.addFragment(
+				collectionName = "Basic Components",
+				fragmentName = "Heading",
+				targetFragmentName = "Button");
+
+			PageEditor.clickPublish();
+		}
+
+		task ("Edit the inline text of Button in Default experience") {
+			ContentPagesNavigator.openEditContentPage(
+				pageName = "Test Page Name",
+				siteName = "Test Site Name Staging");
+
+			PageEditor.editFragmentText(
+				fragmentName = "Button",
+				id = "link",
+				text = "Edited Text");
+		}
+
+		task ("Edit the inline text of Heading in new experience") {
+			PageEditor.changeExperience(newExperience = "New Experience");
+
+			PageEditor.editFragmentText(
+				fragmentName = "Heading",
+				id = "element-text",
+				text = "Edited Heading Example");
+		}
+
+		task ("Navigate to preview draft page via Page Tree") {
+			PagesFinder.goToPagesFinder();
+
+			PagesFinder.gotoPageEllipsisItem(
+				item = "Preview Draft",
+				pageName = "Test Page Name");
+		}
+
+		task ("Change to new experience and view the new experience shown in experience selector") {
+			SelectWindow.selectPopUp(locator1 = "null");
+
+			ContentPages.changeExperience(experienceName = "New Experience");
+
+			ContentPages.viewCurrentExperience(experienceName = "New Experience");
+		}
+
+		task ("Open the preview modal and View the new experience selected in experience selector") {
+			ContentPages.gotoPageEditor();
+
+			PageEditor.openPreviewMode();
+
+			ContentPages.viewCurrentExperience(experienceName = "New Experience");
+		}
+
+		task ("Back to view page mode and view the new experience still selected in experience selector") {
+			Click.mouseDownMouseUp(locator1 = "Modal#CLOSE_BUTTON");
+
+			PageEditor.clickBack();
+
+			ContentPages.viewCurrentExperience(experienceName = "New Experience");
 		}
 	}
 

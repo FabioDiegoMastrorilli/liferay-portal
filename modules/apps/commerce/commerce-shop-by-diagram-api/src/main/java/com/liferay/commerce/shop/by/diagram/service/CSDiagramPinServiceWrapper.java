@@ -26,6 +26,10 @@ import com.liferay.portal.kernel.service.ServiceWrapper;
 public class CSDiagramPinServiceWrapper
 	implements CSDiagramPinService, ServiceWrapper<CSDiagramPinService> {
 
+	public CSDiagramPinServiceWrapper() {
+		this(null);
+	}
+
 	public CSDiagramPinServiceWrapper(CSDiagramPinService csDiagramPinService) {
 		_csDiagramPinService = csDiagramPinService;
 	}
@@ -42,10 +46,12 @@ public class CSDiagramPinServiceWrapper
 	}
 
 	@Override
-	public void deleteCSDiagramPin(long csDiagramPinId)
+	public void deleteCSDiagramPin(
+			com.liferay.commerce.shop.by.diagram.model.CSDiagramPin
+				csDiagramPin)
 		throws com.liferay.portal.kernel.exception.PortalException {
 
-		_csDiagramPinService.deleteCSDiagramPin(csDiagramPinId);
+		_csDiagramPinService.deleteCSDiagramPin(csDiagramPin);
 	}
 
 	@Override

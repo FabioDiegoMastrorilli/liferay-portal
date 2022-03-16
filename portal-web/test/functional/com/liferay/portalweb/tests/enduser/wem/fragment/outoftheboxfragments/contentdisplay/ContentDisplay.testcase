@@ -143,6 +143,7 @@ definition {
 				siteName = "Test Site Name");
 
 			AssertTextEquals.assertPartialText(
+				index = "1",
 				locator1 = "WCD#WEB_CONTENT_CONTENT",
 				value1 = "Web Content Content");
 		}
@@ -220,7 +221,7 @@ definition {
 				siteName = "Test Site Name");
 
 			AssertElementNotPresent(
-				assetType = "web-content",
+				assetType = "journal",
 				index = "1",
 				locator1 = "Fragment#CONTENT_DISPLAY_TEXT");
 
@@ -233,6 +234,108 @@ definition {
 			PageEditor.viewFragmentMessageInfo(
 				fragmentName = "Content Display",
 				messageInfo = "The selected content is no longer available. Please select another.");
+		}
+	}
+
+	@description = "This is a test for LPS-142166. The user could display blogs entry when item type is blogs entry."
+	@priority = "4"
+	test DisplayBlogsEntryWhenItemTypeIsBlogsEntry {
+		task ("Create a blog entry") {
+			HeadlessBlog.addBlogEntry(
+				content = "Blogs Entry Content",
+				groupName = "Test Site Name",
+				title = "Blogs Entry Title");
+		}
+
+		task ("Add a fragment collection") {
+			JSONFragment.addFragmentCollection(
+				groupName = "Test Site Name",
+				name = "Collection Name");
+		}
+
+		task ("Add a fragment with item selector") {
+			FragmentsAdminNavigator.openFragmentsAdmin(siteURLKey = "test-site-name");
+
+			FragmentsAdminNavigator.gotoCollection(collectionName = "Collection Name");
+
+			FragmentsAdminNavigator.gotoCollection(collectionName = "Collection Name");
+
+			FragmentsAdmin.addFragment(fragmentName = "Fragment Name");
+
+			FragmentsEditor.gotoConfigurationTab();
+
+			var jsonSnippet = '''
+{
+	"fieldSets": [
+		{
+			"fields": [
+				{
+					"label": "Item",
+					"name": "itemSelectorName",
+					"type": "itemSelector",
+					"typeOptions": {
+						"itemType": "com.liferay.blogs.model.BlogsEntry"
+					}
+				}
+			]
+		}
+	]
+}
+			''';
+
+			FragmentsEditor.typeConfigurationEditor(content = "${jsonSnippet}");
+
+			FragmentsEditor.waitForAutoSave();
+
+			FragmentsEditor.gotoCodeTab();
+
+			var htmlSnippet = '''
+<div class="fragment-blogs">
+	[#if configuration.itemSelectorName.content??]
+		${configuration.itemSelectorName.content}
+	[#else]
+		<div class="portlet-msg-info">The selected content will be shown here.</div>
+	[/#if]
+</div>
+			''';
+
+			FragmentsEditor.typeHtmlEditor(content = "${htmlSnippet}");
+
+			FragmentsEditor.waitForAutoSave();
+
+			FragmentsEditor.publish();
+		}
+
+		task ("Add a new fragment to the content page") {
+			ContentPagesNavigator.openEditContentPage(
+				pageName = "Test Page Name",
+				siteName = "Test Site Name");
+
+			PageEditor.addFragment(
+				collectionName = "Collection Name",
+				fragmentName = "Fragment Name");
+
+			PageEditor.viewFragmentMessageInfo(
+				fragmentName = "Fragment Name",
+				messageInfo = "The selected content will be shown here.");
+		}
+
+		task ("Select Blog Entry in fragment") {
+			PageEditor.gotoSelectPanel(fragmentName = "Fragment Name");
+
+			LexiconCard.clickCard(card = "Blogs Entry Title");
+
+			PageEditor.viewItemSelectorText(
+				fieldLabel = "Item",
+				text = "Blogs Entry Title");
+		}
+
+		task ("View the displayed content") {
+			AssertTextEquals(
+				fragmentName = "blogs",
+				index = "1",
+				locator1 = "Fragment#FRAGMENT_BODY",
+				value1 = "Blogs Entry Content");
 		}
 	}
 
@@ -614,7 +717,7 @@ definition {
 				siteName = "Test Site Name");
 
 			ContentPages.viewFragmentText(
-				assetType = "web-content",
+				assetType = "journal",
 				fragmentName = "Content Display",
 				text = "Web Content Content");
 		}
@@ -656,7 +759,7 @@ definition {
 				siteName = "Test Site Name");
 
 			ContentPages.viewFragmentText(
-				assetType = "web-content",
+				assetType = "journal",
 				fragmentName = "Content Display",
 				text = "Web Content Content");
 
@@ -665,7 +768,7 @@ definition {
 			PageEditor.viewFragment(fragmentName = "Content Display");
 
 			ContentPages.viewFragmentText(
-				assetType = "web-content",
+				assetType = "journal",
 				fragmentName = "Content Display",
 				text = "Web Content Content");
 		}
@@ -678,7 +781,7 @@ definition {
 		property portal.acceptance = "true";
 
 		task ("Add a blog entry with a cover image") {
-			var imageId	= JSONBlog.uploadBlogImage(
+			var imageId = JSONBlog.uploadBlogImage(
 				groupName = "Test Site Name",
 				sourceFileName = "Document_1.jpg");
 
@@ -718,7 +821,7 @@ definition {
 			ContentPages.viewFragmentBackgroundImage(image = "Document_1.jpg");
 
 			ContentPages.viewFragmentText(
-				assetType = "blog",
+				assetType = "widget-content",
 				fragmentName = "Content Display",
 				text = "This content maps from blog content");
 		}
@@ -828,7 +931,7 @@ definition {
 		}
 	}
 
-	@description = "This is a test for LPS-100545. The user can map the content field from web content to a fragment via the content display."
+	@description = "This is a test for LPS-100545 and LPS-97182. The user can map the content field from web content to a fragment via the content display."
 	@priority = "5"
 	@uitest
 	test ViewSelectedWebContentInContentPage {
@@ -872,7 +975,7 @@ definition {
 		}
 	}
 
-	@description = "This is a test for LPS-100545. The user can map the content field from web content to a fragment via the content display."
+	@description = "This is a test for LPS-100545 and LPS-97182. The user can map the content field from web content to a fragment via the content display."
 	@priority = "4"
 	test ViewSelectedWebContentInContentPageTemplate {
 		property testray.main.component.name = "Content Page Templates";
@@ -936,7 +1039,7 @@ definition {
 		}
 	}
 
-	@description = "This is a test for LPS-100545. The user can map the content field from web content to a fragment via the content display."
+	@description = "This is a test for LPS-100545 and LPS-97182. The user can map the content field from web content to a fragment via the content display."
 	@priority = "4"
 	test ViewSelectedWebContentInDisplayPageTemplate {
 		property testray.main.component.name = "Display Pages";

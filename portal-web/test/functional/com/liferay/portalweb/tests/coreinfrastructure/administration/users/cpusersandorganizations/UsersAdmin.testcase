@@ -71,7 +71,7 @@ definition {
 	test AddUserAfterPublishContentPageWithAP {
 		JSONGroup.addGroup(groupName = "Test Site Name");
 
-		SitePages.openPagesAdmin(siteURLKey = "test-site-name");
+		PagesAdmin.openPagesAdmin(siteURLKey = "test-site-name");
 
 		ContentPages.addPage(pageName = "Test Content Page Name");
 
@@ -380,7 +380,7 @@ definition {
 			portlet = "Users and Organizations");
 
 		User.addCP(
-			userEmailAddress = "userea&gt;@liferay.com",
+			userEmailAddress = "userea>@liferay.com",
 			userEmailAddressVariation = "Invalid",
 			userFirstName = "userfn",
 			userLastName = "userln",
@@ -633,7 +633,7 @@ definition {
 
 		JSONUser.addUser(
 			userEmailAddress = "userea@liferay.com",
-			userFirstName = "&lt;userfn&gt;",
+			userFirstName = "<userfn>",
 			userLastName = "userln",
 			userScreenName = "usersn");
 
@@ -644,7 +644,7 @@ definition {
 
 		User.viewCP(
 			userEmailAddress = "userea@liferay.com",
-			userFirstName = "&lt;userfn&gt;",
+			userFirstName = "<userfn>",
 			userLastName = "userln",
 			userScreenName = "usersn");
 
@@ -706,6 +706,8 @@ definition {
 
 	@priority = "4"
 	test AssignUserGroupToUser {
+		property portal.acceptance = "true";
+
 		JSONUser.addUser(
 			userEmailAddress = "userea@liferay.com",
 			userFirstName = "userfn",
@@ -915,6 +917,27 @@ definition {
 			listEntrySubtitle = "usersn1");
 	}
 
+	@description = "This is a use case for LPS-79937. Portlet options are visible from Control Panel when direct.servlet.context.enabled=false."
+	@priority = "4"
+	test CanExportUsersWithDirectServletContextDisabled {
+		property custom.properties = "direct.servlet.context.enabled=false";
+
+		ApplicationsMenu.gotoPortlet(
+			category = "Users",
+			panel = "Control Panel",
+			portlet = "Users and Organizations");
+
+		AssertVisible(locator1 = "Icon#HEADER_VERTICAL_ELLIPSIS");
+
+		Click(locator1 = "Icon#HEADER_VERTICAL_ELLIPSIS");
+
+		MenuItem.clickNoError(menuItem = "Export Users");
+
+		AssertConfirm(value1 = "Warning: This CSV file contains user supplied inputs. Opening a CSV file in a spreadsheet program may be dangerous.");
+
+		AssertConsoleTextNotPresent(value1 = "javax.servlet.ServletException");
+	}
+
 	@priority = "4"
 	test CannotViewSiteSettingsInUserPersonalSite {
 		Navigator.gotoPersonalSite();
@@ -930,6 +953,8 @@ definition {
 
 	@priority = "5"
 	test ChangeUserPassword {
+		property portal.acceptance = "true";
+
 		ApplicationsMenu.gotoPortlet(
 			category = "Users",
 			panel = "Control Panel",
@@ -1103,6 +1128,8 @@ definition {
 	@description = "This is a use case for LPS-121271."
 	@priority = "3"
 	test EditAlertsandAnnouncementsDelivery {
+		property portal.acceptance = "true";
+
 		JSONUser.addUser(
 			userEmailAddress = "userea@liferay.com",
 			userFirstName = "userfn",
@@ -1239,6 +1266,8 @@ definition {
 
 	@priority = "4"
 	test EditUserAddresses {
+		property testray.component.names = "Address";
+
 		JSONUser.addUser(
 			userEmailAddress = "userea@liferay.com",
 			userFirstName = "userfn",
@@ -1751,6 +1780,65 @@ definition {
 		SelectWindow(locator1 = "title=Users and Organizations - ${siteName}");
 	}
 
+	@description = "This is a use case for LPS-145025. No redirect and language is changed when change the language in password reset page."
+	@priority = "3"
+	test LanguageChangedAndNoRedirectWhenChangeLanguageInPasswordResetPage {
+		property custom.properties = "mail.send.blacklist=noreply@liferay.com,noreply@domain.invalid,test@domain.invalid";
+		property test.smtp.server.enabled = "true";
+
+		var portalURL = PropsUtil.get("portal.url");
+
+		task ("Given that a user forgot password and send email to set new password") {
+			PortalSettings.gotoConfiguration(
+				configurationCategory = "Email",
+				configurationName = "Email Sender",
+				configurationScope = "Virtual Instance Scope");
+
+			PortalSettings.configureEmailSender(
+				emailAddress = "test@liferay.com",
+				emailSenderName = "Joe Bloggs");
+
+			JSONUser.addUser(
+				userEmailAddress = "userea@liferay.com",
+				userFirstName = "userfn",
+				userLastName = "userln",
+				userScreenName = "usersn");
+
+			User.logoutPG();
+
+			User.forgotPasswordSendResetLink(userEmailAddress = "userea@liferay.com");
+
+			Pause(locator1 = "30000");
+		}
+
+		task ("And open link to reset password in email") {
+			MockMock.openBodyLink(
+				asset = "${portalURL}: Reset Your Password",
+				content = "You can reset your password for ${portalURL}",
+				subject = "${portalURL}: Reset Your Password");
+
+			AssertElementPresent(
+				key_title = "Change Password",
+				locator1 = "Header#H2_TITLE");
+		}
+
+		task ("When the user clicks on flags button and selects Chinese in password reset page") {
+			Click(
+				key_currentLocale = StringUtil.lowerCase("en-US"),
+				locator1 = "Button#TRANSLATIONS_LOCALIZATION");
+
+			Click(
+				key_locale = "中文-中国",
+				locator1 = "Translation#DROPDOWN_MENU_ITEM");
+		}
+
+		task ("Then the page does not redirect and language is changed") {
+			AssertElementPresent(
+				key_title = "更改密码",
+				locator1 = "Header#H2_TITLE");
+		}
+	}
+
 	@priority = "4"
 	test LoginUser {
 		ApplicationsMenu.gotoPortlet(
@@ -1976,6 +2064,8 @@ definition {
 
 	@priority = "5"
 	test SearchUser {
+		property portal.acceptance = "true";
+
 		ApplicationsMenu.gotoPortlet(
 			category = "Users",
 			panel = "Control Panel",
@@ -2190,15 +2280,14 @@ definition {
 
 		ServerAdministration.openServerAdmin();
 
-		var script = TestCase.getFileContent(
-			fileName = "updateUser.groovy",
-			filePath = "coreinfrastructure/administration/users/cpusersandorganizations");
+		var script = TestCase.getFileContent(fileName = "updateUser.groovy");
 
 		ServerAdministration.executeScript(
 			language = "Groovy",
 			script = "${script}");
 
 		var companyId = JSONCompany.getCompanyId();
+
 		var userId = JSONUserSetter.setUserId(userEmailAddress = "test@liferay.com");
 
 		AssertTextEquals.assertPartialText(
@@ -2648,7 +2737,7 @@ definition {
 			userBirthday = "11/24/1984",
 			userEmailAddress = "test1@liferay.com",
 			userFirstName = "test1",
-			userID = "${userId}",
+			userId = "${userId}",
 			userLastName = "test1",
 			userScreenName = "test1");
 	}

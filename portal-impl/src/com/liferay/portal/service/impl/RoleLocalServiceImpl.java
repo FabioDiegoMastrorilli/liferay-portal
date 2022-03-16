@@ -461,14 +461,9 @@ public class RoleLocalServiceImpl extends RoleLocalServiceBaseImpl {
 				resourcePermission);
 		}
 
-		String className = role.getClassName();
-		long classNameId = role.getClassNameId();
-
-		if ((classNameId <= 0) || className.equals(Role.class.getName())) {
-			_resourceLocalService.deleteResource(
-				role.getCompanyId(), Role.class.getName(),
-				ResourceConstants.SCOPE_INDIVIDUAL, role.getRoleId());
-		}
+		_resourceLocalService.deleteResource(
+			role.getCompanyId(), Role.class.getName(),
+			ResourceConstants.SCOPE_INDIVIDUAL, role.getRoleId());
 
 		if ((role.getType() == RoleConstants.TYPE_DEPOT) ||
 			(role.getType() == RoleConstants.TYPE_ORGANIZATION) ||
@@ -646,12 +641,26 @@ public class RoleLocalServiceImpl extends RoleLocalServiceBaseImpl {
 			(type == RoleConstants.TYPE_ORGANIZATION) ||
 			(type == RoleConstants.TYPE_SITE)) {
 
+			DynamicQuery userDynamicQuery = _userLocalService.dynamicQuery();
+
+			Property statusProperty = PropertyFactoryUtil.forName("status");
+
+			userDynamicQuery.add(
+				statusProperty.eq(WorkflowConstants.STATUS_APPROVED));
+
+			userDynamicQuery.setProjection(
+				ProjectionFactoryUtil.property("userId"));
+
 			DynamicQuery userGroupRoleDynamicQuery =
 				_userGroupRoleLocalService.dynamicQuery();
 
-			Property property = PropertyFactoryUtil.forName("roleId");
+			Property userIdProperty = PropertyFactoryUtil.forName("userId");
 
-			userGroupRoleDynamicQuery.add(property.eq(roleId));
+			userGroupRoleDynamicQuery.add(userIdProperty.in(userDynamicQuery));
+
+			Property roleIdProperty = PropertyFactoryUtil.forName("roleId");
+
+			userGroupRoleDynamicQuery.add(roleIdProperty.eq(roleId));
 
 			userGroupRoleDynamicQuery.setProjection(
 				ProjectionFactoryUtil.countDistinct("userId"));
@@ -1551,39 +1560,6 @@ public class RoleLocalServiceImpl extends RoleLocalServiceBaseImpl {
 	}
 
 	/**
-	 * Returns a role with the name in the company.
-	 *
-	 * @param  companyId the primary key of the company
-	 * @param  name the role's name (optionally <code>null</code>)
-	 * @return the role with the name, or <code>null</code> if a role with the
-	 *         name could not be found in the company
-	 * @deprecated As of Athanasius (7.3.x), replaced by {@link
-	 *             #fetchRole(long, String)}
-	 */
-	@Deprecated
-	@Override
-	public Role loadFetchRole(long companyId, String name) {
-		return rolePersistence.fetchByC_N(companyId, name);
-	}
-
-	/**
-	 * Returns a role with the name in the company.
-	 *
-	 * @param  companyId the primary key of the company
-	 * @param  name the role's name
-	 * @return the role with the name in the company
-	 * @deprecated As of Athanasius (7.3.x), replaced by {@link
-	 *             #getRole(long, String)}
-	 */
-	@Deprecated
-	@Override
-	public Role loadGetRole(long companyId, String name)
-		throws PortalException {
-
-		return rolePersistence.findByC_N(companyId, name);
-	}
-
-	/**
 	 * Returns an ordered range of all the roles that match the keywords and
 	 * types.
 	 *
@@ -1927,7 +1903,7 @@ public class RoleLocalServiceImpl extends RoleLocalServiceBaseImpl {
 			// LPS-52675
 
 			if (_log.isDebugEnabled()) {
-				_log.debug(noSuchRoleException, noSuchRoleException);
+				_log.debug(noSuchRoleException);
 			}
 
 			User user = _userLocalService.getDefaultUser(companyId);

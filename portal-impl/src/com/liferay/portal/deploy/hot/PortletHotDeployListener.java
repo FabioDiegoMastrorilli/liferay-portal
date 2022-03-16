@@ -21,7 +21,6 @@ import com.liferay.portal.kernel.configuration.ConfigurationFactoryUtil;
 import com.liferay.portal.kernel.deploy.hot.BaseHotDeployListener;
 import com.liferay.portal.kernel.deploy.hot.HotDeployEvent;
 import com.liferay.portal.kernel.deploy.hot.HotDeployException;
-import com.liferay.portal.kernel.javadoc.JavadocManagerUtil;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.model.Portlet;
@@ -183,7 +182,7 @@ public class PortletHotDeployListener extends BaseHotDeployListener {
 			}
 		}
 		catch (Exception exception) {
-			_log.error(exception, exception);
+			_log.error(exception);
 		}
 
 		String servletContextName = servletContext.getServletContextName();
@@ -289,8 +288,6 @@ public class PortletHotDeployListener extends BaseHotDeployListener {
 			portlet.setReady(ready);
 		}
 
-		JavadocManagerUtil.load(servletContextName, classLoader);
-
 		DirectServletRegistryUtil.clearServlets();
 		FileTimestampUtil.reset(servletContext);
 
@@ -354,8 +351,6 @@ public class PortletHotDeployListener extends BaseHotDeployListener {
 		}
 
 		PortletContextBagPool.remove(servletContextName);
-
-		JavadocManagerUtil.unload(servletContextName);
 
 		DirectServletRegistryUtil.clearServlets();
 
@@ -450,17 +445,6 @@ public class PortletHotDeployListener extends BaseHotDeployListener {
 		}
 	}
 
-	/**
-	 * @deprecated As of Cavanaugh (7.4.x), with no direct replacement
-	 */
-	@Deprecated
-	protected void processPortletProperties(
-			String servletContextName, ClassLoader classLoader)
-		throws Exception {
-
-		_processPortletProperties(classLoader);
-	}
-
 	protected void unbindDataSource(String servletContextName) {
 		Boolean dataSourceBindState = _dataSourceBindStates.remove(
 			servletContextName);
@@ -483,7 +467,7 @@ public class PortletHotDeployListener extends BaseHotDeployListener {
 			}
 			catch (NamingException namingException) {
 				if (_log.isDebugEnabled()) {
-					_log.debug(namingException, namingException);
+					_log.debug(namingException);
 				}
 			}
 
@@ -494,7 +478,7 @@ public class PortletHotDeployListener extends BaseHotDeployListener {
 			}
 			catch (NamingException namingException) {
 				if (_log.isDebugEnabled()) {
-					_log.debug(namingException, namingException);
+					_log.debug(namingException);
 				}
 			}
 		}

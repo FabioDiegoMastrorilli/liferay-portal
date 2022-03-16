@@ -61,8 +61,8 @@ import org.elasticsearch.action.support.WriteRequest;
 import org.elasticsearch.client.IndicesClient;
 import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestHighLevelClient;
-import org.elasticsearch.common.xcontent.XContentType;
 import org.elasticsearch.rest.RestStatus;
+import org.elasticsearch.xcontent.XContentType;
 
 import org.junit.After;
 import org.junit.AfterClass;
@@ -597,7 +597,23 @@ public class ElasticsearchSearchEngineAdapterDocumentRequestTest {
 		Assert.assertEquals(Boolean.TRUE.toString(), map.get(_FIELD_NAME));
 	}
 
-	protected static DocumentRequestExecutor createDocumentRequestExecutor(
+	protected static SearchEngineAdapter createSearchEngineAdapter(
+		ElasticsearchClientResolver elasticsearchClientResolver) {
+
+		ElasticsearchDocumentFactory elasticsearchDocumentFactory =
+			new DefaultElasticsearchDocumentFactory();
+
+		return new ElasticsearchSearchEngineAdapterImpl() {
+			{
+				setDocumentRequestExecutor(
+					_createDocumentRequestExecutor(
+						elasticsearchClientResolver,
+						elasticsearchDocumentFactory));
+			}
+		};
+	}
+
+	private static DocumentRequestExecutor _createDocumentRequestExecutor(
 		ElasticsearchClientResolver elasticsearchClientResolver,
 		ElasticsearchDocumentFactory elasticsearchDocumentFactory) {
 
@@ -613,22 +629,6 @@ public class ElasticsearchSearchEngineAdapterDocumentRequestTest {
 		documentRequestExecutorFixture.setUp();
 
 		return documentRequestExecutorFixture.getDocumentRequestExecutor();
-	}
-
-	protected static SearchEngineAdapter createSearchEngineAdapter(
-		ElasticsearchClientResolver elasticsearchClientResolver) {
-
-		ElasticsearchDocumentFactory elasticsearchDocumentFactory =
-			new DefaultElasticsearchDocumentFactory();
-
-		return new ElasticsearchSearchEngineAdapterImpl() {
-			{
-				setDocumentRequestExecutor(
-					createDocumentRequestExecutor(
-						elasticsearchClientResolver,
-						elasticsearchDocumentFactory));
-			}
-		};
 	}
 
 	private void _createIndex() {

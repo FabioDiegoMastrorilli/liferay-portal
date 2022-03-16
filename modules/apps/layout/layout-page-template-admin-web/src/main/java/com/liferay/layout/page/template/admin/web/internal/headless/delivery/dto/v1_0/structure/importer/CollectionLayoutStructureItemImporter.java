@@ -20,6 +20,7 @@ import com.liferay.headless.delivery.dto.v1_0.CollectionConfig;
 import com.liferay.headless.delivery.dto.v1_0.PageCollectionDefinition;
 import com.liferay.headless.delivery.dto.v1_0.PageElement;
 import com.liferay.info.collection.provider.InfoCollectionProvider;
+import com.liferay.info.collection.provider.RelatedInfoItemCollectionProvider;
 import com.liferay.info.collection.provider.SingleFormVariationInfoCollectionProvider;
 import com.liferay.info.item.InfoItemServiceTracker;
 import com.liferay.info.list.provider.item.selector.criterion.InfoListProviderItemSelectorReturnType;
@@ -78,6 +79,10 @@ public class CollectionLayoutStructureItemImporter
 					_getCollectionConfigAsJSONObject(collectionConfig));
 			}
 
+			collectionStyledLayoutStructureItem.setDisplayAllItems(
+				(Boolean)definitionMap.get("displayAllItems"));
+			collectionStyledLayoutStructureItem.setDisplayAllPages(
+				(Boolean)definitionMap.get("displayAllPages"));
 			collectionStyledLayoutStructureItem.setListItemStyle(
 				(String)definitionMap.get("listItemStyle"));
 			collectionStyledLayoutStructureItem.setListStyle(
@@ -95,8 +100,17 @@ public class CollectionLayoutStructureItemImporter
 					numberOfItemsPerPage);
 			}
 
+			Integer numberOfPages = (Integer)definitionMap.get("numberOfPages");
+
+			if (numberOfPages != null) {
+				collectionStyledLayoutStructureItem.setNumberOfPages(
+					numberOfPages);
+			}
+
 			collectionStyledLayoutStructureItem.setPaginationType(
 				_toPaginationType((String)definitionMap.get("paginationType")));
+			collectionStyledLayoutStructureItem.setShowAllItems(
+				(Boolean)definitionMap.get("showAllItems"));
 			collectionStyledLayoutStructureItem.setTemplateKey(
 				(String)definitionMap.get("templateKey"));
 
@@ -105,7 +119,9 @@ public class CollectionLayoutStructureItemImporter
 
 			if (fragmentStyleMap != null) {
 				JSONObject jsonObject = JSONUtil.put(
-					"styles", toStylesJSONObject(fragmentStyleMap));
+					"styles",
+					toStylesJSONObject(
+						layoutStructureItemImporterContext, fragmentStyleMap));
 
 				collectionStyledLayoutStructureItem.updateItemConfig(
 					jsonObject);
@@ -209,26 +225,16 @@ public class CollectionLayoutStructureItemImporter
 				InfoCollectionProvider.class, className);
 
 		if (infoCollectionProvider == null) {
+			infoCollectionProvider = _infoItemServiceTracker.getInfoItemService(
+				RelatedInfoItemCollectionProvider.class, className);
+		}
+
+		if (infoCollectionProvider == null) {
 			return null;
 		}
 
 		return JSONUtil.put(
-			"itemSubtype",
-			() -> {
-				if (infoCollectionProvider instanceof
-						SingleFormVariationInfoCollectionProvider) {
-
-					SingleFormVariationInfoCollectionProvider<?>
-						singleFormVariationInfoCollectionProvider =
-							(SingleFormVariationInfoCollectionProvider<?>)
-								infoCollectionProvider;
-
-					return singleFormVariationInfoCollectionProvider.
-						getFormVariationKey();
-				}
-
-				return null;
-			}
+			"itemSubtype", _getItemSubtype(infoCollectionProvider)
 		).put(
 			"itemType", infoCollectionProvider.getCollectionItemClassName()
 		).put(
@@ -238,6 +244,24 @@ public class CollectionLayoutStructureItemImporter
 		).put(
 			"type", InfoListProviderItemSelectorReturnType.class.getName()
 		);
+	}
+
+	private String _getItemSubtype(
+		InfoCollectionProvider<?> infoCollectionProvider) {
+
+		if (infoCollectionProvider instanceof
+				SingleFormVariationInfoCollectionProvider) {
+
+			SingleFormVariationInfoCollectionProvider<?>
+				singleFormVariationInfoCollectionProvider =
+					(SingleFormVariationInfoCollectionProvider<?>)
+						infoCollectionProvider;
+
+			return singleFormVariationInfoCollectionProvider.
+				getFormVariationKey();
+		}
+
+		return null;
 	}
 
 	private Long _toClassPK(String classPKString) {
@@ -278,9 +302,12 @@ public class CollectionLayoutStructureItemImporter
 
 		if (Objects.equals(
 				paginationType,
+				PageCollectionDefinition.PaginationType.NUMERIC.getValue()) ||
+			Objects.equals(
+				paginationType,
 				PageCollectionDefinition.PaginationType.REGULAR.getValue())) {
 
-			return "regular";
+			return "numeric";
 		}
 
 		if (Objects.equals(

@@ -32,7 +32,7 @@ import {updateRulesReferences} from '../utils/rules';
 import sectionAdded from '../utils/sectionAddedHandler';
 import {enableSubmitButton} from '../utils/submitButtonController.es';
 
-export const deleteField = ({
+export function deleteField({
 	clean = false,
 	defaultLanguageId,
 	editingLanguageId,
@@ -41,8 +41,8 @@ export const deleteField = ({
 	fieldPage,
 	generateFieldNameUsingFieldLabel,
 	pages,
-}) =>
-	pages.map((page, pageIndex) => {
+}) {
+	return pages.map((page, pageIndex) => {
 		if (fieldPage === pageIndex) {
 			const pagesWithFieldRemoved = removeField(
 				{
@@ -69,6 +69,90 @@ export const deleteField = ({
 
 		return page;
 	});
+}
+
+function isParameterRelatedToField(parameter, fieldName) {
+
+	/* TODO: enforce parameter type consistency and remove this normalization */
+	const json =
+		typeof parameter === 'string' ? parameter : JSON.stringify(parameter);
+
+	return json.includes(fieldName);
+}
+
+/* TODO: enforce parameter type consistency and remove this function */
+function normalizeParameter(parameter, defaultLanguageId) {
+	let normalizedParameter = parameter;
+
+	if (typeof normalizedParameter === 'string') {
+		normalizedParameter = JSON.parse(parameter);
+	}
+
+	if (normalizedParameter[defaultLanguageId]) {
+		normalizedParameter = normalizedParameter[defaultLanguageId];
+	}
+
+	return normalizedParameter;
+}
+
+function updateFieldAffectedByActivatingRepeatable({
+	defaultLanguageId,
+	editingLanguageId,
+	field,
+	fieldNameGenerator,
+	generateFieldNameUsingFieldLabel,
+	repeatableFieldName,
+}) {
+	if (
+		field.type === 'date' &&
+		isParameterRelatedToField(
+			field.validation.parameter,
+			repeatableFieldName
+		)
+	) {
+		const {endsOn, startsFrom} = normalizeParameter(
+			field.validation.parameter,
+			defaultLanguageId
+		);
+
+		const removeDateField = (validation) => {
+			if (repeatableFieldName !== validation.dateFieldName) {
+				return;
+			}
+
+			if (validation.type === 'dateField') {
+				validation.type = 'responseDate';
+			}
+			delete validation.dateFieldName;
+		};
+		removeDateField(endsOn);
+		removeDateField(startsFrom);
+
+		const validation = {
+			...field.validation,
+
+			/* TODO: define a proper parameter type and apply it here */
+			parameter: JSON.stringify({
+				endsOn,
+				startsFrom,
+			}),
+		};
+
+		return updateField(
+			{
+				defaultLanguageId,
+				editingLanguageId,
+				fieldNameGenerator,
+				generateFieldNameUsingFieldLabel,
+			},
+			field,
+			'validation',
+			validation
+		);
+	}
+
+	return field;
+}
 
 const updateFieldProperty = ({
 	defaultLanguageId,
@@ -109,7 +193,7 @@ const updateFieldProperty = ({
  * NOTE: This is a literal copy of the old LayoutProvider logic. Small changes
  * were made only to adapt to the reducer.
  */
-export default (state, action, config) => {
+export default function fieldEditableReducer(state, action, config) {
 	switch (action.type) {
 		case EVENT_TYPES.FIELD.ADD: {
 			const {data, fieldType, indexes} = action.payload;
@@ -297,6 +381,16 @@ export default (state, action, config) => {
 					(field) => {
 						if (field.fieldName === newFocusedField.fieldName) {
 							return newFocusedField;
+						}
+						if (propertyValue && propertyName === 'repeatable') {
+							return updateFieldAffectedByActivatingRepeatable({
+								defaultLanguageId,
+								editingLanguageId,
+								field,
+								fieldNameGenerator,
+								generateFieldNameUsingFieldLabel,
+								repeatableFieldName: newFocusedField.fieldName,
+							});
 						}
 
 						return field;
@@ -590,4 +684,4 @@ export default (state, action, config) => {
 		default:
 			return state;
 	}
-};
+}

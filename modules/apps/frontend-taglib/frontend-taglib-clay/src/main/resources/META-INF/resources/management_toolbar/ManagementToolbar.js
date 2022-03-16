@@ -12,19 +12,26 @@
  * details.
  */
 
-import {ClayButtonWithIcon} from '@clayui/button';
+import ClayButton, {ClayButtonWithIcon} from '@clayui/button';
 import {ClayDropDownWithItems} from '@clayui/drop-down';
+import ClayIcon from '@clayui/icon';
 import ClayManagementToolbar from '@clayui/management-toolbar';
+import {LinkOrButton} from '@clayui/shared';
 import PropTypes from 'prop-types';
-import React, {useState} from 'react';
+import React, {useMemo, useState} from 'react';
 
 import ActionControls from './ActionControls';
 import CreationMenu from './CreationMenu';
+import FeatureFlagContext from './FeatureFlagContext';
 import FilterOrderControls from './FilterOrderControls';
 import InfoPanelControl from './InfoPanelControl';
 import ResultsBar from './ResultsBar';
 import SearchControls from './SearchControls';
 import SelectionControls from './SelectionControls';
+
+import './ManagementToolbar.scss';
+
+const noop = () => {};
 
 function ManagementToolbar({
 	clearResultsURL,
@@ -39,15 +46,17 @@ function ManagementToolbar({
 	initialCheckboxStatus,
 	initialSelectAllButtonVisible,
 	initialSelectedItems,
-	onActionButtonClick = () => {},
-	onCheckboxChange = () => {},
-	onClearSelectionButtonClick = () => {},
-	onCreateButtonClick = () => {},
-	onCreationMenuItemClick = () => {},
-	onInfoButtonClick = () => {},
-	onFilterDropdownItemClick = () => {},
-	onSelectAllButtonClick = () => {},
+	onActionButtonClick = noop,
+	onCheckboxChange = noop,
+	onClearSelectionButtonClick = noop,
+	onCreateButtonClick = noop,
+	onCreationMenuItemClick = noop,
+	onInfoButtonClick = noop,
+	onFilterDropdownItemClick = noop,
+	onOrderDropdownItemClick = noop,
+	onSelectAllButtonClick = noop,
 	onShowMoreButtonClick,
+	orderDropdownItems,
 	searchActionURL,
 	searchContainerId,
 	searchData,
@@ -59,6 +68,7 @@ function ManagementToolbar({
 	selectAllURL,
 	selectable,
 	showCreationMenu,
+	showDesignImprovementsFF,
 	showInfoButton,
 	showResultsBar,
 	showSearch,
@@ -72,9 +82,15 @@ function ManagementToolbar({
 	);
 	const [active, setActive] = useState(initialCheckboxStatus !== 'unchecked');
 	const [searchMobile, setSearchMobile] = useState(false);
+	const viewTypeIcon = useMemo(
+		() => viewTypeItems?.find((item) => item.active)?.icon,
+		[viewTypeItems]
+	);
 
 	return (
-		<>
+		<FeatureFlagContext.Provider
+			value={{showDesignImprovements: showDesignImprovementsFF}}
+		>
 			<ClayManagementToolbar active={active}>
 				<ClayManagementToolbar.ItemList>
 					{selectable && (
@@ -113,11 +129,14 @@ function ManagementToolbar({
 							onFilterDropdownItemClick={
 								onFilterDropdownItemClick
 							}
+							onOrderDropdownItemClick={onOrderDropdownItemClick}
+							orderDropdownItems={orderDropdownItems}
 							sortingOrder={sortingOrder}
 							sortingURL={sortingURL}
 						/>
 					)}
 				</ClayManagementToolbar.ItemList>
+
 				{!active && showSearch && (
 					<SearchControls
 						disabled={disabled}
@@ -132,6 +151,7 @@ function ManagementToolbar({
 						setSearchMobile={setSearchMobile}
 					/>
 				)}
+
 				<ClayManagementToolbar.ItemList>
 					{!active && showSearch && (
 						<SearchControls.ShowMobileButton
@@ -139,12 +159,14 @@ function ManagementToolbar({
 							setSearchMobile={setSearchMobile}
 						/>
 					)}
-					{showInfoButton && (
+
+					{!showDesignImprovementsFF && showInfoButton && (
 						<InfoPanelControl
 							infoPanelId={infoPanelId}
 							onInfoButtonClick={onInfoButtonClick}
 						/>
 					)}
+
 					{active ? (
 						<>
 							<ActionControls
@@ -160,15 +182,34 @@ function ManagementToolbar({
 									<ClayDropDownWithItems
 										items={viewTypeItems}
 										trigger={
-											<ClayButtonWithIcon
-												className="nav-link nav-link-monospaced"
-												displayType="unstyled"
-												symbol={
-													viewTypeItems.find(
-														(item) => item.active
-													)?.icon || ''
-												}
-											/>
+											showDesignImprovementsFF ? (
+												<ClayButton
+													className="nav-link"
+													displayType="unstyled"
+													title={Liferay.Language.get(
+														'show-view-options'
+													)}
+												>
+													{viewTypeIcon && (
+														<ClayIcon
+															symbol={
+																viewTypeIcon
+															}
+														/>
+													)}
+
+													<ClayIcon
+														className="inline-item inline-item-after"
+														symbol="caret-double-l"
+													/>
+												</ClayButton>
+											) : (
+												<ClayButtonWithIcon
+													className="nav-link nav-link-monospaced"
+													displayType="unstyled"
+													symbol={viewTypeIcon}
+												/>
+											)
 										}
 									/>
 								</ClayManagementToolbar.Item>
@@ -189,6 +230,16 @@ function ManagementToolbar({
 												onShowMoreButtonClick
 											}
 										/>
+									) : showDesignImprovementsFF ? (
+										<LinkOrButton
+											className="nav-btn"
+											displayType="primary"
+											onClick={onCreateButtonClick}
+											symbol="plus"
+											wide
+										>
+											{Liferay.Language.get('new')}
+										</LinkOrButton>
 									) : (
 										<ClayButtonWithIcon
 											className="nav-btn nav-btn-monospaced"
@@ -201,6 +252,14 @@ function ManagementToolbar({
 							)}
 						</>
 					)}
+
+					{showDesignImprovementsFF && showInfoButton && (
+						<InfoPanelControl
+							infoPanelId={infoPanelId}
+							onInfoButtonClick={onInfoButtonClick}
+							separator={active}
+						/>
+					)}
 				</ClayManagementToolbar.ItemList>
 			</ClayManagementToolbar>
 
@@ -212,7 +271,7 @@ function ManagementToolbar({
 					searchValue={searchValue}
 				/>
 			)}
-		</>
+		</FeatureFlagContext.Provider>
 	);
 }
 
@@ -240,6 +299,7 @@ ManagementToolbar.propTypes = {
 	onCreateButtonClick: PropTypes.func,
 	onInfoButtonClick: PropTypes.func,
 	onViewTypeSelect: PropTypes.func,
+	orderDropdownItems: PropTypes.array,
 	searchActionURL: PropTypes.string,
 	searchContainerId: PropTypes.string,
 	searchData: PropTypes.object,
@@ -250,6 +310,7 @@ ManagementToolbar.propTypes = {
 	selectAllURL: PropTypes.string,
 	selectable: PropTypes.bool,
 	showCreationMenu: PropTypes.bool,
+	showDesignImprovementsFF: PropTypes.bool,
 	showInfoButton: PropTypes.bool,
 	showResultsBar: PropTypes.bool,
 	showSearch: PropTypes.bool,

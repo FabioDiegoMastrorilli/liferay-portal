@@ -78,18 +78,24 @@ public class DDMFormInstanceRecordModelDocumentContributor
 			DDMFormValues ddmFormValues =
 				ddmFormInstanceRecordVersion.getDDMFormValues();
 
-			addContent(ddmFormInstanceRecordVersion, ddmFormValues, document);
+			_addContent(ddmFormInstanceRecordVersion, ddmFormValues, document);
 
 			ddmIndexer.addAttributes(document, ddmStructure, ddmFormValues);
 		}
 		catch (Exception exception) {
 			if (_log.isDebugEnabled()) {
-				_log.debug(exception, exception);
+				_log.debug(exception);
 			}
 		}
 	}
 
-	protected void addContent(
+	@Reference
+	protected ClassNameLocalService classNameLocalService;
+
+	@Reference
+	protected DDMIndexer ddmIndexer;
+
+	private void _addContent(
 			DDMFormInstanceRecordVersion ddmFormInstanceRecordVersion,
 			DDMFormValues ddmFormValues, Document document)
 		throws Exception {
@@ -99,11 +105,11 @@ public class DDMFormInstanceRecordModelDocumentContributor
 		for (Locale locale : locales) {
 			document.addText(
 				"ddmContent_" + LocaleUtil.toLanguageId(locale),
-				extractContent(ddmFormInstanceRecordVersion, locale));
+				_extractContent(ddmFormInstanceRecordVersion, locale));
 		}
 	}
 
-	protected String extractContent(
+	private String _extractContent(
 			DDMFormInstanceRecordVersion ddmFormInstanceRecordVersion,
 			Locale locale)
 		throws Exception {
@@ -121,12 +127,6 @@ public class DDMFormInstanceRecordModelDocumentContributor
 		return ddmIndexer.extractIndexableAttributes(
 			ddmFormInstance.getStructure(), ddmFormValues, locale);
 	}
-
-	@Reference
-	protected ClassNameLocalService classNameLocalService;
-
-	@Reference
-	protected DDMIndexer ddmIndexer;
 
 	private static final Log _log = LogFactoryUtil.getLog(
 		DDMFormInstanceRecordModelDocumentContributor.class);

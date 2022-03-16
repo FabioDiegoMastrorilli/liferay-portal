@@ -16,6 +16,7 @@ package com.liferay.dynamic.data.mapping.form.field.type.internal.radio;
 
 import com.liferay.dynamic.data.mapping.form.field.type.DDMFormFieldTemplateContextContributor;
 import com.liferay.dynamic.data.mapping.form.field.type.constants.DDMFormFieldTypeConstants;
+import com.liferay.dynamic.data.mapping.form.field.type.internal.radio.helper.RadioDDMFormFieldContextHelper;
 import com.liferay.dynamic.data.mapping.form.field.type.internal.util.DDMFormFieldTypeUtil;
 import com.liferay.dynamic.data.mapping.model.DDMFormField;
 import com.liferay.dynamic.data.mapping.model.DDMFormFieldOptions;
@@ -58,7 +59,7 @@ public class RadioDDMFormFieldTemplateContextContributor
 		return HashMapBuilder.<String, Object>put(
 			"inline", GetterUtil.getBoolean(ddmFormField.getProperty("inline"))
 		).put(
-			"options", getOptions(ddmFormField, ddmFormFieldRenderingContext)
+			"options", _getOptions(ddmFormField, ddmFormFieldRenderingContext)
 		).put(
 			"predefinedValue",
 			getValue(
@@ -103,7 +104,25 @@ public class RadioDDMFormFieldTemplateContextContributor
 		return ddmFormFieldOptions;
 	}
 
-	protected List<Object> getOptions(
+	protected String getValue(String valueString) {
+		try {
+			JSONArray jsonArray = jsonFactory.createJSONArray(valueString);
+
+			return GetterUtil.getString(jsonArray.get(0));
+		}
+		catch (JSONException jsonException) {
+			if (_log.isDebugEnabled()) {
+				_log.debug(jsonException);
+			}
+
+			return valueString;
+		}
+	}
+
+	@Reference
+	protected JSONFactory jsonFactory;
+
+	private List<Object> _getOptions(
 		DDMFormField ddmFormField,
 		DDMFormFieldRenderingContext ddmFormFieldRenderingContext) {
 
@@ -116,24 +135,6 @@ public class RadioDDMFormFieldTemplateContextContributor
 		return radioDDMFormFieldContextHelper.getOptions(
 			ddmFormFieldRenderingContext);
 	}
-
-	protected String getValue(String valueString) {
-		try {
-			JSONArray jsonArray = jsonFactory.createJSONArray(valueString);
-
-			return GetterUtil.getString(jsonArray.get(0));
-		}
-		catch (JSONException jsonException) {
-			if (_log.isDebugEnabled()) {
-				_log.debug(jsonException, jsonException);
-			}
-
-			return valueString;
-		}
-	}
-
-	@Reference
-	protected JSONFactory jsonFactory;
 
 	private static final Log _log = LogFactoryUtil.getLog(
 		RadioDDMFormFieldTemplateContextContributor.class);

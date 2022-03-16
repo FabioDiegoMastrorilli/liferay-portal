@@ -127,64 +127,7 @@ public class CalEventImporterVerifyProcess extends VerifyProcess {
 	@Override
 	protected void doVerify() throws Exception {
 		try (LoggingTimer loggingTimer = new LoggingTimer()) {
-			importCalEvents();
-		}
-	}
-
-	protected void importCalEvents() throws Exception {
-		if (!hasTable("CalEvent")) {
-			return;
-		}
-
-		try (LoggingTimer loggingTimer = new LoggingTimer()) {
-			try (PreparedStatement preparedStatement =
-					connection.prepareStatement(
-						StringBundler.concat(
-							"select uuid_, eventId, groupId, companyId, ",
-							"userId, userName, createDate, modifiedDate, ",
-							"title, description, location, startDate, ",
-							"endDate, durationHour, durationMinute, allDay, ",
-							"type_, repeating, recurrence, remindBy, ",
-							"firstReminder, secondReminder from CalEvent"))) {
-
-				ResultSet resultSet = preparedStatement.executeQuery();
-
-				while (resultSet.next()) {
-					String uuid = resultSet.getString("uuid_");
-					long eventId = resultSet.getLong("eventId");
-					long groupId = resultSet.getLong("groupId");
-					long companyId = resultSet.getLong("companyId");
-					long userId = resultSet.getLong("userId");
-					String userName = resultSet.getString("userName");
-					Timestamp createDate = resultSet.getTimestamp("createDate");
-					Timestamp modifiedDate = resultSet.getTimestamp(
-						"modifiedDate");
-					String title = resultSet.getString("title");
-					String description = resultSet.getString("description");
-					String location = resultSet.getString("location");
-					Timestamp startDate = resultSet.getTimestamp("startDate");
-					int durationHour = resultSet.getInt("durationHour");
-					int durationMinute = resultSet.getInt("durationMinute");
-					boolean allDay = resultSet.getBoolean("allDay");
-					String type = resultSet.getString("type_");
-					String recurrence = resultSet.getString("recurrence");
-					int remindBy = resultSet.getInt("remindBy");
-					int firstReminder = resultSet.getInt("firstReminder");
-					int secondReminder = resultSet.getInt("secondReminder");
-
-					CalendarBooking calendarBooking = _importCalEvent(
-						uuid, eventId, groupId, companyId, userId, userName,
-						createDate, modifiedDate, title, description, location,
-						startDate, durationHour, durationMinute, allDay, type,
-						recurrence, remindBy, firstReminder, secondReminder);
-
-					if (_log.isInfoEnabled()) {
-						_log.info(
-							"CalendarBooking: " + calendarBooking +
-								" imported successfully.");
-					}
-				}
-			}
+			_importCalEvents();
 		}
 	}
 
@@ -515,7 +458,7 @@ public class CalEventImporterVerifyProcess extends VerifyProcess {
 		}
 		catch (IllegalStateException illegalStateException) {
 			if (_log.isDebugEnabled()) {
-				_log.debug(illegalStateException, illegalStateException);
+				_log.debug(illegalStateException);
 			}
 
 			// LPS-65972
@@ -633,7 +576,7 @@ public class CalEventImporterVerifyProcess extends VerifyProcess {
 			// LPS-52675
 
 			if (_log.isDebugEnabled()) {
-				_log.debug(noSuchUserException, noSuchUserException);
+				_log.debug(noSuchUserException);
 			}
 
 			user = _userLocalService.getDefaultUser(companyId);
@@ -654,8 +597,7 @@ public class CalEventImporterVerifyProcess extends VerifyProcess {
 			// LPS-52675
 
 			if (_log.isDebugEnabled()) {
-				_log.debug(
-					noSuchVocabularyException, noSuchVocabularyException);
+				_log.debug(noSuchVocabularyException);
 			}
 
 			assetVocabulary = _assetVocabularyLocalService.addVocabulary(
@@ -1080,6 +1022,63 @@ public class CalEventImporterVerifyProcess extends VerifyProcess {
 		_importSocialActivities(companyId, eventId, calendarBookingId);
 
 		return calendarBooking;
+	}
+
+	private void _importCalEvents() throws Exception {
+		if (!hasTable("CalEvent")) {
+			return;
+		}
+
+		try (LoggingTimer loggingTimer = new LoggingTimer()) {
+			try (PreparedStatement preparedStatement =
+					connection.prepareStatement(
+						StringBundler.concat(
+							"select uuid_, eventId, groupId, companyId, ",
+							"userId, userName, createDate, modifiedDate, ",
+							"title, description, location, startDate, ",
+							"endDate, durationHour, durationMinute, allDay, ",
+							"type_, repeating, recurrence, remindBy, ",
+							"firstReminder, secondReminder from CalEvent"))) {
+
+				ResultSet resultSet = preparedStatement.executeQuery();
+
+				while (resultSet.next()) {
+					String uuid = resultSet.getString("uuid_");
+					long eventId = resultSet.getLong("eventId");
+					long groupId = resultSet.getLong("groupId");
+					long companyId = resultSet.getLong("companyId");
+					long userId = resultSet.getLong("userId");
+					String userName = resultSet.getString("userName");
+					Timestamp createDate = resultSet.getTimestamp("createDate");
+					Timestamp modifiedDate = resultSet.getTimestamp(
+						"modifiedDate");
+					String title = resultSet.getString("title");
+					String description = resultSet.getString("description");
+					String location = resultSet.getString("location");
+					Timestamp startDate = resultSet.getTimestamp("startDate");
+					int durationHour = resultSet.getInt("durationHour");
+					int durationMinute = resultSet.getInt("durationMinute");
+					boolean allDay = resultSet.getBoolean("allDay");
+					String type = resultSet.getString("type_");
+					String recurrence = resultSet.getString("recurrence");
+					int remindBy = resultSet.getInt("remindBy");
+					int firstReminder = resultSet.getInt("firstReminder");
+					int secondReminder = resultSet.getInt("secondReminder");
+
+					CalendarBooking calendarBooking = _importCalEvent(
+						uuid, eventId, groupId, companyId, userId, userName,
+						createDate, modifiedDate, title, description, location,
+						startDate, durationHour, durationMinute, allDay, type,
+						recurrence, remindBy, firstReminder, secondReminder);
+
+					if (_log.isInfoEnabled()) {
+						_log.info(
+							"CalendarBooking: " + calendarBooking +
+								" imported successfully.");
+					}
+				}
+			}
+		}
 	}
 
 	private void _importExpando(

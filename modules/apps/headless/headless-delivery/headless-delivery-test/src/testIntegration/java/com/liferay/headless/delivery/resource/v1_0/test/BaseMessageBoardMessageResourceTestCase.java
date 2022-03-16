@@ -22,6 +22,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.util.ISO8601DateFormat;
 
+import com.liferay.headless.delivery.client.dto.v1_0.Field;
 import com.liferay.headless.delivery.client.dto.v1_0.MessageBoardMessage;
 import com.liferay.headless.delivery.client.dto.v1_0.Rating;
 import com.liferay.headless.delivery.client.http.HttpInvoker;
@@ -465,10 +466,10 @@ public abstract class BaseMessageBoardMessageResourceTestCase {
 	}
 
 	@Test
-	public void testPutMessageBoardMessagePermission() throws Exception {
+	public void testPutMessageBoardMessagePermissionsPage() throws Exception {
 		@SuppressWarnings("PMD.UnusedLocalVariable")
 		MessageBoardMessage messageBoardMessage =
-			testPutMessageBoardMessagePermission_addMessageBoardMessage();
+			testPutMessageBoardMessagePermissionsPage_addMessageBoardMessage();
 
 		@SuppressWarnings("PMD.UnusedLocalVariable")
 		com.liferay.portal.kernel.model.Role role = RoleTestUtil.addRole(
@@ -477,7 +478,7 @@ public abstract class BaseMessageBoardMessageResourceTestCase {
 		assertHttpResponseStatusCode(
 			200,
 			messageBoardMessageResource.
-				putMessageBoardMessagePermissionHttpResponse(
+				putMessageBoardMessagePermissionsPageHttpResponse(
 					messageBoardMessage.getId(),
 					new Permission[] {
 						new Permission() {
@@ -491,7 +492,7 @@ public abstract class BaseMessageBoardMessageResourceTestCase {
 		assertHttpResponseStatusCode(
 			404,
 			messageBoardMessageResource.
-				putMessageBoardMessagePermissionHttpResponse(
+				putMessageBoardMessagePermissionsPageHttpResponse(
 					0L,
 					new Permission[] {
 						new Permission() {
@@ -504,7 +505,7 @@ public abstract class BaseMessageBoardMessageResourceTestCase {
 	}
 
 	protected MessageBoardMessage
-			testPutMessageBoardMessagePermission_addMessageBoardMessage()
+			testPutMessageBoardMessagePermissionsPage_addMessageBoardMessage()
 		throws Exception {
 
 		throw new UnsupportedOperationException(
@@ -664,6 +665,44 @@ public abstract class BaseMessageBoardMessageResourceTestCase {
 	}
 
 	@Test
+	public void testGetMessageBoardMessageMessageBoardMessagesPageWithFilterDoubleEquals()
+		throws Exception {
+
+		List<EntityField> entityFields = getEntityFields(
+			EntityField.Type.DOUBLE);
+
+		if (entityFields.isEmpty()) {
+			return;
+		}
+
+		Long parentMessageBoardMessageId =
+			testGetMessageBoardMessageMessageBoardMessagesPage_getParentMessageBoardMessageId();
+
+		MessageBoardMessage messageBoardMessage1 =
+			testGetMessageBoardMessageMessageBoardMessagesPage_addMessageBoardMessage(
+				parentMessageBoardMessageId, randomMessageBoardMessage());
+
+		@SuppressWarnings("PMD.UnusedLocalVariable")
+		MessageBoardMessage messageBoardMessage2 =
+			testGetMessageBoardMessageMessageBoardMessagesPage_addMessageBoardMessage(
+				parentMessageBoardMessageId, randomMessageBoardMessage());
+
+		for (EntityField entityField : entityFields) {
+			Page<MessageBoardMessage> page =
+				messageBoardMessageResource.
+					getMessageBoardMessageMessageBoardMessagesPage(
+						parentMessageBoardMessageId, null, null, null,
+						getFilterString(
+							entityField, "eq", messageBoardMessage1),
+						Pagination.of(1, 2), null);
+
+			assertEquals(
+				Collections.singletonList(messageBoardMessage1),
+				(List<MessageBoardMessage>)page.getItems());
+		}
+	}
+
+	@Test
 	public void testGetMessageBoardMessageMessageBoardMessagesPageWithFilterStringEquals()
 		throws Exception {
 
@@ -769,6 +808,20 @@ public abstract class BaseMessageBoardMessageResourceTestCase {
 				BeanUtils.setProperty(
 					messageBoardMessage1, entityField.getName(),
 					DateUtils.addMinutes(new Date(), -2));
+			});
+	}
+
+	@Test
+	public void testGetMessageBoardMessageMessageBoardMessagesPageWithSortDouble()
+		throws Exception {
+
+		testGetMessageBoardMessageMessageBoardMessagesPageWithSort(
+			EntityField.Type.DOUBLE,
+			(entityField, messageBoardMessage1, messageBoardMessage2) -> {
+				BeanUtils.setProperty(
+					messageBoardMessage1, entityField.getName(), 0.1);
+				BeanUtils.setProperty(
+					messageBoardMessage2, entityField.getName(), 0.5);
 			});
 	}
 
@@ -1047,6 +1100,44 @@ public abstract class BaseMessageBoardMessageResourceTestCase {
 	}
 
 	@Test
+	public void testGetMessageBoardThreadMessageBoardMessagesPageWithFilterDoubleEquals()
+		throws Exception {
+
+		List<EntityField> entityFields = getEntityFields(
+			EntityField.Type.DOUBLE);
+
+		if (entityFields.isEmpty()) {
+			return;
+		}
+
+		Long messageBoardThreadId =
+			testGetMessageBoardThreadMessageBoardMessagesPage_getMessageBoardThreadId();
+
+		MessageBoardMessage messageBoardMessage1 =
+			testGetMessageBoardThreadMessageBoardMessagesPage_addMessageBoardMessage(
+				messageBoardThreadId, randomMessageBoardMessage());
+
+		@SuppressWarnings("PMD.UnusedLocalVariable")
+		MessageBoardMessage messageBoardMessage2 =
+			testGetMessageBoardThreadMessageBoardMessagesPage_addMessageBoardMessage(
+				messageBoardThreadId, randomMessageBoardMessage());
+
+		for (EntityField entityField : entityFields) {
+			Page<MessageBoardMessage> page =
+				messageBoardMessageResource.
+					getMessageBoardThreadMessageBoardMessagesPage(
+						messageBoardThreadId, null, null,
+						getFilterString(
+							entityField, "eq", messageBoardMessage1),
+						Pagination.of(1, 2), null);
+
+			assertEquals(
+				Collections.singletonList(messageBoardMessage1),
+				(List<MessageBoardMessage>)page.getItems());
+		}
+	}
+
+	@Test
 	public void testGetMessageBoardThreadMessageBoardMessagesPageWithFilterStringEquals()
 		throws Exception {
 
@@ -1152,6 +1243,20 @@ public abstract class BaseMessageBoardMessageResourceTestCase {
 				BeanUtils.setProperty(
 					messageBoardMessage1, entityField.getName(),
 					DateUtils.addMinutes(new Date(), -2));
+			});
+	}
+
+	@Test
+	public void testGetMessageBoardThreadMessageBoardMessagesPageWithSortDouble()
+		throws Exception {
+
+		testGetMessageBoardThreadMessageBoardMessagesPageWithSort(
+			EntityField.Type.DOUBLE,
+			(entityField, messageBoardMessage1, messageBoardMessage2) -> {
+				BeanUtils.setProperty(
+					messageBoardMessage1, entityField.getName(), 0.1);
+				BeanUtils.setProperty(
+					messageBoardMessage2, entityField.getName(), 0.5);
 			});
 	}
 
@@ -1417,6 +1522,41 @@ public abstract class BaseMessageBoardMessageResourceTestCase {
 	}
 
 	@Test
+	public void testGetSiteMessageBoardMessagesPageWithFilterDoubleEquals()
+		throws Exception {
+
+		List<EntityField> entityFields = getEntityFields(
+			EntityField.Type.DOUBLE);
+
+		if (entityFields.isEmpty()) {
+			return;
+		}
+
+		Long siteId = testGetSiteMessageBoardMessagesPage_getSiteId();
+
+		MessageBoardMessage messageBoardMessage1 =
+			testGetSiteMessageBoardMessagesPage_addMessageBoardMessage(
+				siteId, randomMessageBoardMessage());
+
+		@SuppressWarnings("PMD.UnusedLocalVariable")
+		MessageBoardMessage messageBoardMessage2 =
+			testGetSiteMessageBoardMessagesPage_addMessageBoardMessage(
+				siteId, randomMessageBoardMessage());
+
+		for (EntityField entityField : entityFields) {
+			Page<MessageBoardMessage> page =
+				messageBoardMessageResource.getSiteMessageBoardMessagesPage(
+					siteId, null, null, null,
+					getFilterString(entityField, "eq", messageBoardMessage1),
+					Pagination.of(1, 2), null);
+
+			assertEquals(
+				Collections.singletonList(messageBoardMessage1),
+				(List<MessageBoardMessage>)page.getItems());
+		}
+	}
+
+	@Test
 	public void testGetSiteMessageBoardMessagesPageWithFilterStringEquals()
 		throws Exception {
 
@@ -1512,6 +1652,20 @@ public abstract class BaseMessageBoardMessageResourceTestCase {
 				BeanUtils.setProperty(
 					messageBoardMessage1, entityField.getName(),
 					DateUtils.addMinutes(new Date(), -2));
+			});
+	}
+
+	@Test
+	public void testGetSiteMessageBoardMessagesPageWithSortDouble()
+		throws Exception {
+
+		testGetSiteMessageBoardMessagesPageWithSort(
+			EntityField.Type.DOUBLE,
+			(entityField, messageBoardMessage1, messageBoardMessage2) -> {
+				BeanUtils.setProperty(
+					messageBoardMessage1, entityField.getName(), 0.1);
+				BeanUtils.setProperty(
+					messageBoardMessage2, entityField.getName(), 0.5);
 			});
 	}
 
@@ -2004,10 +2158,12 @@ public abstract class BaseMessageBoardMessageResourceTestCase {
 	}
 
 	@Test
-	public void testPutSiteMessageBoardMessagePermission() throws Exception {
+	public void testPutSiteMessageBoardMessagePermissionsPage()
+		throws Exception {
+
 		@SuppressWarnings("PMD.UnusedLocalVariable")
 		MessageBoardMessage messageBoardMessage =
-			testPutSiteMessageBoardMessagePermission_addMessageBoardMessage();
+			testPutSiteMessageBoardMessagePermissionsPage_addMessageBoardMessage();
 
 		@SuppressWarnings("PMD.UnusedLocalVariable")
 		com.liferay.portal.kernel.model.Role role = RoleTestUtil.addRole(
@@ -2016,7 +2172,7 @@ public abstract class BaseMessageBoardMessageResourceTestCase {
 		assertHttpResponseStatusCode(
 			200,
 			messageBoardMessageResource.
-				putSiteMessageBoardMessagePermissionHttpResponse(
+				putSiteMessageBoardMessagePermissionsPageHttpResponse(
 					messageBoardMessage.getSiteId(),
 					new Permission[] {
 						new Permission() {
@@ -2030,7 +2186,7 @@ public abstract class BaseMessageBoardMessageResourceTestCase {
 		assertHttpResponseStatusCode(
 			404,
 			messageBoardMessageResource.
-				putSiteMessageBoardMessagePermissionHttpResponse(
+				putSiteMessageBoardMessagePermissionsPageHttpResponse(
 					messageBoardMessage.getSiteId(),
 					new Permission[] {
 						new Permission() {
@@ -2043,7 +2199,7 @@ public abstract class BaseMessageBoardMessageResourceTestCase {
 	}
 
 	protected MessageBoardMessage
-			testPutSiteMessageBoardMessagePermission_addMessageBoardMessage()
+			testPutSiteMessageBoardMessagePermissionsPage_addMessageBoardMessage()
 		throws Exception {
 
 		throw new UnsupportedOperationException(
@@ -3246,13 +3402,19 @@ public abstract class BaseMessageBoardMessageResourceTestCase {
 		}
 
 		if (entityFieldName.equals("numberOfMessageBoardAttachments")) {
-			throw new IllegalArgumentException(
-				"Invalid entity field " + entityFieldName);
+			sb.append(
+				String.valueOf(
+					messageBoardMessage.getNumberOfMessageBoardAttachments()));
+
+			return sb.toString();
 		}
 
 		if (entityFieldName.equals("numberOfMessageBoardMessages")) {
-			throw new IllegalArgumentException(
-				"Invalid entity field " + entityFieldName);
+			sb.append(
+				String.valueOf(
+					messageBoardMessage.getNumberOfMessageBoardMessages()));
+
+			return sb.toString();
 		}
 
 		if (entityFieldName.equals("parentMessageBoardMessageId")) {

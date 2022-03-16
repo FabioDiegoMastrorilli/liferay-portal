@@ -26,6 +26,10 @@ import com.liferay.portal.kernel.service.ServiceWrapper;
 public class COREntryLocalServiceWrapper
 	implements COREntryLocalService, ServiceWrapper<COREntryLocalService> {
 
+	public COREntryLocalServiceWrapper() {
+		this(null);
+	}
+
 	public COREntryLocalServiceWrapper(
 		COREntryLocalService corEntryLocalService) {
 
@@ -512,6 +516,13 @@ public class COREntryLocalServiceWrapper
 		throws com.liferay.portal.kernel.exception.PortalException {
 
 		return _corEntryLocalService.getPersistedModel(primaryKeyObj);
+	}
+
+	@Override
+	public java.util.List<com.liferay.commerce.order.rule.model.COREntry>
+		getUnqualifiedCOREntries(long companyId) {
+
+		return _corEntryLocalService.getUnqualifiedCOREntries(companyId);
 	}
 
 	/**

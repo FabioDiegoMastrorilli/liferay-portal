@@ -1,6 +1,8 @@
 @component-name = "portal-publications"
 definition {
 
+	property app.server.types = "jboss,tomcat,weblogic,websphere,wildfly";
+	property database.types = "db2,hypersonic,mariadb,mysql,oracle,postgresql,sqlserver";
 	property portal.release = "true";
 	property portal.upstream = "true";
 	property testray.main.component.name = "Publications";
@@ -54,11 +56,11 @@ definition {
 			portlet = "Pages",
 			site = "Child Site Name");
 
-		SitePages.addPublicPage(pageName = "Child Site Page");
+		PagesAdmin.addPublicPage(pageName = "Child Site Page");
 
 		PublicationsNavigator.gotoReviewChanges();
 
-		PublicationsChanges.viewChangesViaChangesStyle(
+		PublicationsChanges.viewChanges(
 			changeCategory = "Site",
 			changeSite = "Site Name",
 			changeTitle = "Child Site Name",
@@ -94,7 +96,7 @@ definition {
 
 		PublicationsNavigator.gotoReviewChanges();
 
-		PublicationsChanges.viewChangesViaChangesStyle(
+		PublicationsChanges.viewChanges(
 			changeCategory = "Site",
 			changeSite = "Global",
 			changeTitle = "Site Name",

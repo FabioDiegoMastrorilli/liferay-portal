@@ -55,7 +55,7 @@ import com.liferay.portal.kernel.search.Sort;
 import com.liferay.portal.kernel.security.auth.PrincipalThreadLocal;
 import com.liferay.portal.kernel.service.ServiceContext;
 import com.liferay.portal.kernel.systemevent.SystemEvent;
-import com.liferay.portal.kernel.util.FriendlyURLNormalizerUtil;
+import com.liferay.portal.kernel.util.FriendlyURLNormalizer;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.HashMapBuilder;
 import com.liferay.portal.kernel.util.LinkedHashMapBuilder;
@@ -106,7 +106,7 @@ public class CPDefinitionOptionValueRelLocalServiceImpl
 
 		User user = userLocalService.getUser(serviceContext.getUserId());
 
-		key = FriendlyURLNormalizerUtil.normalize(key);
+		key = _friendlyURLNormalizer.normalize(key);
 
 		validate(0, cpDefinitionOptionRelId, key);
 
@@ -618,7 +618,7 @@ public class CPDefinitionOptionValueRelLocalServiceImpl
 			cpDefinitionOptionValueRelPersistence.findByPrimaryKey(
 				cpDefinitionOptionValueRelId);
 
-		key = FriendlyURLNormalizerUtil.normalize(key);
+		key = _friendlyURLNormalizer.normalize(key);
 
 		validate(
 			cpDefinitionOptionValueRel.getCPDefinitionOptionValueRelId(),
@@ -650,8 +650,9 @@ public class CPDefinitionOptionValueRelLocalServiceImpl
 		cpDefinitionOptionValueRel.setKey(key);
 		cpDefinitionOptionValueRel.setExpandoBridgeAttributes(serviceContext);
 
-		_updateCPDefinitionOptionValueRelCPInstance(
-			cpDefinitionOptionValueRel, cpInstanceId);
+		cpDefinitionOptionValueRel =
+			_updateCPDefinitionOptionValueRelCPInstance(
+				cpDefinitionOptionValueRel, cpInstanceId);
 
 		if (cpDefinitionOptionRel.isPriceTypeStatic()) {
 			cpDefinitionOptionValueRel.setPrice(price);
@@ -669,10 +670,8 @@ public class CPDefinitionOptionValueRelLocalServiceImpl
 
 		if (preselected) {
 			cpDefinitionOptionValueRel =
-				updateCPDefinitionOptionValueRelPreselected(
-					cpDefinitionOptionValueRel.
-						getCPDefinitionOptionValueRelId(),
-					preselected);
+				_updateCPDefinitionOptionValueRelPreselected(
+					cpDefinitionOptionValueRel, preselected);
 		}
 
 		// Commerce product definition
@@ -717,28 +716,8 @@ public class CPDefinitionOptionValueRelLocalServiceImpl
 			cpDefinitionOptionValueRelPersistence.fetchByPrimaryKey(
 				cpDefinitionOptionValueRelId);
 
-		if (!preselected) {
-			cpDefinitionOptionValueRel.setPreselected(false);
-
-			return cpDefinitionOptionValueRelPersistence.update(
-				cpDefinitionOptionValueRel);
-		}
-
-		CPDefinitionOptionValueRel curPreselectedCPDefinitionOptionValueRel =
-			fetchPreselectedCPDefinitionOptionValueRel(
-				cpDefinitionOptionValueRel.getCPDefinitionOptionRelId());
-
-		if (curPreselectedCPDefinitionOptionValueRel != null) {
-			curPreselectedCPDefinitionOptionValueRel.setPreselected(false);
-
-			cpDefinitionOptionValueRelPersistence.update(
-				curPreselectedCPDefinitionOptionValueRel);
-		}
-
-		cpDefinitionOptionValueRel.setPreselected(true);
-
-		return cpDefinitionOptionValueRelPersistence.update(
-			cpDefinitionOptionValueRel);
+		return _updateCPDefinitionOptionValueRelPreselected(
+			cpDefinitionOptionValueRel, preselected);
 	}
 
 	protected SearchContext buildSearchContext(
@@ -922,16 +901,17 @@ public class CPDefinitionOptionValueRelLocalServiceImpl
 		}
 	}
 
-	private void _updateCPDefinitionOptionValueRelCPInstance(
-			CPDefinitionOptionValueRel cpDefinitionOptionValueRel,
-			long cpInstanceId)
+	private CPDefinitionOptionValueRel
+			_updateCPDefinitionOptionValueRelCPInstance(
+				CPDefinitionOptionValueRel cpDefinitionOptionValueRel,
+				long cpInstanceId)
 		throws PortalException {
 
 		if (cpInstanceId <= 0) {
 			cpDefinitionOptionValueRel.setCPInstanceUuid(null);
 			cpDefinitionOptionValueRel.setCProductId(0);
 
-			return;
+			return cpDefinitionOptionValueRel;
 		}
 
 		CPInstance cpInstance = cpInstanceLocalService.getCPInstance(
@@ -943,6 +923,37 @@ public class CPDefinitionOptionValueRelLocalServiceImpl
 		CPDefinition cpDefinition = cpInstance.getCPDefinition();
 
 		cpDefinitionOptionValueRel.setCProductId(cpDefinition.getCProductId());
+
+		return cpDefinitionOptionValueRel;
+	}
+
+	private CPDefinitionOptionValueRel
+		_updateCPDefinitionOptionValueRelPreselected(
+			CPDefinitionOptionValueRel cpDefinitionOptionValueRel,
+			boolean preselected) {
+
+		if (!preselected) {
+			cpDefinitionOptionValueRel.setPreselected(false);
+
+			return cpDefinitionOptionValueRelPersistence.update(
+				cpDefinitionOptionValueRel);
+		}
+
+		CPDefinitionOptionValueRel curPreselectedCPDefinitionOptionValueRel =
+			fetchPreselectedCPDefinitionOptionValueRel(
+				cpDefinitionOptionValueRel.getCPDefinitionOptionRelId());
+
+		if (curPreselectedCPDefinitionOptionValueRel != null) {
+			curPreselectedCPDefinitionOptionValueRel.setPreselected(false);
+
+			cpDefinitionOptionValueRelPersistence.update(
+				curPreselectedCPDefinitionOptionValueRel);
+		}
+
+		cpDefinitionOptionValueRel.setPreselected(true);
+
+		return cpDefinitionOptionValueRelPersistence.update(
+			cpDefinitionOptionValueRel);
 	}
 
 	private void _validateLinkedCPDefinitionOptionValueRel(
@@ -1052,5 +1063,8 @@ public class CPDefinitionOptionValueRelLocalServiceImpl
 
 	@ServiceReference(type = ExpandoRowLocalService.class)
 	private ExpandoRowLocalService _expandoRowLocalService;
+
+	@ServiceReference(type = FriendlyURLNormalizer.class)
+	private FriendlyURLNormalizer _friendlyURLNormalizer;
 
 }

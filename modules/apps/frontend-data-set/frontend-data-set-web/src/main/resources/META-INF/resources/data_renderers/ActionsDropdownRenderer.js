@@ -121,21 +121,21 @@ export function handleAction(
 }
 
 function ActionItem({
+	action,
 	closeMenu,
-	data,
 	handleAction,
-	href,
-	icon,
+	itemData,
 	itemId,
-	label,
 	method,
 	onClick,
 	setLoading,
 	size,
-	target,
 	title,
+	url,
 }) {
 	const context = useContext(DataSetContext);
+
+	const {data, icon, label, target} = action;
 
 	function handleClickOnLink(event) {
 		event.preventDefault();
@@ -152,7 +152,7 @@ function ActionItem({
 				successMessage: data?.successMessage,
 				target,
 				title,
-				url: href,
+				url,
 			},
 			context
 		);
@@ -162,16 +162,31 @@ function ActionItem({
 
 	const link = isLink(target, onClick);
 
+	const onActionDropdownItemClick = context.onActionDropdownItemClick;
+
 	return (
 		<ClayDropDown.Item
-			href={link ? href : null}
-			onClick={link ? null : handleClickOnLink}
+			href={link ? url : null}
+			onClick={(event) => {
+				if (onActionDropdownItemClick) {
+					onActionDropdownItemClick({
+						action,
+						event,
+						itemData,
+					});
+				}
+
+				if (!link) {
+					handleClickOnLink(event);
+				}
+			}}
 		>
 			{icon && (
 				<span className="pr-2">
 					<ClayIcon symbol={icon} />
 				</span>
 			)}
+
 			{label}
 		</ClayDropDown.Item>
 	);
@@ -202,6 +217,7 @@ function ActionsDropdownRenderer({actions, itemData, itemId}) {
 				small
 				symbol="times-small"
 			/>
+
 			{loading ? (
 				<ClayButton disabled monospaced small>
 					<ClayLoadingIndicator small />
@@ -290,11 +306,24 @@ function ActionsDropdownRenderer({actions, itemData, itemId}) {
 			action.label
 		);
 
+		const onActionDropdownItemClick = context.onActionDropdownItemClick;
+
+		const url = formatActionURL(action.href, itemData);
+
 		return isLink(action.target, action.onClick) ? (
 			<ClayLink
 				className="btn btn-secondary btn-sm"
-				href={formatActionURL(action.href, itemData)}
+				href={url}
 				monospaced={Boolean(action.icon)}
+				onClick={(event) => {
+					if (onActionDropdownItemClick) {
+						onActionDropdownItemClick({
+							action,
+							event,
+							itemData,
+						});
+					}
+				}}
 			>
 				{content}
 			</ClayLink>
@@ -305,6 +334,14 @@ function ActionsDropdownRenderer({actions, itemData, itemId}) {
 				href="#"
 				monospaced={Boolean(action.icon)}
 				onClick={(event) => {
+					if (onActionDropdownItemClick) {
+						onActionDropdownItemClick({
+							action,
+							event,
+							itemData,
+						});
+					}
+
 					handleAction(
 						{
 							event,
@@ -312,7 +349,7 @@ function ActionsDropdownRenderer({actions, itemData, itemId}) {
 							method: action.method ?? actionData?.method,
 							setLoading,
 							successMessage: actionData?.successMessage,
-							url: formatActionURL(action.href, itemData),
+							url,
 							...action,
 						},
 						context
@@ -338,6 +375,7 @@ function ActionsDropdownRenderer({actions, itemData, itemId}) {
 				return (
 					<ClayDropDown.Group {...item}>
 						{separator && <ClayDropDown.Divider />}
+
 						{renderItems(nestedItems)}
 					</ClayDropDown.Group>
 				);
@@ -345,14 +383,15 @@ function ActionsDropdownRenderer({actions, itemData, itemId}) {
 
 			return (
 				<ActionItem
-					{...item}
+					action={item}
 					closeMenu={() => setMenuActive(false)}
 					handleAction={handleAction}
-					href={item.href && formatActionURL(item.href, itemData)}
+					itemData={itemData}
 					itemId={itemId}
 					key={i}
 					method={item.method ?? item.data?.method}
 					setLoading={setLoading}
+					url={item.href && formatActionURL(item.href, itemData)}
 				/>
 			);
 		});
@@ -360,6 +399,7 @@ function ActionsDropdownRenderer({actions, itemData, itemId}) {
 	return (
 		<div className="d-flex justify-content-end ml-auto">
 			{inlineEditingAlwaysOn && inlineEditingActions}
+
 			<ClayDropDown
 				active={menuActive}
 				onActiveChange={setMenuActive}
@@ -370,6 +410,7 @@ function ActionsDropdownRenderer({actions, itemData, itemId}) {
 						displayType="unstyled"
 					>
 						<ClayIcon symbol="ellipsis-v" />
+
 						<span className="sr-only">
 							{Liferay.Language.get('actions')}
 						</span>
@@ -389,22 +430,26 @@ ActionsDropdownRenderer.propTypes = {
 		PropTypes.shape({
 			data: PropTypes.shape({
 				confirmationMessage: PropTypes.string,
-				method: PropTypes.oneOf(['get', 'delete']),
+				method: PropTypes.oneOf(['delete', 'get', 'patch', 'post']),
 				permissionKey: PropTypes.string,
 				successMessage: PropTypes.string,
 			}),
 			href: PropTypes.string,
 			icon: PropTypes.string,
 			label: PropTypes.string.isRequired,
-			method: PropTypes.oneOf(['get', 'delete']),
+			method: PropTypes.oneOf(['delete', 'get', 'patch', 'post']),
 			onClick: PropTypes.string,
 			target: PropTypes.oneOf([
-				'modal',
-				'sidePanel',
-				'link',
 				'async',
 				'headless',
 				'inlineEdit',
+				'link',
+				'modal',
+				'modal-full-screen',
+				'modal-lg',
+				'modal-permissions',
+				'modal-sm',
+				'sidePanel',
 			]),
 		})
 	),

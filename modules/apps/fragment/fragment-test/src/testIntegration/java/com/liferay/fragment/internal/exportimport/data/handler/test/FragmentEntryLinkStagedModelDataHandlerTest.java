@@ -66,7 +66,7 @@ public class FragmentEntryLinkStagedModelDataHandlerTest
 	public void setUp() throws Exception {
 		super.setUp();
 
-		LayoutTestUtil.addLayout(stagingGroup);
+		LayoutTestUtil.addTypeContentLayout(stagingGroup);
 	}
 
 	@Test
@@ -194,7 +194,7 @@ public class FragmentEntryLinkStagedModelDataHandlerTest
 				fragmentCollection.getFragmentCollectionId(),
 				RandomTestUtil.randomString(), RandomTestUtil.randomString(),
 				RandomTestUtil.randomString(), RandomTestUtil.randomString(),
-				RandomTestUtil.randomString(), configuration, 0,
+				RandomTestUtil.randomString(), false, configuration, null, 0,
 				FragmentConstants.TYPE_COMPONENT,
 				WorkflowConstants.STATUS_APPROVED, serviceContext);
 

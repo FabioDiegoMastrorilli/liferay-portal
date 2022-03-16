@@ -428,7 +428,7 @@ AUI.add(
 									tempRandomSuffix
 								);
 
-								if (posTempRandomSuffix != -1) {
+								if (posTempRandomSuffix !== -1) {
 									tempTitle = title.substr(
 										0,
 										posTempRandomSuffix
@@ -589,6 +589,7 @@ AUI.add(
 						queue &&
 						(queue.queuedFiles.length > 0 ||
 							queue.numberOfUploads > 0 ||
+							// eslint-disable-next-line @liferay/aui/no-object
 							!A.Object.isEmpty(queue.currentFiles)) &&
 						queue._currentState === UploaderQueue.UPLOADING
 					);
@@ -1458,8 +1459,8 @@ AUI.add(
 
 					if (
 						useFallback ||
-						UPLOADER_TYPE == 'none' ||
-						UPLOADER_TYPE == 'flash'
+						UPLOADER_TYPE === 'none' ||
+						UPLOADER_TYPE === 'flash'
 					) {
 						if (fallback) {
 							fallback.show();

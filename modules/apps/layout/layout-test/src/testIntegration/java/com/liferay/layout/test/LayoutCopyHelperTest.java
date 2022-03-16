@@ -33,7 +33,6 @@ import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.model.Group;
 import com.liferay.portal.kernel.model.Image;
 import com.liferay.portal.kernel.model.Layout;
-import com.liferay.portal.kernel.model.LayoutConstants;
 import com.liferay.portal.kernel.portlet.PortletPreferencesFactoryUtil;
 import com.liferay.portal.kernel.service.ImageLocalService;
 import com.liferay.portal.kernel.service.LayoutLocalService;
@@ -43,15 +42,14 @@ import com.liferay.portal.kernel.service.ServiceContextThreadLocal;
 import com.liferay.portal.kernel.test.rule.AggregateTestRule;
 import com.liferay.portal.kernel.test.rule.DeleteAfterTestRun;
 import com.liferay.portal.kernel.test.util.GroupTestUtil;
-import com.liferay.portal.kernel.test.util.RandomTestUtil;
 import com.liferay.portal.kernel.test.util.ServiceContextTestUtil;
-import com.liferay.portal.kernel.test.util.TestPropsValues;
 import com.liferay.portal.kernel.util.ListUtil;
 import com.liferay.portal.kernel.util.UnicodeProperties;
 import com.liferay.portal.kernel.util.UnicodePropertiesBuilder;
 import com.liferay.portal.test.rule.Inject;
 import com.liferay.portal.test.rule.LiferayIntegrationTestRule;
 import com.liferay.portal.test.rule.PermissionCheckerMethodTestRule;
+import com.liferay.segments.constants.SegmentsExperienceConstants;
 
 import java.awt.image.BufferedImage;
 
@@ -96,10 +94,10 @@ public class LayoutCopyHelperTest {
 
 	@Test
 	public void testCopyAssetCategoryIdsAndAssetTagNames() throws Exception {
-		Layout sourceLayout = LayoutTestUtil.addLayout(
+		Layout sourceLayout = LayoutTestUtil.addTypePortletLayout(
 			_group.getGroupId(), StringPool.BLANK);
 
-		Layout targetLayout = LayoutTestUtil.addLayout(
+		Layout targetLayout = LayoutTestUtil.addTypePortletLayout(
 			_group.getGroupId(), StringPool.BLANK);
 
 		AssetVocabulary assetVocabulary = AssetTestUtil.addVocabulary(
@@ -130,7 +128,7 @@ public class LayoutCopyHelperTest {
 
 	@Test
 	public void testCopyContentLayoutStructure() throws Exception {
-		Layout sourceLayout = _addContentLayout();
+		Layout sourceLayout = LayoutTestUtil.addTypeContentLayout(_group);
 
 		LayoutStructure layoutStructure = new LayoutStructure();
 
@@ -161,12 +159,13 @@ public class LayoutCopyHelperTest {
 			fragmentEntryLink.getFragmentEntryLinkId(),
 			containerLayoutStructureItem.getItemId(), 0);
 
-		_layoutPageTemplateStructureLocalService.addLayoutPageTemplateStructure(
-			sourceLayout.getUserId(), sourceLayout.getGroupId(),
-			sourceLayout.getPlid(), layoutStructure.toString(),
-			_serviceContext);
+		_layoutPageTemplateStructureLocalService.
+			updateLayoutPageTemplateStructureData(
+				sourceLayout.getGroupId(), sourceLayout.getPlid(),
+				SegmentsExperienceConstants.ID_DEFAULT,
+				layoutStructure.toString());
 
-		Layout targetLayout = _addContentLayout();
+		Layout targetLayout = LayoutTestUtil.addTypeContentLayout(_group);
 
 		Assert.assertTrue(
 			ListUtil.isNotEmpty(
@@ -193,7 +192,7 @@ public class LayoutCopyHelperTest {
 
 	@Test
 	public void testCopyLayoutIcon() throws Exception {
-		Layout sourceLayout = LayoutTestUtil.addLayout(
+		Layout sourceLayout = LayoutTestUtil.addTypePortletLayout(
 			_group.getGroupId(), StringPool.BLANK);
 
 		BufferedImage bufferedImage = new BufferedImage(
@@ -209,7 +208,7 @@ public class LayoutCopyHelperTest {
 		sourceLayout = LayoutLocalServiceUtil.updateIconImage(
 			sourceLayout.getPlid(), byteArrayOutputStream.toByteArray());
 
-		Layout targetLayout = LayoutTestUtil.addLayout(
+		Layout targetLayout = LayoutTestUtil.addTypePortletLayout(
 			_group.getGroupId(), StringPool.BLANK);
 
 		Assert.assertTrue(sourceLayout.isIconImage());
@@ -235,7 +234,7 @@ public class LayoutCopyHelperTest {
 
 	@Test
 	public void testCopyLayoutLookAndFeel() throws Exception {
-		Layout sourceLayout = LayoutTestUtil.addLayout(
+		Layout sourceLayout = LayoutTestUtil.addTypePortletLayout(
 			_group.getGroupId(), StringPool.BLANK);
 
 		sourceLayout.setThemeId("l1-theme");
@@ -243,7 +242,7 @@ public class LayoutCopyHelperTest {
 
 		LayoutLocalServiceUtil.updateLayout(sourceLayout);
 
-		Layout targetLayout = LayoutTestUtil.addLayout(
+		Layout targetLayout = LayoutTestUtil.addTypePortletLayout(
 			_group.getGroupId(), StringPool.BLANK);
 
 		Assert.assertNotEquals(
@@ -263,7 +262,7 @@ public class LayoutCopyHelperTest {
 	public void testCopyLayoutPortletPreferences() throws Exception {
 		String portletId = LayoutPortletKeys.LAYOUT_TEST_PORTLET;
 
-		Layout sourceLayout = LayoutTestUtil.addLayout(
+		Layout sourceLayout = LayoutTestUtil.addTypePortletLayout(
 			_group.getGroupId(), "column-1=" + portletId);
 
 		PortletPreferences sourcePortletPreferences =
@@ -272,7 +271,7 @@ public class LayoutCopyHelperTest {
 				"<portlet-preferences><preference><name>layout</name><value>1" +
 					"</value></preference></portlet-preferences>");
 
-		Layout targetLayout = LayoutTestUtil.addLayout(
+		Layout targetLayout = LayoutTestUtil.addTypePortletLayout(
 			_group.getGroupId(), StringPool.BLANK);
 
 		PortletPreferences targetPortletPreferences =
@@ -298,17 +297,15 @@ public class LayoutCopyHelperTest {
 
 	@Test
 	public void testCopyTypeSettings() throws Exception {
-		UnicodeProperties sourceUnicodeProperties = new UnicodeProperties();
+		Layout sourceLayout = LayoutTestUtil.addTypePortletLayout(
+			_group.getGroupId(),
+			UnicodePropertiesBuilder.put(
+				"lfr-theme:regular:show-footer", Boolean.TRUE.toString()
+			).put(
+				"lfr-theme:regular:show-header", Boolean.TRUE.toString()
+			).buildString());
 
-		sourceUnicodeProperties.setProperty(
-			"lfr-theme:regular:show-footer", Boolean.TRUE.toString());
-		sourceUnicodeProperties.setProperty(
-			"lfr-theme:regular:show-header", Boolean.TRUE.toString());
-
-		Layout sourceLayout = LayoutTestUtil.addLayout(
-			_group.getGroupId(), sourceUnicodeProperties.toString());
-
-		Layout targetLayout = LayoutTestUtil.addLayout(
+		Layout targetLayout = LayoutTestUtil.addTypePortletLayout(
 			_group.getGroupId(), StringPool.BLANK);
 
 		UnicodeProperties targetUnicodeProperties =
@@ -337,21 +334,6 @@ public class LayoutCopyHelperTest {
 			Boolean.TRUE.toString(),
 			targetUnicodeProperties.getProperty(
 				"lfr-theme:regular:show-header"));
-	}
-
-	private Layout _addContentLayout() throws Exception {
-		ServiceContext serviceContext =
-			ServiceContextTestUtil.getServiceContext(
-				_group.getGroupId(), TestPropsValues.getUserId());
-
-		ServiceContextThreadLocal.pushServiceContext(serviceContext);
-
-		return _layoutLocalService.addLayout(
-			TestPropsValues.getUserId(), _group.getGroupId(), false,
-			LayoutConstants.DEFAULT_PARENT_LAYOUT_ID,
-			RandomTestUtil.randomString(), RandomTestUtil.randomString(),
-			StringPool.BLANK, LayoutConstants.TYPE_CONTENT, false,
-			StringPool.BLANK, serviceContext);
 	}
 
 	@Inject

@@ -15,6 +15,7 @@
 package com.liferay.headless.admin.user.resource.v1_0.test;
 
 import com.liferay.account.constants.AccountConstants;
+import com.liferay.account.exception.DuplicateAccountEntryExternalReferenceCodeException;
 import com.liferay.account.model.AccountEntry;
 import com.liferay.account.model.AccountEntryModel;
 import com.liferay.account.service.AccountEntryLocalService;
@@ -22,6 +23,7 @@ import com.liferay.account.service.AccountEntryOrganizationRelLocalService;
 import com.liferay.arquillian.extension.junit.bridge.junit.Arquillian;
 import com.liferay.headless.admin.user.client.dto.v1_0.Account;
 import com.liferay.headless.admin.user.client.pagination.Page;
+import com.liferay.headless.admin.user.client.problem.Problem;
 import com.liferay.portal.kernel.model.Organization;
 import com.liferay.portal.kernel.test.rule.DataGuard;
 import com.liferay.portal.kernel.test.util.OrganizationTestUtil;
@@ -266,6 +268,39 @@ public class AccountResourceTest extends BaseAccountResourceTestCase {
 			_accountEntryOrganizationRelLocalService.
 				getAccountEntryOrganizationRelsByOrganizationIdCount(
 					organization2.getOrganizationId()));
+	}
+
+	@Override
+	@Test
+	public void testPostAccount() throws Exception {
+		super.testPostAccount();
+
+		Account account1 = randomAccount();
+
+		Account postAccount = accountResource.postAccount(account1);
+
+		Assert.assertEquals(
+			account1.getExternalReferenceCode(),
+			postAccount.getExternalReferenceCode());
+
+		try {
+			Account account2 = randomAccount();
+
+			account2.setExternalReferenceCode(
+				postAccount.getExternalReferenceCode());
+
+			_postAccount(account2);
+
+			Assert.fail();
+		}
+		catch (Problem.ProblemException problemException) {
+			Problem problem = problemException.getProblem();
+
+			Assert.assertEquals(
+				DuplicateAccountEntryExternalReferenceCodeException.class.
+					getSimpleName(),
+				problem.getType());
+		}
 	}
 
 	@Override

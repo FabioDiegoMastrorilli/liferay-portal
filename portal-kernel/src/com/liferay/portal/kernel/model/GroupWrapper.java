@@ -16,6 +16,7 @@ package com.liferay.portal.kernel.model;
 
 import com.liferay.portal.kernel.model.wrapper.BaseModelWrapper;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.BiConsumer;
@@ -47,6 +48,7 @@ public class GroupWrapper
 		attributes.put("groupId", getGroupId());
 		attributes.put("companyId", getCompanyId());
 		attributes.put("creatorUserId", getCreatorUserId());
+		attributes.put("modifiedDate", getModifiedDate());
 		attributes.put("classNameId", getClassNameId());
 		attributes.put("classPK", getClassPK());
 		attributes.put("parentGroupId", getParentGroupId());
@@ -104,6 +106,12 @@ public class GroupWrapper
 
 		if (creatorUserId != null) {
 			setCreatorUserId(creatorUserId);
+		}
+
+		Date modifiedDate = (Date)attributes.get("modifiedDate");
+
+		if (modifiedDate != null) {
+			setModifiedDate(modifiedDate);
 		}
 
 		Long classNameId = (Long)attributes.get("classNameId");
@@ -579,6 +587,16 @@ public class GroupWrapper
 	}
 
 	/**
+	 * Returns the modified date of this group.
+	 *
+	 * @return the modified date of this group
+	 */
+	@Override
+	public Date getModifiedDate() {
+		return model.getModifiedDate();
+	}
+
+	/**
 	 * Returns the mvcc version of this group.
 	 *
 	 * @return the mvcc version of this group
@@ -959,6 +977,11 @@ public class GroupWrapper
 	}
 
 	@Override
+	public boolean isPrivateLayoutsEnabled() {
+		return model.isPrivateLayoutsEnabled();
+	}
+
+	@Override
 	public boolean isRegularSite() {
 		return model.isRegularSite();
 	}
@@ -1253,6 +1276,16 @@ public class GroupWrapper
 	@Override
 	public void setMembershipRestriction(int membershipRestriction) {
 		model.setMembershipRestriction(membershipRestriction);
+	}
+
+	/**
+	 * Sets the modified date of this group.
+	 *
+	 * @param modifiedDate the modified date of this group
+	 */
+	@Override
+	public void setModifiedDate(Date modifiedDate) {
+		model.setModifiedDate(modifiedDate);
 	}
 
 	/**

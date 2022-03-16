@@ -88,7 +88,10 @@ const ImagePicker = ({
 	const handleItemSelectorTriggerClick = (event) => {
 		event.preventDefault();
 
+		onFocus(event);
+
 		Liferay.Util.openSelectionModal({
+			onClose: () => onBlur(event),
 			onSelect: handleFieldChanged,
 			selectEventName: `${portletNamespace}selectDocumentLibrary`,
 			title: Liferay.Util.sub(
@@ -111,6 +114,7 @@ const ImagePicker = ({
 					type="hidden"
 					value={JSON.stringify(imageValues)}
 				/>
+
 				<ClayInput.Group>
 					<ClayInput.GroupItem className="d-none d-sm-block" prepend>
 						<ClayInput
@@ -119,9 +123,7 @@ const ImagePicker = ({
 							disabled={readOnly}
 							id={id}
 							lang={editingLanguageId}
-							onBlur={onBlur}
 							onClick={handleItemSelectorTriggerClick}
-							onFocus={onFocus}
 							type="text"
 							value={imageValues.title || ''}
 						/>
@@ -176,6 +178,7 @@ const ImagePicker = ({
 					size="full-screen"
 				>
 					<ClayModal.Header />
+
 					<ClayModal.Body>
 						<img
 							alt={imageValues.description}
@@ -184,6 +187,7 @@ const ImagePicker = ({
 							src={imageValues.url}
 							style={{cursor: 'zoom-out', maxHeight: '95%'}}
 						/>
+
 						<p
 							className="font-weight-light text-center"
 							style={{color: '#FFFFFF'}}

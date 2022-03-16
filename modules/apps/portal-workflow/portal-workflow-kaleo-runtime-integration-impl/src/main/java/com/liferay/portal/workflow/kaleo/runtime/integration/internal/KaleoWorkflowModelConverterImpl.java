@@ -146,7 +146,7 @@ public class KaleoWorkflowModelConverterImpl
 		}
 		catch (PortalException portalException) {
 			if (_log.isWarnEnabled()) {
-				_log.warn(portalException, portalException);
+				_log.warn(portalException);
 			}
 		}
 
@@ -172,7 +172,7 @@ public class KaleoWorkflowModelConverterImpl
 		}
 		catch (PortalException portalException) {
 			if (_log.isWarnEnabled()) {
-				_log.warn(portalException, portalException);
+				_log.warn(portalException);
 			}
 
 			defaultWorkflowDefinition.setActive(false);
@@ -242,6 +242,7 @@ public class KaleoWorkflowModelConverterImpl
 		DefaultWorkflowInstance defaultWorkflowInstance =
 			new DefaultWorkflowInstance();
 
+		defaultWorkflowInstance.setActive(kaleoInstance.isActive());
 		defaultWorkflowInstance.setCurrentNodeNames(
 			Stream.of(
 				_kaleoInstanceTokenLocalService.getKaleoInstanceTokens(
@@ -414,6 +415,7 @@ public class KaleoWorkflowModelConverterImpl
 				DefaultWorkflowNode defaultWorkflowNode =
 					new DefaultWorkflowNode();
 
+				defaultWorkflowNode.setLabelMap(kaleoNode.getLabelMap());
 				defaultWorkflowNode.setName(kaleoNode.getName());
 
 				WorkflowNode.Type workflowNodeType = WorkflowNode.Type.valueOf(
@@ -451,6 +453,8 @@ public class KaleoWorkflowModelConverterImpl
 				DefaultWorkflowTransition defaultWorkflowTransition =
 					new DefaultWorkflowTransition();
 
+				defaultWorkflowTransition.setLabelMap(
+					kaleoTransition.getLabelMap());
 				defaultWorkflowTransition.setName(kaleoTransition.getName());
 				defaultWorkflowTransition.setSourceNodeName(
 					kaleoTransition.getSourceKaleoNodeName());

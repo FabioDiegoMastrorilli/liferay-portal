@@ -26,6 +26,10 @@ import com.liferay.portal.kernel.service.ServiceWrapper;
 public class CSDiagramEntryServiceWrapper
 	implements CSDiagramEntryService, ServiceWrapper<CSDiagramEntryService> {
 
+	public CSDiagramEntryServiceWrapper() {
+		this(null);
+	}
+
 	public CSDiagramEntryServiceWrapper(
 		CSDiagramEntryService csDiagramEntryService) {
 
@@ -53,10 +57,12 @@ public class CSDiagramEntryServiceWrapper
 	}
 
 	@Override
-	public void deleteCSDiagramEntry(long csDiagramEntryId)
+	public void deleteCSDiagramEntry(
+			com.liferay.commerce.shop.by.diagram.model.CSDiagramEntry
+				csDiagramEntry)
 		throws com.liferay.portal.kernel.exception.PortalException {
 
-		_csDiagramEntryService.deleteCSDiagramEntry(csDiagramEntryId);
+		_csDiagramEntryService.deleteCSDiagramEntry(csDiagramEntry);
 	}
 
 	@Override

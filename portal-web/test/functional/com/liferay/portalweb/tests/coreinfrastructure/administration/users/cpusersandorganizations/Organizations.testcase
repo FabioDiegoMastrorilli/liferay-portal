@@ -313,19 +313,19 @@ definition {
 			siteName = "Organization Name",
 			siteType = "Private");
 
-		SitePages.openPagesAdmin(siteURLKey = "Organization Name");
+		PagesAdmin.openPagesAdmin(siteURLKey = "Organization Name");
 
 		ProductMenu.gotoPortlet(
 			category = "Site Builder",
 			portlet = "Pages");
 
-		SitePages.addPrivatePage(pageName = "Private Page");
+		PagesAdmin.addPrivatePage(pageName = "Private Page");
 
 		Navigator.gotoSpecificURLPage(
 			pageName = "Private Page",
 			url = "${portalURL}/group/organization-name/private-page");
 
-		Page.view(
+		PagesAdmin.viewPageItemPresent(
 			pageName = "Private Page",
 			privacy = "Private Pages");
 	}
@@ -352,19 +352,19 @@ definition {
 
 		Organization.addSiteCP(orgName = "Organization Name");
 
-		SitePages.openPagesAdmin(siteURLKey = "Organization Name");
+		PagesAdmin.openPagesAdmin(siteURLKey = "Organization Name");
 
 		ProductMenu.gotoPortlet(
 			category = "Site Builder",
 			portlet = "Pages");
 
-		SitePages.addPublicPage(pageName = "Public Page");
+		PagesAdmin.addPublicPage(pageName = "Public Page");
 
 		Navigator.gotoSpecificURLPage(
 			pageName = "Public Page",
 			url = "${portalURL}/web/organization-name/public-page");
 
-		Page.view(
+		PagesAdmin.viewPageItemPresent(
 			pageName = "Public Page",
 			privacy = "Public Pages");
 	}
@@ -413,15 +413,15 @@ definition {
 			userName = "Test Test",
 			userScreenName = "test");
 
-		SitePages.openPagesAdmin(siteURLKey = "Organization Name");
+		PagesAdmin.openPagesAdmin(siteURLKey = "Organization Name");
 
 		ProductMenu.gotoPortlet(
 			category = "Site Builder",
 			portlet = "Pages");
 
-		SitePages.addPublicPage(pageName = "Organization Public Page");
+		PagesAdmin.addPublicPage(pageName = "Organization Public Page");
 
-		SitePages.openPagesAdmin(siteURLKey = "Organization Name");
+		PagesAdmin.openPagesAdmin(siteURLKey = "Organization Name");
 
 		ProductMenu.gotoPortlet(
 			category = "People",
@@ -498,7 +498,7 @@ definition {
 			category = "Site Builder",
 			portlet = "Pages");
 
-		SitePages.addPublicPage(pageName = "Mock LDAP Page");
+		PagesAdmin.addPublicPage(pageName = "Mock LDAP Page");
 
 		Navigator.gotoPage(pageName = "Mock LDAP Page");
 
@@ -510,7 +510,6 @@ definition {
 
 		MockLDAP.selectJsonFile(
 			fileName = "space-groups.json",
-			filePath = "coreinfrastructure/administration/users/cpusersandorganizations",
 			tabName = "User Groups");
 
 		ApplicationsMenu.gotoPortlet(
@@ -530,8 +529,6 @@ definition {
 		UsersAndOrganizationsNavigator.gotoOrganizations();
 
 		LAR.importPortlet(
-			compressedFile = "true",
-			filePath = "coreinfrastructure/administration/users/cpusersandorganizations",
 			larFileName = "organizations-7.0.lar",
 			uploadFrom = "dependencies");
 
@@ -815,6 +812,72 @@ definition {
 		AssetCategorization.viewCategory(categoryName = "Category Name 1");
 
 		AssetCategorization.viewVocabulary(vocabularyName = "Vocabulary Name 1");
+	}
+
+	@description = "Resolved bug automation for LPS-140712. This test asserts that a user can be added to an organization through the UI and displays a success message"
+	@priority = "3"
+	test CanAddOrganizationUser {
+		task ("Given an organization") {
+			JSONOrganization.addOrganization(
+				organizationName = "Organization Name",
+				organizationSite = "true");
+		}
+
+		task ("When a user is added to that organization through the UI") {
+			Organization.openOrganizationsAdmin();
+
+			Organization.addUser(
+				organizationName = "Organization Name",
+				userEmailAddress = "userea@liferay.com",
+				userFirstName = "userfn",
+				userLastName = "userln",
+				userScreenName = "usersn");
+		}
+
+		task ("Then a success message should display and the user should be listed under the organization") {
+			Alert.viewSuccessMessageText(successMessage = "The user was created successfully. You can now add additional information about the user.");
+
+			LexiconEntry.gotoEntry(rowEntry = "Organization Name");
+
+			LexiconEntry.viewEntryContent(
+				rowAny = "userfn userln",
+				rowEntry = "User");
+		}
+	}
+
+	@description = "This test automates LPS-141217 and asserts that a user can still be added to an organization after initially using an invalid email"
+	@priority = "3"
+	test CanAddOrganizationUserAfterFirstUsingInvalidEmail {
+		task ("Given the creation of a user under an organization is attempted using an invalid email") {
+			JSONOrganization.addOrganization(organizationName = "Organization Name");
+
+			Organization.openOrganizationsAdmin();
+
+			Organization.addUser(
+				organizationName = "Organization Name",
+				userEmailAddress = "postmaster@liferay.com",
+				userFirstName = "userfn",
+				userLastName = "userln",
+				userScreenName = "usersn");
+
+			Alert.viewErrorMessage(errorMessage = "Error:Please enter a valid email address.");
+		}
+
+		task ("When the email is changed to a valid email address and the user is saved") {
+			Type(
+				locator1 = "UsersAndOrganizationsEditUser#DETAILS_EMAIL_ADDRESS_FIELD",
+				value1 = "postmaster1@liferay.com");
+
+			Button.clickSave();
+		}
+
+		task ("Then the user should be created and associated under the organization") {
+			LexiconEntry.gotoEntry(rowEntry = "Organization Name");
+
+			LexiconEntry.viewEntryContent(
+				rowAny = "userfn userln",
+				rowEntry = "User");
+		}
 	}
 
 	@description = "This test asserts that an organization cannot be deleted if there is a suborganization associated with it."
@@ -1142,15 +1205,15 @@ definition {
 			userName = "userfn userln",
 			userScreenName = "usersn");
 
-		SitePages.openPagesAdmin(siteURLKey = "Organization Name");
+		PagesAdmin.openPagesAdmin(siteURLKey = "Organization Name");
 
 		ProductMenu.gotoPortlet(
 			category = "Site Builder",
 			portlet = "Pages");
 
-		SitePages.addPublicPage(pageName = "Public Page");
+		PagesAdmin.addPublicPage(pageName = "Public Page");
 
-		SitePages.openPagesAdmin(siteURLKey = "Organization Name");
+		PagesAdmin.openPagesAdmin(siteURLKey = "Organization Name");
 
 		ProductMenu.gotoPortlet(
 			category = "People",
@@ -1412,9 +1475,9 @@ definition {
 
 		Organization.addSiteCP(orgName = "Organization Site Bravo");
 
-		PortalSettings.editConfigurationUsersDefaultUserAssociationsSitesCP(siteName = "Site Name Alpha");
+		PortalSettings.editConfigurationUsersDefaultUserAssociationsCP(siteName = "Site Name Alpha");
 
-		PortalSettings.editConfigurationUsersDefaultUserAssociationsOrganizationSitesCP(orgName = "Organization Site Bravo");
+		PortalSettings.editConfigurationUsersDefaultUserAssociationsCP(orgName = "Organization Site Bravo");
 
 		JSONUser.addUser(
 			userEmailAddress = "userea@liferay.com",
@@ -1916,7 +1979,7 @@ definition {
 			category = "Site Builder",
 			portlet = "Pages");
 
-		SitePages.addPublicPage(pageName = "Sites Directory Page");
+		PagesAdmin.addPublicPage(pageName = "Sites Directory Page");
 
 		Navigator.gotoPage(pageName = "Sites Directory Page");
 
@@ -1940,13 +2003,13 @@ definition {
 
 		Organization.addSiteCP(orgName = "Organization Name 1");
 
-		SitePages.openPagesAdmin(siteURLKey = "Organization Name 1");
+		PagesAdmin.openPagesAdmin(siteURLKey = "Organization Name 1");
 
 		ProductMenu.gotoPortlet(
 			category = "Site Builder",
 			portlet = "Pages");
 
-		SitePages.addPublicPage(pageName = "Test Page");
+		PagesAdmin.addPublicPage(pageName = "Test Page");
 
 		ApplicationsMenu.gotoPortlet(
 			category = "Users",

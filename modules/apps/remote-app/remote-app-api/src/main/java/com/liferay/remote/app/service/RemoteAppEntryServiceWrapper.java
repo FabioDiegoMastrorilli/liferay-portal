@@ -26,6 +26,10 @@ import com.liferay.portal.kernel.service.ServiceWrapper;
 public class RemoteAppEntryServiceWrapper
 	implements RemoteAppEntryService, ServiceWrapper<RemoteAppEntryService> {
 
+	public RemoteAppEntryServiceWrapper() {
+		this(null);
+	}
+
 	public RemoteAppEntryServiceWrapper(
 		RemoteAppEntryService remoteAppEntryService) {
 
@@ -35,29 +39,33 @@ public class RemoteAppEntryServiceWrapper
 	@Override
 	public com.liferay.remote.app.model.RemoteAppEntry
 			addCustomElementRemoteAppEntry(
-				String customElementCSSURLs,
+				String externalReferenceCode, String customElementCSSURLs,
 				String customElementHTMLElementName, String customElementURLs,
+				boolean customElementUseESM, String description,
 				String friendlyURLMapping, boolean instanceable,
 				java.util.Map<java.util.Locale, String> nameMap,
-				String portletCategoryName, String properties)
+				String portletCategoryName, String properties,
+				String sourceCodeURL)
 		throws com.liferay.portal.kernel.exception.PortalException {
 
 		return _remoteAppEntryService.addCustomElementRemoteAppEntry(
-			customElementCSSURLs, customElementHTMLElementName,
-			customElementURLs, friendlyURLMapping, instanceable, nameMap,
-			portletCategoryName, properties);
+			externalReferenceCode, customElementCSSURLs,
+			customElementHTMLElementName, customElementURLs,
+			customElementUseESM, description, friendlyURLMapping, instanceable,
+			nameMap, portletCategoryName, properties, sourceCodeURL);
 	}
 
 	@Override
 	public com.liferay.remote.app.model.RemoteAppEntry addIFrameRemoteAppEntry(
-			String friendlyURLMapping, String iFrameURL, boolean instanceable,
+			String description, String friendlyURLMapping, String iFrameURL,
+			boolean instanceable,
 			java.util.Map<java.util.Locale, String> nameMap,
-			String portletCategoryName, String properties)
+			String portletCategoryName, String properties, String sourceCodeURL)
 		throws com.liferay.portal.kernel.exception.PortalException {
 
 		return _remoteAppEntryService.addIFrameRemoteAppEntry(
-			friendlyURLMapping, iFrameURL, instanceable, nameMap,
-			portletCategoryName, properties);
+			description, friendlyURLMapping, iFrameURL, instanceable, nameMap,
+			portletCategoryName, properties, sourceCodeURL);
 	}
 
 	@Override
@@ -91,29 +99,33 @@ public class RemoteAppEntryServiceWrapper
 			updateCustomElementRemoteAppEntry(
 				long remoteAppEntryId, String customElementCSSURLs,
 				String customElementHTMLElementName, String customElementURLs,
+				boolean customElementUseESM, String description,
 				String friendlyURLMapping,
 				java.util.Map<java.util.Locale, String> nameMap,
-				String portletCategoryName, String properties)
+				String portletCategoryName, String properties,
+				String sourceCodeURL)
 		throws com.liferay.portal.kernel.exception.PortalException {
 
 		return _remoteAppEntryService.updateCustomElementRemoteAppEntry(
 			remoteAppEntryId, customElementCSSURLs,
-			customElementHTMLElementName, customElementURLs, friendlyURLMapping,
-			nameMap, portletCategoryName, properties);
+			customElementHTMLElementName, customElementURLs,
+			customElementUseESM, description, friendlyURLMapping, nameMap,
+			portletCategoryName, properties, sourceCodeURL);
 	}
 
 	@Override
 	public com.liferay.remote.app.model.RemoteAppEntry
 			updateIFrameRemoteAppEntry(
-				long remoteAppEntryId, String friendlyURLMapping,
-				String iFrameURL,
+				long remoteAppEntryId, String description,
+				String friendlyURLMapping, String iFrameURL,
 				java.util.Map<java.util.Locale, String> nameMap,
-				String portletCategoryName, String properties)
+				String portletCategoryName, String properties,
+				String sourceCodeURL)
 		throws com.liferay.portal.kernel.exception.PortalException {
 
 		return _remoteAppEntryService.updateIFrameRemoteAppEntry(
-			remoteAppEntryId, friendlyURLMapping, iFrameURL, nameMap,
-			portletCategoryName, properties);
+			remoteAppEntryId, description, friendlyURLMapping, iFrameURL,
+			nameMap, portletCategoryName, properties, sourceCodeURL);
 	}
 
 	@Override

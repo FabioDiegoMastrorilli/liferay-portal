@@ -268,6 +268,39 @@ public abstract class BaseObjectDefinitionResourceTestCase {
 	}
 
 	@Test
+	public void testGetObjectDefinitionsPageWithFilterDoubleEquals()
+		throws Exception {
+
+		List<EntityField> entityFields = getEntityFields(
+			EntityField.Type.DOUBLE);
+
+		if (entityFields.isEmpty()) {
+			return;
+		}
+
+		ObjectDefinition objectDefinition1 =
+			testGetObjectDefinitionsPage_addObjectDefinition(
+				randomObjectDefinition());
+
+		@SuppressWarnings("PMD.UnusedLocalVariable")
+		ObjectDefinition objectDefinition2 =
+			testGetObjectDefinitionsPage_addObjectDefinition(
+				randomObjectDefinition());
+
+		for (EntityField entityField : entityFields) {
+			Page<ObjectDefinition> page =
+				objectDefinitionResource.getObjectDefinitionsPage(
+					null, null,
+					getFilterString(entityField, "eq", objectDefinition1),
+					Pagination.of(1, 2), null);
+
+			assertEquals(
+				Collections.singletonList(objectDefinition1),
+				(List<ObjectDefinition>)page.getItems());
+		}
+	}
+
+	@Test
 	public void testGetObjectDefinitionsPageWithFilterStringEquals()
 		throws Exception {
 
@@ -365,6 +398,18 @@ public abstract class BaseObjectDefinitionResourceTestCase {
 				BeanUtils.setProperty(
 					objectDefinition1, entityField.getName(),
 					DateUtils.addMinutes(new Date(), -2));
+			});
+	}
+
+	@Test
+	public void testGetObjectDefinitionsPageWithSortDouble() throws Exception {
+		testGetObjectDefinitionsPageWithSort(
+			EntityField.Type.DOUBLE,
+			(entityField, objectDefinition1, objectDefinition2) -> {
+				BeanUtils.setProperty(
+					objectDefinition1, entityField.getName(), 0.1);
+				BeanUtils.setProperty(
+					objectDefinition2, entityField.getName(), 0.5);
 			});
 	}
 
@@ -918,10 +963,26 @@ public abstract class BaseObjectDefinitionResourceTestCase {
 				continue;
 			}
 
+			if (Objects.equals("objectLayouts", additionalAssertFieldName)) {
+				if (objectDefinition.getObjectLayouts() == null) {
+					valid = false;
+				}
+
+				continue;
+			}
+
 			if (Objects.equals(
 					"objectRelationships", additionalAssertFieldName)) {
 
 				if (objectDefinition.getObjectRelationships() == null) {
+					valid = false;
+				}
+
+				continue;
+			}
+
+			if (Objects.equals("objectViews", additionalAssertFieldName)) {
+				if (objectDefinition.getObjectViews() == null) {
 					valid = false;
 				}
 
@@ -952,6 +1013,14 @@ public abstract class BaseObjectDefinitionResourceTestCase {
 				continue;
 			}
 
+			if (Objects.equals("portlet", additionalAssertFieldName)) {
+				if (objectDefinition.getPortlet() == null) {
+					valid = false;
+				}
+
+				continue;
+			}
+
 			if (Objects.equals("scope", additionalAssertFieldName)) {
 				if (objectDefinition.getScope() == null) {
 					valid = false;
@@ -970,6 +1039,16 @@ public abstract class BaseObjectDefinitionResourceTestCase {
 
 			if (Objects.equals("system", additionalAssertFieldName)) {
 				if (objectDefinition.getSystem() == null) {
+					valid = false;
+				}
+
+				continue;
+			}
+
+			if (Objects.equals(
+					"titleObjectFieldId", additionalAssertFieldName)) {
+
+				if (objectDefinition.getTitleObjectFieldId() == null) {
 					valid = false;
 				}
 
@@ -1169,12 +1248,34 @@ public abstract class BaseObjectDefinitionResourceTestCase {
 				continue;
 			}
 
+			if (Objects.equals("objectLayouts", additionalAssertFieldName)) {
+				if (!Objects.deepEquals(
+						objectDefinition1.getObjectLayouts(),
+						objectDefinition2.getObjectLayouts())) {
+
+					return false;
+				}
+
+				continue;
+			}
+
 			if (Objects.equals(
 					"objectRelationships", additionalAssertFieldName)) {
 
 				if (!Objects.deepEquals(
 						objectDefinition1.getObjectRelationships(),
 						objectDefinition2.getObjectRelationships())) {
+
+					return false;
+				}
+
+				continue;
+			}
+
+			if (Objects.equals("objectViews", additionalAssertFieldName)) {
+				if (!Objects.deepEquals(
+						objectDefinition1.getObjectViews(),
+						objectDefinition2.getObjectViews())) {
 
 					return false;
 				}
@@ -1215,6 +1316,17 @@ public abstract class BaseObjectDefinitionResourceTestCase {
 				continue;
 			}
 
+			if (Objects.equals("portlet", additionalAssertFieldName)) {
+				if (!Objects.deepEquals(
+						objectDefinition1.getPortlet(),
+						objectDefinition2.getPortlet())) {
+
+					return false;
+				}
+
+				continue;
+			}
+
 			if (Objects.equals("scope", additionalAssertFieldName)) {
 				if (!Objects.deepEquals(
 						objectDefinition1.getScope(),
@@ -1241,6 +1353,19 @@ public abstract class BaseObjectDefinitionResourceTestCase {
 				if (!Objects.deepEquals(
 						objectDefinition1.getSystem(),
 						objectDefinition2.getSystem())) {
+
+					return false;
+				}
+
+				continue;
+			}
+
+			if (Objects.equals(
+					"titleObjectFieldId", additionalAssertFieldName)) {
+
+				if (!Objects.deepEquals(
+						objectDefinition1.getTitleObjectFieldId(),
+						objectDefinition2.getTitleObjectFieldId())) {
 
 					return false;
 				}
@@ -1452,7 +1577,17 @@ public abstract class BaseObjectDefinitionResourceTestCase {
 				"Invalid entity field " + entityFieldName);
 		}
 
+		if (entityFieldName.equals("objectLayouts")) {
+			throw new IllegalArgumentException(
+				"Invalid entity field " + entityFieldName);
+		}
+
 		if (entityFieldName.equals("objectRelationships")) {
+			throw new IllegalArgumentException(
+				"Invalid entity field " + entityFieldName);
+		}
+
+		if (entityFieldName.equals("objectViews")) {
 			throw new IllegalArgumentException(
 				"Invalid entity field " + entityFieldName);
 		}
@@ -1478,6 +1613,11 @@ public abstract class BaseObjectDefinitionResourceTestCase {
 				"Invalid entity field " + entityFieldName);
 		}
 
+		if (entityFieldName.equals("portlet")) {
+			throw new IllegalArgumentException(
+				"Invalid entity field " + entityFieldName);
+		}
+
 		if (entityFieldName.equals("scope")) {
 			sb.append("'");
 			sb.append(String.valueOf(objectDefinition.getScope()));
@@ -1492,6 +1632,11 @@ public abstract class BaseObjectDefinitionResourceTestCase {
 		}
 
 		if (entityFieldName.equals("system")) {
+			throw new IllegalArgumentException(
+				"Invalid entity field " + entityFieldName);
+		}
+
+		if (entityFieldName.equals("titleObjectFieldId")) {
 			throw new IllegalArgumentException(
 				"Invalid entity field " + entityFieldName);
 		}
@@ -1549,8 +1694,10 @@ public abstract class BaseObjectDefinitionResourceTestCase {
 					RandomTestUtil.randomString());
 				panelCategoryKey = StringUtil.toLowerCase(
 					RandomTestUtil.randomString());
+				portlet = RandomTestUtil.randomBoolean();
 				scope = StringUtil.toLowerCase(RandomTestUtil.randomString());
 				system = RandomTestUtil.randomBoolean();
+				titleObjectFieldId = RandomTestUtil.randomLong();
 			}
 		};
 	}

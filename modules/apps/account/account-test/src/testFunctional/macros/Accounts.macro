@@ -245,10 +245,10 @@ definition {
 			User.changeProfileImage(imageName = "${accountLogo}");
 		}
 
-		if (isSet(accountTaxID)) {
+		if (isSet(accountTaxId)) {
 			PortletEntry.inputText(
 				fieldLabel = "Tax ID",
-				text = "${accountTaxID}");
+				text = "${accountTaxId}");
 		}
 
 		if (isSet(externalReferenceCode)) {
@@ -303,7 +303,6 @@ definition {
 
 			Button.clickDone();
 		}
-
 		else {
 			for (var tagName : list "${tagNameList}") {
 				var tagName = StringUtil.lowerCase("${tagName}");
@@ -588,10 +587,10 @@ definition {
 			User.changeProfileImage(imageName = "${accountLogo}");
 		}
 
-		if (isSet(accountTaxID)) {
+		if (isSet(accountTaxId)) {
 			PortletEntry.inputText(
 				fieldLabel = "Tax ID",
-				text = "${accountTaxID}");
+				text = "${accountTaxId}");
 		}
 
 		Button.clickSave();
@@ -883,6 +882,12 @@ definition {
 				value1 = "${addressCity}");
 		}
 
+		if (isSet(addressCountry)) {
+			Select(
+				locator1 = "Select#COUNTRY",
+				value1 = "${addressCountry}");
+		}
+
 		if (isSet(addressRegion)) {
 			Select(
 				locator1 = "Select#REGION",
@@ -893,12 +898,6 @@ definition {
 			Type(
 				locator1 = "TextInput#POSTAL_CODE",
 				value1 = "${addressPostalCode}");
-		}
-
-		if (isSet(addressCountry)) {
-			Select(
-				locator1 = "Select#COUNTRY",
-				value1 = "${addressCountry}");
 		}
 
 		if (isSet(phoneNumber)) {
@@ -1025,6 +1024,14 @@ definition {
 		AssertTextEquals(
 			locator1 = "Portlet#HEADER",
 			value1 = "Edit ${accountName}");
+	}
+
+	macro goToEntryMenuItem {
+		Click(
+			key_rowEntry = "${rowEntry}",
+			locator1 = "Icon#ROW_VERTICAL_ELLIPSIS");
+
+		MenuItem.clickNoError(menuItem = "${menuItem}");
 	}
 
 	macro openAccountsAdmin {
@@ -1274,17 +1281,24 @@ definition {
 			key_selectFieldLabel = "Type",
 			locator1 = "TextInput#ANY_DISABLED");
 
-		if (isSet(accountTaxID)) {
+		if (isSet(accountTaxId)) {
 			AssertTextEquals(
 				key_fieldLabel = "Tax ID",
 				locator1 = "TextInput#GENERIC_TEXT_INPUT",
-				value1 = "${accountTaxID}");
+				value1 = "${accountTaxId}");
 		}
 
 		AssertTextEquals(
 			key_fieldLabel = "Tax ID",
 			locator1 = "Icon#HELPER",
 			value1 = "Enter the account's tax ID (EIN, VAT number, etc.).");
+
+		if (isSet(externalReferenceCode)) {
+			AssertTextEquals(
+				key_fieldLabel = "External Reference Code",
+				locator1 = "TextInput#GENERIC_TEXT_INPUT",
+				value1 = "${externalReferenceCode}");
+		}
 
 		if (isSet(domainName)) {
 			LexiconEntry.viewEntryName(rowEntry = "${domainName}");
@@ -1446,29 +1460,9 @@ definition {
 	}
 
 	macro viewSelectedAccount {
-		Search.searchPG(
-			portletName = "Account Management",
-			searchTerm = "${selectedAccountSearchTerm}");
-
-		LexiconEntry.viewEntryName(rowEntry = "${selectedAccount}");
-
-		LexiconEntry.viewNoEntry(rowEntry = "${previousAccount}");
-
 		AssertElementPresent(
-			key_text = "check",
-			locator1 = "Icon#ANY");
-
-		Search.searchPG(
-			portletName = "Account Management",
-			searchTerm = "${previousAccountSearchTerm}");
-
-		LexiconEntry.viewEntryName(rowEntry = "${previousAccount}");
-
-		LexiconEntry.viewNoEntry(rowEntry = "${selectedAccount}");
-
-		AssertElementNotPresent(
-			key_text = "check",
-			locator1 = "Icon#ANY");
+			key_entryName = "${entryName}",
+			locator1 = "Account#SELECT_ACCOUNT_ENTRY_CHECKMARK");
 	}
 
 }

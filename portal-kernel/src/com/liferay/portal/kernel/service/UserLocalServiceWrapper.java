@@ -28,6 +28,10 @@ import com.liferay.portal.kernel.service.persistence.change.tracking.CTPersisten
 public class UserLocalServiceWrapper
 	implements ServiceWrapper<UserLocalService>, UserLocalService {
 
+	public UserLocalServiceWrapper() {
+		this(null);
+	}
+
 	public UserLocalServiceWrapper(UserLocalService userLocalService) {
 		_userLocalService = userLocalService;
 	}
@@ -739,22 +743,6 @@ public class UserLocalServiceWrapper
 
 		return _userLocalService.authenticateForDigest(
 			companyId, userName, realm, nonce, method, uri, response);
-	}
-
-	/**
-	 * Attempts to authenticate the user using JAAS credentials, without using
-	 * the AuthPipeline.
-	 *
-	 * @param userId the primary key of the user
-	 * @param encPassword the encrypted password
-	 * @return <code>true</code> if authentication is successful;
-	 <code>false</code> otherwise
-	 * @deprecated As of Cavanaugh (7.4.x), with no replacement
-	 */
-	@Deprecated
-	@Override
-	public boolean authenticateForJAAS(long userId, String encPassword) {
-		return _userLocalService.authenticateForJAAS(userId, encPassword);
 	}
 
 	/**

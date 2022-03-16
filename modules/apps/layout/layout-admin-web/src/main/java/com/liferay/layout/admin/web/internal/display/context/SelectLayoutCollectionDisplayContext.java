@@ -22,6 +22,7 @@ import com.liferay.frontend.taglib.clay.servlet.taglib.util.NavigationItem;
 import com.liferay.info.collection.provider.InfoCollectionProvider;
 import com.liferay.info.item.InfoItemServiceTracker;
 import com.liferay.info.item.provider.InfoItemFormProvider;
+import com.liferay.layout.admin.constants.LayoutAdminPortletKeys;
 import com.liferay.petra.portlet.url.builder.PortletURLBuilder;
 import com.liferay.portal.kernel.dao.search.SearchContainer;
 import com.liferay.portal.kernel.language.LanguageUtil;
@@ -31,10 +32,10 @@ import com.liferay.portal.kernel.model.Group;
 import com.liferay.portal.kernel.portlet.LiferayPortletRequest;
 import com.liferay.portal.kernel.portlet.LiferayPortletResponse;
 import com.liferay.portal.kernel.portlet.PortletURLUtil;
+import com.liferay.portal.kernel.portlet.SearchOrderByUtil;
 import com.liferay.portal.kernel.repository.model.FileEntry;
 import com.liferay.portal.kernel.theme.ThemeDisplay;
 import com.liferay.portal.kernel.util.ListUtil;
-import com.liferay.portal.kernel.util.OrderByComparator;
 import com.liferay.portal.kernel.util.ParamUtil;
 import com.liferay.portal.kernel.util.PortalUtil;
 import com.liferay.portal.kernel.util.Validator;
@@ -84,11 +85,11 @@ public class SelectLayoutCollectionDisplayContext {
 		List<InfoCollectionProvider<?>> infoCollectionProviders =
 			_getInfoCollectionProviders();
 
-		searchContainer.setResults(
-			ListUtil.subList(
+		searchContainer.setResultsAndTotal(
+			() -> ListUtil.subList(
 				infoCollectionProviders, searchContainer.getStart(),
-				searchContainer.getEnd()));
-		searchContainer.setTotal(infoCollectionProviders.size());
+				searchContainer.getEnd()),
+			infoCollectionProviders.size());
 
 		return searchContainer;
 	}
@@ -98,52 +99,34 @@ public class SelectLayoutCollectionDisplayContext {
 			_liferayPortletRequest, getPortletURL(), null,
 			LanguageUtil.get(_httpServletRequest, "there-are-no-collections"));
 
-		String orderByCol = ParamUtil.getString(
-			_httpServletRequest, "orderByCol", "create-date");
-
-		String orderByType = ParamUtil.getString(
-			_httpServletRequest, "orderByType", "asc");
-
-		OrderByComparator<AssetListEntry> orderByComparator =
+		searchContainer.setOrderByCol(_getOrderByCol());
+		searchContainer.setOrderByComparator(
 			AssetListPortletUtil.getAssetListEntryOrderByComparator(
-				_getOrderByCol(), _getOrderByType());
-
-		searchContainer.setOrderByCol(orderByCol);
-		searchContainer.setOrderByComparator(orderByComparator);
-		searchContainer.setOrderByType(orderByType);
-
-		List<AssetListEntry> assetListEntries = null;
-
-		int assetListEntriesCount = 0;
+				_getOrderByCol(), _getOrderByType()));
+		searchContainer.setOrderByType(_getOrderByType());
 
 		if (_isSearch()) {
-			assetListEntries = AssetListEntryServiceUtil.getAssetListEntries(
-				_themeDisplay.getScopeGroupId(), _getKeywords(),
-				searchContainer.getStart(), searchContainer.getEnd(),
-				orderByComparator);
-
-			assetListEntriesCount =
+			searchContainer.setResultsAndTotal(
+				() -> AssetListEntryServiceUtil.getAssetListEntries(
+					_themeDisplay.getScopeGroupId(), _getKeywords(),
+					searchContainer.getStart(), searchContainer.getEnd(),
+					searchContainer.getOrderByComparator()),
 				AssetListEntryServiceUtil.getAssetListEntriesCount(
-					_themeDisplay.getScopeGroupId(), _getKeywords());
+					_themeDisplay.getScopeGroupId(), _getKeywords()));
 		}
 		else {
 			long[] groupIds = {_themeDisplay.getScopeGroupId()};
 
 			List<String> types = _getInfoItemFormProviderClassNames();
 
-			assetListEntries = AssetListEntryServiceUtil.getAssetListEntries(
-				groupIds, types.toArray(new String[0]),
-				searchContainer.getStart(), searchContainer.getEnd(),
-				searchContainer.getOrderByComparator());
-
-			assetListEntriesCount =
+			searchContainer.setResultsAndTotal(
+				() -> AssetListEntryServiceUtil.getAssetListEntries(
+					groupIds, types.toArray(new String[0]),
+					searchContainer.getStart(), searchContainer.getEnd(),
+					searchContainer.getOrderByComparator()),
 				AssetListEntryServiceUtil.getAssetListEntriesCount(
-					groupIds, types.toArray(new String[0]));
+					groupIds, types.toArray(new String[0])));
 		}
-
-		searchContainer.setResults(assetListEntries);
-
-		searchContainer.setTotal(assetListEntriesCount);
 
 		return searchContainer;
 	}
@@ -163,7 +146,7 @@ public class SelectLayoutCollectionDisplayContext {
 		}
 		catch (PortletException portletException) {
 			if (_log.isDebugEnabled()) {
-				_log.debug(portletException, portletException);
+				_log.debug(portletException);
 			}
 
 			return PortletURLBuilder.createRenderURL(
@@ -280,10 +263,11 @@ public class SelectLayoutCollectionDisplayContext {
 	private NavigationItem _getNavigationItem(String label, String tabName) {
 		NavigationItem navigationItem = new NavigationItem();
 
-		String selectedTabName = ParamUtil.getString(
-			_httpServletRequest, "selectedTab", "collections");
+		if (Objects.equals(
+				tabName,
+				ParamUtil.getString(
+					_httpServletRequest, "selectedTab", "collections"))) {
 
-		if (Objects.equals(tabName, selectedTabName)) {
 			navigationItem.setActive(true);
 		}
 
@@ -304,8 +288,9 @@ public class SelectLayoutCollectionDisplayContext {
 			return _orderByCol;
 		}
 
-		_orderByCol = ParamUtil.getString(
-			_httpServletRequest, "orderByCol", "create-date");
+		_orderByCol = SearchOrderByUtil.getOrderByCol(
+			_httpServletRequest, LayoutAdminPortletKeys.GROUP_PAGES,
+			"select-layout-collection-order-by-col", "create-date");
 
 		return _orderByCol;
 	}
@@ -315,8 +300,9 @@ public class SelectLayoutCollectionDisplayContext {
 			return _orderByType;
 		}
 
-		_orderByType = ParamUtil.getString(
-			_httpServletRequest, "orderByType", "asc");
+		_orderByType = SearchOrderByUtil.getOrderByType(
+			_httpServletRequest, LayoutAdminPortletKeys.GROUP_PAGES,
+			"select-layout-collection-order-by-type", "asc");
 
 		return _orderByType;
 	}

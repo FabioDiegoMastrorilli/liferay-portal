@@ -62,6 +62,7 @@ import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.ClassRule;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -69,6 +70,7 @@ import org.junit.runner.RunWith;
 /**
  * @author Raymond Augé
  */
+@Ignore
 @RunWith(Arquillian.class)
 public class BaseUpgradePortletIdTest extends BasePortletIdUpgradeProcess {
 
@@ -169,7 +171,7 @@ public class BaseUpgradePortletIdTest extends BasePortletIdUpgradeProcess {
 	protected Layout addLayout() throws Exception {
 		Group group = GroupTestUtil.addGroup();
 
-		return LayoutTestUtil.addLayout(group, false);
+		return LayoutTestUtil.addTypePortletLayout(group, false);
 	}
 
 	protected void addPortletPreferences(Layout layout, String portletId)

@@ -32,7 +32,7 @@
 </tr>
 <tr>
 	<td>PREVIOUS_LINK</td>
-	<td>//ul[contains(@class,'pagination')]/li/a[contains(.,'2')] | //ul[contains(@class,'pagination')]/li/a[contains(.,'Previous')] | //ul[contains(@class,'pagination')]/li/a/span[contains(@class,'icon-caret-left')]</td>
+	<td>//ul[contains(@class,'pagination')]/li/a[contains(.,'2')] | //ul[contains(@class,'pagination')]/li/a[contains(.,'Previous')] | //ul[contains(@class,'pagination')]/li/a/span[contains(@class,'icon-caret-left')] | //button[contains(@class, 'page-link')]//*[contains(@class,'left')]</td>
 	<td></td>
 </tr>
 <tr>
@@ -56,6 +56,11 @@
 	<td></td>
 </tr>
 <tr>
+	<td>PAGE_ITERATOR</td>
+	<td>//div[@class='clearfix lfr-pagination']</td>
+	<td></td>
+</tr>
+<tr>
 	<td>PAGINATION_BAR</td>
 	<td>//div[@data-qa-id='paginator']</td>
 	<td></td>
@@ -76,13 +81,23 @@
 	<td></td>
 </tr>
 <tr>
+	<td>CURRENT_PAGE_MENU</td>
+	<td>//div[contains(@class,'current-page-menu')]/a[contains(@class,'toggle')]</td>
+	<td></td>
+</tr>
+<tr>
+	<td>CURRENT_PAGE_MENU_INDEX</td>
+	<td>xpath=(//div[contains(@class,'current-page-menu')]/a[contains(@class,'toggle')])[${key_index}]</td>
+	<td></td>
+</tr>
+<tr>
 	<td>CURRENT_PAGE_SELECT</td>
 	<td>//p[contains(@class,'pagination-results')]</td>
 	<td></td>
 </tr>
 <tr>
 	<td>ITEMS_PER_PAGE_SELECT</td>
-	<td>//div[contains(@class,'pagination-items-per-page')]/a[contains(@class,'toggle')]</td>
+	<td>//div[contains(@class,'pagination-items-per-page')]/*[self::a or self::button][contains(@class,'toggle')]</td>
 	<td></td>
 </tr>
 <tr>
@@ -92,12 +107,7 @@
 </tr>
 <tr>
 	<td>RESULTS</td>
-	<td>//p[@class='pagination-results']</td>
-	<td></td>
-</tr>
-<tr>
-	<td>RESULTS_2</td>
-	<td>//div[@class='pagination-results']</td>
+	<td>xpath=(//div|//p)[@class='pagination-results']</td>
 	<td></td>
 </tr>
 <tr>

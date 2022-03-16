@@ -126,7 +126,15 @@ NumberFormat numberFormat = NumberFormat.getNumberInstance(locale);
 
 		<ul class="pagination">
 			<li class="page-item <%= (cur > 1) ? StringPool.BLANK : "disabled" %>">
-				<a class="page-link" href="<%= (cur > 1) ? _getHREF(formName, namespace + curParam, cur - 1, jsCall, url, urlAnchor) : "javascript:;" %>" onclick="<%= ((cur > 1) && forcePost) ? _getOnClick(namespace, curParam, cur -1) : "" %>">
+				<c:choose>
+					<c:when test="<%= cur > 1 %>">
+						<a class="page-link" href="<%= _getHREF(formName, namespace + curParam, cur - 1, jsCall, url, urlAnchor) %>" onclick="<%= forcePost ? _getOnClick(namespace, curParam, cur -1) : "" %>">
+					</c:when>
+					<c:otherwise>
+						<a class="page-link">
+					</c:otherwise>
+				</c:choose>
+
 					<liferay-ui:icon
 						icon='<%= PortalUtil.isRightToLeft(request) ? "angle-right" : "angle-left" %>'
 						markupView="lexicon"
@@ -143,7 +151,16 @@ NumberFormat numberFormat = NumberFormat.getNumberInstance(locale);
 					%>
 
 						<li class="page-item <%= (i == cur) ? "active" : StringPool.BLANK %>">
-							<a class="page-link" href="<%= _getHREF(formName, namespace + curParam, i, jsCall, url, urlAnchor) %>" onclick="<%= forcePost ? _getOnClick(namespace, curParam, i) : "" %>"><span class="sr-only"><liferay-ui:message key="page" /></span><%= i %></a>
+							<c:choose>
+								<c:when test="<%= i == cur %>">
+									<a aria-current="page" class="page-link">
+								</c:when>
+								<c:otherwise>
+									<a class="page-link" href="<%= _getHREF(formName, namespace + curParam, i, jsCall, url, urlAnchor) %>" onclick="<%= forcePost ? _getOnClick(namespace, curParam, i) : "" %>">
+								</c:otherwise>
+							</c:choose>
+
+							<span class="sr-only"><liferay-ui:message key="page" /></span><%= i %></a>
 						</li>
 
 					<%
@@ -153,7 +170,7 @@ NumberFormat numberFormat = NumberFormat.getNumberInstance(locale);
 				</c:when>
 				<c:when test="<%= cur == 1 %>">
 					<li class="active page-item">
-						<a class="page-link" href="<%= _getHREF(formName, namespace + curParam, 1, jsCall, url, urlAnchor) %>" onclick="<%= forcePost ? _getOnClick(namespace, curParam, 1) : "" %>"><span class="sr-only"><liferay-ui:message key="page" /></span>1</a>
+						<a aria-current="page" class="page-link"><span class="sr-only"><liferay-ui:message key="page" /></span>1</a>
 					</li>
 					<li class="page-item">
 						<a class="page-link" href="<%= _getHREF(formName, namespace + curParam, 2, jsCall, url, urlAnchor) %>" onclick="<%= forcePost ? _getOnClick(namespace, curParam, 2) : "" %>"><span class="sr-only"><liferay-ui:message key="page" /></span>2</a>
@@ -229,7 +246,7 @@ NumberFormat numberFormat = NumberFormat.getNumberInstance(locale);
 						<a class="page-link" href="<%= _getHREF(formName, namespace + curParam, pages - 1, jsCall, url, urlAnchor) %>" onclick="<%= forcePost ? _getOnClick(namespace, curParam, pages - 1) : "" %>"><span class="sr-only"><liferay-ui:message key="page" /></span><%= pages - 1 %></a>
 					</li>
 					<li class="active page-item">
-						<a class="page-link" href="<%= _getHREF(formName, namespace + curParam, pages, jsCall, url, urlAnchor) %>" onclick="<%= forcePost ? _getOnClick(namespace, curParam, pages) : "" %>"><span class="sr-only"><liferay-ui:message key="page" /></span><%= pages %></a>
+						<a aria-current="page" class="page-link"><span class="sr-only"><liferay-ui:message key="page" /></span><%= pages %></a>
 					</li>
 				</c:when>
 				<c:otherwise>
@@ -253,8 +270,8 @@ NumberFormat numberFormat = NumberFormat.getNumberInstance(locale);
 					for (int i = 2; i < ((initialPages > (cur - 1)) ? cur - 1 : initialPages); i++) {
 					%>
 
-						<li>
-							<a class="dropdown-item" href="<%= _getHREF(formName, namespace + curParam, i, jsCall, url, urlAnchor) %>" onclick="<%= forcePost ? _getOnClick(namespace, curParam, i) : "" %>"><span class="sr-only"><liferay-ui:message key="page" /></span><%= i %></a>
+						<li class="<%= ((cur - 3) > 1) ? "" : "page-item" %>">
+							<a class="<%= ((cur - 3) > 1) ? "dropdown-item" : "dropdown-item page-link" %>" href="<%= _getHREF(formName, namespace + curParam, i, jsCall, url, urlAnchor) %>" onclick="<%= forcePost ? _getOnClick(namespace, curParam, i) : "" %>"><span class="sr-only"><liferay-ui:message key="page" /></span><%= i %></a>
 						</li>
 
 					<%
@@ -274,7 +291,7 @@ NumberFormat numberFormat = NumberFormat.getNumberInstance(locale);
 					</c:if>
 
 					<li class="active page-item">
-						<a class="page-link" href="<%= _getHREF(formName, namespace + curParam, cur, jsCall, url, urlAnchor) %>" onclick="<%= forcePost ? _getOnClick(namespace, curParam, cur) : "" %>"><span class="sr-only"><liferay-ui:message key="page" /></span><%= cur %></a>
+						<a aria-current="page" class="page-link"><span class="sr-only"><liferay-ui:message key="page" /></span><%= cur %></a>
 					</li>
 
 					<c:if test="<%= (cur + 1) < pages %>">
@@ -301,8 +318,8 @@ NumberFormat numberFormat = NumberFormat.getNumberInstance(locale);
 					for (int i = cur + 2; i < ((cur + 2) + remainingPages); i++) {
 					%>
 
-						<li>
-							<a class="dropdown-item" href="<%= _getHREF(formName, namespace + curParam, i, jsCall, url, urlAnchor) %>" onclick="<%= forcePost ? _getOnClick(namespace, curParam, i) : "" %>"><span class="sr-only"><liferay-ui:message key="page" /></span><%= i %></a>
+						<li class="<%= ((cur + 3) < pages) ? "" : "page-item" %>">
+							<a class="<%= ((cur + 3) < pages) ? "dropdown-item" : "dropdown-item page-link" %>" href="<%= _getHREF(formName, namespace + curParam, i, jsCall, url, urlAnchor) %>" onclick="<%= forcePost ? _getOnClick(namespace, curParam, i) : "" %>"><span class="sr-only"><liferay-ui:message key="page" /></span><%= i %></a>
 						</li>
 
 					<%
@@ -322,7 +339,15 @@ NumberFormat numberFormat = NumberFormat.getNumberInstance(locale);
 			</c:choose>
 
 			<li class="page-item <%= (cur < pages) ? StringPool.BLANK : "disabled" %>">
-				<a class="page-link" href="<%= (cur < pages) ? _getHREF(formName, namespace + curParam, cur + 1, jsCall, url, urlAnchor) : "javascript:;" %>" onclick="<%= ((cur < pages) && forcePost) ? _getOnClick(namespace, curParam, cur + 1) : "" %>">
+				<c:choose>
+					<c:when test="<%= cur < pages %>">
+						<a class="page-link" href="<%= _getHREF(formName, namespace + curParam, cur + 1, jsCall, url, urlAnchor) %>" onclick="<%= forcePost ? _getOnClick(namespace, curParam, cur + 1) : "" %>">
+					</c:when>
+					<c:otherwise>
+						<a class="page-link">
+					</c:otherwise>
+				</c:choose>
+
 					<liferay-ui:icon
 						icon='<%= PortalUtil.isRightToLeft(request) ? "angle-left" : "angle-right" %>'
 						markupView="lexicon"
@@ -383,11 +408,8 @@ private String _getHREF(String formName, String curParam, int cur, String jsCall
 
 	return "javascript:document." + formName + "." + curParam + ".value = '" + cur + "'; " + jsCall;
 }
-%>
 
-<%!
 private String _getOnClick(String namespace, String curParam, int cur) {
 	return "event.preventDefault(); " + namespace + "submitForm('" + namespace + curParam + "','" + cur + "');";
 }
-
 %>

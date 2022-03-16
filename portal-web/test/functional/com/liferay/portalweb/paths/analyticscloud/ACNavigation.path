@@ -23,7 +23,7 @@
 </tr>
 <tr>
 	<td>GENERIC_SIDEBAR_OPTION</td>
-	<td>//*[contains(@class,'sidebar-item-root')]//*[contains(@href,'${key_SidebarOption}')]</td>
+	<td>//*[contains(@class,'sidebar-item-root')]//*[contains(@href,'${key_sidebarOption}')]</td>
 	<td></td>
 </tr>
 <!-- TABS/OPTIONS AVAILABLE IN DIFFERENT PLACES E.G: ASSETS, SEGMENTS, SITES -->
@@ -50,6 +50,11 @@
 <tr>
 	<td>ACTIVE_TAB_NAME</td>
 	<td>//li[@class='nav-item active']</td>
+	<td></td>
+</tr>
+<tr>
+	<td>BACK_NAVIGATION</td>
+	<td>//ol[contains(@class,'breadcrumb')]//a[text()='${key_pageName}']</td>
 	<td></td>
 </tr>
 </tbody>

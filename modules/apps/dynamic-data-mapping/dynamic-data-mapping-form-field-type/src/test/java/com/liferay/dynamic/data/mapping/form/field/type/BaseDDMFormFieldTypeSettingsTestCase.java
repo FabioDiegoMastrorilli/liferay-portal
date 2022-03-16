@@ -22,10 +22,13 @@ import com.liferay.portal.kernel.language.Language;
 import com.liferay.portal.kernel.language.LanguageUtil;
 import com.liferay.portal.kernel.test.ReflectionTestUtil;
 import com.liferay.portal.kernel.util.LocaleUtil;
+import com.liferay.portal.kernel.util.Portal;
 import com.liferay.portal.kernel.util.PortalClassLoaderUtil;
+import com.liferay.portal.kernel.util.PortalUtil;
 import com.liferay.portal.kernel.util.ResourceBundleUtil;
-import com.liferay.portal.kernel.util.SetUtil;
 
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
@@ -39,6 +42,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.runner.RunWith;
 
+import org.mockito.Matchers;
 import org.mockito.Mock;
 
 import org.powermock.api.mockito.PowerMockito;
@@ -58,6 +62,7 @@ public abstract class BaseDDMFormFieldTypeSettingsTestCase
 		setUpJSONFactoryUtil();
 		setUpLanguageUtil();
 		setUpPortalClassLoaderUtil();
+		setUpPortalUtil();
 		setUpResourceBundleUtil();
 	}
 
@@ -80,7 +85,10 @@ public abstract class BaseDDMFormFieldTypeSettingsTestCase
 	}
 
 	protected void setUpLanguageUtil() {
-		Set<Locale> availableLocales = SetUtil.fromArray(LocaleUtil.US);
+		LanguageUtil languageUtil = new LanguageUtil();
+
+		Set<Locale> availableLocales = new HashSet<>(
+			Arrays.asList(LocaleUtil.BRAZIL, LocaleUtil.US));
 
 		when(
 			language.getAvailableLocales()
@@ -88,7 +96,17 @@ public abstract class BaseDDMFormFieldTypeSettingsTestCase
 			availableLocales
 		);
 
-		LanguageUtil languageUtil = new LanguageUtil();
+		when(
+			language.getLanguageId(LocaleUtil.BRAZIL)
+		).thenReturn(
+			"pt_BR"
+		);
+
+		when(
+			language.getLanguageId(LocaleUtil.US)
+		).thenReturn(
+			"en_US"
+		);
 
 		languageUtil.setLanguage(language);
 	}
@@ -101,6 +119,22 @@ public abstract class BaseDDMFormFieldTypeSettingsTestCase
 		).thenReturn(
 			_classLoader
 		);
+	}
+
+	protected void setUpPortalUtil() {
+		PortalUtil portalUtil = new PortalUtil();
+
+		Portal portal = mock(Portal.class);
+
+		ResourceBundle resourceBundle = mock(ResourceBundle.class);
+
+		when(
+			portal.getResourceBundle(Matchers.any(Locale.class))
+		).thenReturn(
+			resourceBundle
+		);
+
+		portalUtil.setPortal(portal);
 	}
 
 	protected void setUpResourceBundleUtil() {

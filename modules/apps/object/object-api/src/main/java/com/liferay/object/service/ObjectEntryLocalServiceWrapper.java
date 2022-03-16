@@ -27,6 +27,10 @@ public class ObjectEntryLocalServiceWrapper
 	implements ObjectEntryLocalService,
 			   ServiceWrapper<ObjectEntryLocalService> {
 
+	public ObjectEntryLocalServiceWrapper() {
+		this(null);
+	}
+
 	public ObjectEntryLocalServiceWrapper(
 		ObjectEntryLocalService objectEntryLocalService) {
 
@@ -360,6 +364,17 @@ public class ObjectEntryLocalServiceWrapper
 
 		return _objectEntryLocalService.getObjectEntries(
 			groupId, objectDefinitionId, start, end);
+	}
+
+	@Override
+	public java.util.List<com.liferay.object.model.ObjectEntry>
+			getObjectEntries(
+				long groupId, long objectDefinitionId, int status, int start,
+				int end)
+		throws com.liferay.portal.kernel.exception.PortalException {
+
+		return _objectEntryLocalService.getObjectEntries(
+			groupId, objectDefinitionId, status, start, end);
 	}
 
 	/**

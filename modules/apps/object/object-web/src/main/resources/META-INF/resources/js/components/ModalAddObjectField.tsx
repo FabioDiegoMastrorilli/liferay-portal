@@ -14,63 +14,46 @@
 
 import ClayAlert from '@clayui/alert';
 import ClayButton from '@clayui/button';
-import ClayForm, {ClayToggle} from '@clayui/form';
+import ClayForm from '@clayui/form';
 import ClayModal, {ClayModalProvider, useModal} from '@clayui/modal';
+import {fetch} from 'frontend-js-web';
 import React, {useEffect, useState} from 'react';
 
-import useForm from '../hooks/useForm';
+import {ERRORS} from '../utils/errors';
 import {toCamelCase} from '../utils/string';
-import Input from './form/Input';
-import Select from './form/Select';
+import Input from './Form/Input';
+import ObjectFieldFormBase, {useObjectFieldForm} from './ObjectFieldFormBase';
 
-const objectFieldTypes = [
-	'BigDecimal',
-	'Boolean',
-	'Date',
-	'Double',
-	'Integer',
-	'Long',
-	'Picklist',
-	'String',
-];
-
-const defaultLanguageId = Liferay.ThemeDisplay.getDefaultLanguageId();
+const defaultLanguageId = Liferay.ThemeDisplay.getDefaultLanguageId() as Liferay.Language.Locale;
 
 const headers = new Headers({
 	'Accept': 'application/json',
 	'Content-Type': 'application/json',
 });
 
-const ModalAddObjectField: React.FC<IProps> = ({apiURL, observer, onClose}) => {
+function ModalAddObjectField({
+	apiURL,
+	objectFieldTypes,
+	observer,
+	onClose,
+}: IModal) {
 	const [error, setError] = useState<string>('');
-	const [picklist, setPicklist] = useState<TPicklist[]>([]);
-	const initialValues: TInitialValues = {
-		label: '',
+
+	const initialValues: Partial<ObjectField> = {
+		indexed: true,
+		indexedAsKeyword: false,
+		indexedLanguageId: null,
 		listTypeDefinitionId: 0,
-		name: undefined,
 		required: false,
-		type: '',
 	};
 
-	const onSubmit = async ({
-		label,
-		listTypeDefinitionId,
-		name,
-		required,
-		type,
-	}: TInitialValues) => {
-		const response = await Liferay.Util.fetch(apiURL, {
+	const onSubmit = async (field: ObjectField) => {
+		const response = await fetch(apiURL, {
 			body: JSON.stringify({
-				indexed: true,
-				indexedAsKeyword: false,
-				indexedLanguageId: null,
-				label: {
-					[defaultLanguageId]: label,
-				},
-				listTypeDefinitionId,
-				name: name || toCamelCase(label),
-				required,
-				type: type === 'Picklist' ? 'String' : type,
+				...field,
+				name:
+					field.name ||
+					toCamelCase(field.label[defaultLanguageId] as string),
 			}),
 			headers,
 			method: 'POST',
@@ -85,40 +68,23 @@ const ModalAddObjectField: React.FC<IProps> = ({apiURL, observer, onClose}) => {
 			window.location.reload();
 		}
 		else {
-			const {
-				title = Liferay.Language.get('an-error-occurred'),
-			} = await response.json();
+			const {type} = (await response.json()) as any;
+			const errorMessage =
+				ERRORS[type] ?? Liferay.Language.get('an-error-occurred');
 
-			setError(title);
+			setError(errorMessage);
 		}
 	};
 
-	const validate = (values: TInitialValues) => {
-		const errors: any = {};
-
-		if (!values.label) {
-			errors.label = Liferay.Language.get('required');
-		}
-
-		if (!(values.name ?? toCamelCase(values.label))) {
-			errors.name = Liferay.Language.get('required');
-		}
-
-		if (!values.type) {
-			errors.type = Liferay.Language.get('required');
-		}
-
-		if (values.type === 'Picklist' && !values.listTypeDefinitionId) {
-			errors.listTypeDefinitionId = Liferay.Language.get('required');
-		}
-
-		return errors;
-	};
-
-	const {errors, handleChange, handleSubmit, values} = useForm({
+	const {
+		errors,
+		handleChange,
+		handleSubmit,
+		setValues,
+		values,
+	} = useObjectFieldForm({
 		initialValues,
 		onSubmit,
-		validate,
 	});
 
 	return (
@@ -138,93 +104,25 @@ const ModalAddObjectField: React.FC<IProps> = ({apiURL, observer, onClose}) => {
 						id="objectFieldLabel"
 						label={Liferay.Language.get('label')}
 						name="label"
-						onChange={handleChange}
-						required
-						value={values.label}
-					/>
-
-					<Input
-						error={errors.name || errors.label}
-						id="objectFieldName"
-						label={Liferay.Language.get('field-name')}
-						name="name"
-						onChange={handleChange}
-						required
-						value={values.name ?? toCamelCase(values.label)}
-					/>
-
-					<Select
-						error={errors.type}
-						id="objectFieldType"
-						label={Liferay.Language.get('type')}
-						onChange={async ({target: {value}}: any) => {
-							const selectedType =
-								objectFieldTypes[Number(value) - 1];
-
-							if (selectedType === 'Picklist') {
-								const result = await Liferay.Util.fetch(
-									'/o/headless-admin-list-type/v1.0/list-type-definitions',
-									{
-										headers,
-										method: 'GET',
-									}
-								);
-
-								const {items = []} = await result.json();
-
-								setPicklist(
-									items.map(({id, name}: TPicklist) => ({
-										id,
-										name,
-									}))
-								);
-							}
-
-							handleChange({
-								target: {
-									name: 'type',
-									value: selectedType,
-								},
-							} as any);
+						onChange={({target: {value}}) => {
+							setValues({label: {[defaultLanguageId]: value}});
 						}}
-						options={objectFieldTypes}
 						required
+						value={values.label?.[defaultLanguageId]}
 					/>
 
-					{values.type === 'Picklist' && (
-						<Select
-							error={errors.listTypeDefinitionId}
-							label={Liferay.Language.get('picklist')}
-							onChange={({target: {value}}: any) => {
-								handleChange({
-									target: {
-										name: 'listTypeDefinitionId',
-										value: picklist[Number(value) - 1].id,
-									},
-								} as any);
-							}}
-							options={picklist.map(({name}) => name)}
-							required
-						/>
-					)}
-
-					<ClayToggle
-						label={Liferay.Language.get('mandatory')}
-						onToggle={() => {
-							handleChange({
-								target: {
-									name: 'required',
-									value: !values.required,
-								},
-							} as any);
-						}}
-						toggled={values.required}
+					<ObjectFieldFormBase
+						errors={errors}
+						handleChange={handleChange}
+						objectField={values}
+						objectFieldTypes={objectFieldTypes}
+						setValues={setValues}
 					/>
 				</ClayModal.Body>
 
 				<ClayModal.Footer
 					last={
-						<ClayButton.Group key={1} spaced>
+						<ClayButton.Group spaced>
 							<ClayButton
 								displayType="secondary"
 								onClick={() => onClose()}
@@ -232,7 +130,7 @@ const ModalAddObjectField: React.FC<IProps> = ({apiURL, observer, onClose}) => {
 								{Liferay.Language.get('cancel')}
 							</ClayButton>
 
-							<ClayButton displayType="primary" type="submit">
+							<ClayButton type="submit">
 								{Liferay.Language.get('save')}
 							</ClayButton>
 						</ClayButton.Group>
@@ -241,52 +139,38 @@ const ModalAddObjectField: React.FC<IProps> = ({apiURL, observer, onClose}) => {
 			</ClayForm>
 		</ClayModal>
 	);
-};
-
-interface IProps extends React.HTMLAttributes<HTMLElement> {
-	apiURL: string;
-	observer: any;
-	onClose: () => void;
 }
 
-type TPicklist = {
-	id: string;
-	name: string;
-};
-
-type TInitialValues = {
-	label: string;
-	name?: string;
-	type: string;
-	listTypeDefinitionId: number;
-	required: boolean;
-};
-
-const ModalWithProvider: React.FC<IProps> = ({apiURL}) => {
-	const [visibleModal, setVisibleModal] = useState<boolean>(false);
-	const {observer, onClose} = useModal({
-		onClose: () => setVisibleModal(false),
-	});
+export default function ModalWithProvider({apiURL, objectFieldTypes}: IProps) {
+	const [isVisible, setVisibility] = useState<boolean>(false);
+	const {observer, onClose} = useModal({onClose: () => setVisibility(false)});
 
 	useEffect(() => {
-		Liferay.on('addObjectField', () => setVisibleModal(true));
+		Liferay.on('addObjectField', () => setVisibility(true));
 
-		return () => {
-			Liferay.detach('addObjectField');
-		};
+		return () => Liferay.detach('addObjectField');
 	}, []);
 
 	return (
 		<ClayModalProvider>
-			{visibleModal && (
+			{isVisible && (
 				<ModalAddObjectField
 					apiURL={apiURL}
+					objectFieldTypes={objectFieldTypes}
 					observer={observer}
 					onClose={onClose}
 				/>
 			)}
 		</ClayModalProvider>
 	);
-};
+}
 
-export default ModalWithProvider;
+interface IModal extends IProps {
+	observer: any;
+	onClose: () => void;
+}
+
+interface IProps {
+	apiURL: string;
+	objectFieldTypes: ObjectFieldType[];
+}

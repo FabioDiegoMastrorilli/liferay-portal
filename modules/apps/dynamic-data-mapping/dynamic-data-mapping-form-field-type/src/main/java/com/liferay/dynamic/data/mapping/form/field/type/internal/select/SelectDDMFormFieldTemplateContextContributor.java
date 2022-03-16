@@ -97,7 +97,7 @@ public class SelectDDMFormFieldTemplateContextContributor
 			GetterUtil.getBoolean(
 				ddmFormField.getProperty("showEmptyOption"), true)
 		).put(
-			"strings", getStrings(ddmFormFieldRenderingContext)
+			"strings", _getStrings(ddmFormFieldRenderingContext)
 		).put(
 			"tooltip",
 			DDMFormFieldTypeUtil.getPropertyValue(
@@ -189,7 +189,39 @@ public class SelectDDMFormFieldTemplateContextContributor
 			resourceBundle, portalResourceBundle);
 	}
 
-	protected Map<String, String> getStrings(
+	protected List<String> getValue(String valueString) {
+		JSONArray jsonArray = null;
+
+		try {
+			jsonArray = jsonFactory.createJSONArray(valueString);
+		}
+		catch (JSONException jsonException) {
+			if (_log.isDebugEnabled()) {
+				_log.debug(jsonException);
+			}
+
+			return ListUtil.fromString(valueString);
+		}
+
+		List<String> values = new ArrayList<>(jsonArray.length());
+
+		for (int i = 0; i < jsonArray.length(); i++) {
+			values.add(String.valueOf(jsonArray.get(i)));
+		}
+
+		return values;
+	}
+
+	@Reference
+	protected DDMFormFieldOptionsFactory ddmFormFieldOptionsFactory;
+
+	@Reference
+	protected JSONFactory jsonFactory;
+
+	@Reference
+	protected Portal portal;
+
+	private Map<String, String> _getStrings(
 		DDMFormFieldRenderingContext ddmFormFieldRenderingContext) {
 
 		Locale displayLocale = LocaleThreadLocal.getThemeDisplayLocale();
@@ -214,38 +246,6 @@ public class SelectDDMFormFieldTemplateContextContributor
 			"search", LanguageUtil.get(resourceBundle, "search")
 		).build();
 	}
-
-	protected List<String> getValue(String valueString) {
-		JSONArray jsonArray = null;
-
-		try {
-			jsonArray = jsonFactory.createJSONArray(valueString);
-		}
-		catch (JSONException jsonException) {
-			if (_log.isDebugEnabled()) {
-				_log.debug(jsonException, jsonException);
-			}
-
-			return ListUtil.fromString(valueString);
-		}
-
-		List<String> values = new ArrayList<>(jsonArray.length());
-
-		for (int i = 0; i < jsonArray.length(); i++) {
-			values.add(String.valueOf(jsonArray.get(i)));
-		}
-
-		return values;
-	}
-
-	@Reference
-	protected DDMFormFieldOptionsFactory ddmFormFieldOptionsFactory;
-
-	@Reference
-	protected JSONFactory jsonFactory;
-
-	@Reference
-	protected Portal portal;
 
 	private static final Log _log = LogFactoryUtil.getLog(
 		SelectDDMFormFieldTemplateContextContributor.class);

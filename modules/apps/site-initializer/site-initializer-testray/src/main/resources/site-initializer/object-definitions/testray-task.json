@@ -1,0 +1,42 @@
+{
+	"label": {
+		"en_US": "Testray Task"
+	},
+	"name": "TestrayTask",
+	"objectFields": [
+		{
+			"indexed": false,
+			"indexedAsKeyword": false,
+			"label": {
+				"en_US": "Name"
+			},
+			"name": "name",
+			"required": false,
+			"type": "String"
+		},
+		{
+			"indexed": false,
+			"indexedAsKeyword": false,
+			"label": {
+				"en_US": "Status"
+			},
+			"name": "dueStatus",
+			"required": false,
+			"type": "Integer"
+		},
+		{
+			"indexed": false,
+			"indexedAsKeyword": false,
+			"label": {
+				"en_US": "Status Update Date"
+			},
+			"name": "statusUpdateDate",
+			"required": false,
+			"type": "Date"
+		}
+	],
+	"pluralLabel": {
+		"en_US": "Testray Tasks"
+	},
+	"scope": "company"
+}

@@ -24,13 +24,14 @@ import com.liferay.change.tracking.exception.CTLocalizedException;
 import com.liferay.change.tracking.internal.CTEnclosureUtil;
 import com.liferay.change.tracking.internal.CTServiceCopier;
 import com.liferay.change.tracking.internal.CTServiceRegistry;
-import com.liferay.change.tracking.internal.CTTableMapperHelper;
 import com.liferay.change.tracking.internal.closure.Node;
 import com.liferay.change.tracking.internal.conflict.CTConflictChecker;
 import com.liferay.change.tracking.internal.conflict.ConstraintResolverConflictInfo;
 import com.liferay.change.tracking.internal.conflict.ModificationConflictInfo;
+import com.liferay.change.tracking.internal.helper.CTTableMapperHelper;
 import com.liferay.change.tracking.internal.reference.TableReferenceDefinitionManager;
 import com.liferay.change.tracking.internal.resolver.ConstraintResolverKey;
+import com.liferay.change.tracking.mapping.CTMappingTableInfo;
 import com.liferay.change.tracking.model.CTAutoResolutionInfo;
 import com.liferay.change.tracking.model.CTCollection;
 import com.liferay.change.tracking.model.CTEntry;
@@ -59,7 +60,7 @@ import com.liferay.petra.string.StringPool;
 import com.liferay.petra.string.StringUtil;
 import com.liferay.portal.aop.AopService;
 import com.liferay.portal.kernel.change.tracking.CTCollectionThreadLocal;
-import com.liferay.portal.kernel.dao.jdbc.CurrentConnectionUtil;
+import com.liferay.portal.kernel.dao.jdbc.CurrentConnection;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.kernel.log.Log;
@@ -384,7 +385,7 @@ public class CTCollectionLocalServiceImpl
 
 			ctService.updateWithUnsafeFunction(
 				ctPersistence -> {
-					Connection connection = CurrentConnectionUtil.getConnection(
+					Connection connection = _currentConnection.getConnection(
 						ctPersistence.getDataSource());
 
 					try (PreparedStatement preparedStatement =
@@ -473,6 +474,26 @@ public class CTCollectionLocalServiceImpl
 
 		return ctCollectionPersistence.findByC_S(
 			companyId, status, start, end, orderByComparator);
+	}
+
+	@Override
+	public List<CTMappingTableInfo> getCTMappingTableInfos(
+		long ctCollectionId) {
+
+		List<CTMappingTableInfo> ctMappingTableInfos = new ArrayList<>();
+
+		for (CTTableMapperHelper ctTableMapperHelper :
+				_ctServiceRegistry.getCTTableMapperHelpers()) {
+
+			CTMappingTableInfo ctMappingTableInfo =
+				ctTableMapperHelper.getCTMappingTableInfo(ctCollectionId);
+
+			if (ctMappingTableInfo != null) {
+				ctMappingTableInfos.add(ctMappingTableInfo);
+			}
+		}
+
+		return ctMappingTableInfos;
 	}
 
 	@Override
@@ -892,6 +913,9 @@ public class CTCollectionLocalServiceImpl
 
 	@Reference
 	private CTServiceRegistry _ctServiceRegistry;
+
+	@Reference
+	private CurrentConnection _currentConnection;
 
 	@Reference
 	private GroupLocalService _groupLocalService;

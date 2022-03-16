@@ -54,7 +54,8 @@ public interface AccountEntryUserRelService extends BaseService {
 	public AccountEntryUserRel addAccountEntryUserRel(
 			long accountEntryId, long creatorUserId, String screenName,
 			String emailAddress, Locale locale, String firstName,
-			String middleName, String lastName, long prefixId, long suffixId)
+			String middleName, String lastName, long prefixId, long suffixId,
+			String jobTitle, ServiceContext serviceContext)
 		throws PortalException;
 
 	public AccountEntryUserRel addAccountEntryUserRelByEmailAddress(
@@ -64,6 +65,13 @@ public interface AccountEntryUserRelService extends BaseService {
 
 	public void addAccountEntryUserRels(
 			long accountEntryId, long[] accountUserIds)
+		throws PortalException;
+
+	public AccountEntryUserRel addPersonTypeAccountEntryUserRel(
+			long accountEntryId, long creatorUserId, String screenName,
+			String emailAddress, Locale locale, String firstName,
+			String middleName, String lastName, long prefixId, long suffixId,
+			String jobTitle, ServiceContext serviceContext)
 		throws PortalException;
 
 	public void deleteAccountEntryUserRelByEmailAddress(

@@ -25,7 +25,6 @@ import com.liferay.info.item.provider.InfoItemFormProvider;
 import com.liferay.info.item.provider.InfoItemObjectProvider;
 import com.liferay.info.item.provider.InfoItemPermissionProvider;
 import com.liferay.petra.string.StringPool;
-import com.liferay.portal.configuration.metatype.bnd.util.ConfigurableUtil;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.language.LanguageUtil;
 import com.liferay.portal.kernel.log.Log;
@@ -49,16 +48,14 @@ import com.liferay.translation.model.TranslationEntry;
 import com.liferay.translation.service.TranslationEntryLocalService;
 import com.liferay.translation.translator.Translator;
 import com.liferay.translation.translator.TranslatorRegistry;
-import com.liferay.translation.web.internal.configuration.FFLayoutExperienceSelectorConfiguration;
 import com.liferay.translation.web.internal.display.context.TranslateDisplayContext;
-import com.liferay.translation.web.internal.util.TranslationRequestUtil;
+import com.liferay.translation.web.internal.helper.TranslationRequestHelper;
 
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -68,16 +65,13 @@ import javax.portlet.PortletException;
 import javax.portlet.RenderRequest;
 import javax.portlet.RenderResponse;
 
-import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.Modified;
 import org.osgi.service.component.annotations.Reference;
 
 /**
  * @author Ambrín Chaudhary
  */
 @Component(
-	configurationPid = "com.liferay.translation.web.internal.configuration.FFLayoutExperienceSelectorConfiguration",
 	property = {
 		"javax.portlet.name=" + TranslationPortletKeys.TRANSLATION,
 		"mvc.command.name=/translation/translate"
@@ -96,11 +90,15 @@ public class TranslateMVCRenderCommand implements MVCRenderCommand {
 				renderRequest, "segmentsExperienceId",
 				SegmentsExperienceConstants.ID_DEFAULT);
 
-			String className = TranslationRequestUtil.getClassName(
-				renderRequest, segmentsExperienceId);
+			TranslationRequestHelper translationRequestHelper =
+				new TranslationRequestHelper(
+					_infoItemServiceTracker, renderRequest);
 
-			long classPK = TranslationRequestUtil.getClassPK(
-				renderRequest, segmentsExperienceId);
+			String className = translationRequestHelper.getClassName(
+				segmentsExperienceId);
+
+			long classPK = translationRequestHelper.getClassPK(
+				segmentsExperienceId);
 
 			ThemeDisplay themeDisplay =
 				(ThemeDisplay)renderRequest.getAttribute(WebKeys.THEME_DISPLAY);
@@ -111,7 +109,8 @@ public class TranslateMVCRenderCommand implements MVCRenderCommand {
 			Object object = _getInfoItem(className, classPK);
 
 			if (object == null) {
-				return _getErrorJSP(renderRequest, renderResponse);
+				return _getErrorJSP(
+					renderRequest, renderResponse, translationRequestHelper);
 			}
 
 			InfoItemLanguagesProvider<Object> infoItemLanguagesProvider =
@@ -119,7 +118,8 @@ public class TranslateMVCRenderCommand implements MVCRenderCommand {
 					InfoItemLanguagesProvider.class, className);
 
 			if (infoItemLanguagesProvider == null) {
-				return _getErrorJSP(renderRequest, renderResponse);
+				return _getErrorJSP(
+					renderRequest, renderResponse, translationRequestHelper);
 			}
 
 			List<String> availableSourceLanguageIds = Arrays.asList(
@@ -138,7 +138,8 @@ public class TranslateMVCRenderCommand implements MVCRenderCommand {
 					InfoItemFormProvider.class, className);
 
 			if (infoItemFormProvider == null) {
-				return _getErrorJSP(renderRequest, renderResponse);
+				return _getErrorJSP(
+					renderRequest, renderResponse, translationRequestHelper);
 			}
 
 			InfoForm infoForm = infoItemFormProvider.getInfoForm(object);
@@ -147,7 +148,8 @@ public class TranslateMVCRenderCommand implements MVCRenderCommand {
 				_getSourceInfoItemFieldValues(className, object);
 
 			if (sourceInfoItemFieldValues == null) {
-				return _getErrorJSP(renderRequest, renderResponse);
+				return _getErrorJSP(
+					renderRequest, renderResponse, translationRequestHelper);
 			}
 
 			String targetLanguageId = ParamUtil.getString(
@@ -164,9 +166,8 @@ public class TranslateMVCRenderCommand implements MVCRenderCommand {
 				new TranslateDisplayContext(
 					availableSourceLanguageIds, availableTargetLanguageIds,
 					() -> _translator != null,
-					TranslationRequestUtil.getModelClassName(renderRequest),
-					TranslationRequestUtil.getModelClassPK(renderRequest),
-					_ffLayoutExperienceSelectorConfiguration, infoForm,
+					translationRequestHelper.getModelClassName(),
+					translationRequestHelper.getModelClassPK(), infoForm,
 					_portal.getLiferayPortletRequest(renderRequest),
 					_portal.getLiferayPortletResponse(renderResponse), object,
 					segmentsExperienceId, sourceInfoItemFieldValues,
@@ -178,14 +179,6 @@ public class TranslateMVCRenderCommand implements MVCRenderCommand {
 		catch (Exception exception) {
 			throw new PortletException(exception);
 		}
-	}
-
-	@Activate
-	@Modified
-	protected void activate(Map<String, Object> properties) {
-		_ffLayoutExperienceSelectorConfiguration =
-			ConfigurableUtil.createConfigurable(
-				FFLayoutExperienceSelectorConfiguration.class, properties);
 	}
 
 	private <T> List<String> _getAvailableTargetLanguageIds(
@@ -232,16 +225,17 @@ public class TranslateMVCRenderCommand implements MVCRenderCommand {
 	}
 
 	private String _getErrorJSP(
-		RenderRequest renderRequest, RenderResponse renderResponse) {
+			RenderRequest renderRequest, RenderResponse renderResponse,
+			TranslationRequestHelper translationRequestHelper)
+		throws PortalException {
 
 		renderRequest.setAttribute(
 			TranslateDisplayContext.class.getName(),
 			new TranslateDisplayContext(
 				Collections.emptyList(), Collections.emptyList(),
 				() -> _translator != null,
-				TranslationRequestUtil.getModelClassName(renderRequest),
-				TranslationRequestUtil.getModelClassPK(renderRequest),
-				_ffLayoutExperienceSelectorConfiguration, null,
+				translationRequestHelper.getModelClassName(),
+				translationRequestHelper.getModelClassPK(), null,
 				_portal.getLiferayPortletRequest(renderRequest),
 				_portal.getLiferayPortletResponse(renderResponse), null,
 				SegmentsExperienceConstants.ID_DEFAULT, null, null, null, null,
@@ -264,7 +258,7 @@ public class TranslateMVCRenderCommand implements MVCRenderCommand {
 		}
 		catch (NoSuchInfoItemException noSuchInfoItemException) {
 			if (_log.isDebugEnabled()) {
-				_log.debug(noSuchInfoItemException, noSuchInfoItemException);
+				_log.debug(noSuchInfoItemException);
 			}
 
 			return null;
@@ -356,9 +350,6 @@ public class TranslateMVCRenderCommand implements MVCRenderCommand {
 
 	private static final Log _log = LogFactoryUtil.getLog(
 		TranslateMVCRenderCommand.class);
-
-	private volatile FFLayoutExperienceSelectorConfiguration
-		_ffLayoutExperienceSelectorConfiguration;
 
 	@Reference
 	private InfoItemServiceTracker _infoItemServiceTracker;

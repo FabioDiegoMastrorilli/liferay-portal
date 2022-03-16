@@ -22,6 +22,7 @@ import com.liferay.object.service.ObjectDefinitionLocalService;
 import com.liferay.object.util.LocalizedMapUtil;
 import com.liferay.portal.kernel.test.util.RandomTestUtil;
 import com.liferay.portal.kernel.test.util.TestPropsValues;
+import com.liferay.portal.kernel.util.LocaleUtil;
 import com.liferay.portal.test.rule.Inject;
 
 import java.util.Collections;
@@ -39,6 +40,7 @@ import org.junit.runner.RunWith;
 public class ObjectFieldResourceTest extends BaseObjectFieldResourceTestCase {
 
 	@Before
+	@Override
 	public void setUp() throws Exception {
 		super.setUp();
 
@@ -54,6 +56,7 @@ public class ObjectFieldResourceTest extends BaseObjectFieldResourceTestCase {
 	}
 
 	@After
+	@Override
 	public void tearDown() throws Exception {
 		super.tearDown();
 
@@ -78,11 +81,13 @@ public class ObjectFieldResourceTest extends BaseObjectFieldResourceTestCase {
 	protected ObjectField randomObjectField() throws Exception {
 		ObjectField objectField = super.randomObjectField();
 
+		objectField.setBusinessType(ObjectField.BusinessType.create("Text"));
+		objectField.setDBType(ObjectField.DBType.create("String"));
 		objectField.setIndexedAsKeyword(false);
 		objectField.setLabel(
-			Collections.singletonMap("en-US", "a" + objectField.getName()));
+			Collections.singletonMap(
+				LocaleUtil.US.toString(), "a" + objectField.getName()));
 		objectField.setName("a" + objectField.getName());
-		objectField.setType(ObjectField.Type.create("String"));
 
 		return objectField;
 	}

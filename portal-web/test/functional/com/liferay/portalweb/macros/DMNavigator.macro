@@ -297,10 +297,12 @@ definition {
 	}
 
 	macro openToAddEntry {
-		var groupId = JSONGroupAPI._getGroupIdByName(groupName = "${groupName}", site = "true");
+		var groupId = JSONGroupAPI._getGroupIdByName(
+			groupName = "${groupName}",
+			site = "true");
 
 		if (isSet(documentTypeName)) {
-			if ("${documentTypeName}" == "External Video Shortcut" || "${documentTypeName}" == "Google Drive Shortcut") {
+			if (("${documentTypeName}" == "External Video Shortcut") || ("${documentTypeName}" == "Google Drive Shortcut")) {
 				var typeId = JSONDocumentAPI._getTypeIdByTypeName(
 					documentTypeName = "${documentTypeName}",
 					groupName = "Global");
@@ -317,8 +319,8 @@ definition {
 
 		if (isSet(folderName)) {
 			var folderId = JSONDocumentAPI._getFolderIdByFolderName(
-				name = "${folderName}",
-				groupName = "${groupName}");
+				groupName = "${groupName}",
+				name = "${folderName}");
 		}
 		else {
 			var folderId = "0";
@@ -337,8 +339,16 @@ definition {
 	macro openToConfigInSystemSettings {
 		var baseURL = "${baseURL}";
 
-		if (contains("${baseURL}", "{baseURL}")) {
+		if (!(isSet(baseURL))) {
 			var baseURL = PropsUtil.get("portal.url");
+		}
+
+		if ("${portlet}" == "AWS Translator") {
+			var portletId = "com.liferay.translation.translator.aws.internal.configuration.AWSTranslatorConfiguration";
+		}
+
+		if ("${portlet}" == "Azure Translator") {
+			var portletId = "com.liferay.translation.translator.azure.internal.configuration.AzureTranslatorConfiguration";
 		}
 
 		if ("${portlet}" == "File Entries") {
@@ -354,7 +364,15 @@ definition {
 		}
 
 		if ("${portlet}" == "Google Cloud Translator") {
-			var portletId = "com.liferay.translation.google.cloud.translator.internal.configuration.GoogleCloudTranslatorConfiguration";
+			var portletId = "com.liferay.translation.translator.google.cloud.internal.configuration.GoogleCloudTranslatorConfiguration";
+		}
+
+		if ("${portlet}" == "Google Drive") {
+			var portletId = "com.liferay.document.library.google.drive.configuration.DLGoogleDriveCompanyConfiguration";
+		}
+
+		if ("${portlet}" == "One Drive") {
+			var portletId = "com.liferay.document.library.opener.onedrive.web.internal.configuration.DLOneDriveCompanyConfiguration";
 		}
 
 		if ("${portlet}" == "Service") {
@@ -369,25 +387,26 @@ definition {
 			Variables.assertDefined(parameterList = "${folderName},${groupName}");
 
 			var folderId = JSONDocumentAPI._getFolderIdByFolderName(
-				name = "${folderName}",
-				groupName = "${groupName}");
+				groupName = "${groupName}",
+				name = "${folderName}");
 		}
 
 		var fileEntryId = JSONDocument.getFileEntryId(
 			dmDocumentTitle = "${dmDocumentTitle}",
 			folderId = "${folderId}",
-			groupName = "${groupName}");
+			groupName = "${groupName}",
+			site = "${site}");
 
 		Navigator.openWithAppendToBaseURL(urlAppend = "group/${siteURLKey}/~/control_panel/manage?p_p_id=com_liferay_document_library_web_portlet_DLAdminPortlet&_com_liferay_document_library_web_portlet_DLAdminPortlet_mvcRenderCommandName=%2Fdocument_library%2Fedit_file_entry&_com_liferay_document_library_web_portlet_DLAdminPortlet_fileEntryId=${fileEntryId}");
 	}
 
 	macro openToEntryInAdmin {
 		var fileEntryId = JSONDocument.getFileEntryId(
-			site = "${site}",
 			dmDocumentTitle = "${dmDocumentTitle}",
 			folderId = "${folderId}",
 			groupName = "${groupName}",
-			portalURL = "${baseURL}");
+			portalURL = "${baseURL}",
+			site = "${site}");
 
 		Navigator.openWithAppendToBaseURL(
 			baseURL = "${baseURL}",
@@ -396,8 +415,8 @@ definition {
 
 	macro openToFolderInAdmin {
 		var folderId = JSONDocumentAPI._getFolderIdByFolderName(
-			name = "${dmFolderName}",
-			groupName = "${groupName}");
+			groupName = "${groupName}",
+			name = "${dmFolderName}");
 
 		Navigator.openWithAppendToBaseURL(urlAppend = "group/${siteURLKey}/~/control_panel/manage?p_p_id=com_liferay_document_library_web_portlet_DLAdminPortlet&_com_liferay_document_library_web_portlet_DLAdminPortlet_mvcRenderCommandName=%2Fdocument_library%2Fview_folder&_com_liferay_document_library_web_portlet_DLAdminPortlet_folderId=${folderId}");
 	}

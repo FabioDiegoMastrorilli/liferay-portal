@@ -17,6 +17,9 @@ package com.liferay.search.experiences.rest.client.serdes.v1_0;
 import com.liferay.search.experiences.rest.client.dto.v1_0.SXPElement;
 import com.liferay.search.experiences.rest.client.json.BaseJSONParser;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Objects;
@@ -52,6 +55,34 @@ public class SXPElementSerDes {
 		StringBuilder sb = new StringBuilder();
 
 		sb.append("{");
+
+		DateFormat liferayToJSONDateFormat = new SimpleDateFormat(
+			"yyyy-MM-dd'T'HH:mm:ssXX");
+
+		if (sxpElement.getActions() != null) {
+			if (sb.length() > 1) {
+				sb.append(", ");
+			}
+
+			sb.append("\"actions\": ");
+
+			sb.append(_toJSON(sxpElement.getActions()));
+		}
+
+		if (sxpElement.getCreateDate() != null) {
+			if (sb.length() > 1) {
+				sb.append(", ");
+			}
+
+			sb.append("\"createDate\": ");
+
+			sb.append("\"");
+
+			sb.append(
+				liferayToJSONDateFormat.format(sxpElement.getCreateDate()));
+
+			sb.append("\"");
+		}
 
 		if (sxpElement.getDescription() != null) {
 			if (sb.length() > 1) {
@@ -107,6 +138,21 @@ public class SXPElementSerDes {
 			sb.append(sxpElement.getId());
 		}
 
+		if (sxpElement.getModifiedDate() != null) {
+			if (sb.length() > 1) {
+				sb.append(", ");
+			}
+
+			sb.append("\"modifiedDate\": ");
+
+			sb.append("\"");
+
+			sb.append(
+				liferayToJSONDateFormat.format(sxpElement.getModifiedDate()));
+
+			sb.append("\"");
+		}
+
 		if (sxpElement.getReadOnly() != null) {
 			if (sb.length() > 1) {
 				sb.append(", ");
@@ -115,6 +161,20 @@ public class SXPElementSerDes {
 			sb.append("\"readOnly\": ");
 
 			sb.append(sxpElement.getReadOnly());
+		}
+
+		if (sxpElement.getSchemaVersion() != null) {
+			if (sb.length() > 1) {
+				sb.append(", ");
+			}
+
+			sb.append("\"schemaVersion\": ");
+
+			sb.append("\"");
+
+			sb.append(_escape(sxpElement.getSchemaVersion()));
+
+			sb.append("\"");
 		}
 
 		if (sxpElement.getTitle() != null) {
@@ -151,6 +211,20 @@ public class SXPElementSerDes {
 			sb.append(sxpElement.getType());
 		}
 
+		if (sxpElement.getUserName() != null) {
+			if (sb.length() > 1) {
+				sb.append(", ");
+			}
+
+			sb.append("\"userName\": ");
+
+			sb.append("\"");
+
+			sb.append(_escape(sxpElement.getUserName()));
+
+			sb.append("\"");
+		}
+
 		sb.append("}");
 
 		return sb.toString();
@@ -168,6 +242,25 @@ public class SXPElementSerDes {
 		}
 
 		Map<String, String> map = new TreeMap<>();
+
+		DateFormat liferayToJSONDateFormat = new SimpleDateFormat(
+			"yyyy-MM-dd'T'HH:mm:ssXX");
+
+		if (sxpElement.getActions() == null) {
+			map.put("actions", null);
+		}
+		else {
+			map.put("actions", String.valueOf(sxpElement.getActions()));
+		}
+
+		if (sxpElement.getCreateDate() == null) {
+			map.put("createDate", null);
+		}
+		else {
+			map.put(
+				"createDate",
+				liferayToJSONDateFormat.format(sxpElement.getCreateDate()));
+		}
 
 		if (sxpElement.getDescription() == null) {
 			map.put("description", null);
@@ -208,11 +301,28 @@ public class SXPElementSerDes {
 			map.put("id", String.valueOf(sxpElement.getId()));
 		}
 
+		if (sxpElement.getModifiedDate() == null) {
+			map.put("modifiedDate", null);
+		}
+		else {
+			map.put(
+				"modifiedDate",
+				liferayToJSONDateFormat.format(sxpElement.getModifiedDate()));
+		}
+
 		if (sxpElement.getReadOnly() == null) {
 			map.put("readOnly", null);
 		}
 		else {
 			map.put("readOnly", String.valueOf(sxpElement.getReadOnly()));
+		}
+
+		if (sxpElement.getSchemaVersion() == null) {
+			map.put("schemaVersion", null);
+		}
+		else {
+			map.put(
+				"schemaVersion", String.valueOf(sxpElement.getSchemaVersion()));
 		}
 
 		if (sxpElement.getTitle() == null) {
@@ -236,6 +346,13 @@ public class SXPElementSerDes {
 			map.put("type", String.valueOf(sxpElement.getType()));
 		}
 
+		if (sxpElement.getUserName() == null) {
+			map.put("userName", null);
+		}
+		else {
+			map.put("userName", String.valueOf(sxpElement.getUserName()));
+		}
+
 		return map;
 	}
 
@@ -257,7 +374,20 @@ public class SXPElementSerDes {
 			SXPElement sxpElement, String jsonParserFieldName,
 			Object jsonParserFieldValue) {
 
-			if (Objects.equals(jsonParserFieldName, "description")) {
+			if (Objects.equals(jsonParserFieldName, "actions")) {
+				if (jsonParserFieldValue != null) {
+					sxpElement.setActions(
+						(Map)SXPElementSerDes.toMap(
+							(String)jsonParserFieldValue));
+				}
+			}
+			else if (Objects.equals(jsonParserFieldName, "createDate")) {
+				if (jsonParserFieldValue != null) {
+					sxpElement.setCreateDate(
+						toDate((String)jsonParserFieldValue));
+				}
+			}
+			else if (Objects.equals(jsonParserFieldName, "description")) {
 				if (jsonParserFieldValue != null) {
 					sxpElement.setDescription((String)jsonParserFieldValue);
 				}
@@ -287,9 +417,20 @@ public class SXPElementSerDes {
 						Long.valueOf((String)jsonParserFieldValue));
 				}
 			}
+			else if (Objects.equals(jsonParserFieldName, "modifiedDate")) {
+				if (jsonParserFieldValue != null) {
+					sxpElement.setModifiedDate(
+						toDate((String)jsonParserFieldValue));
+				}
+			}
 			else if (Objects.equals(jsonParserFieldName, "readOnly")) {
 				if (jsonParserFieldValue != null) {
 					sxpElement.setReadOnly((Boolean)jsonParserFieldValue);
+				}
+			}
+			else if (Objects.equals(jsonParserFieldName, "schemaVersion")) {
+				if (jsonParserFieldValue != null) {
+					sxpElement.setSchemaVersion((String)jsonParserFieldValue);
 				}
 			}
 			else if (Objects.equals(jsonParserFieldName, "title")) {
@@ -308,6 +449,11 @@ public class SXPElementSerDes {
 				if (jsonParserFieldValue != null) {
 					sxpElement.setType(
 						Integer.valueOf((String)jsonParserFieldValue));
+				}
+			}
+			else if (Objects.equals(jsonParserFieldName, "userName")) {
+				if (jsonParserFieldValue != null) {
+					sxpElement.setUserName((String)jsonParserFieldValue);
 				}
 			}
 		}

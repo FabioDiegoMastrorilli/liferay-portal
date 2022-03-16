@@ -22,6 +22,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.util.ISO8601DateFormat;
 
+import com.liferay.headless.delivery.client.dto.v1_0.Field;
 import com.liferay.headless.delivery.client.dto.v1_0.MessageBoardThread;
 import com.liferay.headless.delivery.client.dto.v1_0.Rating;
 import com.liferay.headless.delivery.client.http.HttpInvoker;
@@ -315,6 +316,43 @@ public abstract class BaseMessageBoardThreadResourceTestCase {
 	}
 
 	@Test
+	public void testGetMessageBoardSectionMessageBoardThreadsPageWithFilterDoubleEquals()
+		throws Exception {
+
+		List<EntityField> entityFields = getEntityFields(
+			EntityField.Type.DOUBLE);
+
+		if (entityFields.isEmpty()) {
+			return;
+		}
+
+		Long messageBoardSectionId =
+			testGetMessageBoardSectionMessageBoardThreadsPage_getMessageBoardSectionId();
+
+		MessageBoardThread messageBoardThread1 =
+			testGetMessageBoardSectionMessageBoardThreadsPage_addMessageBoardThread(
+				messageBoardSectionId, randomMessageBoardThread());
+
+		@SuppressWarnings("PMD.UnusedLocalVariable")
+		MessageBoardThread messageBoardThread2 =
+			testGetMessageBoardSectionMessageBoardThreadsPage_addMessageBoardThread(
+				messageBoardSectionId, randomMessageBoardThread());
+
+		for (EntityField entityField : entityFields) {
+			Page<MessageBoardThread> page =
+				messageBoardThreadResource.
+					getMessageBoardSectionMessageBoardThreadsPage(
+						messageBoardSectionId, null, null,
+						getFilterString(entityField, "eq", messageBoardThread1),
+						Pagination.of(1, 2), null);
+
+			assertEquals(
+				Collections.singletonList(messageBoardThread1),
+				(List<MessageBoardThread>)page.getItems());
+		}
+	}
+
+	@Test
 	public void testGetMessageBoardSectionMessageBoardThreadsPageWithFilterStringEquals()
 		throws Exception {
 
@@ -418,6 +456,20 @@ public abstract class BaseMessageBoardThreadResourceTestCase {
 				BeanUtils.setProperty(
 					messageBoardThread1, entityField.getName(),
 					DateUtils.addMinutes(new Date(), -2));
+			});
+	}
+
+	@Test
+	public void testGetMessageBoardSectionMessageBoardThreadsPageWithSortDouble()
+		throws Exception {
+
+		testGetMessageBoardSectionMessageBoardThreadsPageWithSort(
+			EntityField.Type.DOUBLE,
+			(entityField, messageBoardThread1, messageBoardThread2) -> {
+				BeanUtils.setProperty(
+					messageBoardThread1, entityField.getName(), 0.1);
+				BeanUtils.setProperty(
+					messageBoardThread2, entityField.getName(), 0.5);
 			});
 	}
 
@@ -697,6 +749,20 @@ public abstract class BaseMessageBoardThreadResourceTestCase {
 				BeanUtils.setProperty(
 					messageBoardThread1, entityField.getName(),
 					DateUtils.addMinutes(new Date(), -2));
+			});
+	}
+
+	@Test
+	public void testGetMessageBoardThreadsRankedPageWithSortDouble()
+		throws Exception {
+
+		testGetMessageBoardThreadsRankedPageWithSort(
+			EntityField.Type.DOUBLE,
+			(entityField, messageBoardThread1, messageBoardThread2) -> {
+				BeanUtils.setProperty(
+					messageBoardThread1, entityField.getName(), 0.1);
+				BeanUtils.setProperty(
+					messageBoardThread2, entityField.getName(), 0.5);
 			});
 	}
 
@@ -1077,10 +1143,10 @@ public abstract class BaseMessageBoardThreadResourceTestCase {
 	}
 
 	@Test
-	public void testPutMessageBoardThreadPermission() throws Exception {
+	public void testPutMessageBoardThreadPermissionsPage() throws Exception {
 		@SuppressWarnings("PMD.UnusedLocalVariable")
 		MessageBoardThread messageBoardThread =
-			testPutMessageBoardThreadPermission_addMessageBoardThread();
+			testPutMessageBoardThreadPermissionsPage_addMessageBoardThread();
 
 		@SuppressWarnings("PMD.UnusedLocalVariable")
 		com.liferay.portal.kernel.model.Role role = RoleTestUtil.addRole(
@@ -1089,7 +1155,7 @@ public abstract class BaseMessageBoardThreadResourceTestCase {
 		assertHttpResponseStatusCode(
 			200,
 			messageBoardThreadResource.
-				putMessageBoardThreadPermissionHttpResponse(
+				putMessageBoardThreadPermissionsPageHttpResponse(
 					messageBoardThread.getId(),
 					new Permission[] {
 						new Permission() {
@@ -1103,7 +1169,7 @@ public abstract class BaseMessageBoardThreadResourceTestCase {
 		assertHttpResponseStatusCode(
 			404,
 			messageBoardThreadResource.
-				putMessageBoardThreadPermissionHttpResponse(
+				putMessageBoardThreadPermissionsPageHttpResponse(
 					0L,
 					new Permission[] {
 						new Permission() {
@@ -1116,7 +1182,7 @@ public abstract class BaseMessageBoardThreadResourceTestCase {
 	}
 
 	protected MessageBoardThread
-			testPutMessageBoardThreadPermission_addMessageBoardThread()
+			testPutMessageBoardThreadPermissionsPage_addMessageBoardThread()
 		throws Exception {
 
 		return messageBoardThreadResource.postSiteMessageBoardThread(
@@ -1263,6 +1329,41 @@ public abstract class BaseMessageBoardThreadResourceTestCase {
 	}
 
 	@Test
+	public void testGetSiteMessageBoardThreadsPageWithFilterDoubleEquals()
+		throws Exception {
+
+		List<EntityField> entityFields = getEntityFields(
+			EntityField.Type.DOUBLE);
+
+		if (entityFields.isEmpty()) {
+			return;
+		}
+
+		Long siteId = testGetSiteMessageBoardThreadsPage_getSiteId();
+
+		MessageBoardThread messageBoardThread1 =
+			testGetSiteMessageBoardThreadsPage_addMessageBoardThread(
+				siteId, randomMessageBoardThread());
+
+		@SuppressWarnings("PMD.UnusedLocalVariable")
+		MessageBoardThread messageBoardThread2 =
+			testGetSiteMessageBoardThreadsPage_addMessageBoardThread(
+				siteId, randomMessageBoardThread());
+
+		for (EntityField entityField : entityFields) {
+			Page<MessageBoardThread> page =
+				messageBoardThreadResource.getSiteMessageBoardThreadsPage(
+					siteId, null, null, null,
+					getFilterString(entityField, "eq", messageBoardThread1),
+					Pagination.of(1, 2), null);
+
+			assertEquals(
+				Collections.singletonList(messageBoardThread1),
+				(List<MessageBoardThread>)page.getItems());
+		}
+	}
+
+	@Test
 	public void testGetSiteMessageBoardThreadsPageWithFilterStringEquals()
 		throws Exception {
 
@@ -1357,6 +1458,20 @@ public abstract class BaseMessageBoardThreadResourceTestCase {
 				BeanUtils.setProperty(
 					messageBoardThread1, entityField.getName(),
 					DateUtils.addMinutes(new Date(), -2));
+			});
+	}
+
+	@Test
+	public void testGetSiteMessageBoardThreadsPageWithSortDouble()
+		throws Exception {
+
+		testGetSiteMessageBoardThreadsPageWithSort(
+			EntityField.Type.DOUBLE,
+			(entityField, messageBoardThread1, messageBoardThread2) -> {
+				BeanUtils.setProperty(
+					messageBoardThread1, entityField.getName(), 0.1);
+				BeanUtils.setProperty(
+					messageBoardThread2, entityField.getName(), 0.5);
 			});
 	}
 
@@ -1685,10 +1800,12 @@ public abstract class BaseMessageBoardThreadResourceTestCase {
 	}
 
 	@Test
-	public void testPutSiteMessageBoardThreadPermission() throws Exception {
+	public void testPutSiteMessageBoardThreadPermissionsPage()
+		throws Exception {
+
 		@SuppressWarnings("PMD.UnusedLocalVariable")
 		MessageBoardThread messageBoardThread =
-			testPutSiteMessageBoardThreadPermission_addMessageBoardThread();
+			testPutSiteMessageBoardThreadPermissionsPage_addMessageBoardThread();
 
 		@SuppressWarnings("PMD.UnusedLocalVariable")
 		com.liferay.portal.kernel.model.Role role = RoleTestUtil.addRole(
@@ -1697,7 +1814,7 @@ public abstract class BaseMessageBoardThreadResourceTestCase {
 		assertHttpResponseStatusCode(
 			200,
 			messageBoardThreadResource.
-				putSiteMessageBoardThreadPermissionHttpResponse(
+				putSiteMessageBoardThreadPermissionsPageHttpResponse(
 					messageBoardThread.getSiteId(),
 					new Permission[] {
 						new Permission() {
@@ -1711,7 +1828,7 @@ public abstract class BaseMessageBoardThreadResourceTestCase {
 		assertHttpResponseStatusCode(
 			404,
 			messageBoardThreadResource.
-				putSiteMessageBoardThreadPermissionHttpResponse(
+				putSiteMessageBoardThreadPermissionsPageHttpResponse(
 					messageBoardThread.getSiteId(),
 					new Permission[] {
 						new Permission() {
@@ -1724,7 +1841,7 @@ public abstract class BaseMessageBoardThreadResourceTestCase {
 	}
 
 	protected MessageBoardThread
-			testPutSiteMessageBoardThreadPermission_addMessageBoardThread()
+			testPutSiteMessageBoardThreadPermissionsPage_addMessageBoardThread()
 		throws Exception {
 
 		return messageBoardThreadResource.postSiteMessageBoardThread(
@@ -3066,13 +3183,19 @@ public abstract class BaseMessageBoardThreadResourceTestCase {
 		}
 
 		if (entityFieldName.equals("numberOfMessageBoardAttachments")) {
-			throw new IllegalArgumentException(
-				"Invalid entity field " + entityFieldName);
+			sb.append(
+				String.valueOf(
+					messageBoardThread.getNumberOfMessageBoardAttachments()));
+
+			return sb.toString();
 		}
 
 		if (entityFieldName.equals("numberOfMessageBoardMessages")) {
-			throw new IllegalArgumentException(
-				"Invalid entity field " + entityFieldName);
+			sb.append(
+				String.valueOf(
+					messageBoardThread.getNumberOfMessageBoardMessages()));
+
+			return sb.toString();
 		}
 
 		if (entityFieldName.equals("relatedContents")) {

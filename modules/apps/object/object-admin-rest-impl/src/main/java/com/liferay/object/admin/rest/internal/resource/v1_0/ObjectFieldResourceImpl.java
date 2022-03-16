@@ -16,15 +16,18 @@ package com.liferay.object.admin.rest.internal.resource.v1_0;
 
 import com.liferay.object.admin.rest.dto.v1_0.ObjectDefinition;
 import com.liferay.object.admin.rest.dto.v1_0.ObjectField;
+import com.liferay.object.admin.rest.internal.dto.v1_0.util.ObjectFieldSettingUtil;
 import com.liferay.object.admin.rest.internal.dto.v1_0.util.ObjectFieldUtil;
 import com.liferay.object.admin.rest.resource.v1_0.ObjectFieldResource;
 import com.liferay.object.service.ObjectDefinitionLocalService;
 import com.liferay.object.service.ObjectFieldService;
+import com.liferay.object.service.ObjectFieldSettingLocalService;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.search.Field;
 import com.liferay.portal.kernel.security.permission.ActionKeys;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.HashMapBuilder;
+import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.vulcan.fields.NestedField;
 import com.liferay.portal.vulcan.fields.NestedFieldSupport;
 import com.liferay.portal.vulcan.pagination.Page;
@@ -86,6 +89,7 @@ public class ObjectFieldResourceImpl
 				Field.ENTRY_CLASS_PK),
 			searchContext -> {
 				searchContext.setAttribute(Field.NAME, search);
+				searchContext.setAttribute("label", search);
 				searchContext.setAttribute(
 					"objectDefinitionId", objectDefinitionId);
 				searchContext.setCompanyId(contextCompany.getCompanyId());
@@ -111,11 +115,20 @@ public class ObjectFieldResourceImpl
 		return _toObjectField(
 			_objectFieldService.addCustomObjectField(
 				objectField.getListTypeDefinitionId(), objectDefinitionId,
+				objectField.getBusinessTypeAsString(),
+				ObjectFieldUtil.getDBType(
+					objectField.getDBTypeAsString(),
+					objectField.getTypeAsString()),
 				objectField.getIndexed(), objectField.getIndexedAsKeyword(),
 				objectField.getIndexedLanguageId(),
 				LocalizedMapUtil.getLocalizedMap(objectField.getLabel()),
 				objectField.getName(), objectField.getRequired(),
-				objectField.getTypeAsString()));
+				transformToList(
+					objectField.getObjectFieldSettings(),
+					objectFieldSetting ->
+						ObjectFieldSettingUtil.toObjectFieldSetting(
+							objectFieldSetting,
+							_objectFieldSettingLocalService))));
 	}
 
 	@Override
@@ -126,11 +139,20 @@ public class ObjectFieldResourceImpl
 		return _toObjectField(
 			_objectFieldService.updateCustomObjectField(
 				objectFieldId, objectField.getListTypeDefinitionId(),
+				objectField.getBusinessTypeAsString(),
+				ObjectFieldUtil.getDBType(
+					objectField.getDBTypeAsString(),
+					objectField.getTypeAsString()),
 				objectField.getIndexed(), objectField.getIndexedAsKeyword(),
 				objectField.getIndexedLanguageId(),
 				LocalizedMapUtil.getLocalizedMap(objectField.getLabel()),
 				objectField.getName(), objectField.getRequired(),
-				objectField.getTypeAsString()));
+				transformToList(
+					objectField.getObjectFieldSettings(),
+					objectFieldSetting ->
+						ObjectFieldSettingUtil.toObjectFieldSetting(
+							objectFieldSetting,
+							_objectFieldSettingLocalService))));
 	}
 
 	private ObjectField _toObjectField(
@@ -147,7 +169,10 @@ public class ObjectFieldResourceImpl
 			HashMapBuilder.put(
 				"delete",
 				() -> {
-					if (!updateable) {
+					if (!updateable ||
+						Validator.isNotNull(
+							objectField.getRelationshipType())) {
+
 						return null;
 					}
 
@@ -195,5 +220,8 @@ public class ObjectFieldResourceImpl
 
 	@Reference
 	private ObjectFieldService _objectFieldService;
+
+	@Reference
+	private ObjectFieldSettingLocalService _objectFieldSettingLocalService;
 
 }

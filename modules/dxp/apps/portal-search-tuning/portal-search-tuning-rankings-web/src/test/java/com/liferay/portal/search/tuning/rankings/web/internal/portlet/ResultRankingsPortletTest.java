@@ -49,12 +49,15 @@ public class ResultRankingsPortletTest extends BaseRankingsWebTestCase {
 		LiferayUnitTestRule.INSTANCE;
 
 	@Before
+	@Override
 	public void setUp() throws Exception {
 		super.setUp();
 
 		_resultRankingsPortlet = new ResultRankingsPortlet();
 
 		_setUpMVCCommanCache();
+
+		setUpPortletPreferencesFactoryUtil();
 
 		ReflectionTestUtil.setFieldValue(
 			_resultRankingsPortlet, "documentToRankingTranslator",

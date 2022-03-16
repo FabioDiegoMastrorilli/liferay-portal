@@ -84,7 +84,7 @@ public class UpdateOAuth2ApplicationMVCActionCommand
 
 		int clientProfileId = ParamUtil.getInteger(request, "clientProfile");
 
-		ClientProfile clientProfile = getClientProfile(clientProfileId);
+		ClientProfile clientProfile = _getClientProfile(clientProfileId);
 
 		PortletPreferences portletPreferences = request.getPreferences();
 
@@ -216,7 +216,7 @@ public class UpdateOAuth2ApplicationMVCActionCommand
 		}
 		catch (PortalException portalException) {
 			if (_log.isDebugEnabled()) {
-				_log.debug(portalException, portalException);
+				_log.debug(portalException);
 			}
 
 			Class<?> peClass = portalException.getClass();
@@ -237,7 +237,7 @@ public class UpdateOAuth2ApplicationMVCActionCommand
 			OAuth2ProviderConfiguration.class, properties);
 	}
 
-	protected ClientProfile getClientProfile(int clientProfileId) {
+	private ClientProfile _getClientProfile(int clientProfileId) {
 		for (ClientProfile clientProfile : ClientProfile.values()) {
 			if (clientProfile.id() == clientProfileId) {
 				return clientProfile;

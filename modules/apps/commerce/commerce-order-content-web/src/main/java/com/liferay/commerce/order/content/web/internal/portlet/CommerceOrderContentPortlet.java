@@ -28,6 +28,8 @@ import com.liferay.commerce.service.CommerceOrderNoteService;
 import com.liferay.commerce.service.CommerceOrderService;
 import com.liferay.commerce.service.CommerceOrderTypeService;
 import com.liferay.commerce.service.CommerceShipmentItemService;
+import com.liferay.document.library.kernel.service.DLAppLocalService;
+import com.liferay.item.selector.ItemSelector;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
@@ -73,7 +75,8 @@ import org.osgi.service.component.annotations.Reference;
 		"javax.portlet.init-param.view-template=/placed_commerce_orders/view.jsp",
 		"javax.portlet.name=" + CommercePortletKeys.COMMERCE_ORDER_CONTENT,
 		"javax.portlet.resource-bundle=content.Language",
-		"javax.portlet.security-role-ref=power-user,user"
+		"javax.portlet.security-role-ref=power-user,user",
+		"javax.portlet.version=3.0"
 	},
 	service = {CommerceOrderContentPortlet.class, Portlet.class}
 )
@@ -108,17 +111,17 @@ public class CommerceOrderContentPortlet extends MVCPortlet {
 						_commerceOrderPriceCalculation, _commerceOrderService,
 						_commerceOrderTypeService,
 						_commercePaymentMethodGroupRelService,
-						_commerceShipmentItemService,
+						_commerceShipmentItemService, _dlAppLocalService,
 						_portal.getHttpServletRequest(renderRequest),
-						_modelResourcePermission, _percentageFormatter,
-						_portletResourcePermission);
+						_itemSelector, _modelResourcePermission,
+						_percentageFormatter, _portletResourcePermission);
 
 			renderRequest.setAttribute(
 				WebKeys.PORTLET_DISPLAY_CONTEXT,
 				commerceOrderContentDisplayContext);
 		}
 		catch (PortalException portalException) {
-			_log.error(portalException, portalException);
+			_log.error(portalException);
 		}
 
 		super.render(renderRequest, renderResponse);
@@ -155,6 +158,12 @@ public class CommerceOrderContentPortlet extends MVCPortlet {
 
 	@Reference
 	private CommerceShipmentItemService _commerceShipmentItemService;
+
+	@Reference
+	private DLAppLocalService _dlAppLocalService;
+
+	@Reference
+	private ItemSelector _itemSelector;
 
 	@Reference(
 		target = "(model.class.name=com.liferay.commerce.model.CommerceOrder)"

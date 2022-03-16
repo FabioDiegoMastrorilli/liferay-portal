@@ -14,16 +14,26 @@
 
 package com.liferay.object.admin.rest.internal.resource.v1_0;
 
+import com.liferay.object.admin.rest.dto.v1_0.ObjectAction;
 import com.liferay.object.admin.rest.dto.v1_0.ObjectDefinition;
 import com.liferay.object.admin.rest.dto.v1_0.ObjectField;
+import com.liferay.object.admin.rest.dto.v1_0.ObjectLayout;
+import com.liferay.object.admin.rest.dto.v1_0.ObjectView;
 import com.liferay.object.admin.rest.dto.v1_0.Status;
+import com.liferay.object.admin.rest.internal.dto.v1_0.util.ObjectActionUtil;
 import com.liferay.object.admin.rest.internal.dto.v1_0.util.ObjectFieldUtil;
+import com.liferay.object.admin.rest.internal.dto.v1_0.util.ObjectLayoutUtil;
+import com.liferay.object.admin.rest.internal.dto.v1_0.util.ObjectViewUtil;
 import com.liferay.object.admin.rest.internal.odata.entity.v1_0.ObjectDefinitionEntityModel;
 import com.liferay.object.admin.rest.resource.v1_0.ObjectDefinitionResource;
 import com.liferay.object.constants.ObjectActionKeys;
 import com.liferay.object.constants.ObjectConstants;
+import com.liferay.object.service.ObjectActionLocalService;
 import com.liferay.object.service.ObjectDefinitionService;
 import com.liferay.object.service.ObjectFieldLocalService;
+import com.liferay.object.service.ObjectLayoutLocalService;
+import com.liferay.object.service.ObjectViewLocalService;
+import com.liferay.object.util.LocalizedMapUtil;
 import com.liferay.portal.kernel.language.LanguageUtil;
 import com.liferay.portal.kernel.search.Field;
 import com.liferay.portal.kernel.search.Sort;
@@ -38,7 +48,6 @@ import com.liferay.portal.vulcan.aggregation.Aggregation;
 import com.liferay.portal.vulcan.pagination.Page;
 import com.liferay.portal.vulcan.pagination.Pagination;
 import com.liferay.portal.vulcan.resource.EntityModelResource;
-import com.liferay.portal.vulcan.util.LocalizedMapUtil;
 import com.liferay.portal.vulcan.util.SearchUtil;
 
 import javax.ws.rs.core.MultivaluedMap;
@@ -146,13 +155,27 @@ public class ObjectDefinitionResourceImpl
 			Long objectDefinitionId, ObjectDefinition objectDefinition)
 		throws Exception {
 
+		com.liferay.object.model.ObjectDefinition
+			serviceBuilderObjectDefinition =
+				_objectDefinitionService.getObjectDefinition(
+					objectDefinitionId);
+
+		if (serviceBuilderObjectDefinition.isSystem()) {
+			return _toObjectDefinition(
+				_objectDefinitionService.updateTitleObjectFieldId(
+					objectDefinitionId,
+					objectDefinition.getTitleObjectFieldId()));
+		}
+
 		return _toObjectDefinition(
 			_objectDefinitionService.updateCustomObjectDefinition(
-				objectDefinitionId, 0, 0,
+				objectDefinitionId, 0,
+				GetterUtil.get(objectDefinition.getTitleObjectFieldId(), 0),
 				GetterUtil.getBoolean(objectDefinition.getActive(), true),
 				LocalizedMapUtil.getLocalizedMap(objectDefinition.getLabel()),
 				objectDefinition.getName(), objectDefinition.getPanelAppOrder(),
 				objectDefinition.getPanelCategoryKey(),
+				objectDefinition.getPortlet(),
 				LocalizedMapUtil.getLocalizedMap(
 					objectDefinition.getPluralLabel()),
 				objectDefinition.getScope()));
@@ -186,6 +209,12 @@ public class ObjectDefinitionResourceImpl
 						ActionKeys.VIEW, "getObjectDefinition", permissionName,
 						objectDefinition.getObjectDefinitionId())
 				).put(
+					"permissions",
+					addAction(
+						ActionKeys.PERMISSIONS, "patchObjectDefinition",
+						permissionName,
+						objectDefinition.getObjectDefinitionId())
+				).put(
 					"publish",
 					() -> {
 						if (objectDefinition.isApproved()) {
@@ -210,18 +239,40 @@ public class ObjectDefinitionResourceImpl
 							objectDefinition.getObjectDefinitionId());
 					}
 				).build();
+				active = objectDefinition.isActive();
 				dateCreated = objectDefinition.getCreateDate();
 				dateModified = objectDefinition.getModifiedDate();
 				id = objectDefinition.getObjectDefinitionId();
-				label = LocalizedMapUtil.getI18nMap(
+				label = LocalizedMapUtil.getLanguageIdMap(
 					objectDefinition.getLabelMap());
 				name = objectDefinition.getShortName();
+				objectActions = transformToArray(
+					_objectActionLocalService.getObjectActions(
+						objectDefinition.getObjectDefinitionId()),
+					objectAction -> ObjectActionUtil.toObjectAction(
+						null, objectAction),
+					ObjectAction.class);
 				objectFields = transformToArray(
 					_objectFieldLocalService.getObjectFields(
 						objectDefinition.getObjectDefinitionId()),
 					objectField -> ObjectFieldUtil.toObjectField(
 						null, objectField),
 					ObjectField.class);
+				objectLayouts = transformToArray(
+					_objectLayoutLocalService.getObjectLayouts(
+						objectDefinition.getObjectDefinitionId()),
+					objectLayout -> ObjectLayoutUtil.toObjectLayout(
+						null, objectLayout),
+					ObjectLayout.class);
+				objectViews = transformToArray(
+					_objectViewLocalService.getObjectViews(
+						objectDefinition.getObjectDefinitionId()),
+					objectView -> ObjectViewUtil.toObjectView(null, objectView),
+					ObjectView.class);
+				panelCategoryKey = objectDefinition.getPanelCategoryKey();
+				pluralLabel = LocalizedMapUtil.getLanguageIdMap(
+					objectDefinition.getPluralLabelMap());
+				portlet = objectDefinition.getPortlet();
 				scope = objectDefinition.getScope();
 				status = new Status() {
 					{
@@ -236,6 +287,7 @@ public class ObjectDefinitionResourceImpl
 					}
 				};
 				system = objectDefinition.isSystem();
+				titleObjectFieldId = objectDefinition.getTitleObjectFieldId();
 			}
 		};
 	}
@@ -244,9 +296,18 @@ public class ObjectDefinitionResourceImpl
 		new ObjectDefinitionEntityModel();
 
 	@Reference
+	private ObjectActionLocalService _objectActionLocalService;
+
+	@Reference
 	private ObjectDefinitionService _objectDefinitionService;
 
 	@Reference
 	private ObjectFieldLocalService _objectFieldLocalService;
+
+	@Reference
+	private ObjectLayoutLocalService _objectLayoutLocalService;
+
+	@Reference
+	private ObjectViewLocalService _objectViewLocalService;
 
 }

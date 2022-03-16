@@ -17,7 +17,7 @@ package com.liferay.commerce.product.options.web.internal.portlet;
 import com.liferay.commerce.product.constants.CPConstants;
 import com.liferay.commerce.product.constants.CPPortletKeys;
 import com.liferay.commerce.product.options.web.internal.display.context.CPSpecificationOptionDisplayContext;
-import com.liferay.commerce.product.options.web.internal.portlet.action.ActionHelper;
+import com.liferay.commerce.product.options.web.internal.portlet.action.helper.ActionHelper;
 import com.liferay.commerce.product.service.CPOptionCategoryService;
 import com.liferay.commerce.product.service.CPSpecificationOptionService;
 import com.liferay.petra.lang.SafeCloseable;
@@ -63,7 +63,8 @@ import org.osgi.service.component.annotations.Reference;
 		"javax.portlet.init-param.view-template=/view_cp_specification_options.jsp",
 		"javax.portlet.name=" + CPPortletKeys.CP_SPECIFICATION_OPTIONS,
 		"javax.portlet.resource-bundle=content.Language",
-		"javax.portlet.security-role-ref=power-user,user"
+		"javax.portlet.security-role-ref=power-user,user",
+		"javax.portlet.version=3.0"
 	},
 	service = {CPSpecificationOptionsPortlet.class, Portlet.class}
 )

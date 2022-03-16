@@ -90,7 +90,7 @@ public class GroupPagesRenderParametersRenderFilter implements RenderFilter {
 					selLayout.getUuid(), selGroup.getGroupId(),
 					selLayout.isPrivateLayout())) {
 
-				clearRenderRequestParameters(
+				_clearRenderRequestParameters(
 					_portal.getHttpServletRequest(renderRequest),
 					renderRequest);
 
@@ -111,7 +111,7 @@ public class GroupPagesRenderParametersRenderFilter implements RenderFilter {
 		}
 		catch (PortalException portalException) {
 			if (_log.isDebugEnabled()) {
-				_log.debug(portalException, portalException);
+				_log.debug(portalException);
 			}
 		}
 
@@ -122,7 +122,7 @@ public class GroupPagesRenderParametersRenderFilter implements RenderFilter {
 	public void init(FilterConfig filterConfig) {
 	}
 
-	protected void clearRenderRequestParameters(
+	private void _clearRenderRequestParameters(
 		HttpServletRequest httpServletRequest, RenderRequest renderRequest) {
 
 		ThemeDisplay themeDisplay = (ThemeDisplay)renderRequest.getAttribute(

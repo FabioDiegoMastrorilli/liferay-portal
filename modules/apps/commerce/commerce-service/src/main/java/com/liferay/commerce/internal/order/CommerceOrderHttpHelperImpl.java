@@ -69,6 +69,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.ResourceBundle;
 
+import javax.portlet.ActionRequest;
 import javax.portlet.PortletRequest;
 import javax.portlet.PortletURL;
 import javax.portlet.WindowStateException;
@@ -131,6 +132,32 @@ public class CommerceOrderHttpHelperImpl implements CommerceOrderHttpHelper {
 	}
 
 	@Override
+	public void deleteCommerceOrder(
+			ActionRequest actionRequest, long commerceOrderId)
+		throws PortalException {
+
+		HttpServletRequest httpServletRequest = _portal.getHttpServletRequest(
+			actionRequest);
+
+		httpServletRequest = _portal.getOriginalServletRequest(
+			httpServletRequest);
+
+		httpServletRequest.removeAttribute(
+			CommerceCheckoutWebKeys.COMMERCE_ORDER);
+
+		HttpSession httpSession = httpServletRequest.getSession();
+
+		CommerceOrder commerceOrder = _commerceOrderService.getCommerceOrder(
+			commerceOrderId);
+
+		httpSession.removeAttribute(
+			CommerceOrder.class.getName() + StringPool.POUND +
+				commerceOrder.getGroupId());
+
+		_commerceOrderService.deleteCommerceOrder(commerceOrderId);
+	}
+
+	@Override
 	public PortletURL getCommerceCartPortletURL(
 			HttpServletRequest httpServletRequest)
 		throws PortalException {
@@ -173,6 +200,9 @@ public class CommerceOrderHttpHelperImpl implements CommerceOrderHttpHelper {
 				portletURL.setParameter(
 					"commerceOrderUuid",
 					String.valueOf(commerceOrder.getUuid()));
+				portletURL.setParameter(
+					"commerceOrderId",
+					String.valueOf(commerceOrder.getCommerceOrderId()));
 			}
 
 			return portletURL;
@@ -253,7 +283,7 @@ public class CommerceOrderHttpHelperImpl implements CommerceOrderHttpHelper {
 			}
 		}
 		catch (Exception exception) {
-			_log.error(exception, exception);
+			_log.error(exception);
 
 			throw new PortalException(exception);
 		}
@@ -265,7 +295,7 @@ public class CommerceOrderHttpHelperImpl implements CommerceOrderHttpHelper {
 			portletURL.setWindowState(LiferayWindowState.NORMAL);
 		}
 		catch (WindowStateException windowStateException) {
-			_log.error(windowStateException, windowStateException);
+			_log.error(windowStateException);
 
 			throw new PortalException(windowStateException);
 		}
@@ -297,7 +327,8 @@ public class CommerceOrderHttpHelperImpl implements CommerceOrderHttpHelper {
 					"continueAsGuest", Boolean.TRUE.toString());
 
 				Cookie cookie = new Cookie(
-					"continueAsGuest", Boolean.TRUE.toString());
+					CookieKeys.COMMERCE_CONTINUE_AS_GUEST,
+					Boolean.TRUE.toString());
 
 				String domain = CookieKeys.getDomain(httpServletRequest);
 
@@ -601,8 +632,9 @@ public class CommerceOrderHttpHelperImpl implements CommerceOrderHttpHelper {
 					commerceOrderUuid, commerceChannel.getGroupId());
 
 			if ((commerceOrder == null) ||
-				(commerceAccount.getCommerceAccountId() !=
-					commerceOrder.getCommerceAccountId())) {
+				(!commerceOrder.isGuestOrder() &&
+				 (commerceAccount.getCommerceAccountId() !=
+					 commerceOrder.getCommerceAccountId()))) {
 
 				commerceOrder = _commerceOrderService.fetchCommerceOrder(
 					commerceAccount.getCommerceAccountId(),

@@ -31,7 +31,7 @@ definition {
 		Navigator.openURL();
 
 		ProductMenu.gotoPortlet(
-			category = "Content &amp; Data",
+			category = "Content & Data",
 			panel = "Site Administration",
 			portlet = "Web Content");
 
@@ -42,7 +42,7 @@ definition {
 			panel = "Site Administration",
 			portlet = "Pages");
 
-		SitePages.addPublicPage(pageName = "Asset Publisher Page");
+		PagesAdmin.addPublicPage(pageName = "Asset Publisher Page");
 
 		Navigator.gotoPage(pageName = "Asset Publisher Page");
 
@@ -62,7 +62,7 @@ definition {
 
 			WebContent.tearDownCP();
 
-			Page.tearDownPG();
+			PagesAdmin.tearDownCP();
 
 			Workflow.tearDownPortalWorkflow();
 
@@ -116,7 +116,7 @@ definition {
 	@description = "This is a test for LRQA-70157. Verify that an approved web content is displayed on Asset Publisher."
 	@priority = "4"
 	test ApprovedWebContentIsDisplayed {
-		property portal.upstream = "quarantine";
+		var siteName = TestCase.getSiteName(siteName = "${siteName}");
 
 		ApplicationsMenu.gotoPortlet(
 			category = "Workflow",
@@ -132,7 +132,7 @@ definition {
 		ProductMenu.gotoPortlet(
 			category = "Site Builder",
 			portlet = "Pages",
-			site = "Liferay DXP");
+			site = "${siteName}");
 
 		Navigator.gotoPage(pageName = "Asset Publisher Page");
 
@@ -160,9 +160,7 @@ definition {
 
 		Navigator.gotoPage(pageName = "Asset Publisher Page");
 
-		AssetPublisherPortlet.viewAssetPG(
-			assetContent = "Web Content Content",
-			assetTitle = "Web Content Title");
+		AssetPublisherPortlet.viewAssetPG(assetTitle = "Web Content Title");
 	}
 
 	@description = "This is a use case for LPS-72846."
@@ -173,7 +171,7 @@ definition {
 		Navigator.openURL();
 
 		ProductMenu.gotoPortlet(
-			category = "Content &amp; Data",
+			category = "Content & Data",
 			panel = "Site Administration",
 			portlet = "Message Boards");
 
@@ -263,7 +261,7 @@ definition {
 		AssetPublisherPortlet.viewManualNoAssetsMessagePG();
 
 		ProductMenu.gotoPortlet(
-			category = "Content &amp; Data",
+			category = "Content & Data",
 			panel = "Site Administration",
 			portlet = "Blogs");
 
@@ -302,7 +300,7 @@ definition {
 		AssetPublisherPortlet.viewAssetPG(assetTitle = "Blogs Entry Title");
 
 		ProductMenu.gotoPortlet(
-			category = "Content &amp; Data",
+			category = "Content & Data",
 			panel = "Site Administration",
 			portlet = "Blogs");
 
@@ -325,7 +323,7 @@ definition {
 	@description = "This is a test for LRQA-69814. Verify that a Pending Web Content is not displayed on Asset Publisher."
 	@priority = "3"
 	test PendingWebContentIsNotDisplayed {
-		property portal.upstream = "quarantine";
+		var siteName = TestCase.getSiteName(siteName = "${siteName}");
 
 		ApplicationsMenu.gotoPortlet(
 			category = "Workflow",
@@ -341,7 +339,7 @@ definition {
 		ProductMenu.gotoPortlet(
 			category = "Site Builder",
 			portlet = "Pages",
-			site = "Liferay DXP");
+			site = "${siteName}");
 
 		Navigator.gotoPage(pageName = "Asset Publisher Page");
 
@@ -350,11 +348,13 @@ definition {
 		Button.clickSubmitForPublication();
 
 		ProductMenu.gotoPortlet(
-			category = "Content &amp; Data",
+			category = "Content & Data",
 			panel = "Site Administration",
 			portlet = "Web Content");
 
-		AssertElementPresent(locator1 = "SitePages#SITE_PENDING_STATUS");
+		AssertElementPresent(
+			key_webContentTitle = "Web Content Title",
+			locator1 = "WC#ENTRY_LIST_WORKFLOW_STATUS");
 
 		ProductMenu.gotoPortlet(
 			category = "Site Builder",
@@ -408,7 +408,7 @@ definition {
 	@description = "This is a test for LRQA-69815. Verify that a rejected web content is not displayed on Asset Publisher."
 	@priority = "3"
 	test RejectedWebContentIsNotDisplayed {
-		property portal.upstream = "quarantine";
+		var siteName = TestCase.getSiteName(siteName = "${siteName}");
 
 		ApplicationsMenu.gotoPortlet(
 			category = "Workflow",
@@ -424,7 +424,7 @@ definition {
 		ProductMenu.gotoPortlet(
 			category = "Site Builder",
 			portlet = "Pages",
-			site = "Liferay DXP");
+			site = "${siteName}");
 
 		Navigator.gotoPage(pageName = "Asset Publisher Page");
 
@@ -447,16 +447,18 @@ definition {
 			workflowTask = "Review");
 
 		ProductMenu.gotoPortlet(
-			category = "Content &amp; Data",
+			category = "Content & Data",
 			panel = "Site Administration",
 			portlet = "Web Content");
 
-		AssertElementPresent(locator1 = "SitePages#SITE_PENDING_STATUS");
+		AssertElementPresent(
+			key_webContentTitle = "Web Content Title",
+			locator1 = "WC#ENTRY_LIST_WORKFLOW_STATUS");
 
 		ProductMenu.gotoPortlet(
 			category = "Site Builder",
 			portlet = "Pages",
-			site = "Liferay DXP");
+			site = "${siteName}");
 
 		Navigator.gotoPage(pageName = "Asset Publisher Page");
 

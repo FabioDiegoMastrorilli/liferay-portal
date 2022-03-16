@@ -59,16 +59,6 @@ import org.osgi.service.component.annotations.Reference;
 )
 public class EditInstanceMVCActionCommand extends BaseMVCActionCommand {
 
-	protected void deleteInstance(ActionRequest actionRequest)
-		throws Exception {
-
-		long companyId = ParamUtil.getLong(actionRequest, "companyId");
-
-		_companyService.deleteCompany(companyId);
-
-		synchronizePortalInstances();
-	}
-
 	@Override
 	protected void doProcessAction(
 			ActionRequest actionRequest, ActionResponse actionResponse)
@@ -78,10 +68,10 @@ public class EditInstanceMVCActionCommand extends BaseMVCActionCommand {
 
 		try {
 			if (cmd.equals(Constants.DELETE)) {
-				deleteInstance(actionRequest);
+				_deleteInstance(actionRequest);
 			}
 			else {
-				updateInstance(actionRequest);
+				_updateInstance(actionRequest);
 			}
 
 			sendRedirect(actionRequest, actionResponse);
@@ -90,7 +80,7 @@ public class EditInstanceMVCActionCommand extends BaseMVCActionCommand {
 			String mvcPath = "/error.jsp";
 
 			if (_log.isDebugEnabled()) {
-				_log.debug(exception, exception);
+				_log.debug(exception);
 			}
 
 			if (exception instanceof NoSuchCompanyException ||
@@ -124,7 +114,7 @@ public class EditInstanceMVCActionCommand extends BaseMVCActionCommand {
 				SessionErrors.add(actionRequest, exception.getClass());
 			}
 			else {
-				_log.error(exception, exception);
+				_log.error(exception);
 
 				throw exception;
 			}
@@ -133,13 +123,19 @@ public class EditInstanceMVCActionCommand extends BaseMVCActionCommand {
 		}
 	}
 
-	protected void synchronizePortalInstances() {
+	private void _deleteInstance(ActionRequest actionRequest) throws Exception {
+		long companyId = ParamUtil.getLong(actionRequest, "companyId");
+
+		_companyService.deleteCompany(companyId);
+
+		_synchronizePortalInstances();
+	}
+
+	private void _synchronizePortalInstances() {
 		_portalInstancesLocalService.synchronizePortalInstances();
 	}
 
-	protected void updateInstance(ActionRequest actionRequest)
-		throws Exception {
-
+	private void _updateInstance(ActionRequest actionRequest) throws Exception {
 		long companyId = ParamUtil.getLong(actionRequest, "companyId");
 
 		String virtualHostname = ParamUtil.getString(
@@ -184,7 +180,7 @@ public class EditInstanceMVCActionCommand extends BaseMVCActionCommand {
 				companyId, virtualHostname, mx, maxUsers, active);
 		}
 
-		synchronizePortalInstances();
+		_synchronizePortalInstances();
 	}
 
 	private static final Log _log = LogFactoryUtil.getLog(

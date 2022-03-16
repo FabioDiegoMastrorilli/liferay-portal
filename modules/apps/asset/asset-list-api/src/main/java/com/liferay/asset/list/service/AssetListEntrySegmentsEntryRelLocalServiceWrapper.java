@@ -30,6 +30,10 @@ public class AssetListEntrySegmentsEntryRelLocalServiceWrapper
 	implements AssetListEntrySegmentsEntryRelLocalService,
 			   ServiceWrapper<AssetListEntrySegmentsEntryRelLocalService> {
 
+	public AssetListEntrySegmentsEntryRelLocalServiceWrapper() {
+		this(null);
+	}
+
 	public AssetListEntrySegmentsEntryRelLocalServiceWrapper(
 		AssetListEntrySegmentsEntryRelLocalService
 			assetListEntrySegmentsEntryRelLocalService) {
@@ -317,6 +321,16 @@ public class AssetListEntrySegmentsEntryRelLocalServiceWrapper
 	}
 
 	@Override
+	public java.util.List<AssetListEntrySegmentsEntryRel>
+		fetchAssetListEntrySegmentsEntryRels(
+			long assetListEntryId, long[] segmentsEntryId) {
+
+		return _assetListEntrySegmentsEntryRelLocalService.
+			fetchAssetListEntrySegmentsEntryRels(
+				assetListEntryId, segmentsEntryId);
+	}
+
+	@Override
 	public com.liferay.portal.kernel.dao.orm.ActionableDynamicQuery
 		getActionableDynamicQuery() {
 
@@ -520,6 +534,12 @@ public class AssetListEntrySegmentsEntryRelLocalServiceWrapper
 		return _assetListEntrySegmentsEntryRelLocalService.
 			updateAssetListEntrySegmentsEntryRelTypeSettings(
 				assetListEntryId, segmentsEntryId, typeSettings);
+	}
+
+	@Override
+	public void updateVariationsPriority(long[] variationsPriority) {
+		_assetListEntrySegmentsEntryRelLocalService.updateVariationsPriority(
+			variationsPriority);
 	}
 
 	@Override

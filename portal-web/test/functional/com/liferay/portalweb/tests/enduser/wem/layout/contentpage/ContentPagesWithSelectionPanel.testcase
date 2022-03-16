@@ -35,7 +35,7 @@ definition {
 		}
 	}
 
-	@description = "This is a test for LPS-118271. Can change the order of the elements in page editor via Selection panel."
+	@description = "This is a test for LPS-118271 and LPS-106776. Can change the order of the elements in page editor via Selection panel. View Page Structure in react page editor."
 	@priority = "5"
 	test ChangeOrderOfElementsViaSelectionPanel {
 		property portal.acceptance = "true";
@@ -218,7 +218,7 @@ definition {
 			Pause(locator1 = "3000");
 
 			AssertElementPresent(
-				key_elementHeader = "//div[contains(@class,'page-editor')]//li[contains(.,'Button')]",
+				key_elementHeader = "//div[@aria-label='Button']",
 				key_position = "1",
 				locator1 = "PageEditor#CONTAINER_CONTAINER_NESTED_ELEMENT");
 		}
@@ -236,7 +236,7 @@ definition {
 
 			AssertElementPresent(
 				key_columnNumber = "1",
-				key_elementHeader = "//div[contains(@class,'page-editor')]//li[contains(.,'Asset Publisher')]",
+				key_elementHeader = "//div[@aria-label='Asset Publisher']",
 				key_position = "1",
 				locator1 = "PageEditor#GRID_COLUMN_NESTED_ELEMENT");
 		}
@@ -291,7 +291,7 @@ definition {
 			for (var n : list "1,2,3") {
 				AssertElementPresent(
 					key_colPosition = "1",
-					key_element = "//div[contains(@class,'page-editor')]//li[contains(.,'Heading')]",
+					key_element = "//div[@aria-label='Heading']",
 					key_fragmentName = "Collection Display",
 					key_rowPosition = "${n}",
 					locator1 = "PageEditor#COLLECTION_CELL_NESTED_ELEMENT");
@@ -454,6 +454,8 @@ definition {
 	@description = "This is a test for LPS-125985. The Page Creater can perform actions on the asset displayed in Content Display via General panel."
 	@priority = "5"
 	test PerformActionsOnDisplayedAssetInContentDisplayViaGeneralPanel {
+		property portal.acceptance = "true";
+
 		task ("Add a web content") {
 			JSONWebcontent.addWebContent(
 				content = "Web Content Content",
@@ -496,6 +498,7 @@ definition {
 			PageEditor.assertFragmentSidebarLoaded();
 
 			AssertTextEquals(
+				index = "1",
 				locator1 = "WCD#WEB_CONTENT_CONTENT",
 				value1 = "Web Content Content Edit");
 		}
@@ -586,6 +589,8 @@ definition {
 	@description = "This is a test for LPS-125985. The Page Creater can perform actions on collection displayed in Collection Display via General panel."
 	@priority = "5"
 	test PerformActionsOnDisplayedCollectionInCollectionDisplayViaGeneralPanel {
+		property portal.acceptance = "true";
+
 		task ("Add a vocabulary") {
 			JSONCategory.addVocabulary(
 				groupName = "Test Site Name",
@@ -804,6 +809,8 @@ definition {
 	@description = "This is a test for LPS-125985. The Page Creater can perform actions on mapped asset via Mapping panel."
 	@priority = "5"
 	test PerformActionsOnMappedAssetViaMappingPanel {
+		property portal.acceptance = "true";
+
 		task ("Add a web content") {
 			JSONWebcontent.addWebContent(
 				content = "Web Content Content",
@@ -1128,6 +1135,8 @@ definition {
 	@description = "This is a test for LPS-122396. The details of mapped assets are shown in Mapping panel."
 	@priority = "5"
 	test ViewDetailsOfMappedAssetsInMappingPanel {
+		property portal.acceptance = "true";
+
 		task ("Add a web content based on Basic Web Content") {
 			JSONWebcontent.addWebContent(
 				content = "Web Content Content",

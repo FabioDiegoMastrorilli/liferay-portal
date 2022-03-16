@@ -12,12 +12,7 @@
  * details.
  */
 
-import {
-	cleanup,
-	fireEvent,
-	render,
-	waitForElement,
-} from '@testing-library/react';
+import {fireEvent, render} from '@testing-library/react';
 import React from 'react';
 import {act} from 'react-dom/test-utils';
 
@@ -28,7 +23,8 @@ const activeUrl = '/test';
 const defaultProps = {
 	defaultLanguageId: 'en_US',
 	elementId: 'elementId',
-	friendlyURLEntryURL: 'friendly_url_history',
+	friendlyURLEntryURL: '/o/friendly_url_history',
+	localizable: true,
 };
 
 const fetchResponse = {
@@ -90,8 +86,6 @@ const renderComponent = (props) => render(<FriendlyURLHistory {...props} />);
 describe('FriendlyURLHistory', () => {
 	let historyButton;
 
-	afterEach(cleanup);
-
 	beforeAll(() => {
 		Liferay.component = jest.fn().mockImplementation(() => {
 			return {
@@ -102,7 +96,7 @@ describe('FriendlyURLHistory', () => {
 	});
 
 	it('renders a button', () => {
-		const {getByRole} = renderComponent({...defaultProps});
+		const {getByRole} = renderComponent(defaultProps);
 
 		historyButton = getByRole('button');
 
@@ -110,7 +104,7 @@ describe('FriendlyURLHistory', () => {
 	});
 
 	it('renders a restore icon inside the button', () => {
-		renderComponent({...defaultProps});
+		renderComponent(defaultProps);
 
 		expect(historyButton.querySelector('svg').classList).toContain(
 			'lexicon-icon-restore'
@@ -127,7 +121,7 @@ describe('FriendlyURLHistory', () => {
 		beforeEach(async () => {
 			fetch.mockResponseOnce(JSON.stringify(fetchResponse));
 
-			result = renderComponent({...defaultProps});
+			result = renderComponent(defaultProps);
 
 			historyButton = result.getByRole('button');
 
@@ -137,35 +131,37 @@ describe('FriendlyURLHistory', () => {
 		});
 
 		it('renders a modal when user clicks on history button', async () => {
-			const title = await waitForElement(() =>
-				result.getByText('history')
-			);
+			const title = await result.findByText('history');
 
-			expect(title);
+			expect(title).toBeTruthy();
 		});
 
 		it('renders the active url', async () => {
-			const activeUrlElement = await waitForElement(() =>
-				result.getByText(activeUrl)
-			);
+			const activeUrlElement = await result.findByText(activeUrl);
 
-			expect(activeUrlElement);
+			expect(activeUrlElement).toBeTruthy();
 		});
 
 		it('renders the old friendly urls', async () => {
-			const listItems = await waitForElement(() =>
-				result.getAllByRole('listitem')
+			await result.findAllByRole('listitem');
+
+			const listUrlItems = result.baseElement.querySelectorAll(
+				'.modal-content li.list-group-item'
 			);
 
-			expect(listItems.length).toBe(4);
+			// LPS-141143
+
+			expect(
+				Array.from(listUrlItems).map(({textContent}) => textContent)
+			).toMatchSnapshot();
+
+			expect(listUrlItems.length).toBe(3);
 		});
 
 		it('deletes the third old friendly url', async () => {
 			fetch.mockResponseOnce(JSON.stringify({success: true}));
 
-			const listItems = await waitForElement(() =>
-				result.getAllByRole('listitem')
-			);
+			const listItems = await result.findAllByRole('listitem');
 
 			const deleteButtons = listItems.map((listitem) =>
 				listitem.querySelector('button[data-title="forget-url"]')
@@ -176,8 +172,9 @@ describe('FriendlyURLHistory', () => {
 			});
 
 			expect(
-				document.querySelectorAll('.modal-content li.list-group-item')
-					.length
+				result.baseElement.querySelectorAll(
+					'.modal-content li.list-group-item'
+				).length
 			).toBe(2);
 
 			expect(fetch.mock.calls.length).toEqual(2);
@@ -187,9 +184,7 @@ describe('FriendlyURLHistory', () => {
 			fetch.mockResponseOnce(JSON.stringify({success: true}));
 			fetch.mockResponseOnce(JSON.stringify(fetchResponseAfterRestore));
 
-			const listItems = await waitForElement(() =>
-				result.getAllByRole('listitem')
-			);
+			const listItems = await result.findAllByRole('listitem');
 
 			const restoreButtons = listItems.map((listitem) =>
 				listitem.querySelector('button[data-title="restore-url"]')
@@ -202,8 +197,9 @@ describe('FriendlyURLHistory', () => {
 			expect(fetch.mock.calls.length).toEqual(3);
 
 			expect(
-				document.querySelector('.modal-content .active-url-text')
-					.innerHTML
+				result.baseElement.querySelector(
+					'.modal-content .active-url-text'
+				).textContent
 			).toBe('/test-2');
 		});
 	});

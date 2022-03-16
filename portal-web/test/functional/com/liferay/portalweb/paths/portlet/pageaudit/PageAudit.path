@@ -11,6 +11,11 @@
 
 <tbody>
 <tr>
+	<td>ALERT_BOX</td>
+	<td>//div[@class='sidebar-body'] //div[contains(@class, 'alert')]</td>
+	<td></td>
+</tr>
+<tr>
 	<td>API_FIELD</td>
 	<td>//textarea[contains(@name, 'apiKey')]</td>
 	<td></td>
@@ -112,12 +117,27 @@
 </tr>
 <tr>
 	<td>PANEL_PAGE_URL</td>
-	<td>//div[contains(@class, 'sidebar-body')] //*[contains(@class, 'text-secondary') and contains(.,'${partialUrl}')]</td>
+	<td>//div[contains(@class, 'sidebar-body')] //*[contains(@class, 'text-secondary') and contains(.,'${partialURL}')]</td>
 	<td></td>
 </tr>
 <tr>
 	<td>PANEL_TITLE</td>
 	<td>//div[contains(@class, 'panel-title')]</td>
+	<td></td>
+</tr>
+<tr>
+	<td>PREFERRED_STRATEGY_DROPDOWN</td>
+	<td>//*[contains(.,'Preferred Strategy')] //div[contains(@class, 'form-builder-select-field')]</td>
+	<td></td>
+</tr>
+<tr>
+	<td>PREFERRED_STRATEGY_OPTION</td>
+	<td>//button[@label='${strategy}']</td>
+	<td></td>
+</tr>
+<tr>
+	<td>PREFERRED_STRATEGY_OPTION_SELECTED</td>
+	<td>//*[contains(.,'Preferred Strategy')] //div[contains(@class, 'form-builder-select-field')] //div[@class='option-selected']</td>
 	<td></td>
 </tr>
 <tr>

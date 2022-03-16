@@ -15,13 +15,21 @@
 // Utils
 
 export {default as compose} from './utils/compose.es';
+export {getDDMFormFieldSettingsContext} from './utils/dataConverter';
 export * as DRAG_TYPES from './utils/dragTypes';
 export {convertToFormData, makeFetch} from './utils/fetch.es';
-export {normalizeFieldName} from './utils/fields.es';
+export {getFields, normalizeFieldName} from './utils/fields.es';
 export * as FieldSetUtil from './utils/fieldSets';
 export * as FieldSupport from './utils/fieldSupport';
 export {getUid} from './utils/formId.es';
 export * as FormSupport from './utils/FormSupport.es';
+export {
+	addObjectFields,
+	getFieldsGroupedByTypes,
+	getObjectFieldName,
+	getSelectedValue,
+	updateObjectFields,
+} from './utils/objectFields';
 export {parseProps} from './utils/parseProps.es';
 export {getConnectedReactComponentAdapter} from './utils/ReactComponentAdapter.es';
 export {generateName, getRepeatedIndex, parseName} from './utils/repeatable.es';
@@ -29,6 +37,8 @@ export * as RulesSupport from './utils/rulesSupport';
 export {default as setDataRecord} from './utils/setDataRecord.es';
 export * as SettingsContext from './utils/settingsContext';
 export * as StringUtils from './utils/strings';
+export {Token} from './utils/Token';
+export {Tokenizer} from './utils/Tokenizer';
 export {PagesVisitor} from './utils/visitors.es';
 
 // Form/Data Engine Core
@@ -49,10 +59,15 @@ export * as FieldUtil from './core/utils/fields';
 export {default as sectionAdded} from './core/utils/sectionAddedHandler';
 export {capitalize} from './utils/strings';
 export {enableSubmitButton} from './core/utils/submitButtonController.es';
+export {default as PartialResults} from './custom/form/components/PartialResults';
 
 // Custom Form
 
 export {EVENT_TYPES as FORM_EVENT_TYPES} from './custom/form/eventTypes.es';
+
+// Custom Form Report
+
+export {default as FormReport} from './custom/form-report/index';
 
 // Containers
 

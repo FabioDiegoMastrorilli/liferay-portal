@@ -14,6 +14,7 @@
 
 package com.liferay.commerce.order.content.web.internal.display.context;
 
+import com.liferay.account.model.AccountEntry;
 import com.liferay.commerce.account.constants.CommerceAccountConstants;
 import com.liferay.commerce.account.model.CommerceAccount;
 import com.liferay.commerce.configuration.CommerceOrderFieldsConfiguration;
@@ -41,7 +42,7 @@ import com.liferay.commerce.payment.service.CommercePaymentMethodGroupRelService
 import com.liferay.commerce.percentage.PercentageFormatter;
 import com.liferay.commerce.price.CommerceOrderPrice;
 import com.liferay.commerce.price.CommerceOrderPriceCalculation;
-import com.liferay.commerce.product.display.context.util.CPRequestHelper;
+import com.liferay.commerce.product.display.context.helper.CPRequestHelper;
 import com.liferay.commerce.product.model.CommerceChannel;
 import com.liferay.commerce.product.service.CommerceChannelLocalService;
 import com.liferay.commerce.service.CommerceAddressService;
@@ -49,9 +50,17 @@ import com.liferay.commerce.service.CommerceOrderNoteService;
 import com.liferay.commerce.service.CommerceOrderService;
 import com.liferay.commerce.service.CommerceOrderTypeService;
 import com.liferay.commerce.service.CommerceShipmentItemService;
+import com.liferay.document.library.kernel.model.DLFolderConstants;
+import com.liferay.document.library.kernel.service.DLAppLocalService;
+import com.liferay.document.library.util.DLURLHelperUtil;
 import com.liferay.frontend.taglib.clay.servlet.taglib.util.DropdownItem;
 import com.liferay.frontend.taglib.clay.servlet.taglib.util.DropdownItemBuilder;
+import com.liferay.item.selector.ItemSelector;
+import com.liferay.item.selector.ItemSelectorReturnType;
+import com.liferay.item.selector.criteria.FileEntryItemSelectorReturnType;
+import com.liferay.item.selector.criteria.file.criterion.FileItemSelectorCriterion;
 import com.liferay.petra.portlet.url.builder.PortletURLBuilder;
+import com.liferay.petra.portlet.url.builder.ResourceURLBuilder;
 import com.liferay.petra.string.CharPool;
 import com.liferay.petra.string.StringBundler;
 import com.liferay.petra.string.StringPool;
@@ -64,16 +73,26 @@ import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.module.configuration.ConfigurationException;
 import com.liferay.portal.kernel.module.configuration.ConfigurationProviderUtil;
 import com.liferay.portal.kernel.portlet.LiferayPortletResponse;
+import com.liferay.portal.kernel.portlet.RequestBackedPortletURLFactory;
+import com.liferay.portal.kernel.portlet.RequestBackedPortletURLFactoryUtil;
+import com.liferay.portal.kernel.repository.model.FileEntry;
 import com.liferay.portal.kernel.security.permission.ActionKeys;
+import com.liferay.portal.kernel.security.permission.PermissionChecker;
 import com.liferay.portal.kernel.security.permission.resource.ModelResourcePermission;
 import com.liferay.portal.kernel.security.permission.resource.PortletResourcePermission;
+import com.liferay.portal.kernel.service.ServiceContextFactory;
 import com.liferay.portal.kernel.settings.GroupServiceSettingsLocator;
 import com.liferay.portal.kernel.theme.PortletDisplay;
 import com.liferay.portal.kernel.theme.ThemeDisplay;
 import com.liferay.portal.kernel.util.FastDateFormatFactoryUtil;
+import com.liferay.portal.kernel.util.FileUtil;
 import com.liferay.portal.kernel.util.ListUtil;
+import com.liferay.portal.kernel.util.MimeTypesUtil;
 import com.liferay.portal.kernel.util.ParamUtil;
 import com.liferay.portal.kernel.util.Validator;
+
+import java.io.File;
+import java.io.InputStream;
 
 import java.math.BigDecimal;
 
@@ -105,7 +124,8 @@ public class CommerceOrderContentDisplayContext {
 			CommercePaymentMethodGroupRelService
 				commercePaymentMethodGroupRelService,
 			CommerceShipmentItemService commerceShipmentItemService,
-			HttpServletRequest httpServletRequest,
+			DLAppLocalService dlAppLocalService,
+			HttpServletRequest httpServletRequest, ItemSelector itemSelector,
 			ModelResourcePermission<CommerceOrder> modelResourcePermission,
 			PercentageFormatter percentageFormatter,
 			PortletResourcePermission portletResourcePermission)
@@ -121,7 +141,9 @@ public class CommerceOrderContentDisplayContext {
 		_commercePaymentMethodGroupRelService =
 			commercePaymentMethodGroupRelService;
 		_commerceShipmentItemService = commerceShipmentItemService;
+		_dlAppLocalService = dlAppLocalService;
 		_httpServletRequest = httpServletRequest;
+		_itemSelector = itemSelector;
 		_modelResourcePermission = modelResourcePermission;
 		_percentageFormatter = percentageFormatter;
 		_portletResourcePermission = portletResourcePermission;
@@ -158,7 +180,7 @@ public class CommerceOrderContentDisplayContext {
 		throws PortalException {
 
 		return _commerceAddressService.getBillingCommerceAddresses(
-			companyId, CommerceAccount.class.getName(), commerceAccountId);
+			companyId, AccountEntry.class.getName(), commerceAccountId);
 	}
 
 	public CommerceAccount getCommerceAccount() {
@@ -191,11 +213,9 @@ public class CommerceOrderContentDisplayContext {
 				getCommerceOrderId());
 		}
 
-		String commerceOrderUuid = ParamUtil.getString(
-			_httpServletRequest, "commerceOrderUuid");
-
 		return _commerceOrderService.fetchCommerceOrder(
-			commerceOrderUuid, _cpRequestHelper.getCommerceChannelGroupId());
+			ParamUtil.getString(_httpServletRequest, "commerceOrderUuid"),
+			_cpRequestHelper.getCommerceChannelGroupId());
 	}
 
 	public String getCommerceOrderDate(CommerceOrder commerceOrder) {
@@ -399,6 +419,55 @@ public class CommerceOrderContentDisplayContext {
 			CommerceShipmentConstants.getShipmentStatusLabel(status));
 	}
 
+	public String getCSVFileEntryItemSelectorURL() {
+		RequestBackedPortletURLFactory requestBackedPortletURLFactory =
+			RequestBackedPortletURLFactoryUtil.create(
+				_cpRequestHelper.getRenderRequest());
+
+		FileItemSelectorCriterion fileItemSelectorCriterion =
+			new FileItemSelectorCriterion();
+
+		fileItemSelectorCriterion.setDesiredItemSelectorReturnTypes(
+			Collections.<ItemSelectorReturnType>singletonList(
+				new FileEntryItemSelectorReturnType()));
+
+		PortletURL itemSelectorURL = _itemSelector.getItemSelectorURL(
+			requestBackedPortletURLFactory, "addFileEntry",
+			fileItemSelectorCriterion);
+
+		return itemSelectorURL.toString();
+	}
+
+	public String getCSVTemplateDownloadURL() throws Exception {
+		FileEntry fileEntry =
+			_dlAppLocalService.fetchFileEntryByExternalReferenceCode(
+				_cpRequestHelper.getScopeGroupId(), "CSV_TEMPLATE_ERC");
+
+		if (fileEntry == null) {
+			Class<?> clazz = getClass();
+
+			InputStream inputStream = clazz.getResourceAsStream(
+				"dependencies/csv_template.csv");
+
+			File file = FileUtil.createTempFile(inputStream);
+
+			fileEntry = _dlAppLocalService.addFileEntry(
+				"CSV_TEMPLATE_ERC", _cpRequestHelper.getUserId(),
+				_cpRequestHelper.getScopeGroupId(),
+				DLFolderConstants.DEFAULT_PARENT_FOLDER_ID, "csv_template.csv",
+				MimeTypesUtil.getContentType(file), "csv_template",
+				StringPool.BLANK, StringPool.BLANK, file, null, null,
+				ServiceContextFactory.getInstance(
+					_cpRequestHelper.getRequest()));
+
+			FileUtil.delete(file);
+		}
+
+		return DLURLHelperUtil.getDownloadURL(
+			fileEntry, fileEntry.getFileVersion(),
+			_cpRequestHelper.getThemeDisplay(), StringPool.BLANK, false, true);
+	}
+
 	public String getDisplayStyle(String portletId)
 		throws ConfigurationException {
 
@@ -481,6 +550,17 @@ public class CommerceOrderContentDisplayContext {
 			).build());
 	}
 
+	public String getExportCommerceOrderReportURL() {
+		return ResourceURLBuilder.createResourceURL(
+			_cpRequestHelper.getLiferayPortletResponse(),
+			CommercePortletKeys.COMMERCE_ORDER_CONTENT
+		).setParameter(
+			"commerceOrderId", getCommerceOrderId()
+		).setResourceID(
+			"/commerce_order_content/export_commerce_order_report"
+		).buildString();
+	}
+
 	public List<HeaderActionModel> getHeaderActionModels()
 		throws PortalException {
 
@@ -532,36 +612,28 @@ public class CommerceOrderContentDisplayContext {
 			_cpRequestHelper.getLiferayPortletRequest(), getPortletURL(), null,
 			"no-orders-were-found");
 
-		List<CommerceOrder> commerceOrders = null;
-		long commerceOrdersTotal = 0;
-
 		String keywords = ParamUtil.getString(_httpServletRequest, "keywords");
 
 		if (isOpenOrderContentPortlet()) {
-			commerceOrders = _commerceOrderService.getUserPendingCommerceOrders(
-				_cpRequestHelper.getCompanyId(),
-				_cpRequestHelper.getCommerceChannelGroupId(), keywords,
-				_searchContainer.getStart(), _searchContainer.getEnd());
-
-			commerceOrdersTotal =
-				_commerceOrderService.getUserPendingCommerceOrdersCount(
+			_searchContainer.setResultsAndTotal(
+				() -> _commerceOrderService.getUserPendingCommerceOrders(
 					_cpRequestHelper.getCompanyId(),
-					_cpRequestHelper.getCommerceChannelGroupId(), keywords);
+					_cpRequestHelper.getCommerceChannelGroupId(), keywords,
+					_searchContainer.getStart(), _searchContainer.getEnd()),
+				(int)_commerceOrderService.getUserPendingCommerceOrdersCount(
+					_cpRequestHelper.getCompanyId(),
+					_cpRequestHelper.getCommerceChannelGroupId(), keywords));
 		}
 		else {
-			commerceOrders = _commerceOrderService.getUserPlacedCommerceOrders(
-				_cpRequestHelper.getCompanyId(),
-				_cpRequestHelper.getCommerceChannelGroupId(), keywords,
-				_searchContainer.getStart(), _searchContainer.getEnd());
-
-			commerceOrdersTotal =
-				_commerceOrderService.getUserPlacedCommerceOrdersCount(
+			_searchContainer.setResultsAndTotal(
+				() -> _commerceOrderService.getUserPlacedCommerceOrders(
 					_cpRequestHelper.getCompanyId(),
-					_cpRequestHelper.getCommerceChannelGroupId(), keywords);
+					_cpRequestHelper.getCommerceChannelGroupId(), keywords,
+					_searchContainer.getStart(), _searchContainer.getEnd()),
+				(int)_commerceOrderService.getUserPlacedCommerceOrdersCount(
+					_cpRequestHelper.getCompanyId(),
+					_cpRequestHelper.getCommerceChannelGroupId(), keywords));
 		}
-
-		_searchContainer.setResults(commerceOrders);
-		_searchContainer.setTotal((int)commerceOrdersTotal);
 
 		return _searchContainer;
 	}
@@ -571,7 +643,7 @@ public class CommerceOrderContentDisplayContext {
 		throws PortalException {
 
 		return _commerceAddressService.getShippingCommerceAddresses(
-			companyId, CommerceAccount.class.getName(), commerceAccountId);
+			companyId, AccountEntry.class.getName(), commerceAccountId);
 	}
 
 	public boolean hasModelPermission(
@@ -593,6 +665,24 @@ public class CommerceOrderContentDisplayContext {
 		return _portletResourcePermission.contains(
 			_cpRequestHelper.getPermissionChecker(),
 			_cpRequestHelper.getScopeGroupId(), actionId);
+	}
+
+	public boolean hasViewBillingAddressPermission(
+			PermissionChecker permissionChecker,
+			CommerceAccount commerceAccount)
+		throws PortalException {
+
+		if ((commerceAccount.getType() ==
+				CommerceAccountConstants.ACCOUNT_TYPE_GUEST) ||
+			commerceAccount.isPersonalAccount() ||
+			_portletResourcePermission.contains(
+				permissionChecker, commerceAccount.getCommerceAccountGroup(),
+				CommerceOrderActionKeys.VIEW_BILLING_ADDRESS)) {
+
+			return true;
+		}
+
+		return false;
 	}
 
 	public boolean isCommerceSiteTypeB2C() {
@@ -624,7 +714,7 @@ public class CommerceOrderContentDisplayContext {
 			return commerceOrderFieldsConfiguration.showPurchaseOrderNumber();
 		}
 		catch (PortalException portalException) {
-			_log.error(portalException, portalException);
+			_log.error(portalException);
 		}
 
 		return true;
@@ -651,7 +741,9 @@ public class CommerceOrderContentDisplayContext {
 		_commercePaymentMethodGroupRelService;
 	private final CommerceShipmentItemService _commerceShipmentItemService;
 	private final CPRequestHelper _cpRequestHelper;
+	private final DLAppLocalService _dlAppLocalService;
 	private final HttpServletRequest _httpServletRequest;
+	private final ItemSelector _itemSelector;
 	private final ModelResourcePermission<CommerceOrder>
 		_modelResourcePermission;
 	private final PercentageFormatter _percentageFormatter;

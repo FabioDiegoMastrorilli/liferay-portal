@@ -16,7 +16,6 @@ package com.liferay.commerce.product.model.impl;
 
 import com.liferay.commerce.product.model.CPDisplayLayout;
 import com.liferay.commerce.product.model.CPDisplayLayoutModel;
-import com.liferay.commerce.product.model.CPDisplayLayoutSoap;
 import com.liferay.expando.kernel.model.ExpandoBridge;
 import com.liferay.expando.kernel.util.ExpandoBridgeFactoryUtil;
 import com.liferay.exportimport.kernel.lar.StagedModelType;
@@ -44,12 +43,10 @@ import java.lang.reflect.InvocationHandler;
 import java.sql.Blob;
 import java.sql.Types;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.BiConsumer;
@@ -78,18 +75,19 @@ public class CPDisplayLayoutModelImpl
 	public static final String TABLE_NAME = "CPDisplayLayout";
 
 	public static final Object[][] TABLE_COLUMNS = {
-		{"uuid_", Types.VARCHAR}, {"CPDisplayLayoutId", Types.BIGINT},
-		{"groupId", Types.BIGINT}, {"companyId", Types.BIGINT},
-		{"userId", Types.BIGINT}, {"userName", Types.VARCHAR},
-		{"createDate", Types.TIMESTAMP}, {"modifiedDate", Types.TIMESTAMP},
-		{"classNameId", Types.BIGINT}, {"classPK", Types.BIGINT},
-		{"layoutUuid", Types.VARCHAR}
+		{"mvccVersion", Types.BIGINT}, {"uuid_", Types.VARCHAR},
+		{"CPDisplayLayoutId", Types.BIGINT}, {"groupId", Types.BIGINT},
+		{"companyId", Types.BIGINT}, {"userId", Types.BIGINT},
+		{"userName", Types.VARCHAR}, {"createDate", Types.TIMESTAMP},
+		{"modifiedDate", Types.TIMESTAMP}, {"classNameId", Types.BIGINT},
+		{"classPK", Types.BIGINT}, {"layoutUuid", Types.VARCHAR}
 	};
 
 	public static final Map<String, Integer> TABLE_COLUMNS_MAP =
 		new HashMap<String, Integer>();
 
 	static {
+		TABLE_COLUMNS_MAP.put("mvccVersion", Types.BIGINT);
 		TABLE_COLUMNS_MAP.put("uuid_", Types.VARCHAR);
 		TABLE_COLUMNS_MAP.put("CPDisplayLayoutId", Types.BIGINT);
 		TABLE_COLUMNS_MAP.put("groupId", Types.BIGINT);
@@ -104,7 +102,7 @@ public class CPDisplayLayoutModelImpl
 	}
 
 	public static final String TABLE_SQL_CREATE =
-		"create table CPDisplayLayout (uuid_ VARCHAR(75) null,CPDisplayLayoutId LONG not null primary key,groupId LONG,companyId LONG,userId LONG,userName VARCHAR(75) null,createDate DATE null,modifiedDate DATE null,classNameId LONG,classPK LONG,layoutUuid VARCHAR(75) null)";
+		"create table CPDisplayLayout (mvccVersion LONG default 0 not null,uuid_ VARCHAR(75) null,CPDisplayLayoutId LONG not null primary key,groupId LONG,companyId LONG,userId LONG,userName VARCHAR(75) null,createDate DATE null,modifiedDate DATE null,classNameId LONG,classPK LONG,layoutUuid VARCHAR(75) null)";
 
 	public static final String TABLE_SQL_DROP = "drop table CPDisplayLayout";
 
@@ -180,61 +178,6 @@ public class CPDisplayLayoutModelImpl
 	 */
 	@Deprecated
 	public static final long CPDISPLAYLAYOUTID_COLUMN_BITMASK = 64L;
-
-	/**
-	 * Converts the soap model instance into a normal model instance.
-	 *
-	 * @param soapModel the soap model instance to convert
-	 * @return the normal model instance
-	 * @deprecated As of Athanasius (7.3.x), with no direct replacement
-	 */
-	@Deprecated
-	public static CPDisplayLayout toModel(CPDisplayLayoutSoap soapModel) {
-		if (soapModel == null) {
-			return null;
-		}
-
-		CPDisplayLayout model = new CPDisplayLayoutImpl();
-
-		model.setUuid(soapModel.getUuid());
-		model.setCPDisplayLayoutId(soapModel.getCPDisplayLayoutId());
-		model.setGroupId(soapModel.getGroupId());
-		model.setCompanyId(soapModel.getCompanyId());
-		model.setUserId(soapModel.getUserId());
-		model.setUserName(soapModel.getUserName());
-		model.setCreateDate(soapModel.getCreateDate());
-		model.setModifiedDate(soapModel.getModifiedDate());
-		model.setClassNameId(soapModel.getClassNameId());
-		model.setClassPK(soapModel.getClassPK());
-		model.setLayoutUuid(soapModel.getLayoutUuid());
-
-		return model;
-	}
-
-	/**
-	 * Converts the soap model instances into normal model instances.
-	 *
-	 * @param soapModels the soap model instances to convert
-	 * @return the normal model instances
-	 * @deprecated As of Athanasius (7.3.x), with no direct replacement
-	 */
-	@Deprecated
-	public static List<CPDisplayLayout> toModels(
-		CPDisplayLayoutSoap[] soapModels) {
-
-		if (soapModels == null) {
-			return null;
-		}
-
-		List<CPDisplayLayout> models = new ArrayList<CPDisplayLayout>(
-			soapModels.length);
-
-		for (CPDisplayLayoutSoap soapModel : soapModels) {
-			models.add(toModel(soapModel));
-		}
-
-		return models;
-	}
 
 	public static final long LOCK_EXPIRATION_TIME = GetterUtil.getLong(
 		com.liferay.commerce.product.service.util.ServiceProps.get(
@@ -365,6 +308,11 @@ public class CPDisplayLayoutModelImpl
 		Map<String, BiConsumer<CPDisplayLayout, ?>> attributeSetterBiConsumers =
 			new LinkedHashMap<String, BiConsumer<CPDisplayLayout, ?>>();
 
+		attributeGetterFunctions.put(
+			"mvccVersion", CPDisplayLayout::getMvccVersion);
+		attributeSetterBiConsumers.put(
+			"mvccVersion",
+			(BiConsumer<CPDisplayLayout, Long>)CPDisplayLayout::setMvccVersion);
 		attributeGetterFunctions.put("uuid", CPDisplayLayout::getUuid);
 		attributeSetterBiConsumers.put(
 			"uuid",
@@ -423,6 +371,21 @@ public class CPDisplayLayoutModelImpl
 			attributeGetterFunctions);
 		_attributeSetterBiConsumers = Collections.unmodifiableMap(
 			(Map)attributeSetterBiConsumers);
+	}
+
+	@JSON
+	@Override
+	public long getMvccVersion() {
+		return _mvccVersion;
+	}
+
+	@Override
+	public void setMvccVersion(long mvccVersion) {
+		if (_columnOriginalValues == Collections.EMPTY_MAP) {
+			_setColumnOriginalValues();
+		}
+
+		_mvccVersion = mvccVersion;
 	}
 
 	@JSON
@@ -766,6 +729,7 @@ public class CPDisplayLayoutModelImpl
 	public Object clone() {
 		CPDisplayLayoutImpl cpDisplayLayoutImpl = new CPDisplayLayoutImpl();
 
+		cpDisplayLayoutImpl.setMvccVersion(getMvccVersion());
 		cpDisplayLayoutImpl.setUuid(getUuid());
 		cpDisplayLayoutImpl.setCPDisplayLayoutId(getCPDisplayLayoutId());
 		cpDisplayLayoutImpl.setGroupId(getGroupId());
@@ -787,6 +751,8 @@ public class CPDisplayLayoutModelImpl
 	public CPDisplayLayout cloneWithOriginalValues() {
 		CPDisplayLayoutImpl cpDisplayLayoutImpl = new CPDisplayLayoutImpl();
 
+		cpDisplayLayoutImpl.setMvccVersion(
+			this.<Long>getColumnOriginalValue("mvccVersion"));
 		cpDisplayLayoutImpl.setUuid(
 			this.<String>getColumnOriginalValue("uuid_"));
 		cpDisplayLayoutImpl.setCPDisplayLayoutId(
@@ -886,6 +852,8 @@ public class CPDisplayLayoutModelImpl
 	public CacheModel<CPDisplayLayout> toCacheModel() {
 		CPDisplayLayoutCacheModel cpDisplayLayoutCacheModel =
 			new CPDisplayLayoutCacheModel();
+
+		cpDisplayLayoutCacheModel.mvccVersion = getMvccVersion();
 
 		cpDisplayLayoutCacheModel.uuid = getUuid();
 
@@ -1031,6 +999,7 @@ public class CPDisplayLayoutModelImpl
 
 	}
 
+	private long _mvccVersion;
 	private String _uuid;
 	private long _CPDisplayLayoutId;
 	private long _groupId;
@@ -1073,6 +1042,7 @@ public class CPDisplayLayoutModelImpl
 	private void _setColumnOriginalValues() {
 		_columnOriginalValues = new HashMap<String, Object>();
 
+		_columnOriginalValues.put("mvccVersion", _mvccVersion);
 		_columnOriginalValues.put("uuid_", _uuid);
 		_columnOriginalValues.put("CPDisplayLayoutId", _CPDisplayLayoutId);
 		_columnOriginalValues.put("groupId", _groupId);
@@ -1107,27 +1077,29 @@ public class CPDisplayLayoutModelImpl
 	static {
 		Map<String, Long> columnBitmasks = new HashMap<>();
 
-		columnBitmasks.put("uuid_", 1L);
+		columnBitmasks.put("mvccVersion", 1L);
 
-		columnBitmasks.put("CPDisplayLayoutId", 2L);
+		columnBitmasks.put("uuid_", 2L);
 
-		columnBitmasks.put("groupId", 4L);
+		columnBitmasks.put("CPDisplayLayoutId", 4L);
 
-		columnBitmasks.put("companyId", 8L);
+		columnBitmasks.put("groupId", 8L);
 
-		columnBitmasks.put("userId", 16L);
+		columnBitmasks.put("companyId", 16L);
 
-		columnBitmasks.put("userName", 32L);
+		columnBitmasks.put("userId", 32L);
 
-		columnBitmasks.put("createDate", 64L);
+		columnBitmasks.put("userName", 64L);
 
-		columnBitmasks.put("modifiedDate", 128L);
+		columnBitmasks.put("createDate", 128L);
 
-		columnBitmasks.put("classNameId", 256L);
+		columnBitmasks.put("modifiedDate", 256L);
 
-		columnBitmasks.put("classPK", 512L);
+		columnBitmasks.put("classNameId", 512L);
 
-		columnBitmasks.put("layoutUuid", 1024L);
+		columnBitmasks.put("classPK", 1024L);
+
+		columnBitmasks.put("layoutUuid", 2048L);
 
 		_columnBitmasks = Collections.unmodifiableMap(columnBitmasks);
 	}

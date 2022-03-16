@@ -17,7 +17,6 @@ package com.liferay.object.service.test;
 import com.liferay.arquillian.extension.junit.bridge.junit.Arquillian;
 import com.liferay.object.constants.ObjectDefinitionConstants;
 import com.liferay.object.constants.ObjectRelationshipConstants;
-import com.liferay.object.exception.DuplicateObjectDefinitionException;
 import com.liferay.object.exception.NoSuchObjectFieldException;
 import com.liferay.object.exception.ObjectDefinitionLabelException;
 import com.liferay.object.exception.ObjectDefinitionNameException;
@@ -199,7 +198,10 @@ public class ObjectDefinitionLocalServiceTest {
 				"Test", null, null,
 				LocalizedMapUtil.getLocalizedMap(RandomTestUtil.randomString()),
 				ObjectDefinitionConstants.SCOPE_COMPANY,
-				Collections.<ObjectField>emptyList());
+				Arrays.asList(
+					ObjectFieldUtil.createObjectField(
+						"Text", "String", RandomTestUtil.randomString(),
+						StringUtil.randomId())));
 
 		objectDefinition =
 			_objectDefinitionLocalService.publishCustomObjectDefinition(
@@ -209,12 +211,12 @@ public class ObjectDefinitionLocalServiceTest {
 		try {
 			_testAddCustomObjectDefinition("Test");
 		}
-		catch (DuplicateObjectDefinitionException
-					duplicateObjectDefinitionException) {
+		catch (ObjectDefinitionNameException.MustNotBeDuplicate
+					objectDefinitionNameException) {
 
 			Assert.assertEquals(
 				"Duplicate name C_Test",
-				duplicateObjectDefinitionException.getMessage());
+				objectDefinitionNameException.getMessage());
 		}
 
 		_objectDefinitionLocalService.deleteObjectDefinition(objectDefinition);
@@ -227,7 +229,11 @@ public class ObjectDefinitionLocalServiceTest {
 				LocalizedMapUtil.getLocalizedMap(RandomTestUtil.randomString()),
 				"Test", null, null,
 				LocalizedMapUtil.getLocalizedMap(RandomTestUtil.randomString()),
-				"", Collections.<ObjectField>emptyList());
+				"",
+				Arrays.asList(
+					ObjectFieldUtil.createObjectField(
+						"Text", "String", RandomTestUtil.randomString(),
+						StringUtil.randomId())));
 
 			Assert.fail();
 		}
@@ -246,7 +252,11 @@ public class ObjectDefinitionLocalServiceTest {
 				LocalizedMapUtil.getLocalizedMap(RandomTestUtil.randomString()),
 				"Test", null, null,
 				LocalizedMapUtil.getLocalizedMap(RandomTestUtil.randomString()),
-				scope, Collections.<ObjectField>emptyList());
+				scope,
+				Arrays.asList(
+					ObjectFieldUtil.createObjectField(
+						"Text", "String", RandomTestUtil.randomString(),
+						StringUtil.randomId())));
 
 			Assert.fail();
 		}
@@ -267,15 +277,15 @@ public class ObjectDefinitionLocalServiceTest {
 				ObjectDefinitionConstants.SCOPE_COMPANY,
 				Arrays.asList(
 					ObjectFieldUtil.createObjectField(
-						"Able", "able", false, "String"),
+						"Text", "String", "Able", "able", false),
 					ObjectFieldUtil.createObjectField(
-						"Baker", "baker", false, "String")));
+						"Text", "String", "Baker", "baker", false)));
 
 		_objectFieldLocalService.addCustomObjectField(
 			TestPropsValues.getUserId(), 0,
-			objectDefinition.getObjectDefinitionId(), false, false, null,
-			LocalizedMapUtil.getLocalizedMap("Charlie"), "charlie", true,
-			"String");
+			objectDefinition.getObjectDefinitionId(), "Text", "String", false,
+			false, null, LocalizedMapUtil.getLocalizedMap("Charlie"), "charlie",
+			true, Collections.emptyList());
 
 		// Before publish, database table
 
@@ -319,8 +329,9 @@ public class ObjectDefinitionLocalServiceTest {
 
 		_objectFieldLocalService.addCustomObjectField(
 			TestPropsValues.getUserId(), 0,
-			objectDefinition.getObjectDefinitionId(), false, false, null,
-			LocalizedMapUtil.getLocalizedMap("Dog"), "dog", true, "String");
+			objectDefinition.getObjectDefinitionId(), "Text", "String", false,
+			false, null, LocalizedMapUtil.getLocalizedMap("Dog"), "dog", true,
+			Collections.emptyList());
 
 		// After publish, database table
 
@@ -396,12 +407,14 @@ public class ObjectDefinitionLocalServiceTest {
 					public List<ObjectField> getObjectFields() {
 						return Arrays.asList(
 							createObjectField(
-								"Action Required", "actionRequired", true,
-								"Boolean"),
+								"Boolean", "Boolean", "Action Required",
+								"actionRequired", true),
 							createObjectField(
-								"Delivery Type", "deliveryType", false, "Long"),
+								"LongInteger", "Long", "Delivery Type",
+								"deliveryType", false),
 							createObjectField(
-								"type_", "Type", "type", true, "String"));
+								"Text", "type_", "String", "Type", "type",
+								true));
 					}
 
 					@Override
@@ -449,8 +462,8 @@ public class ObjectDefinitionLocalServiceTest {
 		Assert.assertEquals(1, objectDefinition.getVersion());
 
 		_assertObjectField(
-			objectDefinition, "actionRequired", "actionRequired", true,
-			"Boolean");
+			objectDefinition, "actionRequired", "Boolean", "actionRequired",
+			true);
 
 		try {
 			_objectFieldLocalService.getObjectField(
@@ -463,8 +476,8 @@ public class ObjectDefinitionLocalServiceTest {
 		}
 
 		_assertObjectField(
-			objectDefinition, "deliveryType", "deliveryType", false, "Long");
-		_assertObjectField(objectDefinition, "type_", "type", true, "String");
+			objectDefinition, "deliveryType", "Long", "deliveryType", false);
+		_assertObjectField(objectDefinition, "type_", "String", "type", true);
 
 		objectDefinition =
 			_objectDefinitionLocalService.addOrUpdateSystemObjectDefinition(
@@ -486,11 +499,14 @@ public class ObjectDefinitionLocalServiceTest {
 					public List<ObjectField> getObjectFields() {
 						return Arrays.asList(
 							createObjectField(
-								"Archived", "archived", true, "Boolean"),
+								"Boolean", "Boolean", "Archived", "archived",
+								true),
 							createObjectField(
-								"Delivery Type", "deliveryType", true, "Long"),
+								"LongInteger", "Long", "Delivery Type",
+								"deliveryType", true),
 							createObjectField(
-								"type_", "Type", "type", false, "String"));
+								"Text", "type_", "String", "Type", "type",
+								false));
 					}
 
 					@Override
@@ -540,10 +556,10 @@ public class ObjectDefinitionLocalServiceTest {
 		}
 
 		_assertObjectField(
-			objectDefinition, "archived", "archived", true, "Boolean");
+			objectDefinition, "archived", "Boolean", "archived", true);
 		_assertObjectField(
-			objectDefinition, "deliveryType", "deliveryType", true, "Long");
-		_assertObjectField(objectDefinition, "type_", "type", false, "String");
+			objectDefinition, "deliveryType", "Long", "deliveryType", true);
+		_assertObjectField(objectDefinition, "type_", "String", "type", false);
 
 		_objectDefinitionLocalService.deleteObjectDefinition(objectDefinition);
 	}
@@ -665,17 +681,20 @@ public class ObjectDefinitionLocalServiceTest {
 				"Test", null, null,
 				LocalizedMapUtil.getLocalizedMap(RandomTestUtil.randomString()),
 				ObjectDefinitionConstants.SCOPE_COMPANY, 1,
-				Collections.<ObjectField>emptyList());
+				Arrays.asList(
+					ObjectFieldUtil.createObjectField(
+						"Text", "String", RandomTestUtil.randomString(),
+						StringUtil.randomId())));
 
 		try {
 			_testAddSystemObjectDefinition("Test");
 		}
-		catch (DuplicateObjectDefinitionException
-					duplicateObjectDefinitionException) {
+		catch (ObjectDefinitionNameException.MustNotBeDuplicate
+					objectDefinitionNameException) {
 
 			Assert.assertEquals(
 				"Duplicate name Test",
-				duplicateObjectDefinitionException.getMessage());
+				objectDefinitionNameException.getMessage());
 		}
 
 		_objectDefinitionLocalService.deleteObjectDefinition(objectDefinition);
@@ -688,7 +707,11 @@ public class ObjectDefinitionLocalServiceTest {
 				LocalizedMapUtil.getLocalizedMap(RandomTestUtil.randomString()),
 				"Test", null, null,
 				LocalizedMapUtil.getLocalizedMap(RandomTestUtil.randomString()),
-				"", 1, Collections.<ObjectField>emptyList());
+				"", 1,
+				Arrays.asList(
+					ObjectFieldUtil.createObjectField(
+						"Text", "String", RandomTestUtil.randomString(),
+						StringUtil.randomId())));
 
 			Assert.fail();
 		}
@@ -766,8 +789,9 @@ public class ObjectDefinitionLocalServiceTest {
 
 		_objectFieldLocalService.addCustomObjectField(
 			TestPropsValues.getUserId(), 0,
-			objectDefinition.getObjectDefinitionId(), false, false, null,
-			LocalizedMapUtil.getLocalizedMap("Able"), "able", true, "String");
+			objectDefinition.getObjectDefinitionId(), "Text", "String", false,
+			false, null, LocalizedMapUtil.getLocalizedMap("Able"), "able", true,
+			Collections.emptyList());
 
 		// Database table
 
@@ -851,7 +875,10 @@ public class ObjectDefinitionLocalServiceTest {
 				"Test", null, null,
 				LocalizedMapUtil.getLocalizedMap(RandomTestUtil.randomString()),
 				ObjectDefinitionConstants.SCOPE_COMPANY,
-				Collections.<ObjectField>emptyList());
+				Arrays.asList(
+					ObjectFieldUtil.createObjectField(
+						"Text", "String", RandomTestUtil.randomString(),
+						StringUtil.randomId())));
 
 		_objectDefinitionLocalService.publishCustomObjectDefinition(
 			TestPropsValues.getUserId(),
@@ -920,7 +947,7 @@ public class ObjectDefinitionLocalServiceTest {
 					RandomTestUtil.randomLong(), RandomTestUtil.randomLong(),
 					objectDefinition.isActive(),
 					LocalizedMapUtil.getLocalizedMap("Able"), "Able", null,
-					null, LocalizedMapUtil.getLocalizedMap("Ables"),
+					null, false, LocalizedMapUtil.getLocalizedMap("Ables"),
 					objectDefinition.getScope());
 
 			Assert.fail();
@@ -931,9 +958,10 @@ public class ObjectDefinitionLocalServiceTest {
 
 		ObjectField objectField = _objectFieldLocalService.addCustomObjectField(
 			TestPropsValues.getUserId(), 0,
-			objectDefinition.getObjectDefinitionId(), false, false, null,
+			objectDefinition.getObjectDefinitionId(), "Text", "String", false,
+			false, null,
 			LocalizedMapUtil.getLocalizedMap(RandomTestUtil.randomString()),
-			StringUtil.randomId(), true, "String");
+			StringUtil.randomId(), true, Collections.emptyList());
 
 		objectDefinition =
 			_objectDefinitionLocalService.updateCustomObjectDefinition(
@@ -941,7 +969,7 @@ public class ObjectDefinitionLocalServiceTest {
 				objectField.getObjectFieldId(), objectField.getObjectFieldId(),
 				objectDefinition.isActive(),
 				LocalizedMapUtil.getLocalizedMap("Able"), "Able", null, null,
-				LocalizedMapUtil.getLocalizedMap("Ables"),
+				false, LocalizedMapUtil.getLocalizedMap("Ables"),
 				objectDefinition.getScope());
 
 		Assert.assertEquals(
@@ -956,7 +984,7 @@ public class ObjectDefinitionLocalServiceTest {
 				objectDefinition.getObjectDefinitionId(), 0, 0,
 				objectDefinition.isActive(),
 				LocalizedMapUtil.getLocalizedMap("Able"), "Able", null, null,
-				LocalizedMapUtil.getLocalizedMap("Ables"),
+				false, LocalizedMapUtil.getLocalizedMap("Ables"),
 				objectDefinition.getScope());
 
 		Assert.assertEquals(0, objectDefinition.getDescriptionObjectFieldId());
@@ -975,7 +1003,7 @@ public class ObjectDefinitionLocalServiceTest {
 				objectDefinition.getObjectDefinitionId(), 0, 0,
 				objectDefinition.isActive(),
 				LocalizedMapUtil.getLocalizedMap("Baker"), "Baker", null, null,
-				LocalizedMapUtil.getLocalizedMap("Bakers"),
+				false, LocalizedMapUtil.getLocalizedMap("Bakers"),
 				objectDefinition.getScope());
 
 		Assert.assertFalse(objectDefinition.isActive());
@@ -995,7 +1023,7 @@ public class ObjectDefinitionLocalServiceTest {
 			_objectDefinitionLocalService.updateCustomObjectDefinition(
 				objectDefinition.getObjectDefinitionId(), 0, 0, true,
 				LocalizedMapUtil.getLocalizedMap("Charlie"), "Charlie", null,
-				null, LocalizedMapUtil.getLocalizedMap("Charlies"),
+				null, false, LocalizedMapUtil.getLocalizedMap("Charlies"),
 				objectDefinition.getScope());
 
 		Assert.assertTrue(objectDefinition.isActive());
@@ -1013,20 +1041,62 @@ public class ObjectDefinitionLocalServiceTest {
 		_objectDefinitionLocalService.deleteObjectDefinition(objectDefinition);
 	}
 
+	@Test
+	public void testUpdateTitleObjectFieldId() throws Exception {
+		ObjectDefinition objectDefinition =
+			_objectDefinitionLocalService.addCustomObjectDefinition(
+				TestPropsValues.getUserId(),
+				LocalizedMapUtil.getLocalizedMap(RandomTestUtil.randomString()),
+				"A" + RandomTestUtil.randomString(), null, null,
+				LocalizedMapUtil.getLocalizedMap(RandomTestUtil.randomString()),
+				ObjectDefinitionConstants.SCOPE_COMPANY,
+				Collections.emptyList());
+
+		try {
+			objectDefinition =
+				_objectDefinitionLocalService.updateTitleObjectFieldId(
+					objectDefinition.getObjectDefinitionId(),
+					RandomTestUtil.randomLong());
+
+			Assert.fail();
+		}
+		catch (NoSuchObjectFieldException noSuchObjectFieldException) {
+			Assert.assertNotNull(noSuchObjectFieldException);
+		}
+
+		ObjectField objectField = _objectFieldLocalService.addCustomObjectField(
+			TestPropsValues.getUserId(), 0,
+			objectDefinition.getObjectDefinitionId(), "Text", "String", false,
+			false, null,
+			LocalizedMapUtil.getLocalizedMap(RandomTestUtil.randomString()),
+			StringUtil.randomId(), true, Collections.emptyList());
+
+		objectDefinition =
+			_objectDefinitionLocalService.updateTitleObjectFieldId(
+				objectDefinition.getObjectDefinitionId(),
+				objectField.getObjectFieldId());
+
+		Assert.assertEquals(
+			objectField.getObjectFieldId(),
+			objectDefinition.getTitleObjectFieldId());
+
+		_objectDefinitionLocalService.deleteObjectDefinition(objectDefinition);
+	}
+
 	private void _assertObjectField(
-			ObjectDefinition objectDefinition, String dbColumnName, String name,
-			boolean required, String type)
+			ObjectDefinition objectDefinition, String dbColumnName,
+			String dbType, String name, boolean required)
 		throws Exception {
 
 		ObjectField objectField = _objectFieldLocalService.getObjectField(
 			objectDefinition.getObjectDefinitionId(), name);
 
 		Assert.assertEquals(dbColumnName, objectField.getDBColumnName());
+		Assert.assertEquals(dbType, objectField.getDBType());
 		Assert.assertFalse(objectField.isIndexed());
 		Assert.assertFalse(objectField.isIndexedAsKeyword());
 		Assert.assertEquals("", objectField.getIndexedLanguageId());
 		Assert.assertEquals(required, objectField.isRequired());
-		Assert.assertEquals(type, objectField.getType());
 	}
 
 	private boolean _hasColumn(String tableName, String columnName)
@@ -1064,7 +1134,10 @@ public class ObjectDefinitionLocalServiceTest {
 					LocalizedMapUtil.getLocalizedMap(label), name, null, null,
 					LocalizedMapUtil.getLocalizedMap(pluralLabel),
 					ObjectDefinitionConstants.SCOPE_COMPANY,
-					Collections.<ObjectField>emptyList());
+					Arrays.asList(
+						ObjectFieldUtil.createObjectField(
+							"Text", "String", RandomTestUtil.randomString(),
+							StringUtil.randomId())));
 
 			objectDefinition =
 				_objectDefinitionLocalService.publishCustomObjectDefinition(
@@ -1096,7 +1169,10 @@ public class ObjectDefinitionLocalServiceTest {
 					LocalizedMapUtil.getLocalizedMap(
 						RandomTestUtil.randomString()),
 					ObjectDefinitionConstants.SCOPE_COMPANY, 1,
-					Collections.<ObjectField>emptyList());
+					Arrays.asList(
+						ObjectFieldUtil.createObjectField(
+							"Text", "String", RandomTestUtil.randomString(),
+							StringUtil.randomId())));
 		}
 		finally {
 			if (objectDefinition != null) {
@@ -1118,7 +1194,10 @@ public class ObjectDefinitionLocalServiceTest {
 				"A" + RandomTestUtil.randomString(), null, null,
 				LocalizedMapUtil.getLocalizedMap(RandomTestUtil.randomString()),
 				ObjectDefinitionConstants.SCOPE_COMPANY,
-				Collections.<ObjectField>emptyList());
+				Arrays.asList(
+					ObjectFieldUtil.createObjectField(
+						"Text", "String", RandomTestUtil.randomString(),
+						StringUtil.randomId())));
 
 		objectDefinition2 =
 			_objectDefinitionLocalService.publishCustomObjectDefinition(
@@ -1130,6 +1209,7 @@ public class ObjectDefinitionLocalServiceTest {
 				TestPropsValues.getUserId(),
 				objectDefinition1.getObjectDefinitionId(),
 				objectDefinition2.getObjectDefinitionId(),
+				ObjectRelationshipConstants.DELETION_TYPE_PREVENT,
 				LocalizedMapUtil.getLocalizedMap(RandomTestUtil.randomString()),
 				StringUtil.randomId(),
 				ObjectRelationshipConstants.TYPE_ONE_TO_MANY);
@@ -1141,7 +1221,7 @@ public class ObjectDefinitionLocalServiceTest {
 					objectRelationship.getObjectFieldId2(), 0,
 					objectDefinition2.isActive(),
 					LocalizedMapUtil.getLocalizedMap("Able"), "Able", null,
-					null, LocalizedMapUtil.getLocalizedMap("Ables"),
+					null, false, LocalizedMapUtil.getLocalizedMap("Ables"),
 					objectDefinition2.getScope());
 
 			Assert.fail();

@@ -2,6 +2,8 @@
 definition {
 
 	property custom.properties = "minifier.enabled=true";
+	property osgi.module.configuration.file.names = "com.liferay.frontend.js.loader.modules.extender.internal.configuration.Details.config";
+	property osgi.module.configurations = "waitTimeout=&quot;15&quot;";
 	property portal.release = "true";
 	property portal.upstream = "true";
 	property testray.main.component.name = "Forms";
@@ -22,7 +24,7 @@ definition {
 			Navigator.openURL();
 
 			ProductMenu.gotoPortlet(
-				category = "Content &amp; Data",
+				category = "Content & Data",
 				portlet = "Forms");
 
 			FormsAdmin.teardownForms();
@@ -31,14 +33,14 @@ definition {
 
 			FormsAdmin.teardownElementSets();
 
-			Page.tearDownCP();
+			PagesAdmin.tearDownCP();
 		}
 	}
 
 	@description = "Verify that the backspace function can delete all entries in the Calculator"
 	@priority = "5"
 	test BackspaceCanDeleteAllEntriesInCalculator {
-		property forms.functional = "true";
+		property portal.acceptance = "true";
 
 		FormsAdmin.addForm();
 
@@ -122,7 +124,7 @@ definition {
 	@description = "Verify that a Rule Action can be deleted"
 	@priority = "5"
 	test CanBeDeleted {
-		property forms.functional = "true";
+		property portal.acceptance = "true";
 
 		FormsAdmin.addForm();
 
@@ -197,7 +199,7 @@ definition {
 	@description = "Verify that a Rule Action can be edited"
 	@priority = "5"
 	test CanBeEdited {
-		property forms.functional = "true";
+		property portal.acceptance = "true";
 
 		FormsAdmin.addForm();
 
@@ -358,7 +360,7 @@ definition {
 	@description = "Verify that a Rule with 'Jump to page' action can be created"
 	@priority = "4"
 	test CanCreateAJumpToPageRule {
-		property forms.functional = "true";
+		property portal.acceptance = "true";
 
 		FormsAdmin.addForm();
 
@@ -430,7 +432,7 @@ definition {
 	@description = "Verify that a Rule with 'Enable' action can be created"
 	@priority = "4"
 	test CanCreateAnEnableRule {
-		property forms.functional = "true";
+		property portal.acceptance = "true";
 
 		FormsAdmin.addForm();
 
@@ -558,7 +560,7 @@ definition {
 	@description = "Verify that a Rule with more than one Action can be created"
 	@priority = "5"
 	test CanCreateARuleWithMoreThanOneAction {
-		property forms.functional = "true";
+		property portal.acceptance = "true";
 
 		FormsAdmin.addForm();
 
@@ -639,7 +641,7 @@ definition {
 	@description = "Verify that a Rule with 'Show' action can be created"
 	@priority = "5"
 	test CanCreateAShowRule {
-		property forms.functional = "true";
+		property portal.acceptance = "true";
 
 		FormsAdmin.addForm();
 
@@ -701,15 +703,15 @@ definition {
 	@description = "Verify that a Calculate Rule can be created using the decimal point"
 	@priority = "5"
 	test CanIncludeDecimalPointInCalculations {
-		property forms.functional = "true";
+		property portal.acceptance = "true";
 
 		FormsAdmin.addForm();
 
 		Form.editName(formName = "Form 1");
 
 		for (var fieldAndPosition : list "Text-0,Numeric-1") {
-			var field = StringUtil.extractFirst("${fieldAndPosition}","-");
-			var position = StringUtil.extractLast("${fieldAndPosition}","-");
+			var field = StringUtil.extractFirst("${fieldAndPosition}", "-");
+			var position = StringUtil.extractLast("${fieldAndPosition}", "-");
 
 			Form.gotoAddField(
 				fieldPositionNumber = "${position}",
@@ -772,7 +774,7 @@ definition {
 	@description = "Verify that a Calculate Rule can be created using Numeric Fields in the calculation"
 	@priority = "5"
 	test CanIncludeNumericFieldsInCalculations {
-		property forms.functional = "true";
+		property portal.acceptance = "true";
 
 		FormsAdmin.addForm();
 
@@ -846,7 +848,7 @@ definition {
 	@description = "Verify that a Calculate Rule can be created using all operators (+, -, *, /)"
 	@priority = "5"
 	test CanIncludeOperatorsInCalculations {
-		property forms.functional = "true";
+		property portal.acceptance = "true";
 
 		FormsAdmin.addForm();
 
@@ -930,7 +932,7 @@ definition {
 	@description = "Verify that a Calculate Rule can be created using the parenthesis"
 	@priority = "5"
 	test CanIncludeParenthesisInCalculations {
-		property forms.functional = "true";
+		property portal.acceptance = "true";
 
 		FormsAdmin.addForm();
 
@@ -1007,6 +1009,111 @@ definition {
 			successPageTitle = "Thank you.");
 	}
 
+	@description = "LPS-102616 Configure data providers in both input and output fields in autofill rule"
+	@priority = "5"
+	test CanUtilizeDataProvidersInAutofillRule {
+		property portal.acceptance = "true";
+		property portal.upstream = "true";
+		property test.name.skip.portal.instance = "FormsRulesActions#CanUtilizeDataProvidersInAutofillRule";
+
+		task ("Go to Content > Forms and add a Data Provider") {
+			FormsAdmin.openFormsAdmin(siteURLKey = "guest");
+
+			Navigator.gotoNavItem(navItem = "Data Providers");
+
+			FormsAdminNavigator.gotoAddDataProvider();
+
+			FormsAdmin.editDataProvider(
+				inputParameterLabel = "zipcode",
+				inputParameterName = "zipcode",
+				inputParameterType = "Text",
+				name = "zipcloud",
+				outputParameterLabel = "prefecture",
+				outputParameterPath = "$.results[0].address1",
+				outputParameterType = "Text",
+				timeout = "3000",
+				url = "http://zipcloud.ibsnet.co.jp/api/search?zipcode={zipcode}");
+
+			FormsAdmin.saveDataProvider();
+		}
+
+		task ("Add a form with two text fields: Address and Postal Code") {
+			FormsAdmin.addForm();
+
+			Form.editName(formName = "Address");
+
+			Form.addTextField(fieldPositionNumber = "0");
+
+			var fieldNameTextField = FormFields.getFieldName();
+
+			FormFields.enableSwitch(fieldName = "Required");
+
+			Form.editFieldLabelMetal(fieldValue = "Postal code");
+
+			Form.closeSidebar();
+
+			Form.addTextField(fieldPositionNumber = "1");
+
+			var fieldNameTextField2 = FormFields.getFieldName();
+
+			FormFields.enableSwitch(fieldName = "Required");
+
+			Form.editFieldLabelMetal(fieldValue = "Prefectures");
+
+			Form.closeSidebar();
+		}
+
+		task ("Add a Rule to the form (If Field Postal Code is not empty, Autofill Prefectures from Data Provider zipcloud") {
+			FormsAdminNavigator.gotoRules();
+
+			FormRules.addRule();
+
+			FormRules.configureConditionOptions(
+				conditionField = "Postal code",
+				conditionOperator = "Is Not Empty",
+				conditionRowNumber = "1");
+
+			FormRules.configureActionOptions(
+				action = "Autofill",
+				actionRowNumber = "1",
+				actionTarget = "zipcloud");
+
+			FormRules.selectAutofillFromDataProvider(
+				dataProviderOption = "Postal code",
+				dataProviderParameterName = "zipcode");
+
+			ScrollBy(value1 = "0, 200");
+
+			FormRules.selectAutofillFromDataProvider(
+				dataProviderOption = "Prefectures",
+				dataProviderParameterName = "prefecture");
+
+			FormRules.save();
+		}
+
+		task ("Publish the form") {
+			FormsAdminNavigator.gotoFormBuilder();
+
+			Form.publishForm();
+		}
+
+		task ("Go to the published, fill the Postal code with 1500000") {
+			FormsAdminNavigator.gotoPublishedForm();
+
+			FormFields.editText(
+				fieldName = "${fieldNameTextField}",
+				fieldValue = "1500000");
+		}
+
+		task ("Assert that the Prefectures field was filled by the Data Provider and the form can be submited") {
+			FormFields.viewTextValue(
+				fieldName = "${fieldNameTextField2}",
+				fieldValue = "東京都");
+
+			FormPortlet.submitSuccessfullyAndViewSuccessPage();
+		}
+	}
+
 	@description = "LPS-70446 - Verify that a Rule with 'Autofill' action can be created with Data Providers"
 	@priority = "5"
 	test CanUtilizeDataProvidersToCreateAnAutofillRule {
@@ -1021,7 +1128,7 @@ definition {
 		Navigator.openURL();
 
 		ProductMenu.gotoPortlet(
-			category = "Content &amp; Data",
+			category = "Content & Data",
 			portlet = "Forms");
 
 		Navigator.gotoNavItem(navItem = "Data Providers");
@@ -1089,7 +1196,9 @@ definition {
 			actionRowNumber = "1",
 			actionTarget = "Liferay Countries");
 
-		FormRules.selectAutofillOutput(dataProviderOutput = "Countries");
+		FormRules.selectAutofillFromDataProvider(
+			dataProviderOption = "Countries",
+			dataProviderParameterName = "Countries Full Name");
 
 		FormRules.save();
 
@@ -1111,7 +1220,7 @@ definition {
 
 		FormFields.viewSelectOptionsList(
 			fieldName = "${fieldNameCountries}",
-			selectOption = "Option");
+			selectOption = "Select 1");
 
 		FormFields.editText(
 			fieldName = "${fieldNameTextField}",
@@ -1184,7 +1293,7 @@ definition {
 		Form.save();
 
 		ProductMenu.gotoPortlet(
-			category = "Content &amp; Data",
+			category = "Content & Data",
 			portlet = "Forms");
 
 		FormsAdminNavigator.gotoEditFormByName(formName = "Test Form");

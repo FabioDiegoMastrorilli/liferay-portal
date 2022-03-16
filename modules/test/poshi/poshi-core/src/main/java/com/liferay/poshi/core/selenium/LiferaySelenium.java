@@ -180,6 +180,9 @@ public interface LiferaySelenium {
 		String locatorOfObjectToBeDragged,
 		String locatorOfDragDestinationObject);
 
+	public void dragAtAndDrop(
+		String locator, String coordString, String movementsString);
+
 	public void echo(String message);
 
 	public void executeJavaScript(
@@ -359,7 +362,8 @@ public interface LiferaySelenium {
 
 	public void mouseUpAt(String locator, String coordString);
 
-	public void ocularAssertElementImage(String locator, String fileName)
+	public void ocularAssertElementImage(
+			String locator, String fileName, String match)
 		throws Exception;
 
 	public void open(String url) throws Exception;

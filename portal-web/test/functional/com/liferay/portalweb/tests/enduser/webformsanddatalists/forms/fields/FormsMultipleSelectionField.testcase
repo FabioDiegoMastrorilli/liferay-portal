@@ -2,6 +2,8 @@
 definition {
 
 	property custom.properties = "minifier.enabled=true";
+	property osgi.module.configuration.file.names = "com.liferay.frontend.js.loader.modules.extender.internal.configuration.Details.config";
+	property osgi.module.configurations = "waitTimeout=&quot;15&quot;";
 	property portal.release = "true";
 	property portal.upstream = "true";
 	property testray.main.component.name = "Forms";
@@ -22,19 +24,19 @@ definition {
 			Navigator.openURL();
 
 			ProductMenu.gotoPortlet(
-				category = "Content &amp; Data",
+				category = "Content & Data",
 				portlet = "Forms");
 
 			FormsAdmin.teardownForms();
 
-			Page.tearDownCP();
+			PagesAdmin.tearDownCP();
 		}
 	}
 
 	@description = "Verify that a Multiple Selection Field can be created"
 	@priority = "5"
 	test CanBeCreated {
-		property forms.functional = "true";
+		property portal.acceptance = "true";
 
 		FormsAdmin.addForm();
 
@@ -58,7 +60,7 @@ definition {
 	@description = "Verify that a Multiple Selection Field can be deleted"
 	@priority = "5"
 	test CanBeDeleted {
-		property forms.functional = "true";
+		property portal.acceptance = "true";
 
 		FormsAdmin.addForm();
 
@@ -92,8 +94,6 @@ definition {
 	@description = "Verify that a Multiple Selection Field can be duplicated"
 	@priority = "5"
 	test CanBeDuplicated {
-		property forms.functional = "true";
-
 		FormsAdmin.addForm();
 
 		Form.editName(formName = "Form 1");
@@ -149,7 +149,7 @@ definition {
 	@description = "Verify that a Multiple Selection Field can be edited"
 	@priority = "5"
 	test CanBeEdited {
-		property forms.functional = "true";
+		property portal.acceptance = "true";
 
 		FormsAdmin.addForm();
 
@@ -187,7 +187,7 @@ definition {
 	@description = "Verify that a Multiple Selection Field can be required"
 	@priority = "5"
 	test CanBeRequired {
-		property forms.functional = "true";
+		property portal.acceptance = "true";
 
 		FormsAdmin.addForm();
 
@@ -223,8 +223,6 @@ definition {
 	@description = "Verify that a Multiple Selection Field can be set to repeatable"
 	@priority = "5"
 	test CanBeSetToRepeatable {
-		property forms.functional = "true";
-
 		FormsAdmin.addForm();
 
 		Form.editName(formName = "Form1");
@@ -272,8 +270,6 @@ definition {
 	@description = "Verify that a Form can be submitted with the Multiple Selection Field"
 	@priority = "5"
 	test CanBeSubmitted {
-		property forms.functional = "true";
-
 		FormsAdmin.addForm();
 
 		Form.editName(formName = "Form 1");
@@ -333,7 +329,6 @@ definition {
 	@ignore = "Test Stub"
 	@priority = "4"
 	test ChangesCanBeCanceled {
-		property forms.functional = "false";
 		property portal.acceptance = "false";
 
 		// TODO LPS-132268 ChangesCanBeCanceled pending implementation
@@ -343,7 +338,7 @@ definition {
 	@description = "Verify that an option's Field References can be edited"
 	@priority = "5"
 	test FieldReferencesOfOptionsCanBeEdited {
-		property forms.functional = "false";
+		property portal.acceptance = "true";
 
 		FormsAdmin.addForm();
 
@@ -383,8 +378,6 @@ definition {
 	@description = "Verify that a help text can be added"
 	@priority = "5"
 	test HelpTextCanBeAdded {
-		property forms.functional = "true";
-
 		FormsAdmin.addForm();
 
 		Form.editName(formName = "Form 1");
@@ -425,8 +418,6 @@ definition {
 	@description = "Verify that the Field Label can be edited"
 	@priority = "5"
 	test LabelCanBeEdited {
-		property forms.functional = "true";
-
 		FormsAdmin.addForm();
 
 		Form.editName(formName = "Form 1");
@@ -451,6 +442,7 @@ definition {
 	@description = "LPS-85026 - Veriy that the Field Label can be hidden"
 	@priority = "5"
 	test LabelCanBeHidden {
+		property portal.acceptance = "true";
 		property test.name.skip.portal.instance = "FormsMultipleSelectionField#LabelCanBeHidden";
 
 		FormsAdmin.addForm();
@@ -487,6 +479,7 @@ definition {
 	@description = "LPS-66513 - Verify that the Field Label can be hidden when options are displayed as switches"
 	@priority = "3"
 	test LabelCanBeHiddenWithSwitchEnabled {
+		property portal.acceptance = "true";
 		property test.name.skip.portal.instance = "FormsMultipleSelectionField#LabelCanBeHiddenWithSwitchEnabled";
 
 		FormsAdmin.addForm();
@@ -530,7 +523,7 @@ definition {
 	@description = "Verify that options can be added"
 	@priority = "5"
 	test OptionsCanBeAdded {
-		property forms.functional = "true";
+		property portal.acceptance = "true";
 
 		FormsAdmin.addForm();
 
@@ -574,7 +567,7 @@ definition {
 	@description = "Verify that option can be deleted"
 	@priority = "5"
 	test OptionsCanBeDeleted {
-		property forms.functional = "quarantine";
+		property portal.acceptance = "true";
 
 		FormsAdmin.addForm();
 
@@ -659,7 +652,7 @@ definition {
 	@description = "Verify that options can be displayed both inline and as a list"
 	@priority = "5"
 	test OptionsCanBeDisplayedInlineAndAsList {
-		property forms.functional = "true";
+		property portal.acceptance = "true";
 
 		FormsAdmin.addForm();
 
@@ -704,7 +697,7 @@ definition {
 	@description = "Verify that options can be rearranged"
 	@priority = "5"
 	test OptionsCanBeRearranged {
-		property forms.functional = "true";
+		property portal.acceptance = "true";
 
 		FormsAdmin.addForm();
 
@@ -791,7 +784,7 @@ definition {
 			rowNumberEnd = "2",
 			rowNumberStart = "3");
 
-		if (IsTextNotEqual(locator1 = "FormFields#OPTIONS_OPTION_VALUE_FIELD", value1 = "Checkbox 4", key_rowNumber = "2")) {
+		if (IsTextNotEqual(key_rowNumber = "2", locator1 = "FormFields#OPTIONS_OPTION_VALUE_FIELD", value1 = "Checkbox 4")) {
 			FormFields.moveOptionsRow(
 				rowNumberEnd = "2",
 				rowNumberStart = "3");
@@ -813,7 +806,7 @@ definition {
 	@description = "Verify that an option can be selected as a Predefined Value"
 	@priority = "5"
 	test PredefinedValueCanBeAdded {
-		property forms.functional = "true";
+		property portal.acceptance = "true";
 
 		FormsAdmin.addForm();
 
@@ -857,7 +850,7 @@ definition {
 	@description = "Verify that after deleting an option that had been selected as the Predefined Value, the Predefined Value is reset to "Choose Options""
 	@priority = "4"
 	test PredefinedValueIsResetWhenSelectedOptionIsDeleted {
-		property forms.functional = "true";
+		property portal.acceptance = "true";
 
 		FormsAdmin.addForm();
 
@@ -893,7 +886,7 @@ definition {
 	@description = "Verify that the Field Reference can be edited"
 	@priority = "5"
 	test ReferenceCanBeEdited {
-		property forms.functional = "true";
+		property portal.acceptance = "true";
 
 		FormsAdmin.addForm();
 
@@ -920,7 +913,6 @@ definition {
 	@ignore = "Test Stub"
 	@priority = "5"
 	test TypeCanBeChanged {
-		property forms.functional = "false";
 		property portal.acceptance = "false";
 
 		// TODO LPS-132267 TypeCanBeChanged pending implementation

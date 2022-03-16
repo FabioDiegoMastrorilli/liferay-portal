@@ -133,7 +133,7 @@ definition {
 			ApplicationsMenu.gotoSite(site = "Test Site Name");
 
 			ProductMenu.gotoPortlet(
-				category = "Content &amp; Data",
+				category = "Content & Data",
 				portlet = "Web Content");
 		}
 
@@ -187,11 +187,13 @@ definition {
 				pageName = "Test Page",
 				siteName = "Test Site Name");
 
-			WebContent.addPGViaWCD(
+			WebContentDisplayPortlet.add(
 				webContentContent = "WC Content",
 				webContentTitle = "WC Title");
 
-			WebContent.viewPGViaWCD(webContentContent = "WC Content");
+			WebContentDisplayPortlet.viewContent(
+				webContentContent = "WC Content",
+				webContentTitle = "WC Title");
 		}
 
 		task ("Enbale local staging without web content") {
@@ -299,6 +301,7 @@ definition {
 				assetType = "Web Content Article",
 				deleteUser = "Test Test");
 		}
+
 		task ("Restore WC and view the WC, structure, template are all restored") {
 			RecycleBin.restoreCP(
 				assetName = "WC WebContent Title",

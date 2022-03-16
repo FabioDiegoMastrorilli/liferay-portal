@@ -156,11 +156,11 @@ definition {
 	macro addFieldViaJSON {
 		Navigator.gotoNavTab(navTab = "Source");
 
-		var sourceJSON = JSONUtil.formatJSONString("${sourceJSON}");
+		var sourceJson = JSONUtil.formatJSONString("${sourceJson}");
 
 		Type.typeNotVisibleNoMouseOver(
 			locator1 = "DDMEditStructure#SOURCE_EDITOR_CONTENT",
-			value1 = "${sourceJSON} ");
+			value1 = "${sourceJson} ");
 	}
 
 	macro addFieldWithoutRename {
@@ -203,7 +203,7 @@ definition {
 
 		MouseOver(locator1 = "DDMEditStructure#FORM_FIELD");
 
-		SikuliClick(locator1 = "DDMEditStructure#FORM_FIELD_DELETE_BUTTON");
+		Click(locator1 = "DDMEditStructure#FORM_FIELD_DELETE_BUTTON");
 
 		AssertTextEquals(
 			locator1 = "IFrame#DIALOG_BOX",
@@ -600,7 +600,6 @@ definition {
 
 	macro editFieldSettings {
 		var key_fieldFieldLabel = "${fieldFieldLabel}";
-
 		var browserType = PropsUtil.get("browser.type");
 
 		if ("${browserType}" == "safari") {

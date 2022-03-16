@@ -24,7 +24,6 @@ import com.liferay.poshi.core.prose.PoshiProseMatcher;
 import com.liferay.poshi.core.script.PoshiScriptParserException;
 import com.liferay.poshi.core.selenium.LiferaySelenium;
 import com.liferay.poshi.core.util.FileUtil;
-import com.liferay.poshi.core.util.GetterUtil;
 import com.liferay.poshi.core.util.MathUtil;
 import com.liferay.poshi.core.util.OSDetector;
 import com.liferay.poshi.core.util.PropsUtil;
@@ -96,6 +95,7 @@ public class PoshiContext {
 		_filePaths.clear();
 		_functionFileNames.clear();
 		_functionLocatorCounts.clear();
+		_macroFileNames.clear();
 		_namespacedClassCommandNamePropertiesMap.clear();
 		_namespaces.clear();
 		_overrideClassNames.clear();
@@ -213,6 +213,10 @@ public class PoshiContext {
 		return 0;
 	}
 
+	public static int getFunctionMaxArgumentCount() {
+		return _MAX_ARGUMENT_COUNT;
+	}
+
 	public static Element getFunctionRootElement(
 		String className, String namespace) {
 
@@ -231,6 +235,10 @@ public class PoshiContext {
 
 		return _commandSummaries.get(
 			"macro#" + namespace + "." + classCommandName);
+	}
+
+	public static Set<String> getMacroFileNames() {
+		return _macroFileNames;
 	}
 
 	public static Element getMacroRootElement(
@@ -448,11 +456,6 @@ public class PoshiContext {
 		return _rootElements.get("test-case#" + namespace + "." + className);
 	}
 
-	public static boolean ignoreUtilClassesErrors() {
-		return GetterUtil.getBoolean(
-			PropsUtil.get("ignore.errors.util.classes"));
-	}
-
 	public static boolean isCommandElement(
 		String classType, String classCommandName, String namespace) {
 
@@ -513,51 +516,57 @@ public class PoshiContext {
 			poshiFileIncludes.toArray(new String[0]), "default/testFunctional",
 			"testFunctional");
 
-		String testBaseDirName = PropsUtil.get("test.base.dir.name");
+		if (((baseDirNames == null) || (baseDirNames.length == 0)) &&
+			(Validator.isNull(PropsValues.TEST_BASE_DIR_NAME) ||
+			 PropsValues.TEST_BASE_DIR_NAME.isEmpty())) {
 
-		if ((baseDirNames == null) || (baseDirNames.length == 0)) {
-			if ((testBaseDirName == null) || testBaseDirName.isEmpty()) {
-				throw new RuntimeException("Please set 'test.base.dir.name'");
-			}
-
-			baseDirNames = new String[] {testBaseDirName};
+			throw new RuntimeException("Please set 'test.base.dir.name'");
 		}
 
-		String testSubrepoDirs = PropsUtil.get("test.subrepo.dirs");
+		Set<URL> poshiURLs = new HashSet<>();
 
-		if ((testSubrepoDirs != null) && !testSubrepoDirs.isEmpty()) {
-			baseDirNames = ArrayUtils.addAll(
-				baseDirNames, StringUtil.split(testSubrepoDirs));
+		Set<String> testDirNames = new HashSet<>();
+
+		if (Validator.isNotNull(baseDirNames)) {
+			Collections.addAll(testDirNames, baseDirNames);
 		}
 
-		String testIncludeDirNames = PropsUtil.get("test.include.dir.names");
-
-		if ((testIncludeDirNames != null) && !testIncludeDirNames.isEmpty()) {
-			Set<String> testIncludeDirPaths = new HashSet<>();
-
-			for (String testIncludeDirName :
-					StringUtil.split(testIncludeDirNames)) {
-
-				File testIncludeDir = new File(testIncludeDirName);
-
-				if (!testIncludeDir.exists()) {
-					testIncludeDir = new File(
-						testBaseDirName, testIncludeDirName);
-				}
-
-				if (!testIncludeDir.exists()) {
-					continue;
-				}
-
-				testIncludeDirPaths.add(testIncludeDir.getCanonicalPath());
-			}
-
-			_readPoshiFiles(
-				POSHI_SUPPORT_FILE_INCLUDES,
-				testIncludeDirPaths.toArray(new String[0]));
+		if (Validator.isNotNull(PropsValues.TEST_BASE_DIR_NAME)) {
+			testDirNames.add(PropsValues.TEST_BASE_DIR_NAME);
 		}
 
-		_readPoshiFiles(poshiFileIncludes.toArray(new String[0]), baseDirNames);
+		if (Validator.isNotNull(PropsValues.TEST_DIRS)) {
+			Collections.addAll(testDirNames, PropsValues.TEST_DIRS);
+		}
+
+		if (Validator.isNotNull(PropsValues.TEST_SUBREPO_DIRS)) {
+			Collections.addAll(testDirNames, PropsValues.TEST_SUBREPO_DIRS);
+		}
+
+		for (String testDirName : testDirNames) {
+			poshiURLs.addAll(
+				_getPoshiURLs(
+					poshiFileIncludes.toArray(new String[0]), testDirName));
+		}
+
+		Set<String> testSupportDirNames = new HashSet<>();
+
+		if (Validator.isNotNull(PropsValues.TEST_INCLUDE_DIR_NAMES)) {
+			Collections.addAll(
+				testSupportDirNames, PropsValues.TEST_INCLUDE_DIR_NAMES);
+		}
+
+		if (Validator.isNotNull(PropsValues.TEST_SUPPORT_DIRS)) {
+			Collections.addAll(
+				testSupportDirNames, PropsValues.TEST_SUPPORT_DIRS);
+		}
+
+		for (String testSupportDirName : testSupportDirNames) {
+			poshiURLs.addAll(
+				_getPoshiURLs(POSHI_SUPPORT_FILE_INCLUDES, testSupportDirName));
+		}
+
+		_readPoshiFiles(poshiURLs);
 		_readSeleniumFiles();
 
 		_initComponentCommandNamesMap();
@@ -570,6 +579,14 @@ public class PoshiContext {
 
 		System.out.println(
 			"Completed reading Poshi files in " + duration + "ms.");
+	}
+
+	public static void setFunctionFileNames(String... functionFileNames) {
+		Collections.addAll(_functionFileNames, functionFileNames);
+	}
+
+	public static void setMacroFileNames(String... macroFileNames) {
+		Collections.addAll(_macroFileNames, macroFileNames);
 	}
 
 	public static void setTestCaseNamespacedClassCommandName(
@@ -693,25 +710,30 @@ public class PoshiContext {
 		return "true";
 	}
 
-	private static List<URL> _getPoshiURLs(
+	private static Set<URL> _getPoshiURLs(
 			FileSystem fileSystem, String[] includes, String baseDirName)
 		throws IOException {
 
-		List<URL> urls = null;
+		Set<URL> urls = new HashSet<>();
 
 		if (fileSystem == null) {
-			urls = FileUtil.getIncludedResourceURLs(includes, baseDirName);
+			File file = new File(baseDirName);
+
+			baseDirName = file.getCanonicalPath();
+
+			urls.addAll(
+				FileUtil.getIncludedResourceURLs(includes, baseDirName));
 		}
 		else {
-			urls = FileUtil.getIncludedResourceURLs(
-				fileSystem, includes, baseDirName);
+			urls.addAll(
+				FileUtil.getIncludedResourceURLs(
+					fileSystem, includes, baseDirName));
 		}
 
 		return urls;
 	}
 
-	private static List<URL> _getPoshiURLs(
-			String[] includes, String baseDirName)
+	private static Set<URL> _getPoshiURLs(String[] includes, String baseDirName)
 		throws Exception {
 
 		return _getPoshiURLs(null, includes, baseDirName);
@@ -1122,14 +1144,8 @@ public class PoshiContext {
 		}
 	}
 
-	private static void _readPoshiFiles(
-			String[] includes, String... baseDirNames)
-		throws Exception {
-
-		for (String baseDirName : baseDirNames) {
-			_storeRootElements(
-				_getPoshiURLs(includes, baseDirName), _DEFAULT_NAMESPACE);
-		}
+	private static void _readPoshiFiles(Set<URL> poshiURLs) throws Exception {
+		_storeRootElements(poshiURLs, _DEFAULT_NAMESPACE);
 
 		if (!_duplicateLocatorMessages.isEmpty()) {
 			throw _getDuplicateLocatorsException();
@@ -1188,7 +1204,7 @@ public class PoshiContext {
 
 					_namespaces.add(namespace);
 
-					List<URL> poshiURLs = _getPoshiURLs(
+					Set<URL> poshiURLs = _getPoshiURLs(
 						fileSystem, includes,
 						resourceURLString.substring(x + 1));
 
@@ -1461,7 +1477,7 @@ public class PoshiContext {
 		}
 	}
 
-	private static void _storeRootElements(List<URL> urls, String namespace)
+	private static void _storeRootElements(Set<URL> urls, String namespace)
 		throws Exception {
 
 		List<PoshiFileCallable> dependencyPoshiFileCallables =
@@ -1470,16 +1486,36 @@ public class PoshiContext {
 		List<PoshiFileCallable> testPoshiFileCallables = new ArrayList<>();
 
 		for (URL url : urls) {
-			String fileName = url.getFile();
+			File file = new File(url.getFile());
 
-			if (fileName.contains(".macro")) {
+			String fileName = file.getName();
+
+			if (fileName.endsWith(".function")) {
+				_functionFileNames.add(
+					StringUtil.replace(fileName, ".function", ""));
+
+				_functionFileNames.add(
+					namespace + "." +
+						StringUtil.replace(fileName, ".function", ""));
+			}
+
+			if (fileName.endsWith(".macro")) {
+				_validateUniqueCommandName(
+					StringUtil.replace(fileName, ".macro", ""), file.getPath());
+
+				_macroFileNames.add(StringUtil.replace(fileName, ".macro", ""));
+
+				_macroFileNames.add(
+					namespace + "." +
+						StringUtil.replace(fileName, ".macro", ""));
+
 				macroPoshiFileCallables.add(
 					new PoshiFileCallable(url, namespace));
 
 				continue;
 			}
 
-			if (fileName.contains(".testcase") || fileName.contains(".prose")) {
+			if (fileName.endsWith(".testcase") || fileName.endsWith(".prose")) {
 				testPoshiFileCallables.add(
 					new PoshiFileCallable(url, namespace));
 
@@ -1556,6 +1592,23 @@ public class PoshiContext {
 					StringUtil.join(propertyNames.toArray(new String[0]), ","),
 					"\" cannot be set as they are set in \"", propertyGroup,
 					"\"")));
+	}
+
+	private static void _validateUniqueCommandName(
+		String macroName, String filePath) {
+
+		for (String functionName : _functionFileNames) {
+			if (functionName.contains("LocalFile")) {
+				functionName = StringUtil.replace(
+					functionName, "LocalFile.", "");
+			}
+
+			if (functionName.equals(macroName)) {
+				throw new RuntimeException(
+					"Duplicate macro and function file name: " + macroName +
+						"\n" + filePath + "\n");
+			}
+		}
 	}
 
 	private static void _writeTestCaseMethodNamesProperties() throws Exception {
@@ -1743,6 +1796,8 @@ public class PoshiContext {
 
 	private static final String _DEFAULT_NAMESPACE = "LocalFile";
 
+	private static final int _MAX_ARGUMENT_COUNT = 3;
+
 	private static final Map<String, Element> _commandElements =
 		Collections.synchronizedMap(new HashMap<>());
 	private static final Map<String, String> _commandSummaries =
@@ -1757,6 +1812,8 @@ public class PoshiContext {
 		Collections.synchronizedSet(new HashSet<>());
 	private static final Map<String, Integer> _functionLocatorCounts =
 		Collections.synchronizedMap(new HashMap<>());
+	private static final Set<String> _macroFileNames =
+		Collections.synchronizedSet(new HashSet<>());
 	private static final Pattern _namespaceClassCommandNamePattern =
 		Pattern.compile(
 			"(?<namespace>[^\\.]+)\\.(?<className>[^\\#]+)\\#" +
@@ -1828,15 +1885,6 @@ public class PoshiContext {
 
 				if (rootElement.attributeValue("override") == null) {
 					_filePaths.put(_namespace + "." + fileName, filePath);
-
-					if (fileName.endsWith(".function")) {
-						_functionFileNames.add(
-							StringUtil.replace(fileName, ".function", ""));
-
-						_functionFileNames.add(
-							_namespace + "." +
-								StringUtil.replace(fileName, ".function", ""));
-					}
 				}
 			}
 			catch (Exception exception) {

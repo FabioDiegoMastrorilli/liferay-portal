@@ -14,11 +14,15 @@
 
 package com.liferay.product.navigation.control.menu.web.internal;
 
-import com.liferay.portal.configuration.metatype.bnd.util.ConfigurableUtil;
+import com.liferay.layout.security.permission.resource.LayoutContentModelResourcePermission;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.language.LanguageUtil;
+import com.liferay.portal.kernel.log.Log;
+import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.model.Layout;
 import com.liferay.portal.kernel.model.LayoutConstants;
+import com.liferay.portal.kernel.security.permission.ActionKeys;
+import com.liferay.portal.kernel.service.permission.LayoutPermission;
 import com.liferay.portal.kernel.theme.ThemeDisplay;
 import com.liferay.portal.kernel.util.Constants;
 import com.liferay.portal.kernel.util.GetterUtil;
@@ -33,28 +37,23 @@ import com.liferay.portal.util.PropsValues;
 import com.liferay.product.navigation.control.menu.BaseProductNavigationControlMenuEntry;
 import com.liferay.product.navigation.control.menu.ProductNavigationControlMenuEntry;
 import com.liferay.product.navigation.control.menu.constants.ProductNavigationControlMenuCategoryKeys;
-import com.liferay.product.navigation.control.menu.web.internal.configuration.FFProductNavigationControlMenuConfiguration;
 
 import java.io.IOException;
 import java.io.Writer;
 
 import java.util.Locale;
-import java.util.Map;
 import java.util.Objects;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.Modified;
 import org.osgi.service.component.annotations.Reference;
 
 /**
  * @author Eudaldo Alonso
  */
 @Component(
-	configurationPid = "com.liferay.product.navigation.control.menu.web.internal.configuration.FFProductNavigationControlMenuConfiguration",
 	immediate = true,
 	property = {
 		"product.navigation.control.menu.category.key=" + ProductNavigationControlMenuCategoryKeys.TOOLS,
@@ -97,7 +96,9 @@ public class LayoutHeaderProductNavigationControlMenuEntry
 		sb.append(_getHeaderTitle(httpServletRequest));
 		sb.append("</span>");
 
-		if (_hasDraftLayout(httpServletRequest)) {
+		if (_hasDraftLayout(httpServletRequest) &&
+			_hasEditPermission(httpServletRequest)) {
+
 			sb.append("<sup class=\"flex-shrink-0 small\">*</sup>");
 		}
 
@@ -117,6 +118,18 @@ public class LayoutHeaderProductNavigationControlMenuEntry
 	}
 
 	@Override
+	public boolean isRelevant(HttpServletRequest httpServletRequest) {
+		String layoutMode = ParamUtil.getString(
+			httpServletRequest, "p_l_mode", Constants.VIEW);
+
+		if (layoutMode.equals(Constants.EDIT)) {
+			return true;
+		}
+
+		return false;
+	}
+
+	@Override
 	public boolean isShow(HttpServletRequest httpServletRequest)
 		throws PortalException {
 
@@ -131,14 +144,6 @@ public class LayoutHeaderProductNavigationControlMenuEntry
 		}
 
 		return super.isShow(httpServletRequest);
-	}
-
-	@Activate
-	@Modified
-	protected void activate(Map<String, Object> properties) {
-		_ffProductNavigationControlMenuConfiguration =
-			ConfigurableUtil.createConfigurable(
-				FFProductNavigationControlMenuConfiguration.class, properties);
 	}
 
 	private String _getCssClass(HttpServletRequest httpServletRequest) {
@@ -185,10 +190,7 @@ public class LayoutHeaderProductNavigationControlMenuEntry
 
 		Layout layout = themeDisplay.getLayout();
 
-		if (!_ffProductNavigationControlMenuConfiguration.
-				layoutExperienceSelectorEnabled() ||
-			!layout.isTypeContent()) {
-
+		if (!layout.isTypeContent()) {
 			return false;
 		}
 
@@ -207,6 +209,34 @@ public class LayoutHeaderProductNavigationControlMenuEntry
 		return true;
 	}
 
+	private boolean _hasEditPermission(HttpServletRequest httpServletRequest) {
+		ThemeDisplay themeDisplay =
+			(ThemeDisplay)httpServletRequest.getAttribute(
+				WebKeys.THEME_DISPLAY);
+
+		Layout layout = themeDisplay.getLayout();
+
+		try {
+			if (_layoutContentModelResourcePermission.contains(
+					themeDisplay.getPermissionChecker(), layout.getPlid(),
+					ActionKeys.UPDATE) ||
+				_layoutPermission.contains(
+					themeDisplay.getPermissionChecker(), layout,
+					ActionKeys.UPDATE) ||
+				_layoutPermission.contains(
+					themeDisplay.getPermissionChecker(), layout,
+					ActionKeys.UPDATE_LAYOUT_CONTENT)) {
+
+				return true;
+			}
+		}
+		catch (PortalException portalException) {
+			_log.error(portalException);
+		}
+
+		return false;
+	}
+
 	private boolean _isDraftLayout(HttpServletRequest httpServletRequest) {
 		ThemeDisplay themeDisplay =
 			(ThemeDisplay)httpServletRequest.getAttribute(
@@ -214,10 +244,7 @@ public class LayoutHeaderProductNavigationControlMenuEntry
 
 		Layout layout = themeDisplay.getLayout();
 
-		if (!_ffProductNavigationControlMenuConfiguration.
-				layoutExperienceSelectorEnabled() ||
-			!layout.isTypeContent()) {
-
+		if (!layout.isTypeContent()) {
 			return false;
 		}
 
@@ -250,8 +277,15 @@ public class LayoutHeaderProductNavigationControlMenuEntry
 		return false;
 	}
 
-	private static volatile FFProductNavigationControlMenuConfiguration
-		_ffProductNavigationControlMenuConfiguration;
+	private static final Log _log = LogFactoryUtil.getLog(
+		LayoutHeaderProductNavigationControlMenuEntry.class);
+
+	@Reference
+	private LayoutContentModelResourcePermission
+		_layoutContentModelResourcePermission;
+
+	@Reference
+	private LayoutPermission _layoutPermission;
 
 	@Reference
 	private Portal _portal;

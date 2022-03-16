@@ -839,7 +839,12 @@ public class ServiceBuilder {
 							_createModelCache(entity);
 							_createModelWrapper(entity);
 
-							_createModelSoap(entity);
+							if (isVersionGTE_7_4_0()) {
+								_removeModelSoap(entity, _serviceOutputPath);
+							}
+							else {
+								_createModelSoap(entity);
+							}
 
 							_createModelTable(entity);
 
@@ -893,7 +898,12 @@ public class ServiceBuilder {
 								_removeServiceJsonSerializer(entity);
 							}
 
-							_createServiceSoap(entity);
+							if (isVersionGTE_7_4_0()) {
+								_removeServiceSoap(entity);
+							}
+							else {
+								_createServiceSoap(entity);
+							}
 						}
 						else {
 							_removeServiceImpl(entity, _SESSION_TYPE_REMOTE);
@@ -3076,7 +3086,18 @@ public class ServiceBuilder {
 	}
 
 	private void _createModelArgumentsResolver(Entity entity) throws Exception {
+		File file = new File(
+			StringBundler.concat(
+				_outputPath, "/service/persistence/impl/", entity.getName(),
+				"ModelArgumentsResolver.java"));
+
 		if (!entity.hasPersistence() || isVersionLTE_7_3_0()) {
+			if (file.exists()) {
+				System.out.println("Removing " + file);
+
+				file.delete();
+			}
+
 			return;
 		}
 
@@ -3092,12 +3113,7 @@ public class ServiceBuilder {
 
 		String content = _processTemplate(_tplModelArgumentsResolver, context);
 
-		File argumentsResolverFile = new File(
-			StringBundler.concat(
-				_outputPath, "/service/persistence/impl/", entity.getName(),
-				"ModelArgumentsResolver.java"));
-
-		_write(argumentsResolverFile, content, _modifiedFileNames);
+		_write(file, content, _modifiedFileNames);
 	}
 
 	private void _createModelCache(Entity entity) throws Exception {

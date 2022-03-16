@@ -16,6 +16,7 @@ package com.liferay.layout.page.template.admin.web.internal.display.context;
 
 import com.liferay.frontend.taglib.clay.servlet.taglib.util.DropdownItem;
 import com.liferay.frontend.taglib.clay.servlet.taglib.util.DropdownItemListBuilder;
+import com.liferay.layout.page.template.admin.constants.LayoutPageTemplateAdminPortletKeys;
 import com.liferay.layout.page.template.admin.web.internal.security.permission.resource.LayoutPageTemplateCollectionPermission;
 import com.liferay.layout.page.template.admin.web.internal.security.permission.resource.LayoutPageTemplatePermission;
 import com.liferay.layout.page.template.admin.web.internal.util.LayoutPageTemplatePortletUtil;
@@ -28,10 +29,10 @@ import com.liferay.portal.kernel.dao.search.EmptyOnClickRowChecker;
 import com.liferay.portal.kernel.dao.search.SearchContainer;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.language.LanguageUtil;
+import com.liferay.portal.kernel.portlet.SearchOrderByUtil;
 import com.liferay.portal.kernel.security.permission.ActionKeys;
 import com.liferay.portal.kernel.theme.ThemeDisplay;
 import com.liferay.portal.kernel.util.ListUtil;
-import com.liferay.portal.kernel.util.OrderByComparator;
 import com.liferay.portal.kernel.util.ParamUtil;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.kernel.util.WebKeys;
@@ -166,60 +167,49 @@ public class LayoutPageTemplateDisplayContext {
 				_renderRequest, getPortletURL(), null,
 				"there-are-no-page-templates");
 
-		layoutPageTemplateEntriesSearchContainer.setRowChecker(
-			new EmptyOnClickRowChecker(_renderResponse));
-
 		layoutPageTemplateEntriesSearchContainer.setOrderByCol(getOrderByCol());
-
-		OrderByComparator<LayoutPageTemplateEntry> orderByComparator =
+		layoutPageTemplateEntriesSearchContainer.setOrderByComparator(
 			LayoutPageTemplatePortletUtil.
 				getLayoutPageTemplateEntryOrderByComparator(
-					getOrderByCol(), getOrderByType());
-
-		layoutPageTemplateEntriesSearchContainer.setOrderByComparator(
-			orderByComparator);
-
+					getOrderByCol(), getOrderByType()));
 		layoutPageTemplateEntriesSearchContainer.setOrderByType(
 			getOrderByType());
 
-		List<LayoutPageTemplateEntry> layoutPageTemplateEntries = null;
-		int layoutPageTemplateEntriesCount = 0;
-
 		if (isSearch()) {
-			layoutPageTemplateEntries =
-				LayoutPageTemplateEntryServiceUtil.getLayoutPageTemplateEntries(
-					_themeDisplay.getScopeGroupId(),
-					getLayoutPageTemplateCollectionId(), getKeywords(),
-					layoutPageTemplateEntriesSearchContainer.getStart(),
-					layoutPageTemplateEntriesSearchContainer.getEnd(),
-					orderByComparator);
-
-			layoutPageTemplateEntriesCount =
+			layoutPageTemplateEntriesSearchContainer.setResultsAndTotal(
+				() ->
+					LayoutPageTemplateEntryServiceUtil.
+						getLayoutPageTemplateEntries(
+							_themeDisplay.getScopeGroupId(),
+							getLayoutPageTemplateCollectionId(), getKeywords(),
+							layoutPageTemplateEntriesSearchContainer.getStart(),
+							layoutPageTemplateEntriesSearchContainer.getEnd(),
+							layoutPageTemplateEntriesSearchContainer.
+								getOrderByComparator()),
 				LayoutPageTemplateEntryServiceUtil.
 					getLayoutPageTemplateEntriesCount(
 						_themeDisplay.getScopeGroupId(),
-						getLayoutPageTemplateCollectionId(), getKeywords());
+						getLayoutPageTemplateCollectionId(), getKeywords()));
 		}
 		else {
-			layoutPageTemplateEntries =
-				LayoutPageTemplateEntryServiceUtil.getLayoutPageTemplateEntries(
-					_themeDisplay.getScopeGroupId(),
-					getLayoutPageTemplateCollectionId(),
-					layoutPageTemplateEntriesSearchContainer.getStart(),
-					layoutPageTemplateEntriesSearchContainer.getEnd(),
-					orderByComparator);
-
-			layoutPageTemplateEntriesCount =
+			layoutPageTemplateEntriesSearchContainer.setResultsAndTotal(
+				() ->
+					LayoutPageTemplateEntryServiceUtil.
+						getLayoutPageTemplateEntries(
+							_themeDisplay.getScopeGroupId(),
+							getLayoutPageTemplateCollectionId(),
+							layoutPageTemplateEntriesSearchContainer.getStart(),
+							layoutPageTemplateEntriesSearchContainer.getEnd(),
+							layoutPageTemplateEntriesSearchContainer.
+								getOrderByComparator()),
 				LayoutPageTemplateEntryServiceUtil.
 					getLayoutPageTemplateEntriesCount(
 						_themeDisplay.getScopeGroupId(),
-						getLayoutPageTemplateCollectionId());
+						getLayoutPageTemplateCollectionId()));
 		}
 
-		layoutPageTemplateEntriesSearchContainer.setResults(
-			layoutPageTemplateEntries);
-		layoutPageTemplateEntriesSearchContainer.setTotal(
-			layoutPageTemplateEntriesCount);
+		layoutPageTemplateEntriesSearchContainer.setRowChecker(
+			new EmptyOnClickRowChecker(_renderResponse));
 
 		_layoutPageTemplateEntriesSearchContainer =
 			layoutPageTemplateEntriesSearchContainer;
@@ -257,8 +247,10 @@ public class LayoutPageTemplateDisplayContext {
 			return _orderByCol;
 		}
 
-		_orderByCol = ParamUtil.getString(
-			_httpServletRequest, "orderByCol", "create-date");
+		_orderByCol = SearchOrderByUtil.getOrderByCol(
+			_httpServletRequest,
+			LayoutPageTemplateAdminPortletKeys.LAYOUT_PAGE_TEMPLATES,
+			"layout-page-template-order-by-col", "create-date");
 
 		return _orderByCol;
 	}
@@ -268,8 +260,10 @@ public class LayoutPageTemplateDisplayContext {
 			return _orderByType;
 		}
 
-		_orderByType = ParamUtil.getString(
-			_httpServletRequest, "orderByType", "asc");
+		_orderByType = SearchOrderByUtil.getOrderByType(
+			_httpServletRequest,
+			LayoutPageTemplateAdminPortletKeys.LAYOUT_PAGE_TEMPLATES,
+			"layout-page-template-order-by-type", "asc");
 
 		return _orderByType;
 	}

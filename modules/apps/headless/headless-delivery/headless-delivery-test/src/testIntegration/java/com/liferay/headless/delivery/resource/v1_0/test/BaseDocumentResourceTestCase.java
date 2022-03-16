@@ -25,6 +25,7 @@ import com.fasterxml.jackson.databind.util.ISO8601DateFormat;
 import com.liferay.depot.model.DepotEntry;
 import com.liferay.depot.service.DepotEntryLocalServiceUtil;
 import com.liferay.headless.delivery.client.dto.v1_0.Document;
+import com.liferay.headless.delivery.client.dto.v1_0.Field;
 import com.liferay.headless.delivery.client.dto.v1_0.Rating;
 import com.liferay.headless.delivery.client.http.HttpInvoker;
 import com.liferay.headless.delivery.client.pagination.Page;
@@ -314,6 +315,39 @@ public abstract class BaseDocumentResourceTestCase {
 	}
 
 	@Test
+	public void testGetAssetLibraryDocumentsPageWithFilterDoubleEquals()
+		throws Exception {
+
+		List<EntityField> entityFields = getEntityFields(
+			EntityField.Type.DOUBLE);
+
+		if (entityFields.isEmpty()) {
+			return;
+		}
+
+		Long assetLibraryId =
+			testGetAssetLibraryDocumentsPage_getAssetLibraryId();
+
+		Document document1 = testGetAssetLibraryDocumentsPage_addDocument(
+			assetLibraryId, randomDocument());
+
+		@SuppressWarnings("PMD.UnusedLocalVariable")
+		Document document2 = testGetAssetLibraryDocumentsPage_addDocument(
+			assetLibraryId, randomDocument());
+
+		for (EntityField entityField : entityFields) {
+			Page<Document> page = documentResource.getAssetLibraryDocumentsPage(
+				assetLibraryId, null, null, null,
+				getFilterString(entityField, "eq", document1),
+				Pagination.of(1, 2), null);
+
+			assertEquals(
+				Collections.singletonList(document1),
+				(List<Document>)page.getItems());
+		}
+	}
+
+	@Test
 	public void testGetAssetLibraryDocumentsPageWithFilterStringEquals()
 		throws Exception {
 
@@ -396,6 +430,18 @@ public abstract class BaseDocumentResourceTestCase {
 				BeanUtils.setProperty(
 					document1, entityField.getName(),
 					DateUtils.addMinutes(new Date(), -2));
+			});
+	}
+
+	@Test
+	public void testGetAssetLibraryDocumentsPageWithSortDouble()
+		throws Exception {
+
+		testGetAssetLibraryDocumentsPageWithSort(
+			EntityField.Type.DOUBLE,
+			(entityField, document1, document2) -> {
+				BeanUtils.setProperty(document1, entityField.getName(), 0.1);
+				BeanUtils.setProperty(document2, entityField.getName(), 0.5);
 			});
 	}
 
@@ -575,9 +621,10 @@ public abstract class BaseDocumentResourceTestCase {
 	}
 
 	@Test
-	public void testPutAssetLibraryDocumentPermission() throws Exception {
+	public void testPutAssetLibraryDocumentPermissionsPage() throws Exception {
 		@SuppressWarnings("PMD.UnusedLocalVariable")
-		Document document = testPutAssetLibraryDocumentPermission_addDocument();
+		Document document =
+			testPutAssetLibraryDocumentPermissionsPage_addDocument();
 
 		@SuppressWarnings("PMD.UnusedLocalVariable")
 		com.liferay.portal.kernel.model.Role role = RoleTestUtil.addRole(
@@ -585,7 +632,7 @@ public abstract class BaseDocumentResourceTestCase {
 
 		assertHttpResponseStatusCode(
 			200,
-			documentResource.putAssetLibraryDocumentPermissionHttpResponse(
+			documentResource.putAssetLibraryDocumentPermissionsPageHttpResponse(
 				testDepotEntry.getDepotEntryId(),
 				new Permission[] {
 					new Permission() {
@@ -598,7 +645,7 @@ public abstract class BaseDocumentResourceTestCase {
 
 		assertHttpResponseStatusCode(
 			404,
-			documentResource.putAssetLibraryDocumentPermissionHttpResponse(
+			documentResource.putAssetLibraryDocumentPermissionsPageHttpResponse(
 				testDepotEntry.getDepotEntryId(),
 				new Permission[] {
 					new Permission() {
@@ -610,7 +657,7 @@ public abstract class BaseDocumentResourceTestCase {
 				}));
 	}
 
-	protected Document testPutAssetLibraryDocumentPermission_addDocument()
+	protected Document testPutAssetLibraryDocumentPermissionsPage_addDocument()
 		throws Exception {
 
 		return documentResource.postAssetLibraryDocument(
@@ -694,6 +741,40 @@ public abstract class BaseDocumentResourceTestCase {
 				documentResource.getDocumentFolderDocumentsPage(
 					documentFolderId, null, null, null,
 					getFilterString(entityField, "between", document1),
+					Pagination.of(1, 2), null);
+
+			assertEquals(
+				Collections.singletonList(document1),
+				(List<Document>)page.getItems());
+		}
+	}
+
+	@Test
+	public void testGetDocumentFolderDocumentsPageWithFilterDoubleEquals()
+		throws Exception {
+
+		List<EntityField> entityFields = getEntityFields(
+			EntityField.Type.DOUBLE);
+
+		if (entityFields.isEmpty()) {
+			return;
+		}
+
+		Long documentFolderId =
+			testGetDocumentFolderDocumentsPage_getDocumentFolderId();
+
+		Document document1 = testGetDocumentFolderDocumentsPage_addDocument(
+			documentFolderId, randomDocument());
+
+		@SuppressWarnings("PMD.UnusedLocalVariable")
+		Document document2 = testGetDocumentFolderDocumentsPage_addDocument(
+			documentFolderId, randomDocument());
+
+		for (EntityField entityField : entityFields) {
+			Page<Document> page =
+				documentResource.getDocumentFolderDocumentsPage(
+					documentFolderId, null, null, null,
+					getFilterString(entityField, "eq", document1),
 					Pagination.of(1, 2), null);
 
 			assertEquals(
@@ -789,6 +870,18 @@ public abstract class BaseDocumentResourceTestCase {
 				BeanUtils.setProperty(
 					document1, entityField.getName(),
 					DateUtils.addMinutes(new Date(), -2));
+			});
+	}
+
+	@Test
+	public void testGetDocumentFolderDocumentsPageWithSortDouble()
+		throws Exception {
+
+		testGetDocumentFolderDocumentsPageWithSort(
+			EntityField.Type.DOUBLE,
+			(entityField, document1, document2) -> {
+				BeanUtils.setProperty(document1, entityField.getName(), 0.1);
+				BeanUtils.setProperty(document2, entityField.getName(), 0.5);
 			});
 	}
 
@@ -1162,9 +1255,9 @@ public abstract class BaseDocumentResourceTestCase {
 	}
 
 	@Test
-	public void testPutDocumentPermission() throws Exception {
+	public void testPutDocumentPermissionsPage() throws Exception {
 		@SuppressWarnings("PMD.UnusedLocalVariable")
-		Document document = testPutDocumentPermission_addDocument();
+		Document document = testPutDocumentPermissionsPage_addDocument();
 
 		@SuppressWarnings("PMD.UnusedLocalVariable")
 		com.liferay.portal.kernel.model.Role role = RoleTestUtil.addRole(
@@ -1172,7 +1265,7 @@ public abstract class BaseDocumentResourceTestCase {
 
 		assertHttpResponseStatusCode(
 			200,
-			documentResource.putDocumentPermissionHttpResponse(
+			documentResource.putDocumentPermissionsPageHttpResponse(
 				document.getId(),
 				new Permission[] {
 					new Permission() {
@@ -1185,7 +1278,7 @@ public abstract class BaseDocumentResourceTestCase {
 
 		assertHttpResponseStatusCode(
 			404,
-			documentResource.putDocumentPermissionHttpResponse(
+			documentResource.putDocumentPermissionsPageHttpResponse(
 				0L,
 				new Permission[] {
 					new Permission() {
@@ -1197,7 +1290,7 @@ public abstract class BaseDocumentResourceTestCase {
 				}));
 	}
 
-	protected Document testPutDocumentPermission_addDocument()
+	protected Document testPutDocumentPermissionsPage_addDocument()
 		throws Exception {
 
 		return documentResource.postSiteDocument(
@@ -1288,6 +1381,38 @@ public abstract class BaseDocumentResourceTestCase {
 	}
 
 	@Test
+	public void testGetSiteDocumentsPageWithFilterDoubleEquals()
+		throws Exception {
+
+		List<EntityField> entityFields = getEntityFields(
+			EntityField.Type.DOUBLE);
+
+		if (entityFields.isEmpty()) {
+			return;
+		}
+
+		Long siteId = testGetSiteDocumentsPage_getSiteId();
+
+		Document document1 = testGetSiteDocumentsPage_addDocument(
+			siteId, randomDocument());
+
+		@SuppressWarnings("PMD.UnusedLocalVariable")
+		Document document2 = testGetSiteDocumentsPage_addDocument(
+			siteId, randomDocument());
+
+		for (EntityField entityField : entityFields) {
+			Page<Document> page = documentResource.getSiteDocumentsPage(
+				siteId, null, null, null,
+				getFilterString(entityField, "eq", document1),
+				Pagination.of(1, 2), null);
+
+			assertEquals(
+				Collections.singletonList(document1),
+				(List<Document>)page.getItems());
+		}
+	}
+
+	@Test
 	public void testGetSiteDocumentsPageWithFilterStringEquals()
 		throws Exception {
 
@@ -1364,6 +1489,16 @@ public abstract class BaseDocumentResourceTestCase {
 				BeanUtils.setProperty(
 					document1, entityField.getName(),
 					DateUtils.addMinutes(new Date(), -2));
+			});
+	}
+
+	@Test
+	public void testGetSiteDocumentsPageWithSortDouble() throws Exception {
+		testGetSiteDocumentsPageWithSort(
+			EntityField.Type.DOUBLE,
+			(entityField, document1, document2) -> {
+				BeanUtils.setProperty(document1, entityField.getName(), 0.1);
+				BeanUtils.setProperty(document2, entityField.getName(), 0.5);
 			});
 	}
 
@@ -1743,9 +1878,9 @@ public abstract class BaseDocumentResourceTestCase {
 	}
 
 	@Test
-	public void testPutSiteDocumentPermission() throws Exception {
+	public void testPutSiteDocumentPermissionsPage() throws Exception {
 		@SuppressWarnings("PMD.UnusedLocalVariable")
-		Document document = testPutSiteDocumentPermission_addDocument();
+		Document document = testPutSiteDocumentPermissionsPage_addDocument();
 
 		@SuppressWarnings("PMD.UnusedLocalVariable")
 		com.liferay.portal.kernel.model.Role role = RoleTestUtil.addRole(
@@ -1753,7 +1888,7 @@ public abstract class BaseDocumentResourceTestCase {
 
 		assertHttpResponseStatusCode(
 			200,
-			documentResource.putSiteDocumentPermissionHttpResponse(
+			documentResource.putSiteDocumentPermissionsPageHttpResponse(
 				document.getSiteId(),
 				new Permission[] {
 					new Permission() {
@@ -1766,7 +1901,7 @@ public abstract class BaseDocumentResourceTestCase {
 
 		assertHttpResponseStatusCode(
 			404,
-			documentResource.putSiteDocumentPermissionHttpResponse(
+			documentResource.putSiteDocumentPermissionsPageHttpResponse(
 				document.getSiteId(),
 				new Permission[] {
 					new Permission() {
@@ -1778,7 +1913,7 @@ public abstract class BaseDocumentResourceTestCase {
 				}));
 	}
 
-	protected Document testPutSiteDocumentPermission_addDocument()
+	protected Document testPutSiteDocumentPermissionsPage_addDocument()
 		throws Exception {
 
 		return documentResource.postSiteDocument(
@@ -3021,8 +3156,9 @@ public abstract class BaseDocumentResourceTestCase {
 		}
 
 		if (entityFieldName.equals("numberOfComments")) {
-			throw new IllegalArgumentException(
-				"Invalid entity field " + entityFieldName);
+			sb.append(String.valueOf(document.getNumberOfComments()));
+
+			return sb.toString();
 		}
 
 		if (entityFieldName.equals("relatedContents")) {

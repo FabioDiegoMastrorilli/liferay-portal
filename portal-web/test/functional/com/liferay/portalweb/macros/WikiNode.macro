@@ -18,7 +18,7 @@ definition {
 		Navigator.openURL();
 
 		ProductMenu.gotoPortlet(
-			category = "Content &amp; Data",
+			category = "Content & Data",
 			portlet = "Wiki");
 
 		if (IsElementNotPresent(locator1 = "Wiki#NODE_TABLE")) {
@@ -85,11 +85,30 @@ definition {
 		Alert.viewSuccessMessage();
 	}
 
+	macro importWikiPage {
+		LexiconEntry.gotoEntryMenuItem(
+			menuItem = "Import Pages",
+			rowEntry = "${wikiNodeName}");
+
+		var dependencyFilePath = TestCase.getDependenciesDirPath(fileName = "${fileName}");
+
+		UploadFile(
+			key_tag = "Pages File",
+			locator1 = "Wiki#IMPORT_PAGES_MEDIAWIKI",
+			value1 = "${dependencyFilePath}");
+
+		Click(
+			key_text = "Import",
+			locator1 = "Button#ANY");
+
+		Alert.viewSuccessMessage();
+	}
+
 	macro tearDownCP {
 		Navigator.openURL();
 
 		ProductMenu.gotoPortlet(
-			category = "Content &amp; Data",
+			category = "Content & Data",
 			portlet = "Wiki");
 
 		if (IsElementPresent(locator1 = "Wiki#NODE_TABLE_ACTIONS_GENERIC_DROPDOWN_2")) {

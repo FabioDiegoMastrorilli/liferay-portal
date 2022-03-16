@@ -18,8 +18,6 @@ import com.liferay.dynamic.data.mapping.form.field.type.BaseDDMFormFieldTypeSett
 import com.liferay.dynamic.data.mapping.model.DDMFormField;
 import com.liferay.dynamic.data.mapping.render.DDMFormFieldRenderingContext;
 import com.liferay.dynamic.data.mapping.test.util.DDMFormValuesTestUtil;
-import com.liferay.portal.json.JSONFactoryImpl;
-import com.liferay.portal.kernel.json.JSONFactoryUtil;
 import com.liferay.portal.kernel.json.JSONUtil;
 import com.liferay.portal.kernel.util.HashMapBuilder;
 import com.liferay.portal.kernel.util.HtmlUtil;
@@ -37,7 +35,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
@@ -55,8 +52,6 @@ public class NumericDDMFormFieldTemplateContextContributorTest
 		super.setUp();
 
 		_setUpHtmlUtil();
-		_setUpJSONFactory();
-		_setUpJSONFactoryUtil();
 	}
 
 	@Test
@@ -92,7 +87,7 @@ public class NumericDDMFormFieldTemplateContextContributorTest
 		ddmFormField.setProperty("dataType", "integer");
 
 		DDMFormFieldRenderingContext ddmFormFieldRenderingContext =
-			new DDMFormFieldRenderingContext();
+			_createDDMFormFieldRenderingContext();
 
 		ddmFormFieldRenderingContext.setProperty(
 			"changedProperties",
@@ -100,10 +95,11 @@ public class NumericDDMFormFieldTemplateContextContributorTest
 				"dataType", "double"
 			).build());
 
-		Assert.assertEquals(
-			"double",
-			_numericDDMFormFieldTemplateContextContributor.getPropertyValue(
-				ddmFormField, ddmFormFieldRenderingContext, "dataType"));
+		Map<String, Object> parameters =
+			_numericDDMFormFieldTemplateContextContributor.getParameters(
+				ddmFormField, ddmFormFieldRenderingContext);
+
+		Assert.assertEquals("double", parameters.get("dataType"));
 	}
 
 	@Test
@@ -113,14 +109,15 @@ public class NumericDDMFormFieldTemplateContextContributorTest
 		ddmFormField.setProperty("dataType", "double");
 
 		DDMFormFieldRenderingContext ddmFormFieldRenderingContext =
-			new DDMFormFieldRenderingContext();
+			_createDDMFormFieldRenderingContext();
 
 		ddmFormFieldRenderingContext.setProperty("changedProperties", null);
 
-		Assert.assertEquals(
-			"double",
-			_numericDDMFormFieldTemplateContextContributor.getPropertyValue(
-				ddmFormField, ddmFormFieldRenderingContext, "dataType"));
+		Map<String, Object> parameters =
+			_numericDDMFormFieldTemplateContextContributor.getParameters(
+				ddmFormField, ddmFormFieldRenderingContext);
+
+		Assert.assertEquals("double", parameters.get("dataType"));
 	}
 
 	@Test
@@ -130,15 +127,16 @@ public class NumericDDMFormFieldTemplateContextContributorTest
 		ddmFormField.setProperty("dataType", "integer");
 
 		DDMFormFieldRenderingContext ddmFormFieldRenderingContext =
-			new DDMFormFieldRenderingContext();
+			_createDDMFormFieldRenderingContext();
 
 		ddmFormFieldRenderingContext.setProperty(
 			"changedProperties", new HashMap<String, Object>());
 
-		Assert.assertEquals(
-			"integer",
-			_numericDDMFormFieldTemplateContextContributor.getPropertyValue(
-				ddmFormField, ddmFormFieldRenderingContext, "dataType"));
+		Map<String, Object> parameters =
+			_numericDDMFormFieldTemplateContextContributor.getParameters(
+				ddmFormField, ddmFormFieldRenderingContext);
+
+		Assert.assertEquals("integer", parameters.get("dataType"));
 	}
 
 	@Test
@@ -149,8 +147,6 @@ public class NumericDDMFormFieldTemplateContextContributorTest
 		ddmFormFieldRenderingContext.setProperty(
 			"changedProperties",
 			HashMapBuilder.<String, Object>put(
-				"inputMask", false
-			).put(
 				"inputMaskFormat",
 				DDMFormValuesTestUtil.createLocalizedValue("(999)", _locale)
 			).build());
@@ -160,7 +156,6 @@ public class NumericDDMFormFieldTemplateContextContributorTest
 				_createDDMFormFieldWithInputMask(),
 				ddmFormFieldRenderingContext);
 
-		Assert.assertFalse((boolean)parameters.get("inputMask"));
 		Assert.assertEquals("(999)", parameters.get("inputMaskFormat"));
 	}
 
@@ -174,13 +169,6 @@ public class NumericDDMFormFieldTemplateContextContributorTest
 		Assert.assertTrue((boolean)parameters.get("inputMask"));
 		Assert.assertEquals(
 			"(999) 0999-9999", parameters.get("inputMaskFormat"));
-		Assert.assertEquals(
-			HashMapBuilder.put(
-				"decimalSymbol", "."
-			).put(
-				"thousandsSeparator", ","
-			).build(),
-			parameters.get("symbols"));
 	}
 
 	@Test
@@ -219,12 +207,12 @@ public class NumericDDMFormFieldTemplateContextContributorTest
 		Assert.assertEquals("suffix", parameters.get("appendType"));
 		Assert.assertEquals(2, parameters.get("decimalPlaces"));
 		Assert.assertEquals(
-			JSONUtil.put(
+			HashMapBuilder.put(
 				"decimalSymbol", "."
 			).put(
 				"thousandsSeparator", " "
-			).toString(),
-			String.valueOf(parameters.get("symbols")));
+			).build(),
+			parameters.get("symbols"));
 	}
 
 	@Test
@@ -238,54 +226,51 @@ public class NumericDDMFormFieldTemplateContextContributorTest
 		Assert.assertEquals("prefix", parameters.get("appendType"));
 		Assert.assertEquals(2, parameters.get("decimalPlaces"));
 		Assert.assertEquals(
-			JSONUtil.put(
+			HashMapBuilder.put(
 				"decimalSymbol", ","
 			).put(
 				"thousandsSeparator", "\'"
-			).toString(),
-			String.valueOf(parameters.get("symbols")));
+			).build(),
+			parameters.get("symbols"));
 	}
 
 	@Test
-	public void testGetPredefinedValue() {
+	public void testGetSymbols() {
 		DDMFormField ddmFormField = new DDMFormField("field", "numeric");
 
-		ddmFormField.setProperty(
-			"predefinedValue",
-			DDMFormValuesTestUtil.createLocalizedValue("42", _locale));
+		ddmFormField.setProperty("dataType", "double");
+
+		Map<String, Object> parameters =
+			_numericDDMFormFieldTemplateContextContributor.getParameters(
+				ddmFormField, _createDDMFormFieldRenderingContext());
+
+		Map<String, String> symbols = (Map<String, String>)parameters.get(
+			"symbols");
+
+		Assert.assertEquals(".", symbols.get("decimalSymbol"));
+		Assert.assertEquals(",", symbols.get("thousandsSeparator"));
+	}
+
+	@Test
+	public void testGetSymbolsBrazilLocale() {
+		DDMFormField ddmFormField = new DDMFormField("field", "numeric");
+
+		ddmFormField.setProperty("dataType", "double");
 
 		DDMFormFieldRenderingContext ddmFormFieldRenderingContext =
 			new DDMFormFieldRenderingContext();
 
-		ddmFormFieldRenderingContext.setLocale(_locale);
-		ddmFormFieldRenderingContext.setViewMode(true);
+		ddmFormFieldRenderingContext.setLocale(LocaleUtil.BRAZIL);
 
 		Map<String, Object> parameters =
 			_numericDDMFormFieldTemplateContextContributor.getParameters(
 				ddmFormField, ddmFormFieldRenderingContext);
 
-		Assert.assertEquals(
-			"42", String.valueOf(parameters.get("predefinedValue")));
-	}
+		Map<String, String> symbols = (Map<String, String>)parameters.get(
+			"symbols");
 
-	@Test
-	public void testGetSymbols() {
-		Map<String, String> symbolsMap =
-			_numericDDMFormFieldTemplateContextContributor.getSymbolsMap(
-				LocaleUtil.US);
-
-		Assert.assertEquals(".", symbolsMap.get("decimalSymbol"));
-		Assert.assertEquals(",", symbolsMap.get("thousandsSeparator"));
-	}
-
-	@Test
-	public void testGetSymbolsBrazilLocale() {
-		Map<String, String> symbolsMap =
-			_numericDDMFormFieldTemplateContextContributor.getSymbolsMap(
-				LocaleUtil.BRAZIL);
-
-		Assert.assertEquals(",", symbolsMap.get("decimalSymbol"));
-		Assert.assertEquals(".", symbolsMap.get("thousandsSeparator"));
+		Assert.assertEquals(",", symbols.get("decimalSymbol"));
+		Assert.assertEquals(".", symbols.get("thousandsSeparator"));
 	}
 
 	private DDMFormFieldRenderingContext _createDDMFormFieldRenderingContext() {
@@ -340,21 +325,6 @@ public class NumericDDMFormFieldTemplateContextContributorTest
 		HtmlUtil htmlUtil = new HtmlUtil();
 
 		htmlUtil.setHtml(new HtmlImpl());
-	}
-
-	private void _setUpJSONFactory() throws Exception {
-		PowerMockito.field(
-			NumericDDMFormFieldTemplateContextContributor.class, "_jsonFactory"
-		).set(
-			_numericDDMFormFieldTemplateContextContributor,
-			new JSONFactoryImpl()
-		);
-	}
-
-	private void _setUpJSONFactoryUtil() {
-		JSONFactoryUtil jsonFactoryUtil = new JSONFactoryUtil();
-
-		jsonFactoryUtil.setJSONFactory(new JSONFactoryImpl());
 	}
 
 	private final Locale _locale = LocaleUtil.US;

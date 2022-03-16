@@ -61,8 +61,35 @@ definition {
 		Alert.viewSuccessMessageText(successMessage = "Permissions Changed");
 	}
 
+	macro editViaSharedwithMe {
+		Asset.openTosharedContent(
+			navTab = "Shared with Me",
+			siteURLKey = "guest");
+
+		if (isSet(dmDocumentTitle)) {
+			DMDocument.editCP(
+				dmDocumentTitle = "${dmDocumentTitle}",
+				dmDocumentTitleEdit = "${entryTitleEdit}");
+		}
+		else {
+			LexiconEntry.gotoEntryMenuItem(
+				menuItem = "Edit",
+				rowEntry = "${entryTitle}");
+
+			BlogsEntry.editTitle(
+				entryTitle = "${entryTitle}",
+				entryTitleEdit = "${entryTitleEdit}");
+
+			Button.clickPublish();
+		}
+
+		LexiconEntry.viewEntryName(rowEntry = "${entryTitleEdit}");
+	}
+
 	macro removeCollaborator {
-		DMDocumentSharing._manageCollaborators();
+		if (!(isSet(sharedByMe))) {
+			DMDocumentSharing._manageCollaborators();
+		}
 
 		SelectFrame(locator1 = "IFrame#MODAL_IFRAME");
 
@@ -107,7 +134,6 @@ definition {
 
 			MenuItem.viewNotPresent(menuItem = "Edit");
 		}
-
 		else if ("${contentSharingPermission}" == "Comment") {
 			SelectFrame.selectFrameNoLoading(locator1 = "CKEditor#BODY_FIELD_IFRAME");
 
@@ -119,7 +145,6 @@ definition {
 
 			MenuItem.viewNotPresent(menuItem = "Edit");
 		}
-
 		else if ("${contentSharingPermission}" == "Update") {
 			SelectFrame.selectFrameNoLoading(locator1 = "CKEditor#BODY_FIELD_IFRAME");
 

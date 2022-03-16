@@ -15,6 +15,7 @@
 package com.liferay.object.admin.rest.client.serdes.v1_0;
 
 import com.liferay.object.admin.rest.client.dto.v1_0.ObjectField;
+import com.liferay.object.admin.rest.client.dto.v1_0.ObjectFieldSetting;
 import com.liferay.object.admin.rest.client.json.BaseJSONParser;
 
 import java.util.Iterator;
@@ -22,6 +23,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.stream.Stream;
 
 import javax.annotation.Generated;
 
@@ -55,6 +57,20 @@ public class ObjectFieldSerDes {
 
 		sb.append("{");
 
+		if (objectField.getDBType() != null) {
+			if (sb.length() > 1) {
+				sb.append(", ");
+			}
+
+			sb.append("\"DBType\": ");
+
+			sb.append("\"");
+
+			sb.append(objectField.getDBType());
+
+			sb.append("\"");
+		}
+
 		if (objectField.getActions() != null) {
 			if (sb.length() > 1) {
 				sb.append(", ");
@@ -63,6 +79,20 @@ public class ObjectFieldSerDes {
 			sb.append("\"actions\": ");
 
 			sb.append(_toJSON(objectField.getActions()));
+		}
+
+		if (objectField.getBusinessType() != null) {
+			if (sb.length() > 1) {
+				sb.append(", ");
+			}
+
+			sb.append("\"businessType\": ");
+
+			sb.append("\"");
+
+			sb.append(objectField.getBusinessType());
+
+			sb.append("\"");
 		}
 
 		if (objectField.getId() != null) {
@@ -143,6 +173,43 @@ public class ObjectFieldSerDes {
 			sb.append("\"");
 		}
 
+		if (objectField.getObjectFieldSettings() != null) {
+			if (sb.length() > 1) {
+				sb.append(", ");
+			}
+
+			sb.append("\"objectFieldSettings\": ");
+
+			sb.append("[");
+
+			for (int i = 0; i < objectField.getObjectFieldSettings().length;
+				 i++) {
+
+				sb.append(
+					String.valueOf(objectField.getObjectFieldSettings()[i]));
+
+				if ((i + 1) < objectField.getObjectFieldSettings().length) {
+					sb.append(", ");
+				}
+			}
+
+			sb.append("]");
+		}
+
+		if (objectField.getRelationshipType() != null) {
+			if (sb.length() > 1) {
+				sb.append(", ");
+			}
+
+			sb.append("\"relationshipType\": ");
+
+			sb.append("\"");
+
+			sb.append(objectField.getRelationshipType());
+
+			sb.append("\"");
+		}
+
 		if (objectField.getRequired() != null) {
 			if (sb.length() > 1) {
 				sb.append(", ");
@@ -186,11 +253,26 @@ public class ObjectFieldSerDes {
 
 		Map<String, String> map = new TreeMap<>();
 
+		if (objectField.getDBType() == null) {
+			map.put("DBType", null);
+		}
+		else {
+			map.put("DBType", String.valueOf(objectField.getDBType()));
+		}
+
 		if (objectField.getActions() == null) {
 			map.put("actions", null);
 		}
 		else {
 			map.put("actions", String.valueOf(objectField.getActions()));
+		}
+
+		if (objectField.getBusinessType() == null) {
+			map.put("businessType", null);
+		}
+		else {
+			map.put(
+				"businessType", String.valueOf(objectField.getBusinessType()));
 		}
 
 		if (objectField.getId() == null) {
@@ -248,6 +330,24 @@ public class ObjectFieldSerDes {
 			map.put("name", String.valueOf(objectField.getName()));
 		}
 
+		if (objectField.getObjectFieldSettings() == null) {
+			map.put("objectFieldSettings", null);
+		}
+		else {
+			map.put(
+				"objectFieldSettings",
+				String.valueOf(objectField.getObjectFieldSettings()));
+		}
+
+		if (objectField.getRelationshipType() == null) {
+			map.put("relationshipType", null);
+		}
+		else {
+			map.put(
+				"relationshipType",
+				String.valueOf(objectField.getRelationshipType()));
+		}
+
 		if (objectField.getRequired() == null) {
 			map.put("required", null);
 		}
@@ -283,10 +383,24 @@ public class ObjectFieldSerDes {
 			ObjectField objectField, String jsonParserFieldName,
 			Object jsonParserFieldValue) {
 
-			if (Objects.equals(jsonParserFieldName, "actions")) {
+			if (Objects.equals(jsonParserFieldName, "DBType")) {
+				if (jsonParserFieldValue != null) {
+					objectField.setDBType(
+						ObjectField.DBType.create(
+							(String)jsonParserFieldValue));
+				}
+			}
+			else if (Objects.equals(jsonParserFieldName, "actions")) {
 				if (jsonParserFieldValue != null) {
 					objectField.setActions(
 						(Map)ObjectFieldSerDes.toMap(
+							(String)jsonParserFieldValue));
+				}
+			}
+			else if (Objects.equals(jsonParserFieldName, "businessType")) {
+				if (jsonParserFieldValue != null) {
+					objectField.setBusinessType(
+						ObjectField.BusinessType.create(
 							(String)jsonParserFieldValue));
 				}
 			}
@@ -331,6 +445,28 @@ public class ObjectFieldSerDes {
 			else if (Objects.equals(jsonParserFieldName, "name")) {
 				if (jsonParserFieldValue != null) {
 					objectField.setName((String)jsonParserFieldValue);
+				}
+			}
+			else if (Objects.equals(
+						jsonParserFieldName, "objectFieldSettings")) {
+
+				if (jsonParserFieldValue != null) {
+					objectField.setObjectFieldSettings(
+						Stream.of(
+							toStrings((Object[])jsonParserFieldValue)
+						).map(
+							object -> ObjectFieldSettingSerDes.toDTO(
+								(String)object)
+						).toArray(
+							size -> new ObjectFieldSetting[size]
+						));
+				}
+			}
+			else if (Objects.equals(jsonParserFieldName, "relationshipType")) {
+				if (jsonParserFieldValue != null) {
+					objectField.setRelationshipType(
+						ObjectField.RelationshipType.create(
+							(String)jsonParserFieldValue));
 				}
 			}
 			else if (Objects.equals(jsonParserFieldName, "required")) {

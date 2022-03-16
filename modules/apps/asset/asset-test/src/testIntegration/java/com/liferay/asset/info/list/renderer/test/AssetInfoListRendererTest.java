@@ -105,7 +105,7 @@ public class AssetInfoListRendererTest {
 				_infoListRendererTracker.getInfoListRenderer(
 					"com.liferay.asset.info.internal.list.renderer." +
 						"UnstyledAssetEntryBasicInfoListRenderer");
-		_layout = LayoutTestUtil.addLayout(_group);
+		_layout = LayoutTestUtil.addTypePortletLayout(_group);
 	}
 
 	@Test
@@ -229,8 +229,8 @@ public class AssetInfoListRendererTest {
 		themeDisplay.setRealUser(TestPropsValues.getUser());
 		themeDisplay.setRequest(httpServletRequest);
 		themeDisplay.setResponse(new MockHttpServletResponse());
-		themeDisplay.setUser(TestPropsValues.getUser());
 		themeDisplay.setScopeGroupId(_group.getGroupId());
+		themeDisplay.setUser(TestPropsValues.getUser());
 
 		httpServletRequest.setAttribute(WebKeys.THEME_DISPLAY, themeDisplay);
 

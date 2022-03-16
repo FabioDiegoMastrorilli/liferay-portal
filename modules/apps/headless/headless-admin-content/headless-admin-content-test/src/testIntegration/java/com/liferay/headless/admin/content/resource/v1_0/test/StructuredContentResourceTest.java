@@ -184,7 +184,7 @@ public class StructuredContentResourceTest
 
 	@Override
 	protected String[] getAdditionalAssertFieldNames() {
-		return new String[] {"title"};
+		return new String[] {"priority", "title"};
 	}
 
 	@Override
@@ -241,7 +241,7 @@ public class StructuredContentResourceTest
 				StructuredContent structuredContent)
 		throws Exception {
 
-		return _postSiteStructuredContent(
+		return structuredContentResource.postSiteStructuredContentDraft(
 			testGroup.getGroupId(), structuredContent);
 	}
 
@@ -266,7 +266,7 @@ public class StructuredContentResourceTest
 			ddmStructure.getGroupId(), ddmStructure.getStructureId(),
 			PortalUtil.getClassNameId(JournalArticle.class),
 			TemplateConstants.LANG_TYPE_VM,
-			_read("test-structured-content-template.xsl"), LocaleUtil.US);
+			_read("test-structured-content-template.vm"), LocaleUtil.US);
 	}
 
 	private DDMForm _deserialize(String content) {
@@ -293,6 +293,7 @@ public class StructuredContentResourceTest
 					{
 						setContentStructureId(
 							structuredContent.getContentStructureId());
+						setPriority(structuredContent.getPriority());
 						setSiteId(structuredContent.getSiteId());
 						setTitle(structuredContent.getTitle());
 					}
@@ -308,6 +309,21 @@ public class StructuredContentResourceTest
 		return StringUtil.read(inputStream);
 	}
 
+	private com.liferay.headless.delivery.client.dto.v1_0.StructuredContent
+		_toStructuredContent(StructuredContent structuredContent) {
+
+		return new com.liferay.headless.delivery.client.dto.v1_0.
+			StructuredContent() {
+
+			{
+				setContentStructureId(
+					structuredContent.getContentStructureId());
+				setSiteId(structuredContent.getSiteId());
+				setTitle(structuredContent.getTitle());
+			}
+		};
+	}
+
 	private StructuredContent _toStructuredContent(
 		com.liferay.headless.delivery.client.dto.v1_0.StructuredContent
 			structuredContent) {
@@ -319,21 +335,7 @@ public class StructuredContentResourceTest
 				setDateCreated(structuredContent.getDateCreated());
 				setDateModified(structuredContent.getDateModified());
 				setId(structuredContent.getId());
-				setSiteId(structuredContent.getSiteId());
-				setTitle(structuredContent.getTitle());
-			}
-		};
-	}
-
-	private com.liferay.headless.delivery.client.dto.v1_0.StructuredContent
-		_toStructuredContent(StructuredContent structuredContent) {
-
-		return new com.liferay.headless.delivery.client.dto.v1_0.
-			StructuredContent() {
-
-			{
-				setContentStructureId(
-					structuredContent.getContentStructureId());
+				setPriority(structuredContent.getPriority());
 				setSiteId(structuredContent.getSiteId());
 				setTitle(structuredContent.getTitle());
 			}

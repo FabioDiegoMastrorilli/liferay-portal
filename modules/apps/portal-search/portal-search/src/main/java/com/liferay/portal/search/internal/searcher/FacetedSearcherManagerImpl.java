@@ -18,12 +18,12 @@ import com.liferay.portal.kernel.search.IndexerRegistry;
 import com.liferay.portal.kernel.search.facet.faceted.searcher.FacetedSearcher;
 import com.liferay.portal.kernel.search.facet.faceted.searcher.FacetedSearcherManager;
 import com.liferay.portal.kernel.util.Localization;
-import com.liferay.portal.kernel.util.LocalizationUtil;
 import com.liferay.portal.search.asset.SearchableAssetClassNamesProvider;
-import com.liferay.portal.search.internal.expando.ExpandoQueryContributorHelper;
-import com.liferay.portal.search.internal.indexer.AddSearchKeywordsQueryContributorHelper;
-import com.liferay.portal.search.internal.indexer.PostProcessSearchQueryContributorHelper;
-import com.liferay.portal.search.internal.indexer.PreFilterContributorHelper;
+import com.liferay.portal.search.internal.expando.helper.ExpandoQueryContributorHelper;
+import com.liferay.portal.search.internal.indexer.helper.AddSearchKeywordsQueryContributorHelper;
+import com.liferay.portal.search.internal.indexer.helper.PostProcessSearchQueryContributorHelper;
+import com.liferay.portal.search.internal.indexer.helper.PreFilterContributorHelper;
+import com.liferay.portal.search.internal.searcher.helper.IndexSearcherHelper;
 import com.liferay.portal.search.legacy.searcher.SearchRequestBuilderFactory;
 
 import org.osgi.service.component.annotations.Component;
@@ -42,17 +42,6 @@ public class FacetedSearcherManagerImpl implements FacetedSearcherManager {
 			expandoQueryContributorHelper, indexerRegistry, indexSearcherHelper,
 			postProcessSearchQueryContributorHelper, preFilterContributorHelper,
 			searchableAssetClassNamesProvider, searchRequestBuilderFactory);
-	}
-
-	protected Localization getLocalization() {
-
-		// See LPS-72507
-
-		if (localization != null) {
-			return localization;
-		}
-
-		return LocalizationUtil.getLocalization();
 	}
 
 	@Reference

@@ -17,9 +17,12 @@ package com.liferay.object.rest.internal.graphql.dto.v1_0;
 import com.liferay.object.model.ObjectDefinition;
 import com.liferay.object.model.ObjectField;
 import com.liferay.object.rest.dto.v1_0.ObjectEntry;
+import com.liferay.object.rest.dto.v1_0.Status;
+import com.liferay.object.rest.internal.configuration.activator.FFSearchAndSortMetadataColumnsConfigurationActivator;
 import com.liferay.object.rest.internal.odata.entity.v1_0.ObjectEntryEntityModel;
 import com.liferay.object.rest.manager.v1_0.ObjectEntryManager;
 import com.liferay.object.scope.ObjectScopeProvider;
+import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.search.Sort;
 import com.liferay.portal.kernel.search.filter.Filter;
 import com.liferay.portal.kernel.util.HashMapBuilder;
@@ -29,6 +32,8 @@ import com.liferay.portal.vulcan.aggregation.Aggregation;
 import com.liferay.portal.vulcan.dto.converter.DTOConverterContext;
 import com.liferay.portal.vulcan.graphql.dto.GraphQLDTOContributor;
 import com.liferay.portal.vulcan.graphql.dto.GraphQLDTOProperty;
+import com.liferay.portal.vulcan.graphql.dto.v1_0.Creator;
+import com.liferay.portal.vulcan.list.type.ListEntry;
 import com.liferay.portal.vulcan.pagination.Page;
 import com.liferay.portal.vulcan.pagination.Pagination;
 
@@ -41,6 +46,7 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -51,6 +57,8 @@ public class ObjectDefinitionGraphQLDTOContributor
 	implements GraphQLDTOContributor<Map<String, Object>, Map<String, Object>> {
 
 	public static ObjectDefinitionGraphQLDTOContributor of(
+		FFSearchAndSortMetadataColumnsConfigurationActivator
+			ffSearchAndSortMetadataColumnsConfigurationActivator,
 		ObjectDefinition objectDefinition,
 		ObjectEntryManager objectEntryManager, List<ObjectField> objectFields,
 		ObjectScopeProvider objectScopeProvider) {
@@ -59,23 +67,64 @@ public class ObjectDefinitionGraphQLDTOContributor
 
 		graphQLDTOProperties.add(
 			GraphQLDTOProperty.of(
-				objectDefinition.getPKObjectFieldName(), Long.class));
+				objectDefinition.getPKObjectFieldName(), true, Long.class));
+		graphQLDTOProperties.add(
+			GraphQLDTOProperty.of("creator", true, Creator.class));
+		graphQLDTOProperties.add(
+			GraphQLDTOProperty.of("dateCreated", true, Date.class));
+		graphQLDTOProperties.add(
+			GraphQLDTOProperty.of("dateModified", true, Date.class));
+		graphQLDTOProperties.add(
+			GraphQLDTOProperty.of("externalReferenceCode", String.class));
+		graphQLDTOProperties.add(
+			GraphQLDTOProperty.of("status", true, String.class));
+
+		List<GraphQLDTOProperty> relationshipGraphQLDTOProperties =
+			new ArrayList<>();
 
 		for (ObjectField objectField : objectFields) {
-			graphQLDTOProperties.add(
-				GraphQLDTOProperty.of(
-					objectField.getName(),
-					_typedClasses.getOrDefault(
-						objectField.getType(), Object.class)));
+			if (objectField.getListTypeDefinitionId() != 0) {
+				graphQLDTOProperties.add(
+					GraphQLDTOProperty.of(
+						objectField.getName(), ListEntry.class));
+			}
+			else if (Objects.equals(
+						objectField.getRelationshipType(), "oneToMany")) {
+
+				String objectFieldName = objectField.getName();
+
+				String relationshipIdName = objectFieldName.substring(
+					objectFieldName.lastIndexOf(StringPool.UNDERLINE) + 1);
+
+				graphQLDTOProperties.add(
+					GraphQLDTOProperty.of(relationshipIdName, Long.class));
+
+				String relationshipName = StringUtil.replaceLast(
+					relationshipIdName, "Id", "");
+
+				relationshipGraphQLDTOProperties.add(
+					GraphQLDTOProperty.of(relationshipName, Map.class));
+			}
+			else {
+				graphQLDTOProperties.add(
+					GraphQLDTOProperty.of(
+						objectField.getName(),
+						_typedClasses.getOrDefault(
+							objectField.getDBType(), Object.class)));
+			}
 		}
 
 		return new ObjectDefinitionGraphQLDTOContributor(
 			objectDefinition.getCompanyId(),
-			new ObjectEntryEntityModel(objectFields), graphQLDTOProperties,
+			new ObjectEntryEntityModel(
+				ffSearchAndSortMetadataColumnsConfigurationActivator,
+				objectFields),
+			graphQLDTOProperties,
 			StringUtil.removeSubstring(
 				objectDefinition.getPKObjectFieldName(), "c_"),
 			objectDefinition, objectEntryManager, objectScopeProvider,
-			objectDefinition.getShortName(), objectDefinition.getName());
+			relationshipGraphQLDTOProperties, objectDefinition.getShortName(),
+			objectDefinition.getName());
 	}
 
 	@Override
@@ -91,7 +140,7 @@ public class ObjectDefinitionGraphQLDTOContributor
 
 	@Override
 	public boolean deleteDTO(long id) throws Exception {
-		_objectEntryManager.deleteObjectEntry(id);
+		_objectEntryManager.deleteObjectEntry(_objectDefinition, id);
 
 		return true;
 	}
@@ -153,10 +202,45 @@ public class ObjectDefinitionGraphQLDTOContributor
 	}
 
 	@Override
+	public List<GraphQLDTOProperty> getRelationshipGraphQLDTOProperties() {
+		return _relationshipGraphQLDTOProperties;
+	}
+
+	@Override
+	public <T> T getRelationshipValue(
+			DTOConverterContext dtoConverterContext, long id,
+			Class<T> relationshipClass, String relationshipName)
+		throws Exception {
+
+		if (!Objects.equals(relationshipClass, Map.class)) {
+			return null;
+		}
+
+		ObjectEntry objectEntry = _objectEntryManager.getObjectEntry(
+			dtoConverterContext, _objectDefinition, id);
+
+		Map<String, Object> properties = objectEntry.getProperties();
+
+		String relationshipIdName = relationshipName + "Id";
+
+		Object relationshipId = properties.get(relationshipIdName);
+
+		if (!(relationshipId instanceof Long)) {
+			return null;
+		}
+
+		return (T)_toMap(
+			_objectEntryManager.fetchObjectEntry(
+				dtoConverterContext, null, (long)relationshipId),
+			relationshipIdName);
+	}
+
+	@Override
 	public String getResourceName() {
 		return _resourceName;
 	}
 
+	@Override
 	public String getTypeName() {
 		return _typeName;
 	}
@@ -183,8 +267,9 @@ public class ObjectDefinitionGraphQLDTOContributor
 		List<GraphQLDTOProperty> graphQLDTOProperties, String idName,
 		ObjectDefinition objectDefinition,
 		ObjectEntryManager objectEntryManager,
-		ObjectScopeProvider objectScopeProvider, String resourceName,
-		String typeName) {
+		ObjectScopeProvider objectScopeProvider,
+		List<GraphQLDTOProperty> relationshipGraphQLDTOProperties,
+		String resourceName, String typeName) {
 
 		_companyId = companyId;
 		_entityModel = entityModel;
@@ -193,14 +278,35 @@ public class ObjectDefinitionGraphQLDTOContributor
 		_objectDefinition = objectDefinition;
 		_objectEntryManager = objectEntryManager;
 		_objectScopeProvider = objectScopeProvider;
+		_relationshipGraphQLDTOProperties = relationshipGraphQLDTOProperties;
 		_resourceName = resourceName;
 		_typeName = typeName;
 	}
 
 	private Map<String, Object> _toMap(ObjectEntry objectEntry) {
+		return _toMap(objectEntry, getIdName());
+	}
+
+	private Map<String, Object> _toMap(
+		ObjectEntry objectEntry, String objectEntryIdName) {
+
+		if (objectEntry == null) {
+			return null;
+		}
+
 		Map<String, Object> properties = objectEntry.getProperties();
 
-		properties.put(getIdName(), objectEntry.getId());
+		properties.put(objectEntryIdName, objectEntry.getId());
+
+		properties.put("creator", objectEntry.getCreator());
+		properties.put("dateCreated", objectEntry.getDateCreated());
+		properties.put("dateModified", objectEntry.getDateModified());
+		properties.put(
+			"externalReferenceCode", objectEntry.getExternalReferenceCode());
+
+		Status status = objectEntry.getStatus();
+
+		properties.put("status", status.getLabel());
 
 		return properties;
 	}
@@ -249,6 +355,7 @@ public class ObjectDefinitionGraphQLDTOContributor
 	private final ObjectDefinition _objectDefinition;
 	private final ObjectEntryManager _objectEntryManager;
 	private final ObjectScopeProvider _objectScopeProvider;
+	private final List<GraphQLDTOProperty> _relationshipGraphQLDTOProperties;
 	private final String _resourceName;
 	private final String _typeName;
 

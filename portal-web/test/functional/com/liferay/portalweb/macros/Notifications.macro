@@ -56,12 +56,51 @@ definition {
 		}
 	}
 
+	macro markAsReadViaManagementBar {
+		if (isSet(selectAll)) {
+			PortletEntry.selectAll();
+		}
+		else {
+			LexiconEntry.selectEntry(key_rowEntry = "${notificationsTitle}");
+		}
+
+		Click(locator1 = "Icon#MARK_AS_READ");
+
+		Alert.viewSuccessMessage();
+	}
+
+	macro markAsUnreadViaManagementBar {
+		if (isSet(selectAll)) {
+			PortletEntry.selectAll();
+		}
+		else {
+			LexiconEntry.selectEntry(key_rowEntry = "${notificationsTitle}");
+		}
+
+		Click(locator1 = "Icon#MARK_AS_UNREAD");
+
+		Alert.viewSuccessMessage();
+	}
+
 	macro navigateToContent {
 		var key_contentBody = "${contentBody}";
 
 		AssertClick.assertPartialTextClickAt(
 			locator1 = "Notifications#NOTIFICATIONS_CONTENT",
 			value1 = "${contentBody}");
+	}
+
+	macro removeNotificationsViaManagementBar {
+		if (isSet(selectAll)) {
+			PortletEntry.selectAll();
+		}
+		else {
+			LexiconEntry.selectEntry(key_rowEntry = "${notificationsTitle}");
+		}
+
+		Click(locator1 = "Icon#DELETE");
+
+		Alert.viewSuccessMessage();
 	}
 
 	macro tearDownUnreadNotifications {
@@ -140,13 +179,11 @@ definition {
 				locator1 = "Notifications#NOTIFICATIONS_TITLE",
 				value1 = "in the &quot;Content Page Name&quot; page.");
 		}
-
 		else if (isSet(mentioned)) {
 			AssertTextEquals.assertPartialText(
 				locator1 = "Notifications#NOTIFICATIONS_TITLE",
 				value1 = "${user} mentioned you in a comment in a ${assetType}.");
 		}
-
 		else {
 			AssertTextEquals(
 				locator1 = "Notifications#NOTIFICATIONS_TITLE",
@@ -185,7 +222,6 @@ definition {
 				locator1 = "Sharing#NOTIFICATIONS_TITLE_SPECIAL",
 				value1 = "${ownerName} has shared ${contentTitle} with you for ${contentSharingPermission}.");
 		}
-
 		else {
 			AssertTextEquals(
 				locator1 = "Sharing#NOTIFICATIONS_TITLE",
@@ -293,6 +329,16 @@ definition {
 		AssertTextEquals(
 			locator1 = "Notifications#NOTIFICATIONS_CONTENT",
 			value1 = "${contentBody}");
+	}
+
+	macro waitForNotificationFlexibly {
+		Pause(locator1 = "${waitingTime}");
+
+		while (IsElementNotPresent(locator1 = "Notifications#PROFILE_BADGE_COUNT")) {
+			Pause(locator1 = "${flexibleRefreshingTime}");
+
+			Refresh();
+		}
 	}
 
 }

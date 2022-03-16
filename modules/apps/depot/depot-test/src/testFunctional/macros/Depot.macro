@@ -23,7 +23,7 @@ definition {
 
 			Type(
 				locator1 = "SiteSettingsStaging#REMOTE_STAGING_SITE_ID",
-				value1 = "${groupID}");
+				value1 = "${groupId}");
 		}
 		else {
 			Check.checkHiddenToggleSwitch(locator1 = "SiteSettingsStaging#STAGING_LOCAL_LIVE");
@@ -44,7 +44,6 @@ definition {
 				locator1 = "Staging#STAGING_INDICATOR_TITLE_DEPOT",
 				value1 = "Staging");
 		}
-
 		else {
 			AssertConfirm(value1 = "Are you sure you want to activate local staging for ${depotName}?");
 
@@ -145,7 +144,6 @@ definition {
 		if (isSet(depotName)) {
 			SelectFrame(locator1 = "IFrame#ADD_USERS_TO_ASSET_LIBRARY");
 		}
-
 		else {
 			SelectFrame(locator1 = "IFrame#ADD_USERS_TO_SITE");
 		}
@@ -239,7 +237,7 @@ definition {
 	macro configureCurrentLanguages {
 		for (var language : list "English (United States),Arabic (Saudi Arabia),Catalan (Spain),Chinese (China),Dutch (Netherlands),Finnish (Finland),French (France),German (Germany),Hungarian (Hungary),Japanese (Japan),Portuguese (Brazil),Spanish (Spain),Swedish (Sweden)") {
 			if ("${language}" != "${defaultDepotLanguage}") {
-				if (IsElementPresent(locator1 = "Checkbox#DEPOT_LANGUAGE_CHECKBOX_CHECKED", key_language = "${language}")) {
+				if (IsElementPresent(key_language = "${language}", locator1 = "Checkbox#DEPOT_LANGUAGE_CHECKBOX_CHECKED")) {
 					Click.clickNoMouseOverNoWaitForVisible(
 						key_language = "${language}",
 						locator1 = "Checkbox#DEPOT_LANGUAGE_CHECKBOX");
@@ -247,7 +245,7 @@ definition {
 			}
 		}
 
-		for (var currentLanguage : list "${currentLanguages}" ) {
+		for (var currentLanguage : list "${currentLanguages}") {
 			if ("${currentLanguage}" != "${defaultDepotLanguage}") {
 				Click.clickNoMouseOverNoWaitForVisible(
 					key_language = "${currentLanguage}",
@@ -263,7 +261,7 @@ definition {
 
 		DepotNavigator.gotoSites(depotName = "${depotName}");
 
-		if (isSet(makeWCUnavailable)) {
+		if (isSet(makeWcUnavailable)) {
 			LexiconTable.clickEllipsisItem(
 				item = "Make Structures Unavailable",
 				tableEntry = "${siteName}");
@@ -403,7 +401,7 @@ definition {
 
 			Pause(locator1 = "3000");
 
-			Navigator.gotoNavItem(navItem = "My Sites");
+			Navigator.gotoNavItem(navItem = "All Sites");
 
 			if (isSet(parentSiteName)) {
 				Search.searchCP(searchTerm = "${parentSiteName}");
@@ -478,7 +476,6 @@ definition {
 		if (isSet(deletions)) {
 			ClickNoError(locator1 = "Icon#DELETE");
 		}
-
 		else {
 			LexiconEntry.gotoEntryMenuItemNoError(
 				menuItem = "Delete",
@@ -518,7 +515,6 @@ definition {
 
 			MenuItem.click(menuItem = "Edit");
 		}
-
 		else if (isSet(tableView)) {
 			LexiconEntry.changeDisplayStyle(displayStyle = "table");
 
@@ -528,11 +524,9 @@ definition {
 
 			MenuItem.click(menuItem = "Edit");
 		}
-
 		else if (isSet(settings)) {
 			AssertElementNotPresent(locator1 = "Button#BACK");
 		}
-
 		else {
 			DepotNavigator.gotoEdit(depotName = "${depotName}");
 		}
@@ -577,7 +571,7 @@ definition {
 				locator1 = "Button#LOCALIZATION");
 
 			Click(
-				key_locale = StringUtil.replace("${language}", "-", "_"),
+				key_locale = "${language}",
 				locator1 = "Translation#LOCALIZATION_NAME");
 
 			AssertTextEquals.assertValue(
@@ -596,9 +590,9 @@ definition {
 			depotName = "${depotName}",
 			portlet = "Asset Library Settings");
 
-		var groupID = selenium.getElementValue("//input[contains(@id,'groupId')]");
+		var groupId = selenium.getElementValue("//input[contains(@id,'groupId')]");
 
-		return "${groupID}";
+		return "${groupId}";
 	}
 
 	macro moveLanguage {
@@ -609,7 +603,6 @@ definition {
 		if ("${moveDown}" == "true") {
 			MenuItem.click(menuItem = "Move Down");
 		}
-
 		else {
 			MenuItem.click(menuItem = "Move Up");
 		}
@@ -639,7 +632,7 @@ definition {
 
 		Depot.addDepot(depotName = "Remote Depot");
 
-		var groupID = Depot.getGroupID(depotName = "Remote Depot");
+		var groupId = Depot.getGroupID(depotName = "Remote Depot");
 
 		if (isSet(remotePort)) {
 			User.loginPG(
@@ -656,7 +649,7 @@ definition {
 
 		Depot.activateStaging(
 			depotName = "${depotName}",
-			groupID = "${groupID}",
+			groupId = "${groupId}",
 			remotePort = "${remotePort}",
 			remoteStaging = "true");
 	}
@@ -843,7 +836,6 @@ definition {
 				tableEntry = "${depotName}",
 				tableEntryText = "${connectedSiteNumber}");
 		}
-
 		else if (isSet(cardView)) {
 			LexiconEntry.changeDisplayStyle(displayStyle = "cards");
 
@@ -858,7 +850,6 @@ definition {
 					cardSubtitle = "${connectedSiteNumber} Connected Sites");
 			}
 		}
-
 		else {
 			LexiconEntry.changeDisplayStyle(displayStyle = "list");
 
@@ -993,12 +984,12 @@ definition {
 	}
 
 	macro viewGeneralLanguageOptions {
-		Page.viewFriendlyURLLanguageOptionsPG(
-			currentLanguageList = "${currentLanguageList}",
+		PagesAdmin.viewAvailableLanguages(
+			availableLanguageList = "${currentLanguageList}",
 			fieldName = "Name");
 
-		Page.viewFriendlyURLLanguageOptionsPG(
-			currentLanguageList = "${currentLanguageList}",
+		PagesAdmin.viewAvailableLanguages(
+			availableLanguageList = "${currentLanguageList}",
 			fieldName = "Description");
 	}
 
@@ -1012,13 +1003,11 @@ definition {
 
 			MenuItem.viewVisible(menuItem = "Move Down");
 		}
-
 		else if ("${lastLanguageItem}" == "true") {
 			MenuItem.viewNotPresent(menuItem = "Move Down");
 
 			MenuItem.viewVisible(menuItem = "Move Up");
 		}
-
 		else {
 			MenuItem.viewVisible(menuItem = "Move Down");
 
@@ -1070,15 +1059,9 @@ definition {
 			cardSubtitle = "${userScreenName}");
 
 		if (isSet(viewOnly)) {
-			Click.waitForMenuToggleJSClick(
+			AssertElementNotPresent(
 				key_card = "${userScreenName}",
 				locator1 = "Card#CARD_ELLIPSIS");
-
-			for (var item : list "Remove Membership,Assign Roles") {
-				AssertElementNotPresent(
-					key_menuItem = "${item}",
-					locator1 = "MenuItem#ANY_MENU_ITEM");
-			}
 		}
 		else {
 			AssertVisible(
@@ -1118,7 +1101,7 @@ definition {
 
 	macro viewNoConnectedSiteCP {
 		AssertTextEquals(
-			locator1 = "Message#EMPTY_INFO_DEPOT",
+			locator1 = "Message#SUBTITLE",
 			value1 = "No sites are connected yet.");
 	}
 
@@ -1158,7 +1141,6 @@ definition {
 				locator1 = "ManagementBar#SEARCH_RESULT_SUMMARY",
 				value1 = "${resultCount} Results for ${searchTerm}");
 		}
-
 		else {
 			AssertTextEquals.assertPartialText(
 				locator1 = "ManagementBar#SEARCH_RESULT_SUMMARY",

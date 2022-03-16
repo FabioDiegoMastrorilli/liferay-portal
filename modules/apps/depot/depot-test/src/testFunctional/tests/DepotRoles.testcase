@@ -237,7 +237,9 @@ definition {
 			pageName = "Test Page Name",
 			siteName = "Site Name");
 
-		AssertElementNotPresent(locator1 = "WCD#WEB_CONTENT_CONTENT");
+		AssertElementNotPresent(
+			key_content = "[normalize-space(text())='WC WebContent Depot']",
+			locator1 = "WCD#WEB_CONTENT_CONTENT_ANY");
 
 		User.logoutAndLoginPG(
 			userLoginEmailAddress = "test@liferay.com",
@@ -265,7 +267,9 @@ definition {
 			pageName = "Test Page Name",
 			siteName = "Site Name");
 
-		WebContent.viewPGViaWCD(webContentContent = "WC WebContent Depot");
+		WebContentDisplayPortlet.viewContent(
+			webContentContent = "WC WebContent Depot",
+			webContentTitle = "WC WebContent Title");
 
 		WebContentDisplayPortletNavigator.gotoArticleEllipsisMenu(webContentTitle = "WC WebContent Title");
 
@@ -554,6 +558,39 @@ definition {
 			roleTitle = "AL Role Name",
 			roleTitleEdit = "AL Role Name Edit",
 			roleType = "Asset Library");
+	}
+
+	@description = "This ensures that a depot owner can assign specific roles to a user."
+	@priority = "5"
+	test OwnerCanAssignSpecificRolesToUser {
+		property custom.properties = "jsonws.web.service.paths.excludes=";
+
+		JSONUser.addUser(
+			userEmailAddress = "userea@liferay.com",
+			userFirstName = "userfn",
+			userLastName = "userln",
+			userScreenName = "usersn");
+
+		JSONUser.setFirstPassword(
+			agreeToTermsAndAnswerReminderQuery = "true",
+			requireReset = "false",
+			userEmailAddress = "userea@liferay.com");
+
+		JSONUser.addUserToDepot(
+			depotName = "Test Depot Name",
+			userEmailAddress = "userea@liferay.com");
+
+		DepotNavigator.openDepotMembershipsAdmin(depotName = "Test Depot Name");
+
+		LexiconEntry.gotoEntryMenuItem(
+			menuItem = "Assign Roles",
+			rowEntry = "userfn userln");
+
+		SelectFrame(locator1 = "IFrame#MODAL_BODY");
+
+		for (var roleTitle : list "Asset Library Administrator,Asset Library Owner,Asset Library Content Reviewer") {
+			LexiconEntry.viewEntryName(rowEntry = "${roleTitle}");
+		}
 	}
 
 	@description = "This ensures that an asset library role can be edited."

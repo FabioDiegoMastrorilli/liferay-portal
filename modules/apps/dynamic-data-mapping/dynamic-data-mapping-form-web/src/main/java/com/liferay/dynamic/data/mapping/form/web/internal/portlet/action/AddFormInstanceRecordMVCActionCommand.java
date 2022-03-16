@@ -20,6 +20,7 @@ import com.liferay.dynamic.data.mapping.exception.FormInstanceNotPublishedExcept
 import com.liferay.dynamic.data.mapping.form.values.factory.DDMFormValuesFactory;
 import com.liferay.dynamic.data.mapping.form.web.internal.constants.DDMFormWebKeys;
 import com.liferay.dynamic.data.mapping.form.web.internal.instance.lifecycle.AddDefaultSharedFormLayoutPortalInstanceLifecycleListener;
+import com.liferay.dynamic.data.mapping.form.web.internal.portlet.action.helper.AddFormInstanceRecordMVCCommandHelper;
 import com.liferay.dynamic.data.mapping.model.DDMForm;
 import com.liferay.dynamic.data.mapping.model.DDMFormInstance;
 import com.liferay.dynamic.data.mapping.model.DDMFormInstanceRecord;
@@ -97,9 +98,15 @@ public class AddFormInstanceRecordMVCActionCommand
 		DDMFormInstance ddmFormInstance =
 			_ddmFormInstanceService.getFormInstance(formInstanceId);
 
+		_addFormInstanceMVCCommandHelper.validateExpirationStatus(
+			ddmFormInstance, actionRequest);
+		_addFormInstanceMVCCommandHelper.validateSubmissionLimitStatus(
+			ddmFormInstance, _ddmFormInstanceRecordVersionLocalService,
+			actionRequest);
+
 		_validatePublishStatus(actionRequest, ddmFormInstance);
 
-		validateCaptcha(actionRequest, ddmFormInstance);
+		_validateCaptcha(actionRequest, ddmFormInstance);
 
 		DDMForm ddmForm = getDDMForm(ddmFormInstance);
 
@@ -109,11 +116,10 @@ public class AddFormInstanceRecordMVCActionCommand
 		ThemeDisplay themeDisplay = (ThemeDisplay)actionRequest.getAttribute(
 			WebKeys.THEME_DISPLAY);
 
-		_addFormInstanceMVCCommandHelper.
-			updateRequiredFieldsAccordingToVisibility(
-				actionRequest, ddmForm, ddmFormValues,
-				LocaleUtil.fromLanguageId(
-					LanguageUtil.getLanguageId(actionRequest)));
+		_addFormInstanceMVCCommandHelper.updateNonevaluableDDMFormFields(
+			actionRequest, ddmForm, ddmFormValues,
+			LocaleUtil.fromLanguageId(
+				LanguageUtil.getLanguageId(actionRequest)));
 
 		ServiceContext serviceContext = ServiceContextFactory.getInstance(
 			DDMFormInstanceRecord.class.getName(), actionRequest);
@@ -128,11 +134,21 @@ public class AddFormInstanceRecordMVCActionCommand
 			return;
 		}
 
-		DDMFormInstanceSettings formInstanceSettings =
+		if (SessionMessages.contains(
+				actionRequest,
+				_portal.getPortletId(actionRequest) +
+					SessionMessages.KEY_SUFFIX_HIDE_DEFAULT_SUCCESS_MESSAGE)) {
+
+			SessionMessages.clear(actionRequest);
+		}
+
+		SessionMessages.add(actionRequest, "formInstanceRecordAdded");
+
+		DDMFormInstanceSettings ddmFormInstanceSettings =
 			ddmFormInstance.getSettingsModel();
 
 		String redirectURL = ParamUtil.getString(
-			actionRequest, "redirect", formInstanceSettings.redirectURL());
+			actionRequest, "redirect", ddmFormInstanceSettings.redirectURL());
 
 		if (Validator.isNotNull(redirectURL)) {
 			portletSession.setAttribute(
@@ -147,13 +163,7 @@ public class AddFormInstanceRecordMVCActionCommand
 				ddmForm.getDDMFormSuccessPageSettings();
 
 			if (ddmFormSuccessPageSettings.isEnabled()) {
-				String portletId = _portal.getPortletId(actionRequest);
-
-				SessionMessages.add(
-					actionRequest,
-					portletId.concat(
-						SessionMessages.
-							KEY_SUFFIX_HIDE_DEFAULT_SUCCESS_MESSAGE));
+				hideDefaultSuccessMessage(actionRequest);
 			}
 		}
 	}
@@ -187,18 +197,6 @@ public class AddFormInstanceRecordMVCActionCommand
 		_ddmFormValuesFactory = ddmFormValuesFactory;
 	}
 
-	protected void validateCaptcha(
-			ActionRequest actionRequest, DDMFormInstance ddmFormInstance)
-		throws Exception {
-
-		DDMFormInstanceSettings formInstanceSettings =
-			ddmFormInstance.getSettingsModel();
-
-		if (formInstanceSettings.requireCaptcha()) {
-			CaptchaUtil.check(actionRequest);
-		}
-	}
-
 	private void _updateFormInstanceRecord(
 			ActionRequest actionRequest, DDMFormInstance ddmFormInstance,
 			DDMFormValues ddmFormValues, long groupId,
@@ -230,6 +228,18 @@ public class AddFormInstanceRecordMVCActionCommand
 					ddmFormInstanceRecordVersion.getFormInstanceRecordId(),
 					false, ddmFormValues, serviceContext);
 			}
+		}
+	}
+
+	private void _validateCaptcha(
+			ActionRequest actionRequest, DDMFormInstance ddmFormInstance)
+		throws Exception {
+
+		DDMFormInstanceSettings formInstanceSettings =
+			ddmFormInstance.getSettingsModel();
+
+		if (formInstanceSettings.requireCaptcha()) {
+			CaptchaUtil.check(actionRequest);
 		}
 	}
 

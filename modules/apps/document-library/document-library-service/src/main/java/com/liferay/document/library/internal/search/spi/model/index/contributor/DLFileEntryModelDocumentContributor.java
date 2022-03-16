@@ -34,6 +34,7 @@ import com.liferay.portal.kernel.search.Field;
 import com.liferay.portal.kernel.search.RelatedEntryIndexer;
 import com.liferay.portal.kernel.search.RelatedEntryIndexerRegistry;
 import com.liferay.portal.kernel.util.ArrayUtil;
+import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.ListUtil;
 import com.liferay.portal.kernel.util.LocaleUtil;
 import com.liferay.portal.kernel.util.Portal;
@@ -130,6 +131,7 @@ public class DLFileEntryModelDocumentContributor
 
 			document.addKeyword(
 				Field.CLASS_TYPE_ID, dlFileEntry.getFileEntryTypeId());
+			document.addText(Field.DESCRIPTION, dlFileEntry.getDescription());
 			document.addText(
 				Field.getLocalizedName(defaultLocale, Field.DESCRIPTION),
 				dlFileEntry.getDescription());
@@ -143,6 +145,7 @@ public class DLFileEntryModelDocumentContributor
 				title = _trashHelper.getOriginalTitle(title);
 			}
 
+			document.addText(Field.TITLE, title);
 			document.addText(
 				Field.getLocalizedName(defaultLocale, Field.TITLE), title);
 
@@ -169,6 +172,8 @@ public class DLFileEntryModelDocumentContributor
 					CharPool.UNDERLINE));
 			document.addKeyword("readCount", dlFileEntry.getReadCount());
 			document.addNumber("size", dlFileEntry.getSize());
+			document.addNumber(
+				"versionCount", GetterUtil.getDouble(dlFileEntry.getVersion()));
 
 			_addFileEntryTypeAttributes(document, dlFileVersion);
 
@@ -210,7 +215,7 @@ public class DLFileEntryModelDocumentContributor
 				}
 				catch (IOException ioException) {
 					if (_log.isDebugEnabled()) {
-						_log.debug(ioException, ioException);
+						_log.debug(ioException);
 					}
 				}
 			}

@@ -17,17 +17,14 @@ package com.liferay.jenkins.results.parser.test.clazz.group;
 import com.liferay.jenkins.results.parser.JenkinsResultsParserUtil;
 import com.liferay.jenkins.results.parser.PortalGitWorkingDirectory;
 import com.liferay.jenkins.results.parser.PortalTestClassJob;
+import com.liferay.jenkins.results.parser.test.clazz.TestClass;
+import com.liferay.jenkins.results.parser.test.clazz.TestClassFactory;
 
 import java.io.File;
 import java.io.IOException;
 
-import java.nio.file.FileVisitResult;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.SimpleFileVisitor;
-import java.nio.file.attribute.BasicFileAttributes;
+import java.nio.file.PathMatcher;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -60,77 +57,6 @@ public class RESTBuilderModulesBatchTestClassGroup
 
 	}
 
-	public static class RESTBuilderModulesBatchTestClass
-		extends ModulesBatchTestClass {
-
-		protected static RESTBuilderModulesBatchTestClass getInstance(
-			File moduleBaseDir, File modulesDir,
-			List<File> modulesProjectDirs) {
-
-			return new RESTBuilderModulesBatchTestClass(
-				new File(
-					JenkinsResultsParserUtil.getCanonicalPath(moduleBaseDir)),
-				modulesDir, modulesProjectDirs);
-		}
-
-		protected RESTBuilderModulesBatchTestClass(
-			File testClassFile, File modulesDir,
-			List<File> modulesProjectDirs) {
-
-			super(testClassFile);
-
-			initTestClassMethods(modulesProjectDirs, modulesDir, "buildREST");
-		}
-
-	}
-
-	protected static List<File> getModulesProjectDirs(File moduleBaseDir) {
-		final List<File> modulesProjectDirs = new ArrayList<>();
-		Path moduleBaseDirPath = moduleBaseDir.toPath();
-
-		try {
-			Files.walkFileTree(
-				moduleBaseDirPath,
-				new SimpleFileVisitor<Path>() {
-
-					@Override
-					public FileVisitResult preVisitDirectory(
-						Path filePath,
-						BasicFileAttributes basicFileAttributes) {
-
-						File currentDirectory = filePath.toFile();
-						String filePathString = filePath.toString();
-
-						if (filePathString.endsWith("-impl")) {
-							File restConfigYAMLFile = new File(
-								currentDirectory, "rest-config.yaml");
-							File restOpenAPIYAMLFile = new File(
-								currentDirectory, "rest-openapi.yaml");
-
-							if (restConfigYAMLFile.exists() &&
-								restOpenAPIYAMLFile.exists()) {
-
-								modulesProjectDirs.add(currentDirectory);
-
-								return FileVisitResult.SKIP_SUBTREE;
-							}
-						}
-
-						return FileVisitResult.CONTINUE;
-					}
-
-				});
-		}
-		catch (IOException ioException) {
-			throw new RuntimeException(
-				"Unable to get module marker files from " +
-					moduleBaseDir.getPath(),
-				ioException);
-		}
-
-		return modulesProjectDirs;
-	}
-
 	protected RESTBuilderModulesBatchTestClassGroup(
 		String batchName, PortalTestClassJob portalTestClassJob) {
 
@@ -161,6 +87,11 @@ public class RESTBuilderModulesBatchTestClassGroup
 		File portalModulesBaseDir = new File(
 			portalGitWorkingDirectory.getWorkingDirectory(), "modules");
 
+		List<PathMatcher> excludesPathMatchers = getPathMatchers(
+			getExcludesJobProperties());
+		List<PathMatcher> includesPathMatchers = getPathMatchers(
+			getIncludesJobProperties());
+
 		if (testRelevantChanges &&
 			!(includeStableTestSuite && isStableTestSuiteBatch())) {
 
@@ -188,17 +119,20 @@ public class RESTBuilderModulesBatchTestClassGroup
 		else {
 			_buildType = BuildType.FULL;
 
-			return;
+			moduleDirsList.addAll(
+				portalGitWorkingDirectory.getModuleDirsList(
+					excludesPathMatchers, includesPathMatchers));
 		}
 
 		for (File moduleDir : moduleDirsList) {
-			List<File> modulesProjectDirs = getModulesProjectDirs(moduleDir);
+			TestClass testClass = TestClassFactory.newTestClass(
+				this, moduleDir);
 
-			if (!modulesProjectDirs.isEmpty()) {
-				testClasses.add(
-					RESTBuilderModulesBatchTestClass.getInstance(
-						moduleDir, portalModulesBaseDir, modulesProjectDirs));
+			if (!testClass.hasTestClassMethods()) {
+				continue;
 			}
+
+			testClasses.add(testClass);
 		}
 
 		Collections.sort(testClasses);

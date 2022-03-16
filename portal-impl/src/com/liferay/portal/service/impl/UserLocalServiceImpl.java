@@ -318,7 +318,8 @@ public class UserLocalServiceImpl extends UserLocalServiceBaseImpl {
 		updateLastLogin(
 			defaultAdminUser.getUserId(), defaultAdminUser.getLoginIP());
 
-		updatePasswordReset(defaultAdminUser.getUserId(), false);
+		updatePasswordReset(
+			defaultAdminUser.getUserId(), _isPasswordReset(companyId));
 
 		return defaultAdminUser;
 	}
@@ -1234,18 +1235,7 @@ public class UserLocalServiceImpl extends UserLocalServiceBaseImpl {
 		}
 
 		user.setPasswordEncrypted(true);
-
-		PasswordPolicy passwordPolicy = defaultUser.getPasswordPolicy();
-
-		if ((passwordPolicy != null) && passwordPolicy.isChangeable() &&
-			passwordPolicy.isChangeRequired()) {
-
-			user.setPasswordReset(true);
-		}
-		else {
-			user.setPasswordReset(false);
-		}
-
+		user.setPasswordReset(_isPasswordReset(companyId));
 		user.setScreenName(screenName);
 		user.setEmailAddress(emailAddress);
 
@@ -1793,83 +1783,6 @@ public class UserLocalServiceImpl extends UserLocalServiceBaseImpl {
 			new HashMap<String, String[]>(), new HashMap<String, String[]>());
 
 		return 0;
-	}
-
-	/**
-	 * Attempts to authenticate the user using JAAS credentials, without using
-	 * the AuthPipeline.
-	 *
-	 * @param  userId the primary key of the user
-	 * @param  encPassword the encrypted password
-	 * @return <code>true</code> if authentication is successful;
-	 *         <code>false</code> otherwise
-	 * @deprecated As of Cavanaugh (7.4.x), with no replacement
-	 */
-	@Deprecated
-	@Override
-	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
-	public boolean authenticateForJAAS(long userId, String encPassword) {
-		if (PropsValues.AUTH_LOGIN_DISABLED) {
-			return false;
-		}
-
-		try {
-			User user = userPersistence.findByPrimaryKey(userId);
-
-			if (user.isDefaultUser()) {
-				if (_log.isInfoEnabled()) {
-					_log.info(
-						"JAAS authentication is disabled for the default user");
-				}
-
-				return false;
-			}
-			else if (!user.isActive()) {
-				if (_log.isInfoEnabled()) {
-					_log.info(
-						"JAAS authentication is disabled for inactive user " +
-							userId);
-				}
-
-				return false;
-			}
-
-			String userPassword = user.getPassword();
-
-			if (user.isPasswordEncrypted()) {
-				if (userPassword.equals(encPassword)) {
-					return true;
-				}
-
-				if (!PropsValues.PORTAL_JAAS_STRICT_PASSWORD) {
-					encPassword = PasswordEncryptorUtil.encrypt(
-						encPassword, userPassword);
-
-					if (userPassword.equals(encPassword)) {
-						return true;
-					}
-				}
-			}
-			else {
-				if (!PropsValues.PORTAL_JAAS_STRICT_PASSWORD &&
-					userPassword.equals(encPassword)) {
-
-					return true;
-				}
-
-				userPassword = PasswordEncryptorUtil.encrypt(
-					userPassword, encPassword);
-
-				if (userPassword.equals(encPassword)) {
-					return true;
-				}
-			}
-		}
-		catch (Exception exception) {
-			_log.error("Unable to authenticate for JAAS", exception);
-		}
-
-		return false;
 	}
 
 	/**
@@ -3796,7 +3709,7 @@ public class UserLocalServiceImpl extends UserLocalServiceBaseImpl {
 			}
 		}
 		catch (Exception exception) {
-			_log.error(exception, exception);
+			_log.error(exception);
 		}
 
 		return counts;
@@ -4361,7 +4274,7 @@ public class UserLocalServiceImpl extends UserLocalServiceBaseImpl {
 		}
 		catch (PortalException portalException) {
 			if (_log.isWarnEnabled()) {
-				_log.warn(portalException, portalException);
+				_log.warn(portalException);
 			}
 		}
 
@@ -4459,6 +4372,7 @@ public class UserLocalServiceImpl extends UserLocalServiceBaseImpl {
 	 *         use
 	 * @return the user
 	 */
+	@CTAware(onProduction = true)
 	@Override
 	public User updateAgreedToTermsOfUse(
 			long userId, boolean agreedToTermsOfUse)
@@ -4616,6 +4530,7 @@ public class UserLocalServiceImpl extends UserLocalServiceBaseImpl {
 	 * @param  emailAddressVerified whether the user has verified email address
 	 * @return the user
 	 */
+	@CTAware(onProduction = true)
 	@Override
 	public User updateEmailAddressVerified(
 			long userId, boolean emailAddressVerified)
@@ -4795,18 +4710,7 @@ public class UserLocalServiceImpl extends UserLocalServiceBaseImpl {
 			}
 
 			user.setPasswordEncrypted(true);
-
-			PasswordPolicy passwordPolicy = defaultUser.getPasswordPolicy();
-
-			if ((passwordPolicy != null) && passwordPolicy.isChangeable() &&
-				passwordPolicy.isChangeRequired()) {
-
-				user.setPasswordReset(true);
-			}
-			else {
-				user.setPasswordReset(false);
-			}
-
+			user.setPasswordReset(_isPasswordReset(companyId));
 			user.setScreenName(screenName);
 			user.setLanguageId(locale.toString());
 			user.setTimeZoneId(defaultUser.getTimeZoneId());
@@ -5174,6 +5078,7 @@ public class UserLocalServiceImpl extends UserLocalServiceBaseImpl {
 	 *         password the next time they log in
 	 * @return the user
 	 */
+	@CTAware(onProduction = true)
 	@Override
 	public User updatePassword(
 			long userId, String password1, String password2,
@@ -5197,19 +5102,30 @@ public class UserLocalServiceImpl extends UserLocalServiceBaseImpl {
 	 *         tracked, or validated. Primarily used for password imports.
 	 * @return the user
 	 */
+	@CTAware(onProduction = true)
 	@Override
 	public User updatePassword(
 			long userId, String password1, String password2,
 			boolean passwordReset, boolean silentUpdate)
 		throws PortalException {
 
+		User user = userPersistence.findByPrimaryKey(userId);
+
+		String newEncPwd = null;
+
+		if (user.isPasswordEncrypted()) {
+			newEncPwd = PasswordEncryptorUtil.encrypt(
+				password1, user.getPassword());
+		}
+		else {
+			newEncPwd = PasswordEncryptorUtil.encrypt(password1);
+		}
+
 		// Password hashing takes a long time. Therefore, encrypt the password
 		// before we get the user to avoid
 		// an org.hibernate.StaleObjectStateException.
 
-		String newEncPwd = PasswordEncryptorUtil.encrypt(password1);
-
-		User user = userPersistence.findByPrimaryKey(userId);
+		user = userPersistence.findByPrimaryKey(userId);
 
 		if (!silentUpdate) {
 			validatePassword(user.getCompanyId(), userId, password1, password2);
@@ -5341,6 +5257,7 @@ public class UserLocalServiceImpl extends UserLocalServiceBaseImpl {
 	 *         password the next time they login
 	 * @return the user
 	 */
+	@CTAware(onProduction = true)
 	@Override
 	public User updatePasswordReset(long userId, boolean passwordReset)
 		throws PortalException {
@@ -5382,6 +5299,7 @@ public class UserLocalServiceImpl extends UserLocalServiceBaseImpl {
 	 * @param  answer the user's new password reset answer
 	 * @return the user
 	 */
+	@CTAware(onProduction = true)
 	@Override
 	public User updateReminderQuery(long userId, String question, String answer)
 		throws PortalException {
@@ -6268,7 +6186,7 @@ public class UserLocalServiceImpl extends UserLocalServiceBaseImpl {
 				}
 				catch (Exception exception) {
 					if (_log.isWarnEnabled()) {
-						_log.warn(exception, exception);
+						_log.warn(exception);
 					}
 				}
 			}
@@ -6499,7 +6417,7 @@ public class UserLocalServiceImpl extends UserLocalServiceBaseImpl {
 			}
 		}
 		catch (Exception exception) {
-			_log.error(exception, exception);
+			_log.error(exception);
 		}
 
 		return Authenticator.FAILURE;
@@ -7472,7 +7390,7 @@ public class UserLocalServiceImpl extends UserLocalServiceBaseImpl {
 			}
 			catch (PortalException portalException) {
 				if (_log.isWarnEnabled()) {
-					_log.warn(portalException, portalException);
+					_log.warn(portalException);
 				}
 			}
 		}
@@ -7508,6 +7426,26 @@ public class UserLocalServiceImpl extends UserLocalServiceBaseImpl {
 					ticket.getExtraInfo(), new Date());
 			}
 		}
+	}
+
+	private boolean _isPasswordReset(long companyId) {
+		try {
+			PasswordPolicy passwordPolicy =
+				_passwordPolicyLocalService.getDefaultPasswordPolicy(companyId);
+
+			if ((passwordPolicy != null) && passwordPolicy.isChangeable() &&
+				passwordPolicy.isChangeRequired()) {
+
+				return true;
+			}
+		}
+		catch (PortalException portalException) {
+			if (_log.isWarnEnabled()) {
+				_log.warn(portalException);
+			}
+		}
+
+		return false;
 	}
 
 	private boolean _isPasswordUnchanged(

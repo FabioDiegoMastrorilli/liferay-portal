@@ -19,6 +19,8 @@ import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.model.User;
 import com.liferay.portal.kernel.service.ServiceContext;
 import com.liferay.portal.kernel.upgrade.UpgradeProcess;
+import com.liferay.portal.kernel.util.LocaleThreadLocal;
+import com.liferay.portal.kernel.util.LocaleUtil;
 import com.liferay.portal.kernel.util.LocalizationUtil;
 import com.liferay.portal.kernel.util.LoggingTimer;
 import com.liferay.portal.kernel.util.PortalUtil;
@@ -54,11 +56,11 @@ public class ContentTargetingUpgradeProcess extends UpgradeProcess {
 			return;
 		}
 
-		upgradeContentTargetingUserSegments();
-		deleteContentTargetingData();
+		_upgradeContentTargetingUserSegments();
+		_deleteContentTargetingData();
 	}
 
-	protected void deleteContentTargetingData() throws Exception {
+	private void _deleteContentTargetingData() throws Exception {
 		runSQL(
 			"delete from ClassName_ where value like '" + _CT_PACKAGE_NAME +
 				"%'");
@@ -99,7 +101,13 @@ public class ContentTargetingUpgradeProcess extends UpgradeProcess {
 		_dropTable("CT_Visited_PageVisited");
 	}
 
-	protected String getCriteria(long userSegmentId) throws Exception {
+	private void _dropTable(String tableName) throws Exception {
+		if (hasTable(tableName)) {
+			runSQL("drop table " + tableName);
+		}
+	}
+
+	private String _getCriteria(long userSegmentId) throws Exception {
 		Criteria criteria = new Criteria();
 
 		try (PreparedStatement preparedStatement = connection.prepareStatement(
@@ -136,7 +144,7 @@ public class ContentTargetingUpgradeProcess extends UpgradeProcess {
 		return CriteriaSerializer.serialize(criteria);
 	}
 
-	protected void upgradeContentTargetingUserSegments() throws Exception {
+	private void _upgradeContentTargetingUserSegments() throws Exception {
 		try (LoggingTimer loggingTimer = new LoggingTimer();
 			PreparedStatement preparedStatement1 = connection.prepareStatement(
 				"select * from CT_UserSegment");
@@ -153,9 +161,11 @@ public class ContentTargetingUpgradeProcess extends UpgradeProcess {
 							userSegmentId);
 				}
 
+				String name = resultSet.getString("name");
+
 				Map<Locale, String> nameMap =
-					LocalizationUtil.getLocalizationMap(
-						resultSet.getString("name"));
+					LocalizationUtil.getLocalizationMap(name);
+
 				Map<Locale, String> descriptionMap =
 					LocalizationUtil.getLocalizationMap(
 						resultSet.getString("description"));
@@ -166,18 +176,26 @@ public class ContentTargetingUpgradeProcess extends UpgradeProcess {
 						resultSet.getLong("companyId"),
 						resultSet.getLong("userId")));
 
-				_segmentsEntryLocalService.addSegmentsEntry(
-					"ct_" + userSegmentId, nameMap, descriptionMap, true,
-					getCriteria(userSegmentId),
-					SegmentsEntryConstants.SOURCE_DEFAULT, User.class.getName(),
-					serviceContext);
-			}
-		}
-	}
+				Locale defaultLocale = LocaleUtil.fromLanguageId(
+					LocalizationUtil.getDefaultLanguageId(name));
 
-	private void _dropTable(String tableName) throws Exception {
-		if (hasTable(tableName)) {
-			runSQL("drop table " + tableName);
+				Locale currentDefaultLocale =
+					LocaleThreadLocal.getSiteDefaultLocale();
+
+				try {
+					LocaleThreadLocal.setSiteDefaultLocale(defaultLocale);
+
+					_segmentsEntryLocalService.addSegmentsEntry(
+						"ct_" + userSegmentId, nameMap, descriptionMap, true,
+						_getCriteria(userSegmentId),
+						SegmentsEntryConstants.SOURCE_DEFAULT,
+						User.class.getName(), serviceContext);
+				}
+				finally {
+					LocaleThreadLocal.setSiteDefaultLocale(
+						currentDefaultLocale);
+				}
+			}
 		}
 	}
 

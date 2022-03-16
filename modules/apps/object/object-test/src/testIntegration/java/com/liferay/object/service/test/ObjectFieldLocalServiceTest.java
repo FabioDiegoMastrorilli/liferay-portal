@@ -15,29 +15,45 @@
 package com.liferay.object.service.test;
 
 import com.liferay.arquillian.extension.junit.bridge.junit.Arquillian;
+import com.liferay.document.library.kernel.exception.NoSuchFileEntryException;
+import com.liferay.document.library.kernel.model.DLFolderConstants;
+import com.liferay.document.library.kernel.service.DLAppLocalService;
 import com.liferay.object.constants.ObjectDefinitionConstants;
-import com.liferay.object.exception.DuplicateObjectFieldException;
+import com.liferay.object.constants.ObjectRelationshipConstants;
+import com.liferay.object.exception.ObjectFieldBusinessTypeException;
+import com.liferay.object.exception.ObjectFieldDBTypeException;
 import com.liferay.object.exception.ObjectFieldLabelException;
 import com.liferay.object.exception.ObjectFieldNameException;
-import com.liferay.object.exception.ObjectFieldTypeException;
+import com.liferay.object.exception.ObjectFieldRelationshipTypeException;
 import com.liferay.object.exception.RequiredObjectFieldException;
-import com.liferay.object.exception.ReservedObjectFieldException;
 import com.liferay.object.model.ObjectDefinition;
 import com.liferay.object.model.ObjectField;
+import com.liferay.object.model.ObjectFieldSetting;
 import com.liferay.object.service.ObjectDefinitionLocalService;
+import com.liferay.object.service.ObjectEntryLocalService;
 import com.liferay.object.service.ObjectFieldLocalService;
+import com.liferay.object.service.ObjectFieldSettingLocalService;
+import com.liferay.object.service.ObjectRelationshipLocalService;
 import com.liferay.object.util.LocalizedMapUtil;
 import com.liferay.object.util.ObjectFieldUtil;
+import com.liferay.petra.string.StringBundler;
 import com.liferay.portal.kernel.dao.db.DBInspector;
 import com.liferay.portal.kernel.dao.jdbc.DataAccess;
 import com.liferay.portal.kernel.language.LanguageUtil;
+import com.liferay.portal.kernel.repository.model.FileEntry;
 import com.liferay.portal.kernel.test.rule.AggregateTestRule;
 import com.liferay.portal.kernel.test.util.RandomTestUtil;
+import com.liferay.portal.kernel.test.util.ServiceContextTestUtil;
 import com.liferay.portal.kernel.test.util.TestPropsValues;
+import com.liferay.portal.kernel.util.ContentTypes;
+import com.liferay.portal.kernel.util.HashMapBuilder;
 import com.liferay.portal.kernel.util.LocaleUtil;
+import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.TextFormatter;
 import com.liferay.portal.test.rule.Inject;
 import com.liferay.portal.test.rule.LiferayIntegrationTestRule;
+
+import java.io.Serializable;
 
 import java.sql.Connection;
 
@@ -70,14 +86,70 @@ public class ObjectFieldLocalServiceTest {
 		try {
 			_testAddSystemObjectField(
 				ObjectFieldUtil.createObjectField(
-					0, null, true, false, "", "", "able", false, "Blob"));
+					0, "LargeFile", null, "Blob", true, false, "", "", "able",
+					false));
 
 			Assert.fail();
 		}
-		catch (ObjectFieldTypeException objectFieldTypeException) {
+		catch (ObjectFieldDBTypeException objectFieldDBTypeException) {
 			Assert.assertEquals(
 				"Blob type is not indexable",
-				objectFieldTypeException.getMessage());
+				objectFieldDBTypeException.getMessage());
+		}
+
+		// Business types
+
+		String[] businessTypes = {
+			"Boolean", "Date", "Decimal", "Integer", "LargeFile", "LongInteger",
+			"LongText", "Picklist", "PrecisionDecimal", "Relationship", "Text"
+		};
+
+		for (String businessType : businessTypes) {
+			_testAddSystemObjectField(
+				ObjectFieldUtil.createObjectField(
+					businessType, "", "Able", "able"));
+		}
+
+		String businessType = RandomTestUtil.randomString();
+
+		try {
+			_testAddSystemObjectField(
+				ObjectFieldUtil.createObjectField(
+					businessType, "", "Able", "able"));
+
+			Assert.fail();
+		}
+		catch (ObjectFieldBusinessTypeException
+					objectFieldBusinessTypeException) {
+
+			Assert.assertEquals(
+				"Invalid business type " + businessType,
+				objectFieldBusinessTypeException.getMessage());
+		}
+
+		// DB types
+
+		String[] dbTypes = {
+			"BigDecimal", "Blob", "Clob", "Boolean", "Date", "Double",
+			"Integer", "Long", "String"
+		};
+
+		for (String dbType : dbTypes) {
+			_testAddSystemObjectField(
+				ObjectFieldUtil.createObjectField("", dbType, "Able", "able"));
+		}
+
+		try {
+			_testAddSystemObjectField(
+				ObjectFieldUtil.createObjectField(
+					"", "STRING", "Able", "able"));
+
+			Assert.fail();
+		}
+		catch (ObjectFieldDBTypeException objectFieldDBTypeException) {
+			Assert.assertEquals(
+				"Invalid DB type STRING",
+				objectFieldDBTypeException.getMessage());
 		}
 
 		// Indexed language ID can only be applied with type \"String\" that
@@ -86,50 +158,54 @@ public class ObjectFieldLocalServiceTest {
 		try {
 			_testAddSystemObjectField(
 				ObjectFieldUtil.createObjectField(
-					0, null, true, false, "en_US", "", "able", false, "Long"));
+					0, "LongInteger", null, "Long", true, false, "en_US", "",
+					"able", false));
 
 			Assert.fail();
 		}
-		catch (ObjectFieldTypeException objectFieldTypeException) {
+		catch (ObjectFieldDBTypeException objectFieldDBTypeException) {
 			Assert.assertEquals(
 				"Indexed language ID can only be applied with type " +
 					"\"String\" that is not indexed as a keyword",
-				objectFieldTypeException.getMessage());
+				objectFieldDBTypeException.getMessage());
 		}
 
 		try {
 			_testAddSystemObjectField(
 				ObjectFieldUtil.createObjectField(
-					0, null, true, true, "en_US", "", "able", false, "Long"));
+					0, "LongInteger", null, "Long", true, true, "en_US", "",
+					"able", false));
 
 			Assert.fail();
 		}
-		catch (ObjectFieldTypeException objectFieldTypeException) {
+		catch (ObjectFieldDBTypeException objectFieldDBTypeException) {
 			Assert.assertEquals(
 				"Indexed language ID can only be applied with type " +
 					"\"String\" that is not indexed as a keyword",
-				objectFieldTypeException.getMessage());
+				objectFieldDBTypeException.getMessage());
 		}
 
 		try {
 			_testAddSystemObjectField(
 				ObjectFieldUtil.createObjectField(
-					0, null, true, true, "en_US", "", "able", false, "String"));
+					0, "Text", null, "String", true, true, "en_US", "", "able",
+					false));
 
 			Assert.fail();
 		}
-		catch (ObjectFieldTypeException objectFieldTypeException) {
+		catch (ObjectFieldDBTypeException objectFieldDBTypeException) {
 			Assert.assertEquals(
 				"Indexed language ID can only be applied with type " +
 					"\"String\" that is not indexed as a keyword",
-				objectFieldTypeException.getMessage());
+				objectFieldDBTypeException.getMessage());
 		}
 
 		// Label is null
 
 		try {
 			_testAddSystemObjectField(
-				ObjectFieldUtil.createObjectField("", "able", "String"));
+				ObjectFieldUtil.createObjectField(
+					"Text", "String", "", "able"));
 
 			Assert.fail();
 		}
@@ -143,7 +219,8 @@ public class ObjectFieldLocalServiceTest {
 
 		try {
 			_testAddSystemObjectField(
-				ObjectFieldUtil.createObjectField("Able", "", "String"));
+				ObjectFieldUtil.createObjectField(
+					"Text", "String", "Able", ""));
 
 			Assert.fail();
 		}
@@ -155,11 +232,11 @@ public class ObjectFieldLocalServiceTest {
 		// Name must only contain letters and digits
 
 		_testAddSystemObjectField(
-			ObjectFieldUtil.createObjectField(" able ", "String"));
+			ObjectFieldUtil.createObjectField("Text", "String", " able "));
 
 		try {
 			_testAddSystemObjectField(
-				ObjectFieldUtil.createObjectField("abl e", "String"));
+				ObjectFieldUtil.createObjectField("Text", "String", "abl e"));
 
 			Assert.fail();
 		}
@@ -171,7 +248,7 @@ public class ObjectFieldLocalServiceTest {
 
 		try {
 			_testAddSystemObjectField(
-				ObjectFieldUtil.createObjectField("abl-e", "String"));
+				ObjectFieldUtil.createObjectField("Text", "String", "abl-e"));
 
 			Assert.fail();
 		}
@@ -185,7 +262,7 @@ public class ObjectFieldLocalServiceTest {
 
 		try {
 			_testAddSystemObjectField(
-				ObjectFieldUtil.createObjectField("Able", "String"));
+				ObjectFieldUtil.createObjectField("Text", "String", "Able"));
 
 			Assert.fail();
 		}
@@ -199,12 +276,13 @@ public class ObjectFieldLocalServiceTest {
 
 		_testAddSystemObjectField(
 			ObjectFieldUtil.createObjectField(
-				"a123456789a123456789a123456789a1234567891", "String"));
+				"Text", "String", "a123456789a123456789a123456789a1234567891"));
 
 		try {
 			_testAddSystemObjectField(
 				ObjectFieldUtil.createObjectField(
-					"a123456789a123456789a123456789a12345678912", "String"));
+					"Text", "String",
+					"a123456789a123456789a123456789a12345678912"));
 
 			Assert.fail();
 		}
@@ -217,22 +295,24 @@ public class ObjectFieldLocalServiceTest {
 		// Reserved name
 
 		String[] reservedNames = {
-			"companyId", "createDate", "groupId", "id", "lastPublishDate",
-			"modifiedDate", "status", "statusByUserId", "statusByUserName",
-			"statusDate", "userId", "userName"
+			"actions", "companyId", "createDate", "creator", "dateCreated",
+			"dateModified", "externalReferenceCode", "groupId", "id",
+			"lastPublishDate", "modifiedDate", "status", "statusByUserId",
+			"statusByUserName", "statusDate", "userId", "userName"
 		};
 
 		for (String reservedName : reservedNames) {
 			try {
 				_testAddSystemObjectField(
-					ObjectFieldUtil.createObjectField(reservedName, "String"));
+					ObjectFieldUtil.createObjectField(
+						"Text", "String", reservedName));
 
 				Assert.fail();
 			}
-			catch (ReservedObjectFieldException reservedObjectFieldException) {
+			catch (ObjectFieldNameException objectFieldNameException) {
 				Assert.assertEquals(
 					"Reserved name " + reservedName,
-					reservedObjectFieldException.getMessage());
+					objectFieldNameException.getMessage());
 			}
 		}
 
@@ -244,59 +324,38 @@ public class ObjectFieldLocalServiceTest {
 		try {
 			_testAddSystemObjectField(
 				objectDefinitionName,
-				ObjectFieldUtil.createObjectField(pkObjectFieldName, "String"));
+				ObjectFieldUtil.createObjectField(
+					"Text", "String", pkObjectFieldName));
 
 			Assert.fail();
 		}
-		catch (ReservedObjectFieldException reservedObjectFieldException) {
+		catch (ObjectFieldNameException objectFieldNameException) {
 			Assert.assertEquals(
 				"Reserved name " + pkObjectFieldName,
-				reservedObjectFieldException.getMessage());
+				objectFieldNameException.getMessage());
 		}
 
 		// Duplicate name
 
 		try {
 			_testAddSystemObjectField(
-				ObjectFieldUtil.createObjectField("Able", "able", "String"),
-				ObjectFieldUtil.createObjectField("Able", "able", "String"));
+				ObjectFieldUtil.createObjectField(
+					"Text", "String", "Able", "able"),
+				ObjectFieldUtil.createObjectField(
+					"Text", "String", "Able", "able"));
 
 			Assert.fail();
 		}
-		catch (DuplicateObjectFieldException duplicateObjectFieldException) {
+		catch (ObjectFieldNameException objectFieldNameException) {
 			Assert.assertEquals(
-				"Duplicate name able",
-				duplicateObjectFieldException.getMessage());
-		}
-
-		// Types
-
-		String[] types = {
-			"BigDecimal", "Blob", "Boolean", "Date", "Double", "Integer",
-			"Long", "String"
-		};
-
-		for (String type : types) {
-			_testAddSystemObjectField(
-				ObjectFieldUtil.createObjectField("Able", "able", type));
-		}
-
-		try {
-			_testAddSystemObjectField(
-				ObjectFieldUtil.createObjectField("Able", "able", "STRING"));
-
-			Assert.fail();
-		}
-		catch (ObjectFieldTypeException objectFieldTypeException) {
-			Assert.assertEquals(
-				"Invalid type STRING", objectFieldTypeException.getMessage());
+				"Duplicate name able", objectFieldNameException.getMessage());
 		}
 	}
 
 	@Test
 	public void testDeleteObjectField1() throws Exception {
 		ObjectField ableObjectField = ObjectFieldUtil.createObjectField(
-			"able", "String");
+			"Text", "String", "able");
 
 		ObjectDefinition objectDefinition =
 			_objectDefinitionLocalService.addCustomObjectDefinition(
@@ -328,8 +387,9 @@ public class ObjectFieldLocalServiceTest {
 
 		ableObjectField = _objectFieldLocalService.addCustomObjectField(
 			TestPropsValues.getUserId(), 0,
-			objectDefinition.getObjectDefinitionId(), false, true, "",
-			LocalizedMapUtil.getLocalizedMap("able"), "able", false, "String");
+			objectDefinition.getObjectDefinitionId(), "Text", "String", false,
+			true, "", LocalizedMapUtil.getLocalizedMap("able"), "able", false,
+			Collections.emptyList());
 
 		Assert.assertNotNull(ableObjectField);
 
@@ -345,9 +405,9 @@ public class ObjectFieldLocalServiceTest {
 
 		_objectFieldLocalService.addCustomObjectField(
 			TestPropsValues.getUserId(), 0,
-			objectDefinition.getObjectDefinitionId(), false, true, "",
-			LocalizedMapUtil.getLocalizedMap("baker"), "baker", false,
-			"String");
+			objectDefinition.getObjectDefinitionId(), "Text", "String", false,
+			true, "", LocalizedMapUtil.getLocalizedMap("baker"), "baker", false,
+			Collections.emptyList());
 
 		ObjectField bakerObjectField =
 			_objectFieldLocalService.fetchObjectField(
@@ -384,7 +444,7 @@ public class ObjectFieldLocalServiceTest {
 	@Test
 	public void testDeleteObjectField2() throws Exception {
 		ObjectField ableObjectField = ObjectFieldUtil.createObjectField(
-			"able", "String");
+			"Text", "String", "able");
 
 		ObjectDefinition objectDefinition =
 			_objectDefinitionLocalService.addSystemObjectDefinition(
@@ -416,9 +476,9 @@ public class ObjectFieldLocalServiceTest {
 
 		_objectFieldLocalService.addCustomObjectField(
 			TestPropsValues.getUserId(), 0,
-			objectDefinition.getObjectDefinitionId(), false, true, "",
-			LocalizedMapUtil.getLocalizedMap("baker"), "baker", false,
-			"String");
+			objectDefinition.getObjectDefinitionId(), "Text", "String", false,
+			true, "", LocalizedMapUtil.getLocalizedMap("baker"), "baker", false,
+			Collections.emptyList());
 
 		ObjectField bakerObjectField =
 			_objectFieldLocalService.fetchObjectField(
@@ -440,6 +500,131 @@ public class ObjectFieldLocalServiceTest {
 	}
 
 	@Test
+	public void testDeleteObjectFieldAttachment() throws Exception {
+		ObjectDefinition objectDefinition =
+			_objectDefinitionLocalService.addCustomObjectDefinition(
+				TestPropsValues.getUserId(),
+				LocalizedMapUtil.getLocalizedMap(RandomTestUtil.randomString()),
+				"A" + RandomTestUtil.randomString(), null, null,
+				LocalizedMapUtil.getLocalizedMap(RandomTestUtil.randomString()),
+				ObjectDefinitionConstants.SCOPE_COMPANY,
+				Arrays.asList(
+					ObjectFieldUtil.createObjectField(
+						"Date", "Date", true, false, null, "Birthday",
+						"birthday", false)));
+
+		_objectDefinitionLocalService.publishCustomObjectDefinition(
+			TestPropsValues.getUserId(),
+			objectDefinition.getObjectDefinitionId());
+
+		ObjectField objectField = _objectFieldLocalService.addCustomObjectField(
+			TestPropsValues.getUserId(), 0,
+			objectDefinition.getObjectDefinitionId(), "Attachment", "Long",
+			true, false, null,
+			LocalizedMapUtil.getLocalizedMap(RandomTestUtil.randomString()),
+			"upload", false, Collections.emptyList());
+
+		String fileContent = StringUtil.merge(RandomTestUtil.randomStrings(20));
+
+		FileEntry fileEntry = _dlAppLocalService.addFileEntry(
+			null, TestPropsValues.getUserId(), TestPropsValues.getGroupId(),
+			DLFolderConstants.DEFAULT_PARENT_FOLDER_ID,
+			StringUtil.randomString() + ".txt", ContentTypes.TEXT_PLAIN,
+			fileContent.getBytes(), null, null,
+			ServiceContextTestUtil.getServiceContext());
+
+		_objectEntryLocalService.addObjectEntry(
+			TestPropsValues.getUserId(), 0,
+			objectDefinition.getObjectDefinitionId(),
+			HashMapBuilder.<String, Serializable>put(
+				"upload", fileEntry.getFileEntryId()
+			).build(),
+			ServiceContextTestUtil.getServiceContext());
+
+		Assert.assertNotNull(
+			_dlAppLocalService.getFileEntry(fileEntry.getFileEntryId()));
+
+		_objectFieldLocalService.deleteObjectField(
+			objectField.getObjectFieldId());
+
+		try {
+			_dlAppLocalService.getFileEntry(fileEntry.getFileEntryId());
+
+			Assert.fail();
+		}
+		catch (NoSuchFileEntryException noSuchFileEntryException) {
+			Assert.assertEquals(
+				StringBundler.concat(
+					"No FileEntry exists with the key {fileEntryId=",
+					fileEntry.getFileEntryId(), "}"),
+				noSuchFileEntryException.getMessage());
+		}
+
+		_objectDefinitionLocalService.deleteObjectDefinition(
+			objectDefinition.getObjectDefinitionId());
+	}
+
+	@Test
+	public void testObjectFieldSettings() throws Exception {
+		ObjectDefinition objectDefinition =
+			_objectDefinitionLocalService.addCustomObjectDefinition(
+				TestPropsValues.getUserId(),
+				LocalizedMapUtil.getLocalizedMap(RandomTestUtil.randomString()),
+				"A" + RandomTestUtil.randomString(), null, null,
+				LocalizedMapUtil.getLocalizedMap(RandomTestUtil.randomString()),
+				ObjectDefinitionConstants.SCOPE_COMPANY,
+				Collections.emptyList());
+
+		ObjectField objectField = _objectFieldLocalService.addCustomObjectField(
+			TestPropsValues.getUserId(), 0,
+			objectDefinition.getObjectDefinitionId(), "Text", "String", true,
+			false, null,
+			LocalizedMapUtil.getLocalizedMap(RandomTestUtil.randomString()),
+			StringUtil.randomId(), false,
+			Arrays.asList(
+				_createObjectFieldSetting("helpText", true, "Help Text"),
+				_createObjectFieldSetting("repeatable", false, "True")));
+
+		_assertObjectFieldSetting(
+			"helpText", objectField.getObjectFieldId(), true, "Help Text");
+		_assertObjectFieldSetting(
+			"repeatable", objectField.getObjectFieldId(), false, "True");
+
+		objectField = _objectFieldLocalService.updateCustomObjectField(
+			objectField.getObjectFieldId(), 0, "Text", "String", true, false,
+			null,
+			LocalizedMapUtil.getLocalizedMap(RandomTestUtil.randomString()),
+			StringUtil.randomId(), false,
+			Arrays.asList(
+				_createObjectFieldSetting("helpText", true, "New Help Text"),
+				_createObjectFieldSetting(
+					"placeholder", false, "Placeholder")));
+
+		_assertObjectFieldSetting(
+			"helpText", objectField.getObjectFieldId(), true, "New Help Text");
+		_assertObjectFieldSetting(
+			"placeholder", objectField.getObjectFieldId(), false,
+			"Placeholder");
+
+		Assert.assertNull(
+			_objectFieldSettingLocalService.fetchObjectFieldSetting(
+				objectField.getObjectFieldId(), "repeatable"));
+
+		_objectFieldLocalService.deleteObjectField(
+			objectField.getObjectFieldId());
+
+		Assert.assertNull(
+			_objectFieldSettingLocalService.fetchObjectFieldSetting(
+				objectField.getObjectFieldId(), "helpText"));
+		Assert.assertNull(
+			_objectFieldSettingLocalService.fetchObjectFieldSetting(
+				objectField.getObjectFieldId(), "placeholder"));
+
+		_objectDefinitionLocalService.deleteObjectDefinition(
+			objectDefinition.getObjectDefinitionId());
+	}
+
+	@Test
 	public void testUpdateCustomObjectField() throws Exception {
 		ObjectDefinition objectDefinition =
 			_objectDefinitionLocalService.addCustomObjectDefinition(
@@ -451,9 +636,12 @@ public class ObjectFieldLocalServiceTest {
 
 		ObjectField objectField = _objectFieldLocalService.addCustomObjectField(
 			TestPropsValues.getUserId(), 0,
-			objectDefinition.getObjectDefinitionId(), false, true, "",
-			LocalizedMapUtil.getLocalizedMap("able"), "able", false, "Long");
+			objectDefinition.getObjectDefinitionId(), "LongInteger", "Long",
+			false, true, "", LocalizedMapUtil.getLocalizedMap("able"), "able",
+			false, Collections.emptyList());
 
+		Assert.assertEquals("able_", objectField.getDBColumnName());
+		Assert.assertEquals("Long", objectField.getDBType());
 		Assert.assertFalse(objectField.isIndexed());
 		Assert.assertTrue(objectField.isIndexedAsKeyword());
 		Assert.assertEquals("", objectField.getIndexedLanguageId());
@@ -462,12 +650,14 @@ public class ObjectFieldLocalServiceTest {
 			objectField.getLabelMap());
 		Assert.assertEquals("able", objectField.getName());
 		Assert.assertFalse(objectField.isRequired());
-		Assert.assertEquals("Long", objectField.getType());
 
 		objectField = _objectFieldLocalService.updateCustomObjectField(
-			objectField.getObjectFieldId(), 0, false, true, "",
-			LocalizedMapUtil.getLocalizedMap("able"), "able", false, "Long");
+			objectField.getObjectFieldId(), 0, "LongInteger", "Long", false,
+			true, "", LocalizedMapUtil.getLocalizedMap("able"), "able", false,
+			Collections.emptyList());
 
+		Assert.assertEquals("able_", objectField.getDBColumnName());
+		Assert.assertEquals("Long", objectField.getDBType());
 		Assert.assertFalse(objectField.isIndexed());
 		Assert.assertTrue(objectField.isIndexedAsKeyword());
 		Assert.assertEquals("", objectField.getIndexedLanguageId());
@@ -476,15 +666,17 @@ public class ObjectFieldLocalServiceTest {
 			objectField.getLabelMap());
 		Assert.assertEquals("able", objectField.getName());
 		Assert.assertFalse(objectField.isRequired());
-		Assert.assertEquals("Long", objectField.getType());
 
 		String indexedLanguageId = LanguageUtil.getLanguageId(
 			LocaleUtil.getDefault());
 
 		objectField = _objectFieldLocalService.updateCustomObjectField(
-			objectField.getObjectFieldId(), 0, true, false, indexedLanguageId,
-			LocalizedMapUtil.getLocalizedMap("baker"), "baker", true, "String");
+			objectField.getObjectFieldId(), 0, "Text", "String", true, false,
+			indexedLanguageId, LocalizedMapUtil.getLocalizedMap("baker"),
+			"baker", true, Collections.emptyList());
 
+		Assert.assertEquals("baker_", objectField.getDBColumnName());
+		Assert.assertEquals("String", objectField.getDBType());
 		Assert.assertTrue(objectField.isIndexed());
 		Assert.assertFalse(objectField.isIndexedAsKeyword());
 		Assert.assertEquals(
@@ -494,17 +686,18 @@ public class ObjectFieldLocalServiceTest {
 			objectField.getLabelMap());
 		Assert.assertEquals("baker", objectField.getName());
 		Assert.assertTrue(objectField.isRequired());
-		Assert.assertEquals("String", objectField.getType());
 
 		_objectDefinitionLocalService.publishCustomObjectDefinition(
 			TestPropsValues.getUserId(),
 			objectDefinition.getObjectDefinitionId());
 
 		objectField = _objectFieldLocalService.updateCustomObjectField(
-			objectField.getObjectFieldId(), 0, false, true, "",
-			LocalizedMapUtil.getLocalizedMap("charlie"), "charlie", false,
-			"Integer");
+			objectField.getObjectFieldId(), 0, "Integer", "Integer", false,
+			true, "", LocalizedMapUtil.getLocalizedMap("charlie"), "charlie",
+			false, Collections.emptyList());
 
+		Assert.assertEquals("baker_", objectField.getDBColumnName());
+		Assert.assertEquals("String", objectField.getDBType());
 		Assert.assertTrue(objectField.isIndexed());
 		Assert.assertFalse(objectField.isIndexedAsKeyword());
 		Assert.assertEquals(
@@ -514,10 +707,38 @@ public class ObjectFieldLocalServiceTest {
 			LocalizedMapUtil.getLocalizedMap("charlie"));
 		Assert.assertEquals("baker", objectField.getName());
 		Assert.assertTrue(objectField.isRequired());
-		Assert.assertEquals("String", objectField.getType());
+
+		_testUpdateCustomObjectFieldThrowsObjectFieldRelationshipTypeException(
+			objectDefinition);
 
 		_objectDefinitionLocalService.deleteObjectDefinition(
 			objectDefinition.getObjectDefinitionId());
+	}
+
+	private void _assertObjectFieldSetting(
+			String name, long objectFieldId, boolean required, String value)
+		throws Exception {
+
+		ObjectFieldSetting objectFieldSetting =
+			_objectFieldSettingLocalService.fetchObjectFieldSetting(
+				objectFieldId, name);
+
+		Assert.assertEquals(name, objectFieldSetting.getName());
+		Assert.assertEquals(required, objectFieldSetting.isRequired());
+		Assert.assertEquals(value, objectFieldSetting.getValue());
+	}
+
+	private ObjectFieldSetting _createObjectFieldSetting(
+		String name, boolean required, String value) {
+
+		ObjectFieldSetting objectFieldSetting =
+			_objectFieldSettingLocalService.createObjectFieldSetting(0L);
+
+		objectFieldSetting.setName(name);
+		objectFieldSetting.setRequired(required);
+		objectFieldSetting.setValue(value);
+
+		return objectFieldSetting;
 	}
 
 	private boolean _hasColumn(String tableName, String columnName)
@@ -566,10 +787,77 @@ public class ObjectFieldLocalServiceTest {
 		return objectDefinitionName;
 	}
 
+	private void
+			_testUpdateCustomObjectFieldThrowsObjectFieldRelationshipTypeException(
+				ObjectDefinition objectDefinition1)
+		throws Exception {
+
+		ObjectDefinition objectDefinition2 =
+			_objectDefinitionLocalService.addCustomObjectDefinition(
+				TestPropsValues.getUserId(),
+				LocalizedMapUtil.getLocalizedMap(RandomTestUtil.randomString()),
+				"A" + RandomTestUtil.randomString(), null, null,
+				LocalizedMapUtil.getLocalizedMap(RandomTestUtil.randomString()),
+				ObjectDefinitionConstants.SCOPE_COMPANY,
+				Collections.<ObjectField>emptyList());
+
+		String name = StringUtil.randomId();
+
+		_objectRelationshipLocalService.addObjectRelationship(
+			TestPropsValues.getUserId(),
+			objectDefinition1.getObjectDefinitionId(),
+			objectDefinition2.getObjectDefinitionId(),
+			ObjectRelationshipConstants.DELETION_TYPE_PREVENT,
+			LocalizedMapUtil.getLocalizedMap(RandomTestUtil.randomString()),
+			name, ObjectRelationshipConstants.TYPE_ONE_TO_MANY);
+
+		try {
+			String objectFieldNamePrefix = "r_" + name + "_";
+
+			ObjectField objectField = _objectFieldLocalService.fetchObjectField(
+				objectDefinition2.getObjectDefinitionId(),
+				objectFieldNamePrefix +
+					objectDefinition1.getPKObjectFieldName());
+
+			_objectFieldLocalService.updateCustomObjectField(
+				objectField.getObjectFieldId(),
+				objectField.getListTypeDefinitionId(),
+				objectField.getBusinessType(), "String",
+				objectField.isIndexed(), objectField.isIndexedAsKeyword(),
+				objectField.getIndexedLanguageId(), objectField.getLabelMap(),
+				"able", objectField.isRequired(), Collections.emptyList());
+
+			Assert.fail();
+		}
+		catch (ObjectFieldRelationshipTypeException
+					objectFieldRelationshipTypeException) {
+
+			Assert.assertEquals(
+				"Object field relationship name and DB type cannot be changed",
+				objectFieldRelationshipTypeException.getMessage());
+		}
+		finally {
+			_objectDefinitionLocalService.deleteObjectDefinition(
+				objectDefinition2);
+		}
+	}
+
+	@Inject
+	private DLAppLocalService _dlAppLocalService;
+
 	@Inject
 	private ObjectDefinitionLocalService _objectDefinitionLocalService;
 
 	@Inject
+	private ObjectEntryLocalService _objectEntryLocalService;
+
+	@Inject
 	private ObjectFieldLocalService _objectFieldLocalService;
+
+	@Inject
+	private ObjectFieldSettingLocalService _objectFieldSettingLocalService;
+
+	@Inject
+	private ObjectRelationshipLocalService _objectRelationshipLocalService;
 
 }

@@ -17,9 +17,9 @@ import ClayIcon from '@clayui/icon';
 import ClayTabs from '@clayui/tabs';
 import React, {useState} from 'react';
 
+import NoPreview from './NoPreview.es';
 import PreviewImage from './PreviewImage.es';
 import PreviewVideo from './PreviewVideo.es';
-import {STR_VIDEO_HTML_RETURN_TYPE} from './constants';
 
 const Arrow = ({direction, handleClick}) => (
 	<div className={`pull-${direction}`}>
@@ -43,7 +43,7 @@ const InfoPanel = ({metadata}) => {
 	const itemsHeader = imageData.groups.map((group, index) => {
 		return (
 			<ClayTabs.Item
-				active={activeTabKeyValue == index}
+				active={activeTabKeyValue === index}
 				key={group.title}
 				onClick={() => setActiveTabKeyValue(index)}
 			>
@@ -57,6 +57,7 @@ const InfoPanel = ({metadata}) => {
 			return (
 				<React.Fragment key={item.key}>
 					<dt className="sidebar-dt">{item.key}</dt>
+
 					<dd className="sidebar-dd">{item.value}</dd>
 				</React.Fragment>
 			);
@@ -77,6 +78,7 @@ const InfoPanel = ({metadata}) => {
 			<div className="sidebar-header">
 				<ClayTabs modern>{itemsHeader}</ClayTabs>
 			</div>
+
 			<div className="sidebar-body">
 				<ClayTabs.Content activeIndex={activeTabKeyValue} fade>
 					{itemsContent}
@@ -90,30 +92,42 @@ const Carousel = ({
 	currentItem,
 	handleClickNext,
 	handleClickPrevious,
+	isImage,
 	showArrows = true,
-}) => (
-	<div className="carousel closed sidenav-container">
-		<InfoPanel metadata={currentItem.metadata} />
+}) => {
+	const isVideo = currentItem.type === 'video';
+	let videoHtml = isVideo && currentItem?.value?.html;
 
-		<div className="sidenav-content">
-			{showArrows && (
-				<Arrow direction="left" handleClick={handleClickPrevious} />
-			)}
+	if (isVideo && typeof currentItem.value === 'string') {
+		videoHtml = JSON.parse(currentItem.value).html;
+	}
 
-			{currentItem.returntype === STR_VIDEO_HTML_RETURN_TYPE ? (
-				<PreviewVideo html={currentItem.value} />
-			) : (
-				<PreviewImage
-					src={currentItem.url || currentItem.base64}
-					title={currentItem.title}
-				/>
-			)}
+	return (
+		<div className="carousel closed sidenav-container">
+			<InfoPanel metadata={currentItem.metadata} />
 
-			{showArrows && (
-				<Arrow direction="right" handleClick={handleClickNext} />
-			)}
+			<div className="sidenav-content">
+				{showArrows && (
+					<Arrow direction="left" handleClick={handleClickPrevious} />
+				)}
+
+				{isVideo ? (
+					<PreviewVideo html={videoHtml} />
+				) : isImage ? (
+					<PreviewImage
+						src={currentItem.url || currentItem.base64}
+						title={currentItem.title}
+					/>
+				) : (
+					<NoPreview />
+				)}
+
+				{showArrows && (
+					<Arrow direction="right" handleClick={handleClickNext} />
+				)}
+			</div>
 		</div>
-	</div>
-);
+	);
+};
 
 export default Carousel;

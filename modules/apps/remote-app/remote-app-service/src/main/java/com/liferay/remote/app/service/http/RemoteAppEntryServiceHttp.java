@@ -46,18 +46,20 @@ import com.liferay.remote.app.service.RemoteAppEntryServiceUtil;
  * </p>
  *
  * @author Brian Wing Shun Chan
- * @see RemoteAppEntryServiceSoap
  * @generated
  */
 public class RemoteAppEntryServiceHttp {
 
 	public static com.liferay.remote.app.model.RemoteAppEntry
 			addCustomElementRemoteAppEntry(
-				HttpPrincipal httpPrincipal, String customElementCSSURLs,
+				HttpPrincipal httpPrincipal, String externalReferenceCode,
+				String customElementCSSURLs,
 				String customElementHTMLElementName, String customElementURLs,
+				boolean customElementUseESM, String description,
 				String friendlyURLMapping, boolean instanceable,
 				java.util.Map<java.util.Locale, String> nameMap,
-				String portletCategoryName, String properties)
+				String portletCategoryName, String properties,
+				String sourceCodeURL)
 		throws com.liferay.portal.kernel.exception.PortalException {
 
 		try {
@@ -67,9 +69,11 @@ public class RemoteAppEntryServiceHttp {
 				_addCustomElementRemoteAppEntryParameterTypes0);
 
 			MethodHandler methodHandler = new MethodHandler(
-				methodKey, customElementCSSURLs, customElementHTMLElementName,
-				customElementURLs, friendlyURLMapping, instanceable, nameMap,
-				portletCategoryName, properties);
+				methodKey, externalReferenceCode, customElementCSSURLs,
+				customElementHTMLElementName, customElementURLs,
+				customElementUseESM, description, friendlyURLMapping,
+				instanceable, nameMap, portletCategoryName, properties,
+				sourceCodeURL);
 
 			Object returnObj = null;
 
@@ -101,10 +105,12 @@ public class RemoteAppEntryServiceHttp {
 
 	public static com.liferay.remote.app.model.RemoteAppEntry
 			addIFrameRemoteAppEntry(
-				HttpPrincipal httpPrincipal, String friendlyURLMapping,
-				String iFrameURL, boolean instanceable,
+				HttpPrincipal httpPrincipal, String description,
+				String friendlyURLMapping, String iFrameURL,
+				boolean instanceable,
 				java.util.Map<java.util.Locale, String> nameMap,
-				String portletCategoryName, String properties)
+				String portletCategoryName, String properties,
+				String sourceCodeURL)
 		throws com.liferay.portal.kernel.exception.PortalException {
 
 		try {
@@ -113,8 +119,9 @@ public class RemoteAppEntryServiceHttp {
 				_addIFrameRemoteAppEntryParameterTypes1);
 
 			MethodHandler methodHandler = new MethodHandler(
-				methodKey, friendlyURLMapping, iFrameURL, instanceable, nameMap,
-				portletCategoryName, properties);
+				methodKey, description, friendlyURLMapping, iFrameURL,
+				instanceable, nameMap, portletCategoryName, properties,
+				sourceCodeURL);
 
 			Object returnObj = null;
 
@@ -230,9 +237,11 @@ public class RemoteAppEntryServiceHttp {
 				HttpPrincipal httpPrincipal, long remoteAppEntryId,
 				String customElementCSSURLs,
 				String customElementHTMLElementName, String customElementURLs,
+				boolean customElementUseESM, String description,
 				String friendlyURLMapping,
 				java.util.Map<java.util.Locale, String> nameMap,
-				String portletCategoryName, String properties)
+				String portletCategoryName, String properties,
+				String sourceCodeURL)
 		throws com.liferay.portal.kernel.exception.PortalException {
 
 		try {
@@ -244,7 +253,8 @@ public class RemoteAppEntryServiceHttp {
 			MethodHandler methodHandler = new MethodHandler(
 				methodKey, remoteAppEntryId, customElementCSSURLs,
 				customElementHTMLElementName, customElementURLs,
-				friendlyURLMapping, nameMap, portletCategoryName, properties);
+				customElementUseESM, description, friendlyURLMapping, nameMap,
+				portletCategoryName, properties, sourceCodeURL);
 
 			Object returnObj = null;
 
@@ -277,9 +287,10 @@ public class RemoteAppEntryServiceHttp {
 	public static com.liferay.remote.app.model.RemoteAppEntry
 			updateIFrameRemoteAppEntry(
 				HttpPrincipal httpPrincipal, long remoteAppEntryId,
-				String friendlyURLMapping, String iFrameURL,
+				String description, String friendlyURLMapping, String iFrameURL,
 				java.util.Map<java.util.Locale, String> nameMap,
-				String portletCategoryName, String properties)
+				String portletCategoryName, String properties,
+				String sourceCodeURL)
 		throws com.liferay.portal.kernel.exception.PortalException {
 
 		try {
@@ -288,8 +299,9 @@ public class RemoteAppEntryServiceHttp {
 				_updateIFrameRemoteAppEntryParameterTypes5);
 
 			MethodHandler methodHandler = new MethodHandler(
-				methodKey, remoteAppEntryId, friendlyURLMapping, iFrameURL,
-				nameMap, portletCategoryName, properties);
+				methodKey, remoteAppEntryId, description, friendlyURLMapping,
+				iFrameURL, nameMap, portletCategoryName, properties,
+				sourceCodeURL);
 
 			Object returnObj = null;
 
@@ -325,12 +337,13 @@ public class RemoteAppEntryServiceHttp {
 	private static final Class<?>[]
 		_addCustomElementRemoteAppEntryParameterTypes0 = new Class[] {
 			String.class, String.class, String.class, String.class,
-			boolean.class, java.util.Map.class, String.class, String.class
+			boolean.class, String.class, String.class, boolean.class,
+			java.util.Map.class, String.class, String.class, String.class
 		};
 	private static final Class<?>[] _addIFrameRemoteAppEntryParameterTypes1 =
 		new Class[] {
-			String.class, String.class, boolean.class, java.util.Map.class,
-			String.class, String.class
+			String.class, String.class, String.class, boolean.class,
+			java.util.Map.class, String.class, String.class, String.class
 		};
 	private static final Class<?>[] _deleteRemoteAppEntryParameterTypes2 =
 		new Class[] {long.class};
@@ -338,13 +351,14 @@ public class RemoteAppEntryServiceHttp {
 		new Class[] {long.class};
 	private static final Class<?>[]
 		_updateCustomElementRemoteAppEntryParameterTypes4 = new Class[] {
-			long.class, String.class, String.class, String.class, String.class,
-			java.util.Map.class, String.class, String.class
+			long.class, String.class, String.class, String.class, boolean.class,
+			String.class, String.class, java.util.Map.class, String.class,
+			String.class, String.class
 		};
 	private static final Class<?>[] _updateIFrameRemoteAppEntryParameterTypes5 =
 		new Class[] {
-			long.class, String.class, String.class, java.util.Map.class,
-			String.class, String.class
+			long.class, String.class, String.class, String.class,
+			java.util.Map.class, String.class, String.class, String.class
 		};
 
 }

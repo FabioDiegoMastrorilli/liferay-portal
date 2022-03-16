@@ -35,6 +35,7 @@ import com.liferay.search.experiences.model.SXPBlueprint;
 import com.liferay.search.experiences.service.base.SXPBlueprintLocalServiceBaseImpl;
 import com.liferay.search.experiences.validator.SXPBlueprintValidator;
 
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
@@ -46,6 +47,7 @@ import org.osgi.service.component.annotations.Reference;
  * @author Petteri Karttunen
  */
 @Component(
+	enabled = false,
 	property = "model.class.name=com.liferay.search.experiences.model.SXPBlueprint",
 	service = AopService.class
 )
@@ -57,7 +59,8 @@ public class SXPBlueprintLocalServiceImpl
 	public SXPBlueprint addSXPBlueprint(
 			long userId, String configurationJSON,
 			Map<Locale, String> descriptionMap, String elementInstancesJSON,
-			Map<Locale, String> titleMap, ServiceContext serviceContext)
+			String schemaVersion, Map<Locale, String> titleMap,
+			ServiceContext serviceContext)
 		throws PortalException {
 
 		_validate(configurationJSON, titleMap, serviceContext);
@@ -74,6 +77,7 @@ public class SXPBlueprintLocalServiceImpl
 		sxpBlueprint.setConfigurationJSON(configurationJSON);
 		sxpBlueprint.setDescriptionMap(descriptionMap);
 		sxpBlueprint.setElementInstancesJSON(elementInstancesJSON);
+		sxpBlueprint.setSchemaVersion(schemaVersion);
 		sxpBlueprint.setTitleMap(titleMap);
 		sxpBlueprint.setStatus(WorkflowConstants.STATUS_DRAFT);
 		sxpBlueprint.setStatusByUserId(user.getUserId());
@@ -86,6 +90,18 @@ public class SXPBlueprintLocalServiceImpl
 		_startWorkflowInstance(userId, sxpBlueprint, serviceContext);
 
 		return sxpBlueprint;
+	}
+
+	@Override
+	public void deleteCompanySXPBlueprints(long companyId)
+		throws PortalException {
+
+		List<SXPBlueprint> sxpBlueprints =
+			sxpBlueprintPersistence.findByCompanyId(companyId);
+
+		for (SXPBlueprint sxpBlueprint : sxpBlueprints) {
+			sxpBlueprintLocalService.deleteSXPBlueprint(sxpBlueprint);
+		}
 	}
 
 	@Indexable(type = IndexableType.DELETE)
@@ -154,7 +170,8 @@ public class SXPBlueprintLocalServiceImpl
 	public SXPBlueprint updateSXPBlueprint(
 			long userId, long sxpBlueprintId, String configurationJSON,
 			Map<Locale, String> descriptionMap, String elementInstancesJSON,
-			Map<Locale, String> titleMap, ServiceContext serviceContext)
+			String schemaVersion, Map<Locale, String> titleMap,
+			ServiceContext serviceContext)
 		throws PortalException {
 
 		_validate(configurationJSON, titleMap, serviceContext);

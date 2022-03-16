@@ -14,14 +14,23 @@
 
 import {ClayButtonWithIcon} from '@clayui/button';
 import {useModal} from '@clayui/modal';
+import classNames from 'classnames';
 import PropTypes from 'prop-types';
-import React, {useState} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 
 import FriendlyURLHistoryModal from './FriendlyURLHistoryModal';
 
-export default function FriendlyURLHistory({elementId, ...restProps}) {
+export default function FriendlyURLHistory({
+	disabled: initialDisabled = false,
+	elementId,
+	localizable = false,
+	...restProps
+}) {
 	const [showModal, setShowModal] = useState(false);
 	const [selectedLanguageId, setSelectedLanguageId] = useState();
+	const [disabled, setDisabled] = useState(initialDisabled);
+
+	const inputRef = useRef(document.getElementById(elementId));
 
 	const handleOnClose = () => {
 		setShowModal(false);
@@ -31,16 +40,47 @@ export default function FriendlyURLHistory({elementId, ...restProps}) {
 		onClose: handleOnClose,
 	});
 
+	useEffect(() => {
+		const input = inputRef.current;
+
+		if (input) {
+			const mutationObserver = new MutationObserver((mutations) => {
+				mutations.forEach((mutation) => {
+					if (
+						mutation.type === 'attributes' &&
+						mutation.attributeName === 'disabled'
+					) {
+						setDisabled(mutation.target.disabled);
+					}
+				});
+			});
+
+			mutationObserver.observe(input, {
+				attributeFilter: ['disabled'],
+				attributes: true,
+			});
+
+			return () => {
+				mutationObserver.disconnect(input);
+			};
+		}
+	}, []);
+
 	return (
 		<>
 			<ClayButtonWithIcon
 				borderless
-				className="btn-url-history"
+				className={classNames('btn-url-history', {
+					['btn-url-history-localizable']: localizable,
+				})}
+				disabled={disabled}
 				displayType="secondary"
 				onClick={() => {
-					setSelectedLanguageId(
-						Liferay.component(elementId).getSelectedLanguageId()
-					);
+					if (localizable) {
+						setSelectedLanguageId(
+							Liferay.component(elementId).getSelectedLanguageId()
+						);
+					}
 					setShowModal(true);
 				}}
 				outline
@@ -52,6 +92,7 @@ export default function FriendlyURLHistory({elementId, ...restProps}) {
 					{...restProps}
 					elementId={elementId}
 					initialLanguageId={selectedLanguageId}
+					localizable={localizable}
 					observer={observer}
 					onModalClose={onClose}
 				/>
@@ -61,5 +102,7 @@ export default function FriendlyURLHistory({elementId, ...restProps}) {
 }
 
 FriendlyURLHistory.propTypes = {
+	disabled: PropTypes.bool,
 	elementId: PropTypes.string.isRequired,
+	localizable: PropTypes.bool,
 };

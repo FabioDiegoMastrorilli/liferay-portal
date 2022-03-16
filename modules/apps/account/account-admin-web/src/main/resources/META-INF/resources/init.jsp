@@ -65,7 +65,9 @@ page import="com.liferay.account.admin.web.internal.display.context.ViewAccountR
 page import="com.liferay.account.admin.web.internal.display.context.ViewAccountUserRolesManagementToolbarDisplayContext" %><%@
 page import="com.liferay.account.admin.web.internal.display.context.ViewAccountUsersManagementToolbarDisplayContext" %><%@
 page import="com.liferay.account.admin.web.internal.security.permission.resource.AccountEntryPermission" %><%@
+page import="com.liferay.account.admin.web.internal.security.permission.resource.AccountGroupPermission" %><%@
 page import="com.liferay.account.admin.web.internal.security.permission.resource.AccountPermission" %><%@
+page import="com.liferay.account.admin.web.internal.security.permission.resource.AccountRolePermission" %><%@
 page import="com.liferay.account.admin.web.internal.servlet.taglib.util.AccountUserActionDropdownItemsProvider" %><%@
 page import="com.liferay.account.constants.AccountActionKeys" %><%@
 page import="com.liferay.account.constants.AccountConstants" %><%@
@@ -90,6 +92,7 @@ page import="com.liferay.portal.kernel.exception.UserEmailAddressException" %><%
 page import="com.liferay.portal.kernel.exception.UserScreenNameException" %><%@
 page import="com.liferay.portal.kernel.language.LanguageUtil" %><%@
 page import="com.liferay.portal.kernel.model.Address" %><%@
+page import="com.liferay.portal.kernel.model.Contact" %><%@
 page import="com.liferay.portal.kernel.model.Group" %><%@
 page import="com.liferay.portal.kernel.model.ListType" %><%@
 page import="com.liferay.portal.kernel.model.ListTypeConstants" %><%@
@@ -113,6 +116,7 @@ page import="com.liferay.portal.kernel.util.GetterUtil" %><%@
 page import="com.liferay.portal.kernel.util.HashMapBuilder" %><%@
 page import="com.liferay.portal.kernel.util.HtmlUtil" %><%@
 page import="com.liferay.portal.kernel.util.HttpUtil" %><%@
+page import="com.liferay.portal.kernel.util.LinkedHashMapBuilder" %><%@
 page import="com.liferay.portal.kernel.util.ListUtil" %><%@
 page import="com.liferay.portal.kernel.util.ParamUtil" %><%@
 page import="com.liferay.portal.kernel.util.PortalUtil" %><%@
@@ -125,8 +129,7 @@ page import="com.liferay.portal.kernel.util.WebKeys" %><%@
 page import="com.liferay.portal.kernel.workflow.WorkflowConstants" %><%@
 page import="com.liferay.portal.security.auth.ScreenNameValidatorFactory" %><%@
 page import="com.liferay.portal.util.PropsValues" %><%@
-page import="com.liferay.taglib.search.ResultRow" %><%@
-page import="com.liferay.users.admin.configuration.UserFileUploadsConfiguration" %>
+page import="com.liferay.taglib.search.ResultRow" %>
 
 <%@ page import="java.util.Collections" %><%@
 page import="java.util.List" %><%@
@@ -134,7 +137,8 @@ page import="java.util.Map" %><%@
 page import="java.util.Objects" %><%@
 page import="java.util.Optional" %>
 
-<%@ page import="javax.portlet.PortletURL" %>
+<%@ page import="javax.portlet.ActionRequest" %><%@
+page import="javax.portlet.PortletURL" %>
 
 <liferay-frontend:defineObjects />
 

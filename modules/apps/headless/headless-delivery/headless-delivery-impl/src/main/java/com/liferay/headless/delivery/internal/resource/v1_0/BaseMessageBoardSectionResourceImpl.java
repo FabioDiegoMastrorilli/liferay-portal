@@ -16,6 +16,7 @@ package com.liferay.headless.delivery.internal.resource.v1_0;
 
 import com.liferay.headless.delivery.dto.v1_0.MessageBoardSection;
 import com.liferay.headless.delivery.resource.v1_0.MessageBoardSectionResource;
+import com.liferay.petra.function.UnsafeBiConsumer;
 import com.liferay.petra.function.UnsafeConsumer;
 import com.liferay.petra.function.UnsafeFunction;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
@@ -442,8 +443,9 @@ public abstract class BaseMessageBoardSectionResourceImpl
 			).put(
 				"replace",
 				addAction(
-					ActionKeys.PERMISSIONS, "putMessageBoardSectionPermission",
-					resourceName, resourceId)
+					ActionKeys.PERMISSIONS,
+					"putMessageBoardSectionPermissionsPage", resourceName,
+					resourceId)
 			).build(),
 			resourceId, resourceName, roleNames);
 	}
@@ -475,7 +477,7 @@ public abstract class BaseMessageBoardSectionResourceImpl
 	@javax.ws.rs.PUT
 	@Override
 	public Page<com.liferay.portal.vulcan.permission.Permission>
-			putMessageBoardSectionPermission(
+			putMessageBoardSectionPermissionsPage(
 				@io.swagger.v3.oas.annotations.Parameter(hidden = true)
 				@javax.validation.constraints.NotNull
 				@javax.ws.rs.PathParam("messageBoardSectionId")
@@ -510,8 +512,9 @@ public abstract class BaseMessageBoardSectionResourceImpl
 			).put(
 				"replace",
 				addAction(
-					ActionKeys.PERMISSIONS, "putMessageBoardSectionPermission",
-					resourceName, resourceId)
+					ActionKeys.PERMISSIONS,
+					"putMessageBoardSectionPermissionsPage", resourceName,
+					resourceId)
 			).build(),
 			resourceId, resourceName, null);
 	}
@@ -917,7 +920,8 @@ public abstract class BaseMessageBoardSectionResourceImpl
 				"replace",
 				addAction(
 					ActionKeys.PERMISSIONS,
-					"putSiteMessageBoardSectionPermission", portletName, siteId)
+					"putSiteMessageBoardSectionPermissionsPage", portletName,
+					siteId)
 			).build(),
 			siteId, portletName, roleNames);
 	}
@@ -947,7 +951,7 @@ public abstract class BaseMessageBoardSectionResourceImpl
 	@javax.ws.rs.PUT
 	@Override
 	public Page<com.liferay.portal.vulcan.permission.Permission>
-			putSiteMessageBoardSectionPermission(
+			putSiteMessageBoardSectionPermissionsPage(
 				@io.swagger.v3.oas.annotations.Parameter(hidden = true)
 				@javax.validation.constraints.NotNull
 				@javax.ws.rs.PathParam("siteId")
@@ -980,7 +984,8 @@ public abstract class BaseMessageBoardSectionResourceImpl
 				"replace",
 				addAction(
 					ActionKeys.PERMISSIONS,
-					"putSiteMessageBoardSectionPermission", portletName, siteId)
+					"putSiteMessageBoardSectionPermissionsPage", portletName,
+					siteId)
 			).build(),
 			siteId, portletName, null);
 	}
@@ -1002,8 +1007,16 @@ public abstract class BaseMessageBoardSectionResourceImpl
 					(Long)parameters.get("siteId"), messageBoardSection);
 		}
 
-		for (MessageBoardSection messageBoardSection : messageBoardSections) {
-			messageBoardSectionUnsafeConsumer.accept(messageBoardSection);
+		if (contextBatchUnsafeConsumer != null) {
+			contextBatchUnsafeConsumer.accept(
+				messageBoardSections, messageBoardSectionUnsafeConsumer);
+		}
+		else {
+			for (MessageBoardSection messageBoardSection :
+					messageBoardSections) {
+
+				messageBoardSectionUnsafeConsumer.accept(messageBoardSection);
+			}
 		}
 	}
 
@@ -1151,6 +1164,15 @@ public abstract class BaseMessageBoardSectionResourceImpl
 
 	public void setContextAcceptLanguage(AcceptLanguage contextAcceptLanguage) {
 		this.contextAcceptLanguage = contextAcceptLanguage;
+	}
+
+	public void setContextBatchUnsafeConsumer(
+		UnsafeBiConsumer
+			<java.util.Collection<MessageBoardSection>,
+			 UnsafeConsumer<MessageBoardSection, Exception>, Exception>
+				contextBatchUnsafeConsumer) {
+
+		this.contextBatchUnsafeConsumer = contextBatchUnsafeConsumer;
 	}
 
 	public void setContextCompany(
@@ -1306,6 +1328,10 @@ public abstract class BaseMessageBoardSectionResourceImpl
 	}
 
 	protected AcceptLanguage contextAcceptLanguage;
+	protected UnsafeBiConsumer
+		<java.util.Collection<MessageBoardSection>,
+		 UnsafeConsumer<MessageBoardSection, Exception>, Exception>
+			contextBatchUnsafeConsumer;
 	protected com.liferay.portal.kernel.model.Company contextCompany;
 	protected HttpServletRequest contextHttpServletRequest;
 	protected HttpServletResponse contextHttpServletResponse;

@@ -1,10 +1,10 @@
-@component-name = "portal-collaboration"
+@component-name = "portal-lima"
 definition {
 
 	property custom.properties = "default.layout.template.id=1_column${line.separator}jsonws.web.service.paths.excludes=";
 	property portal.release = "true";
 	property portal.upstream = "true";
-	property testray.component.names = "Mentions";
+	property testray.component.names = "Wiki";
 	property testray.main.component.name = "Mentions";
 
 	setUp {
@@ -48,13 +48,15 @@ definition {
 
 			JSONUser.tearDownNonAdminUsers();
 
-			Page.tearDownCP();
+			PagesAdmin.tearDownCP();
 		}
 	}
 
 	@priority = "5"
 	@refactordone
 	test CanViewWikiCommentMentionedUser {
+		property portal.acceptance = "true";
+
 		JSONWiki.addWikiPage(
 			groupName = "Guest",
 			wikiNodeName = "Main",

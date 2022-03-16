@@ -17,7 +17,6 @@ package com.liferay.commerce.internal.upgrade.v4_1_0;
 import com.liferay.commerce.account.model.CommerceAccount;
 import com.liferay.commerce.constants.CommerceAddressConstants;
 import com.liferay.commerce.internal.upgrade.base.BaseCommerceServiceUpgradeProcess;
-import com.liferay.commerce.model.impl.CommerceAddressImpl;
 import com.liferay.commerce.model.impl.CommerceAddressModelImpl;
 import com.liferay.portal.dao.orm.common.SQLTransformer;
 import com.liferay.portal.kernel.service.ClassNameLocalService;
@@ -49,9 +48,7 @@ public class CommerceAddressUpgradeProcess
 						"'defaultShippingAddressId'");
 		}
 
-		addColumn(
-			CommerceAddressImpl.class, CommerceAddressImpl.TABLE_NAME, "type_",
-			"INTEGER");
+		addColumn("CommerceAddress", "type_", "INTEGER");
 
 		PreparedStatement preparedStatement = null;
 
@@ -60,9 +57,9 @@ public class CommerceAddressUpgradeProcess
 				"update CommerceAccount set defaultBillingAddressId = ? " +
 					"where commerceAccountId = ?");
 
-			updateCommerceAccountAndSetType(
+			_updateCommerceAccountAndSetType(
 				preparedStatement,
-				getCommerceAddressResultSet("defaultBilling"));
+				_getCommerceAddressResultSet("defaultBilling"));
 		}
 
 		if (hasColumn(CommerceAddressModelImpl.TABLE_NAME, "defaultShipping")) {
@@ -70,13 +67,13 @@ public class CommerceAddressUpgradeProcess
 				"update CommerceAccount set defaultShippingAddressId = ? " +
 					"where commerceAccountId = ?");
 
-			updateCommerceAccountAndSetType(
+			_updateCommerceAccountAndSetType(
 				preparedStatement,
-				getCommerceAddressResultSet("defaultShipping"));
+				_getCommerceAddressResultSet("defaultShipping"));
 		}
 	}
 
-	protected ResultSet getCommerceAddressResultSet(String type)
+	private ResultSet _getCommerceAddressResultSet(String type)
 		throws Exception {
 
 		long commerceAccountClassNameId = _classNameLocalService.getClassNameId(
@@ -104,7 +101,7 @@ public class CommerceAddressUpgradeProcess
 		return preparedStatement.executeQuery();
 	}
 
-	protected void setType(
+	private void _setType(
 			boolean defaultBilling, boolean defaultShipping,
 			long commerceAddressId)
 		throws Exception {
@@ -127,7 +124,7 @@ public class CommerceAddressUpgradeProcess
 		preparedStatement.addBatch();
 	}
 
-	protected void updateCommerceAccountAndSetType(
+	private void _updateCommerceAccountAndSetType(
 			PreparedStatement preparedStatement, ResultSet resultSet)
 		throws Exception {
 
@@ -138,7 +135,7 @@ public class CommerceAddressUpgradeProcess
 
 			preparedStatement.setLong(2, resultSet.getLong("classPK"));
 
-			setType(
+			_setType(
 				resultSet.getBoolean("defaultBilling"),
 				resultSet.getBoolean("defaultShipping"), commerceAddressId);
 

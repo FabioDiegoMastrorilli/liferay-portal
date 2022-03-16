@@ -86,7 +86,7 @@ public class UpdateAssetListEntryDynamicMVCActionCommand
 					assetListEntry.getTypeSettings(segmentsEntryId)
 				).build();
 
-			updateQueryLogic(actionRequest, unicodeProperties);
+			_updateQueryLogic(actionRequest, unicodeProperties);
 
 			UnicodeProperties typeSettingsUnicodeProperties =
 				PropertiesParamUtil.getProperties(
@@ -100,8 +100,7 @@ public class UpdateAssetListEntryDynamicMVCActionCommand
 		}
 		catch (DuplicateQueryRuleException duplicateQueryRuleException) {
 			if (_log.isDebugEnabled()) {
-				_log.debug(
-					duplicateQueryRuleException, duplicateQueryRuleException);
+				_log.debug(duplicateQueryRuleException);
 			}
 
 			SessionErrors.add(
@@ -110,7 +109,7 @@ public class UpdateAssetListEntryDynamicMVCActionCommand
 		}
 	}
 
-	protected AssetQueryRule getQueryRule(
+	private AssetQueryRule _getQueryRule(
 		ActionRequest actionRequest, int index) {
 
 		boolean contains = ParamUtil.getBoolean(
@@ -144,7 +143,7 @@ public class UpdateAssetListEntryDynamicMVCActionCommand
 		return new AssetQueryRule(contains, andOperator, name, values);
 	}
 
-	protected void updateQueryLogic(
+	private void _updateQueryLogic(
 			ActionRequest actionRequest, UnicodeProperties unicodeProperties)
 		throws Exception {
 
@@ -162,10 +161,10 @@ public class UpdateAssetListEntryDynamicMVCActionCommand
 		List<AssetQueryRule> queryRules = new ArrayList<>();
 
 		for (int queryRulesIndex : queryRulesIndexes) {
-			AssetQueryRule queryRule = getQueryRule(
+			AssetQueryRule queryRule = _getQueryRule(
 				actionRequest, queryRulesIndex);
 
-			validateQueryRule(userId, groupId, queryRules, queryRule);
+			_validateQueryRule(userId, groupId, queryRules, queryRule);
 
 			queryRules.add(queryRule);
 
@@ -197,7 +196,7 @@ public class UpdateAssetListEntryDynamicMVCActionCommand
 		}
 	}
 
-	protected void validateQueryRule(
+	private void _validateQueryRule(
 			long userId, long groupId, List<AssetQueryRule> queryRules,
 			AssetQueryRule queryRule)
 		throws Exception {

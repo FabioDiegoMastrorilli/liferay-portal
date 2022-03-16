@@ -257,24 +257,22 @@ AUI.add(
 
 				validator: {
 					setter(val) {
-						var config = A.merge(
-							{
-								fieldStrings: {
-									name: {
-										required: Liferay.Language.get(
-											'this-field-is-required'
-										),
-									},
-								},
-								rules: {
-									name: {
-										required: true,
-										structureFieldName: true,
-									},
+						var config = {
+							fieldStrings: {
+								name: {
+									required: Liferay.Language.get(
+										'this-field-is-required'
+									),
 								},
 							},
-							val
-						);
+							rules: {
+								name: {
+									required: true,
+									structureFieldName: true,
+								},
+							},
+							...val,
+						};
 
 						return config;
 					},
@@ -1127,7 +1125,7 @@ AUI.add(
 						!A.Text.Unicode.test(item, 'L') &&
 						!A.Text.Unicode.test(item, 'N') &&
 						!A.Text.Unicode.test(item, 'Pd') &&
-						item != STR_UNDERSCORE
+						item !== STR_UNDERSCORE
 					) {
 						key = key.replace(item, STR_SPACE);
 					}
@@ -1173,7 +1171,7 @@ AUI.add(
 						!A.Text.Unicode.test(item, 'L') &&
 						!A.Text.Unicode.test(item, 'N') &&
 						!A.Text.Unicode.test(item, 'Pd') &&
-						item != STR_UNDERSCORE
+						item !== STR_UNDERSCORE
 					) {
 						valid = false;
 

@@ -16,23 +16,23 @@ import ClayAlert from '@clayui/alert';
 import ClayButton from '@clayui/button';
 import ClayForm from '@clayui/form';
 import ClayModal, {ClayModalProvider, useModal} from '@clayui/modal';
+import {fetch} from 'frontend-js-web';
 import React, {useEffect, useState} from 'react';
 
 import useForm from '../hooks/useForm';
 import {toCamelCase} from '../utils/string';
-import CustomSelect from './form/CustomSelect/CustomSelect';
-import Input from './form/Input';
-import Select from './form/Select';
+import CustomSelect from './Form/CustomSelect/CustomSelect';
+import Input from './Form/Input';
+import Select from './Form/Select';
 
 const objectRelationshipTypes = [
-
-	/* {
+	{
 		description: Liferay.Language.get(
 			"one-object's-entry-interacts-only-with-one-other-object's-entry"
 		),
 		label: Liferay.Language.get('one-to-one'),
 		value: 'oneToOne',
-	},*/
+	},
 	{
 		description: Liferay.Language.get(
 			"one-object's-entry-interacts-with-many-others-object's-entries"
@@ -58,8 +58,11 @@ const defaultLanguageId = Liferay.ThemeDisplay.getDefaultLanguageId();
 
 const ModalAddObjectRelationship: React.FC<IProps> = ({
 	apiURL,
+	ffOneToOneRelationshipConfigurationEnabled,
+	objectDefinitionId,
 	observer,
 	onClose,
+	system,
 }) => {
 	const [error, setError] = useState<string>('');
 	const [objectDefinitions, setObjectDefinitions] = useState<
@@ -72,13 +75,26 @@ const ModalAddObjectRelationship: React.FC<IProps> = ({
 		type: {label: '', value: ''},
 	};
 
+	const filteredObjectRelationshipTypes = objectRelationshipTypes.filter(
+		({value}) => {
+			if (system) {
+				return value === 'oneToMany';
+			}
+			else if (!ffOneToOneRelationshipConfigurationEnabled) {
+				return value !== 'oneToOne';
+			}
+
+			return true;
+		}
+	);
+
 	const onSubmit = async ({
 		label,
 		name,
 		objectDefinitionId2,
 		type,
 	}: TInitialValues) => {
-		const response = await Liferay.Util.fetch(apiURL, {
+		const response = await fetch(apiURL, {
 			body: JSON.stringify({
 				label: {
 					[defaultLanguageId]: label,
@@ -102,7 +118,7 @@ const ModalAddObjectRelationship: React.FC<IProps> = ({
 		else {
 			const {
 				title = Liferay.Language.get('an-error-occurred'),
-			} = await response.json();
+			} = (await response.json()) as {title?: string};
 
 			setError(title);
 		}
@@ -130,35 +146,44 @@ const ModalAddObjectRelationship: React.FC<IProps> = ({
 		return errors;
 	};
 
-	const {errors, handleChange, handleSubmit, values} = useForm({
+	const {errors, handleChange, handleSubmit, setValues, values} = useForm({
 		initialValues,
 		onSubmit,
 		validate,
 	});
 
+	const makeRequest = async () => {
+		const result = await fetch(
+			'/o/object-admin/v1.0/object-definitions?page=-1',
+			{
+				headers,
+				method: 'GET',
+			}
+		);
+
+		const {items = []} = (await result.json()) as {items?: []};
+
+		const objectDefinitions = items
+			.map(({id, name, system}: TObjectDefinition) => ({
+				id,
+				name,
+				system,
+			}))
+			.filter(({system}: TObjectDefinition) => !system);
+
+		setObjectDefinitions(objectDefinitions);
+	};
+
+	const handleChangeManyToMany = () => {
+		const newObjectDefinitions = objectDefinitions.filter(
+			(objectDefinition) =>
+				objectDefinition.id !== Number(objectDefinitionId)
+		);
+
+		setObjectDefinitions(newObjectDefinitions);
+	};
+
 	useEffect(() => {
-		const makeRequest = async () => {
-			const result = await Liferay.Util.fetch(
-				'/o/object-admin/v1.0/object-definitions',
-				{
-					headers,
-					method: 'GET',
-				}
-			);
-
-			const {items = []} = await result.json();
-
-			const objectDefinitions = items
-				.map(({id, name, system}: TObjectDefinition) => ({
-					id,
-					name,
-					system,
-				}))
-				.filter(({system}: TObjectDefinition) => !system);
-
-			setObjectDefinitions(objectDefinitions);
-		};
-
 		makeRequest();
 	}, []);
 
@@ -197,41 +222,26 @@ const ModalAddObjectRelationship: React.FC<IProps> = ({
 					<CustomSelect
 						error={errors.type}
 						label={Liferay.Language.get('type')}
-						onChange={(type: any) => {
-							handleChange({
-								target: {
-									name: 'type',
-									value: type,
-								},
-							} as any);
+						onChange={(type) => {
+							setValues({type});
+
+							type.value === 'manyToMany'
+								? handleChangeManyToMany()
+								: makeRequest();
 						}}
-						options={objectRelationshipTypes}
+						options={filteredObjectRelationshipTypes}
 						required
 						value={values.type.label}
-					>
-						{({description, label}) => (
-							<>
-								<div>{label}</div>
-								<span className="text-small">
-									{description}
-								</span>
-							</>
-						)}
-					</CustomSelect>
+					/>
 
 					<Select
 						error={errors.objectDefinitionId2}
 						id="objectDefinitionId2"
 						label={Liferay.Language.get('object')}
 						onChange={({target: {value}}: any) => {
-							const {id} = objectDefinitions[Number(value) - 1];
+							const {id} = objectDefinitions[Number(value)];
 
-							handleChange({
-								target: {
-									name: 'objectDefinitionId2',
-									value: Number(id),
-								},
-							} as any);
+							setValues({objectDefinitionId2: Number(id)});
 						}}
 						options={objectDefinitions.map(({name}) => name)}
 						required
@@ -261,12 +271,15 @@ const ModalAddObjectRelationship: React.FC<IProps> = ({
 
 interface IProps extends React.HTMLAttributes<HTMLElement> {
 	apiURL: string;
+	ffOneToOneRelationshipConfigurationEnabled: boolean;
+	objectDefinitionId: number;
 	observer: any;
 	onClose: () => void;
+	system: boolean;
 }
 
 type TObjectDefinition = {
-	id: string;
+	id: number;
 	name: string;
 	system: boolean;
 };
@@ -281,7 +294,12 @@ type TInitialValues = {
 	};
 };
 
-const ModalWithProvider: React.FC<IProps> = ({apiURL}) => {
+const ModalWithProvider: React.FC<IProps> = ({
+	apiURL,
+	ffOneToOneRelationshipConfigurationEnabled,
+	objectDefinitionId,
+	system,
+}) => {
 	const [visibleModal, setVisibleModal] = useState<boolean>(false);
 	const {observer, onClose} = useModal({
 		onClose: () => setVisibleModal(false),
@@ -300,8 +318,13 @@ const ModalWithProvider: React.FC<IProps> = ({apiURL}) => {
 			{visibleModal && (
 				<ModalAddObjectRelationship
 					apiURL={apiURL}
+					ffOneToOneRelationshipConfigurationEnabled={
+						ffOneToOneRelationshipConfigurationEnabled
+					}
+					objectDefinitionId={objectDefinitionId}
 					observer={observer}
 					onClose={onClose}
+					system={system}
 				/>
 			)}
 		</ClayModalProvider>

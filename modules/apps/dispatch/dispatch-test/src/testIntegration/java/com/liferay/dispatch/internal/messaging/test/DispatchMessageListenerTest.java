@@ -18,6 +18,7 @@ import com.liferay.arquillian.extension.junit.bridge.junit.Arquillian;
 import com.liferay.dispatch.constants.DispatchConstants;
 import com.liferay.dispatch.executor.DispatchTaskClusterMode;
 import com.liferay.dispatch.executor.DispatchTaskStatus;
+import com.liferay.dispatch.internal.messaging.TestDispatchTaskExecutor;
 import com.liferay.dispatch.model.DispatchLog;
 import com.liferay.dispatch.model.DispatchTrigger;
 import com.liferay.dispatch.service.DispatchLogLocalService;
@@ -253,8 +254,9 @@ public class DispatchMessageListenerTest {
 		Message message = new Message();
 
 		message.setPayload(
-			String.valueOf(
-				JSONUtil.put("dispatchTriggerId", dispatchTriggerId)));
+			JSONUtil.put(
+				"dispatchTriggerId", dispatchTriggerId
+			).toString());
 
 		return message;
 	}

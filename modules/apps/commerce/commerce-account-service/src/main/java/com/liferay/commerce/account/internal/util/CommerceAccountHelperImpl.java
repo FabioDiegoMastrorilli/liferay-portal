@@ -153,7 +153,8 @@ public class CommerceAccountHelperImpl implements CommerceAccountHelper {
 
 			if (commerceAccount == null) {
 				setCurrentCommerceAccount(
-					httpServletRequest, commerceChannelGroupId, -1);
+					httpServletRequest, commerceChannelGroupId,
+					CommerceAccountConstants.ACCOUNT_ID_GUEST);
 			}
 			else {
 				setCurrentCommerceAccount(
@@ -199,9 +200,12 @@ public class CommerceAccountHelperImpl implements CommerceAccountHelper {
 			_commerceChannelLocalService.getCommerceChannelByGroupId(
 				commerceChannelGroupId);
 
+		long userId = _portal.getUserId(httpServletRequest);
+
 		_currentAccountEntryManager.setCurrentAccountEntry(
-			commerceAccountId, commerceChannel.getSiteGroupId(),
-			_portal.getUserId(httpServletRequest));
+			commerceAccountId, commerceChannel.getGroupId(), userId);
+		_currentAccountEntryManager.setCurrentAccountEntry(
+			commerceAccountId, commerceChannel.getSiteGroupId(), userId);
 	}
 
 	private void _checkAccountType(

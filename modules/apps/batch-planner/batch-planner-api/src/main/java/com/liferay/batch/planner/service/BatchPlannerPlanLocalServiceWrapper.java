@@ -27,6 +27,10 @@ public class BatchPlannerPlanLocalServiceWrapper
 	implements BatchPlannerPlanLocalService,
 			   ServiceWrapper<BatchPlannerPlanLocalService> {
 
+	public BatchPlannerPlanLocalServiceWrapper() {
+		this(null);
+	}
+
 	public BatchPlannerPlanLocalServiceWrapper(
 		BatchPlannerPlanLocalService batchPlannerPlanLocalService) {
 
@@ -333,6 +337,15 @@ public class BatchPlannerPlanLocalServiceWrapper
 
 	@Override
 	public com.liferay.batch.planner.model.BatchPlannerPlan updateActive(
+			boolean active, String batchEngineTaskERC, boolean export)
+		throws com.liferay.portal.kernel.exception.PortalException {
+
+		return _batchPlannerPlanLocalService.updateActive(
+			active, batchEngineTaskERC, export);
+	}
+
+	@Override
+	public com.liferay.batch.planner.model.BatchPlannerPlan updateActive(
 			long batchPlannerPlanId, boolean active)
 		throws com.liferay.portal.kernel.exception.PortalException {
 
@@ -362,11 +375,12 @@ public class BatchPlannerPlanLocalServiceWrapper
 	@Override
 	public com.liferay.batch.planner.model.BatchPlannerPlan
 			updateBatchPlannerPlan(
-				long userId, long batchPlannerPlanId, String name)
+				long userId, long batchPlannerPlanId, String externalType,
+				String internalClassName, String name)
 		throws com.liferay.portal.kernel.exception.PortalException {
 
 		return _batchPlannerPlanLocalService.updateBatchPlannerPlan(
-			userId, batchPlannerPlanId, name);
+			userId, batchPlannerPlanId, externalType, internalClassName, name);
 	}
 
 	@Override

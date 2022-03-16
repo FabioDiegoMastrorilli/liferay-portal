@@ -1,6 +1,8 @@
 @component-name = "portal-publications"
 definition {
 
+	property app.server.types = "jboss,tomcat,weblogic,websphere,wildfly";
+	property database.types = "db2,hypersonic,mariadb,mysql,oracle,postgresql,sqlserver";
 	property portal.release = "true";
 	property portal.upstream = "true";
 	property testray.main.component.name = "Publications";
@@ -62,21 +64,21 @@ definition {
 
 		PublicationsNavigator.gotoReviewChanges(publicationName = "Publication Name");
 
-		PublicationsChanges.viewChangesViaChangesStyle(
+		PublicationsChanges.viewChanges(
 			changeCategory = "Calendar",
 			changeSite = "Site Name",
 			changeTitle = "Site Name",
 			changeType = "Added",
 			changeUser = "Test Test");
 
-		PublicationsChanges.viewChangesViaChangesStyle(
+		PublicationsChanges.viewChanges(
 			changeCategory = "Calendar Event",
 			changeSite = "Site Name",
 			changeTitle = "Publication Calendar Event Title",
 			changeType = "Added",
 			changeUser = "Test Test");
 
-		PublicationsChanges.viewChangesViaChangesStyle(
+		PublicationsChanges.viewChanges(
 			changeCategory = "Calendar Resource",
 			changeSite = "Site Name",
 			changeTitle = "Site Name",
@@ -97,25 +99,29 @@ definition {
 	@description = "Assert the conflict can be manually resovled on Calendar by discarding within Publications."
 	@priority = "4"
 	test ResolveConflictingPublicationsByDiscarding {
+		JSONGroup.addGroup(groupName = "Site Name");
+
 		JSONLayout.addPublicLayout(
-			groupName = "Guest",
+			groupName = "Site Name",
 			layoutName = "Calendar Page");
 
 		JSONLayout.updateLayoutTemplateOfPublicLayout(
-			groupName = "Guest",
+			groupName = "Site Name",
 			layoutName = "Calendar Page",
 			layoutTemplate = "1 Column");
 
-		Navigator.gotoPage(pageName = "Calendar Page");
+		Navigator.gotoSitePage(
+			pageName = "Calendar Page",
+			siteName = "Site Name");
 
 		Portlet.addPG(portletName = "Calendar");
 
 		CalendarNavigator.gotoAddEvent();
 
-		CalendarEvent.add(
+		CalendarEvent.addRegularInCustomSite(
 			eventTitle = "Publication Calendar Event Title",
-			eventType = "All Day",
-			pageName = "Calendar Page");
+			pageName = "Calendar Page",
+			siteName = "Site Name");
 
 		JSONPublications.addPublication(publicationName = "Publication Name");
 
@@ -131,9 +137,9 @@ definition {
 
 		PublicationsNavigator.gotoReviewChanges(publicationName = "Publication Name");
 
-		PublicationsChanges.viewChangesViaChangesStyle(
+		PublicationsChanges.viewChanges(
 			changeCategory = "Calendar Event",
-			changeSite = "Guest",
+			changeSite = "Site Name",
 			changeTitle = "Publication Calendar Event Title Edit",
 			changeType = "Modified",
 			changeUser = "Test Test");
@@ -142,11 +148,13 @@ definition {
 
 		JSONPublications.selectPublication(publicationName = "Publication Name 2");
 
-		Navigator.gotoPage(pageName = "Calendar Page");
+		Navigator.gotoSitePage(
+			pageName = "Calendar Page",
+			siteName = "Site Name");
 
 		CalendarEvent.delete();
 
-		RecycleBin.openRecycleBinAdmin(siteURLKey = "guest");
+		RecycleBin.openRecycleBinAdmin(siteURLKey = "site-name");
 
 		RecycleBin.deleteCP(
 			assetName = "Publication Calendar Event Title",
@@ -154,9 +162,9 @@ definition {
 
 		PublicationsNavigator.gotoReviewChanges(publicationName = "Publication Name 2");
 
-		PublicationsChanges.viewChangesViaChangesStyle(
+		PublicationsChanges.viewChanges(
 			changeCategory = "Calendar Event",
-			changeSite = "Guest",
+			changeSite = "Site Name",
 			changeTitle = "Publication Calendar Event Title",
 			changeType = "Deleted",
 			changeUser = "Test Test");
@@ -173,12 +181,12 @@ definition {
 			entryTitle = "Publication Calendar Event Title Edit",
 			warningMessage = "Deletion Modification Conflict: Modification conflicts with a deletion.");
 
-		PublicationsNavigator.gotoViewChangeDiffInConflictingPublications(entryTitle = "Publication Calendar Event Title Edit");
+		PublicationsNavigator.gotoViewConflictingChangeDetails(entryTitle = "Publication Calendar Event Title Edit");
 
-		PublicationsChanges.viewChangeDiff(
+		PublicationsChangeDetails.viewConflictingChangeDetails(
 			columnName = "Title",
 			columnValueInPublication = "Publication Calendar Event Title Edit",
-			entryDeletedInProduction = "true",
+			deletionModificationConflict = "true",
 			publicationName = "Publication Name");
 
 		IFrame.closeFrame();

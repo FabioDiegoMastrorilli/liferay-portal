@@ -145,8 +145,11 @@
 																	}
 																},
 																"text": {
-																	"value_i18n": {
-																		"en_US": "Category"
+																	"mapping": {
+																		"fieldKey": "masterclass",
+																		"itemReference": {
+																			"contextSource": "DisplayPageItem"
+																		}
 																	}
 																}
 															}
@@ -249,6 +252,25 @@
 															"id": "link",
 															"value": {
 																"fragmentLink": {
+																	"value": {
+																		"href": {
+																			"mapping": {
+																				"itemReference": {
+																					"className": "com.liferay.portal.kernel.model.Layout",
+																					"fields": [
+																						{
+																							"fieldName": "friendlyURL",
+																							"fieldValue": "/apply"
+																						},
+																						{
+																							"fieldName": "privatePage",
+																							"fieldValue": "false"
+																						}
+																					]
+																				}
+																			}
+																		}
+																	},
 																	"value_i18n": {
 																	}
 																}
@@ -1877,7 +1899,7 @@
 												"classPKReferences": {
 													"en_US": {
 														"className": "com.liferay.portal.kernel.repository.model.FileEntry",
-														"classPK": "[$DOCUMENT_FILE_ENTRY_ID:/site-initializer/documents/logos.svg$]"
+														"classPK": "[$DOCUMENT_FILE_ENTRY_ID:/site-initializer/documents/group/logos.svg$]"
 													}
 												},
 												"fragmentImageConfiguration": {
@@ -1956,6 +1978,25 @@
 									"id": "link",
 									"value": {
 										"fragmentLink": {
+											"value": {
+												"href": {
+													"mapping": {
+														"itemReference": {
+															"className": "com.liferay.portal.kernel.model.Layout",
+															"fields": [
+																{
+																	"fieldName": "friendlyURL",
+																	"fieldValue": "/apply"
+																},
+																{
+																	"fieldName": "privatePage",
+																	"fieldValue": "false"
+																}
+															]
+														}
+													}
+												}
+											},
 											"value_i18n": {
 											}
 										}

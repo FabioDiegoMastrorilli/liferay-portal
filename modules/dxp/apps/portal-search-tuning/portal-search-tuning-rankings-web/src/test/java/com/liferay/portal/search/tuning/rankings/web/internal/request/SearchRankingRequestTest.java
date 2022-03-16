@@ -47,11 +47,13 @@ public class SearchRankingRequestTest extends BaseRankingsWebTestCase {
 		LiferayUnitTestRule.INSTANCE;
 
 	@Before
+	@Override
 	public void setUp() throws Exception {
 		super.setUp();
 
 		_setUpQuery();
 
+		setUpPortletPreferencesFactoryUtil();
 		setUpPropsUtil();
 
 		HttpServletRequest httpServletRequest =

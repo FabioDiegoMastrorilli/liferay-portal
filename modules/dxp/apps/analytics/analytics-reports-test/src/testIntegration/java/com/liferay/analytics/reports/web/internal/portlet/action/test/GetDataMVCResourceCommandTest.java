@@ -88,7 +88,7 @@ public class GetDataMVCResourceCommandTest {
 	public void setUp() throws Exception {
 		_group = GroupTestUtil.addGroup();
 
-		_layout = LayoutTestUtil.addLayout(_group);
+		_layout = LayoutTestUtil.addTypePortletLayout(_group);
 	}
 
 	@Test
@@ -220,8 +220,9 @@ public class GetDataMVCResourceCommandTest {
 					viewURLJSONObject.getString("languageId"));
 				Assert.assertEquals(
 					StringBundler.concat(
-						locale.getDisplayLanguage(), StringPool.SPACE,
-						StringPool.OPEN_PARENTHESIS, locale.getDisplayCountry(),
+						locale.getDisplayLanguage(_locale), StringPool.SPACE,
+						StringPool.OPEN_PARENTHESIS,
+						locale.getDisplayCountry(_locale),
 						StringPool.CLOSE_PARENTHESIS),
 					viewURLJSONObject.getString("languageLabel"));
 

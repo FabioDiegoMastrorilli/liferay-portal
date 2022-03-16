@@ -15,7 +15,7 @@
 package com.liferay.journal.internal.upgrade.v1_1_0;
 
 import com.liferay.journal.constants.JournalConstants;
-import com.liferay.journal.internal.upgrade.util.JournalArticleImageUpgradeHelper;
+import com.liferay.journal.internal.upgrade.helper.JournalArticleImageUpgradeHelper;
 import com.liferay.journal.model.JournalArticle;
 import com.liferay.petra.string.StringBundler;
 import com.liferay.petra.string.StringPool;
@@ -45,7 +45,13 @@ public class ImageTypeContentUpgradeProcess extends UpgradeProcess {
 		_portletFileRepository = portletFileRepository;
 	}
 
-	protected void copyJournalArticleImagesToJournalRepository()
+	@Override
+	protected void doUpgrade() throws Exception {
+		_copyJournalArticleImagesToJournalRepository();
+		_dropJournalArticleImageTable();
+	}
+
+	private void _copyJournalArticleImagesToJournalRepository()
 		throws Exception {
 
 		try (LoggingTimer loggingTimer = new LoggingTimer()) {
@@ -120,13 +126,7 @@ public class ImageTypeContentUpgradeProcess extends UpgradeProcess {
 		}
 	}
 
-	@Override
-	protected void doUpgrade() throws Exception {
-		copyJournalArticleImagesToJournalRepository();
-		dropJournalArticleImageTable();
-	}
-
-	protected void dropJournalArticleImageTable() throws Exception {
+	private void _dropJournalArticleImageTable() throws Exception {
 		runSQL(connection, "drop table JournalArticleImage");
 
 		if (_log.isInfoEnabled()) {

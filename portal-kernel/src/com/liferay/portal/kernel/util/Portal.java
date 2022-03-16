@@ -229,13 +229,6 @@ public interface Portal {
 		boolean doAsUser);
 
 	/**
-	 * @deprecated As of Athanasius (7.3.x), with no direct replacement
-	 */
-	@Deprecated
-	public void addUserLocaleOptionsMessage(
-		HttpServletRequest httpServletRequest);
-
-	/**
 	 * Clears the render parameters in the request if the portlet is in the
 	 * action phase.
 	 *
@@ -683,18 +676,7 @@ public interface Portal {
 	public String getFullName(
 		String firstName, String middleName, String lastName);
 
-	public String getGlobalLibDir();
-
 	public String getGoogleGadgetURL(Portlet portlet, ThemeDisplay themeDisplay)
-		throws PortalException;
-
-	/**
-	 * @deprecated As of Cavanaugh (7.4.x), replaced by {@link
-	 * #getGroupFriendlyURL(LayoutSet, ThemeDisplay, boolean, boolean)}
-	 */
-	@Deprecated
-	public String getGroupFriendlyURL(
-			LayoutSet layoutSet, ThemeDisplay themeDisplay)
 		throws PortalException;
 
 	public String getGroupFriendlyURL(
@@ -868,8 +850,6 @@ public interface Portal {
 
 	public PortalInetSocketAddressEventListener[]
 		getPortalInetSocketAddressEventListeners();
-
-	public String getPortalLibDir();
 
 	public InetAddress getPortalLocalInetAddress(boolean secure);
 
@@ -1122,13 +1102,6 @@ public interface Portal {
 	public long getValidUserId(long companyId, long userId)
 		throws PortalException;
 
-	/**
-	 * @deprecated As of Mueller (7.2.x), replaced by {@link
-	 *             #getVirtualHostnames(LayoutSet)}
-	 */
-	@Deprecated
-	public String getVirtualHostname(LayoutSet layoutSet);
-
 	public TreeMap<String, String> getVirtualHostnames(LayoutSet layoutSet);
 
 	public String getWidgetURL(Portlet portlet, ThemeDisplay themeDisplay)
@@ -1205,8 +1178,6 @@ public interface Portal {
 	public boolean isSystemGroup(String groupName);
 
 	public boolean isSystemRole(String roleName);
-
-	public boolean isUpdateAvailable();
 
 	public boolean isValidResourceId(String resourceId);
 

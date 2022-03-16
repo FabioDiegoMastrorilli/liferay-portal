@@ -12,6 +12,8 @@
  * details.
  */
 
+import type {Locale, LocalizedValue} from '../types';
+
 function assertOptionParameters<T>({
 	editingLanguageId,
 	multiple,
@@ -61,10 +63,10 @@ export function normalizeOptions({
 	valueArray: string[];
 }) {
 	const newOptions: {
-		separator?: true;
 		active?: boolean;
 		checked?: boolean;
 		label: string | undefined;
+		separator?: true;
 		type?: 'checkbox' | 'item';
 		value: string | null;
 	}[] = [];
@@ -93,7 +95,10 @@ export function normalizeOptions({
 	populateNewOptions(options);
 
 	if (fixedOptions.length) {
-		newOptions[options.length - 1].separator = true;
+		if (options.length) {
+			newOptions[options.length - 1].separator = true;
+		}
+
 		populateNewOptions(fixedOptions);
 	}
 
@@ -127,6 +132,6 @@ export function normalizeValue<T>({
 	return normalizedValues.filter((value) => normalizedOptionSet.has(value));
 }
 interface Option<T> {
-	value: T;
 	label: LocalizedValue<string>;
+	value: T;
 }

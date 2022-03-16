@@ -16,11 +16,13 @@ package com.liferay.object.rest.internal.manager.v1_0;
 
 import com.liferay.depot.service.DepotEntryLocalService;
 import com.liferay.object.constants.ObjectConstants;
+import com.liferay.object.exception.NoSuchObjectEntryException;
 import com.liferay.object.model.ObjectDefinition;
 import com.liferay.object.model.ObjectField;
 import com.liferay.object.rest.dto.v1_0.ObjectEntry;
 import com.liferay.object.rest.internal.dto.v1_0.converter.ObjectEntryDTOConverter;
 import com.liferay.object.rest.internal.resource.v1_0.ObjectEntryResourceImpl;
+import com.liferay.object.rest.internal.search.aggregation.AggregationUtil;
 import com.liferay.object.rest.manager.v1_0.ObjectEntryManager;
 import com.liferay.object.scope.ObjectScopeProvider;
 import com.liferay.object.scope.ObjectScopeProviderRegistry;
@@ -40,6 +42,10 @@ import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.HashMapBuilder;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.kernel.workflow.WorkflowConstants;
+import com.liferay.portal.search.aggregation.Aggregations;
+import com.liferay.portal.search.legacy.searcher.SearchRequestBuilderFactory;
+import com.liferay.portal.search.query.Queries;
+import com.liferay.portal.search.searcher.SearchRequestBuilder;
 import com.liferay.portal.vulcan.aggregation.Aggregation;
 import com.liferay.portal.vulcan.dto.converter.DTOConverterContext;
 import com.liferay.portal.vulcan.dto.converter.DefaultDTOConverterContext;
@@ -62,6 +68,7 @@ import java.util.Objects;
 import java.util.Optional;
 
 import javax.ws.rs.BadRequestException;
+import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.UriInfo;
 
 import org.osgi.service.component.annotations.Component;
@@ -112,7 +119,14 @@ public class ObjectEntryManagerImpl implements ObjectEntryManager {
 	}
 
 	@Override
-	public void deleteObjectEntry(long objectEntryId) throws Exception {
+	public void deleteObjectEntry(
+			ObjectDefinition objectDefinition, long objectEntryId)
+		throws Exception {
+
+		_checkObjectEntryObjectDefinitionId(
+			objectDefinition,
+			_objectEntryService.getObjectEntry(objectEntryId));
+
 		_objectEntryService.deleteObjectEntry(objectEntryId);
 	}
 
@@ -122,9 +136,14 @@ public class ObjectEntryManagerImpl implements ObjectEntryManager {
 			ObjectDefinition objectDefinition, String scopeKey)
 		throws Exception {
 
-		_objectEntryService.deleteObjectEntry(
-			externalReferenceCode, companyId,
-			_getGroupId(objectDefinition, scopeKey));
+		com.liferay.object.model.ObjectEntry objectEntry =
+			_objectEntryService.getObjectEntry(
+				externalReferenceCode, companyId,
+				_getGroupId(objectDefinition, scopeKey));
+
+		_checkObjectEntryObjectDefinitionId(objectDefinition, objectEntry);
+
+		_objectEntryService.deleteObjectEntry(objectEntry.getObjectEntryId());
 	}
 
 	@Override
@@ -197,8 +216,24 @@ public class ObjectEntryManagerImpl implements ObjectEntryManager {
 				searchContext.setAttribute(
 					"objectDefinitionId",
 					objectDefinition.getObjectDefinitionId());
+
+				if (uriInfo != null) {
+					MultivaluedMap<String, String> queryParameters =
+						uriInfo.getQueryParameters();
+
+					searchContext.setAttribute(
+						"searchByObjectView",
+						queryParameters.containsKey("searchByObjectView"));
+				}
+
 				searchContext.setCompanyId(companyId);
 				searchContext.setGroupIds(new long[] {groupId});
+
+				SearchRequestBuilder searchRequestBuilder =
+					_searchRequestBuilderFactory.builder(searchContext);
+
+				AggregationUtil.processVulcanAggregation(
+					_aggregations, _queries, searchRequestBuilder, aggregation);
 			},
 			sorts,
 			document -> getObjectEntry(
@@ -212,9 +247,13 @@ public class ObjectEntryManagerImpl implements ObjectEntryManager {
 			ObjectDefinition objectDefinition, long objectEntryId)
 		throws Exception {
 
+		com.liferay.object.model.ObjectEntry objectEntry =
+			_objectEntryService.getObjectEntry(objectEntryId);
+
+		_checkObjectEntryObjectDefinitionId(objectDefinition, objectEntry);
+
 		return _toObjectEntry(
-			dtoConverterContext, objectDefinition,
-			_objectEntryService.getObjectEntry(objectEntryId));
+			dtoConverterContext, objectDefinition, objectEntry);
 	}
 
 	@Override
@@ -224,11 +263,15 @@ public class ObjectEntryManagerImpl implements ObjectEntryManager {
 			ObjectDefinition objectDefinition, String scopeKey)
 		throws Exception {
 
-		return _toObjectEntry(
-			dtoConverterContext, objectDefinition,
+		com.liferay.object.model.ObjectEntry objectEntry =
 			_objectEntryService.getObjectEntry(
 				externalReferenceCode, companyId,
-				_getGroupId(objectDefinition, scopeKey)));
+				_getGroupId(objectDefinition, scopeKey));
+
+		_checkObjectEntryObjectDefinitionId(objectDefinition, objectEntry);
+
+		return _toObjectEntry(
+			dtoConverterContext, objectDefinition, objectEntry);
 	}
 
 	@Override
@@ -241,6 +284,9 @@ public class ObjectEntryManagerImpl implements ObjectEntryManager {
 		com.liferay.object.model.ObjectEntry serviceBuilderObjectEntry =
 			_objectEntryService.getObjectEntry(objectEntryId);
 
+		_checkObjectEntryObjectDefinitionId(
+			objectDefinition, serviceBuilderObjectEntry);
+
 		return _toObjectEntry(
 			dtoConverterContext, objectDefinition,
 			_objectEntryService.updateObjectEntry(
@@ -250,6 +296,18 @@ public class ObjectEntryManagerImpl implements ObjectEntryManager {
 					objectEntry.getProperties(),
 					dtoConverterContext.getLocale()),
 				new ServiceContext()));
+	}
+
+	private void _checkObjectEntryObjectDefinitionId(
+			ObjectDefinition objectDefinition,
+			com.liferay.object.model.ObjectEntry objectEntry)
+		throws Exception {
+
+		if (objectDefinition.getObjectDefinitionId() !=
+				objectEntry.getObjectDefinitionId()) {
+
+			throw new NoSuchObjectEntryException();
+		}
 	}
 
 	private long _getGroupId(
@@ -336,6 +394,15 @@ public class ObjectEntryManagerImpl implements ObjectEntryManager {
 							objectEntry.getObjectDefinitionId()),
 						objectEntry.getGroupId(), uriInfo)
 				).put(
+					"permissions",
+					ActionUtil.addAction(
+						ActionKeys.PERMISSIONS, ObjectEntryResourceImpl.class,
+						objectEntry.getObjectEntryId(), "patchObjectEntry",
+						null, objectEntry.getUserId(),
+						_getObjectEntryPermissionName(
+							objectEntry.getObjectDefinitionId()),
+						objectEntry.getGroupId(), uriInfo)
+				).put(
 					"update",
 					ActionUtil.addAction(
 						ActionKeys.UPDATE, ObjectEntryResourceImpl.class,
@@ -375,7 +442,7 @@ public class ObjectEntryManagerImpl implements ObjectEntryManager {
 				continue;
 			}
 
-			if (Objects.equals(objectField.getType(), "Date")) {
+			if (Objects.equals(objectField.getDBType(), "Date")) {
 				values.put(name, _toDate(locale, String.valueOf(object)));
 			}
 
@@ -391,6 +458,9 @@ public class ObjectEntryManagerImpl implements ObjectEntryManager {
 
 		return values;
 	}
+
+	@Reference
+	private Aggregations _aggregations;
 
 	@Reference
 	private DepotEntryLocalService _depotEntryLocalService;
@@ -409,5 +479,11 @@ public class ObjectEntryManagerImpl implements ObjectEntryManager {
 
 	@Reference
 	private ObjectScopeProviderRegistry _objectScopeProviderRegistry;
+
+	@Reference
+	private Queries _queries;
+
+	@Reference
+	private SearchRequestBuilderFactory _searchRequestBuilderFactory;
 
 }

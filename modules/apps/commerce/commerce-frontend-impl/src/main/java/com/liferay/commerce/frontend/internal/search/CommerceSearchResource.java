@@ -100,20 +100,20 @@ public class CommerceSearchResource {
 		try {
 			Layout layout = _layoutLocalService.getLayout(plid);
 
-			themeDisplay.setScopeGroupId(layout.getGroupId());
 			themeDisplay.setLayout(layout);
 			themeDisplay.setLayoutSet(layout.getLayoutSet());
+			themeDisplay.setScopeGroupId(layout.getGroupId());
 
 			List<SearchItemModel> searchItemModels = new ArrayList<>();
 
 			searchItemModels.addAll(
-				searchProducts(
+				_searchProducts(
 					themeDisplay.getCompanyId(), layout.getGroupId(),
 					queryString, themeDisplay));
 
 			if (themeDisplay.isSignedIn()) {
 				searchItemModels.addAll(
-					searchAccounts(queryString, themeDisplay));
+					_searchAccounts(queryString, themeDisplay));
 
 				CommerceAccount commerceAccount =
 					_commerceAccountHelper.getCurrentCommerceAccount(
@@ -123,7 +123,7 @@ public class CommerceSearchResource {
 						httpServletRequest);
 
 				searchItemModels.addAll(
-					searchOrders(queryString, themeDisplay, commerceAccount));
+					_searchOrders(queryString, themeDisplay, commerceAccount));
 			}
 
 			String url = _commerceSearchUtil.getSearchFriendlyURL(themeDisplay);
@@ -147,7 +147,7 @@ public class CommerceSearchResource {
 			).build();
 		}
 		catch (Exception exception) {
-			_log.error(exception, exception);
+			_log.error(exception);
 		}
 
 		return Response.status(
@@ -155,7 +155,52 @@ public class CommerceSearchResource {
 		).build();
 	}
 
-	protected List<SearchItemModel> searchAccounts(
+	private String _getAccountManagementPortletEditURL(
+			long accountId, ThemeDisplay themeDisplay)
+		throws PortalException {
+
+		PortletURL editURL = PortletProviderUtil.getPortletURL(
+			themeDisplay.getRequest(), CommerceAccount.class.getName(),
+			PortletProvider.Action.VIEW);
+
+		if (editURL == null) {
+			return StringPool.BLANK;
+		}
+
+		editURL.setParameter("commerceAccountId", String.valueOf(accountId));
+
+		return editURL.toString();
+	}
+
+	private SearchItemModel _getSearchItemModel(
+			long commerceAccountId, CPCatalogEntry cpCatalogEntry,
+			ThemeDisplay themeDisplay)
+		throws PortalException {
+
+		SearchItemModel searchItemModel = new SearchItemModel(
+			"item", HtmlUtil.escape(cpCatalogEntry.getName()));
+
+		searchItemModel.setImage(
+			_cpDefinitionHelper.getDefaultImageFileURL(
+				commerceAccountId, cpCatalogEntry.getCPDefinitionId()));
+
+		String subtitle = cpCatalogEntry.getShortDescription();
+
+		if (Validator.isNull(subtitle)) {
+			subtitle = HtmlUtil.extractText(cpCatalogEntry.getDescription());
+		}
+
+		searchItemModel.setSubtitle(subtitle);
+
+		String url = _cpDefinitionHelper.getFriendlyURL(
+			cpCatalogEntry.getCPDefinitionId(), themeDisplay);
+
+		searchItemModel.setUrl(url);
+
+		return searchItemModel;
+	}
+
+	private List<SearchItemModel> _searchAccounts(
 			String queryString, ThemeDisplay themeDisplay)
 		throws PortalException {
 
@@ -185,7 +230,6 @@ public class CommerceSearchResource {
 				"item", account.getName());
 
 			searchItemModel.setImage(account.getThumbnail());
-
 			searchItemModel.setUrl(
 				_getAccountManagementPortletEditURL(
 					GetterUtil.getLong(account.getAccountId()), themeDisplay));
@@ -211,7 +255,7 @@ public class CommerceSearchResource {
 		return searchItemModels;
 	}
 
-	protected List<SearchItemModel> searchOrders(
+	private List<SearchItemModel> _searchOrders(
 			String queryString, ThemeDisplay themeDisplay,
 			CommerceAccount commerceAccount)
 		throws PortalException {
@@ -265,7 +309,7 @@ public class CommerceSearchResource {
 		return searchItemModels;
 	}
 
-	protected List<SearchItemModel> searchProducts(
+	private List<SearchItemModel> _searchProducts(
 			long companyId, long groupId, String queryString,
 			ThemeDisplay themeDisplay)
 		throws PortalException {
@@ -291,25 +335,24 @@ public class CommerceSearchResource {
 				"commerceChannelGroupId", commerceChannel.getGroupId());
 		}
 
+		long commerceAccountId = 0;
+
 		CommerceAccount commerceAccount =
 			_commerceAccountHelper.getCurrentCommerceAccount(
 				commerceChannel.getGroupId(), themeDisplay.getRequest());
 
-		long[] commerceAccountGroupIds = null;
-
 		if (commerceAccount != null) {
-			commerceAccountGroupIds =
-				_commerceAccountHelper.getCommerceAccountGroupIds(
-					commerceAccount.getCommerceAccountId());
-		}
+			commerceAccountId = commerceAccount.getCommerceAccountId();
 
-		searchContext.setAttribute(
-			"commerceAccountGroupIds", commerceAccountGroupIds);
+			attributes.put(
+				"commerceAccountGroupIds",
+				_commerceAccountHelper.getCommerceAccountGroupIds(
+					commerceAccountId));
+		}
 
 		searchContext.setAttributes(attributes);
 
 		searchContext.setCompanyId(companyId);
-
 		searchContext.setKeywords(queryString);
 
 		CPQuery cpQuery = new CPQuery();
@@ -332,7 +375,8 @@ public class CommerceSearchResource {
 				cpDataSourceResult.getCPCatalogEntries()) {
 
 			searchItemModels.add(
-				_getSearchItemModel(cpCatalogEntry, themeDisplay));
+				_getSearchItemModel(
+					commerceAccountId, cpCatalogEntry, themeDisplay));
 		}
 
 		String url = _commerceSearchUtil.getCatalogFriendlyURL(themeDisplay);
@@ -349,48 +393,6 @@ public class CommerceSearchResource {
 		}
 
 		return searchItemModels;
-	}
-
-	private String _getAccountManagementPortletEditURL(
-			long accountId, ThemeDisplay themeDisplay)
-		throws PortalException {
-
-		PortletURL editURL = PortletProviderUtil.getPortletURL(
-			themeDisplay.getRequest(), CommerceAccount.class.getName(),
-			PortletProvider.Action.VIEW);
-
-		if (editURL == null) {
-			return StringPool.BLANK;
-		}
-
-		editURL.setParameter("commerceAccountId", String.valueOf(accountId));
-
-		return editURL.toString();
-	}
-
-	private SearchItemModel _getSearchItemModel(
-			CPCatalogEntry cpCatalogEntry, ThemeDisplay themeDisplay)
-		throws PortalException {
-
-		SearchItemModel searchItemModel = new SearchItemModel(
-			"item", HtmlUtil.escape(cpCatalogEntry.getName()));
-
-		String subtitle = cpCatalogEntry.getShortDescription();
-
-		if (Validator.isNull(subtitle)) {
-			subtitle = HtmlUtil.extractText(cpCatalogEntry.getDescription());
-		}
-
-		searchItemModel.setSubtitle(subtitle);
-
-		searchItemModel.setImage(cpCatalogEntry.getDefaultImageFileUrl());
-
-		String url = _cpDefinitionHelper.getFriendlyURL(
-			cpCatalogEntry.getCPDefinitionId(), themeDisplay);
-
-		searchItemModel.setUrl(url);
-
-		return searchItemModel;
 	}
 
 	private static final ObjectMapper _OBJECT_MAPPER = new ObjectMapper() {

@@ -47,15 +47,18 @@ public class ObjectFieldLocalServiceUtil {
 	 */
 	public static ObjectField addCustomObjectField(
 			long userId, long listTypeDefinitionId, long objectDefinitionId,
-			boolean indexed, boolean indexedAsKeyword, String indexedLanguageId,
+			String businessType, String dbType, boolean indexed,
+			boolean indexedAsKeyword, String indexedLanguageId,
 			Map<java.util.Locale, String> labelMap, String name,
-			boolean required, String type)
+			boolean required,
+			List<com.liferay.object.model.ObjectFieldSetting>
+				objectFieldSettings)
 		throws PortalException {
 
 		return getService().addCustomObjectField(
-			userId, listTypeDefinitionId, objectDefinitionId, indexed,
-			indexedAsKeyword, indexedLanguageId, labelMap, name, required,
-			type);
+			userId, listTypeDefinitionId, objectDefinitionId, businessType,
+			dbType, indexed, indexedAsKeyword, indexedLanguageId, labelMap,
+			name, required, objectFieldSettings);
 	}
 
 	/**
@@ -73,15 +76,17 @@ public class ObjectFieldLocalServiceUtil {
 	}
 
 	public static ObjectField addSystemObjectField(
-			long userId, long objectDefinitionId, String dbColumnName,
-			boolean indexed, boolean indexedAsKeyword, String indexedLanguageId,
+			long userId, long objectDefinitionId, String businessType,
+			String dbColumnName, String dbType, boolean indexed,
+			boolean indexedAsKeyword, String indexedLanguageId,
 			Map<java.util.Locale, String> labelMap, String name,
-			boolean required, String type)
+			boolean required)
 		throws PortalException {
 
 		return getService().addSystemObjectField(
-			userId, objectDefinitionId, dbColumnName, indexed, indexedAsKeyword,
-			indexedLanguageId, labelMap, name, required, type);
+			userId, objectDefinitionId, businessType, dbColumnName, dbType,
+			indexed, indexedAsKeyword, indexedLanguageId, labelMap, name,
+			required);
 	}
 
 	/**
@@ -146,6 +151,13 @@ public class ObjectFieldLocalServiceUtil {
 		throws PortalException {
 
 		return getService().deletePersistedModel(persistedModel);
+	}
+
+	public static ObjectField deleteRelationshipTypeObjectField(
+			long objectFieldId)
+		throws PortalException {
+
+		return getService().deleteRelationshipTypeObjectField(objectFieldId);
 	}
 
 	public static <T> T dslQuery(DSLQuery dslQuery) {
@@ -376,15 +388,18 @@ public class ObjectFieldLocalServiceUtil {
 	}
 
 	public static ObjectField updateCustomObjectField(
-			long objectFieldId, long listTypeDefinitionId, boolean indexed,
-			boolean indexedAsKeyword, String indexedLanguageId,
-			Map<java.util.Locale, String> labelMap, String name,
-			boolean required, String type)
+			long objectFieldId, long listTypeDefinitionId, String businessType,
+			String dbType, boolean indexed, boolean indexedAsKeyword,
+			String indexedLanguageId, Map<java.util.Locale, String> labelMap,
+			String name, boolean required,
+			List<com.liferay.object.model.ObjectFieldSetting>
+				objectFieldSettings)
 		throws PortalException {
 
 		return getService().updateCustomObjectField(
-			objectFieldId, listTypeDefinitionId, indexed, indexedAsKeyword,
-			indexedLanguageId, labelMap, name, required, type);
+			objectFieldId, listTypeDefinitionId, businessType, dbType, indexed,
+			indexedAsKeyword, indexedLanguageId, labelMap, name, required,
+			objectFieldSettings);
 	}
 
 	/**
@@ -399,10 +414,6 @@ public class ObjectFieldLocalServiceUtil {
 	 */
 	public static ObjectField updateObjectField(ObjectField objectField) {
 		return getService().updateObjectField(objectField);
-	}
-
-	public static void validateType(String type) throws PortalException {
-		getService().validateType(type);
 	}
 
 	public static ObjectFieldLocalService getService() {

@@ -10,14 +10,18 @@ definition {
 
 		Variables.assertDefined(parameterList = "${typeSettings}");
 
-		var widget = JSONLayoutUtil._generateWidget(
-			widgetName = "${widgetName}");
+		var widget = JSONLayoutUtil._generateWidget(widgetName = "${widgetName}");
 
-		if (contains("${typeSettings}","column-${column}=")) {
-			var typeSettings = StringUtil.regexReplaceFirst("${typeSettings}","(column-${column}=[^%]*)","$1,${widget}");
+		if (isSet(remoteAppEntryId)) {
+			var widget = StringUtil.replace("${widget}", "remoteAppEntryId", "${remoteAppEntryId}");
+		}
+
+		if (contains("${typeSettings}", "column-${column}=")) {
+			var typeSettings = StringUtil.regexReplaceFirst("${typeSettings}", "(column-${column}=[^%]*)", "$1,${widget}");
 		}
 		else {
 			var typeSettings = '''${typeSettings}column-${column}''';
+
 			var typeSettings = '''${typeSettings}=${widget}''';
 		}
 
@@ -52,14 +56,23 @@ definition {
 		else if ("${widgetName}" == "Breadcrumb") {
 			var portletId = "com_liferay_site_navigation_breadcrumb_web_portlet_SiteNavigationBreadcrumbPortlet";
 		}
-		else if ("${widgetName}" == "Categories Navigation") {
+		else if ("${widgetName}" == "Category Filter") {
 			var portletId = "com_liferay_asset_categories_navigation_web_portlet_AssetCategoriesNavigationPortlet";
+		}
+		else if ("${widgetName}" == "Category Content") {
+			var portletId = "com_liferay_commerce_product_content_web_internal_portlet_CPCategoryContentPortlet";
 		}
 		else if ("${widgetName}" == "Clay Sample") {
 			var portletId = "com_liferay_clay_sample_web_portlet_ClaySamplePortlet";
 		}
+		else if ("${widgetName}" == "Commerce Categories Navigation") {
+			var portletId = "com_liferay_commerce_product_asset_categories_navigation_web_internal_portlet_CPAssetCategoriesNavigationPortlet";
+		}
 		else if ("${widgetName}" == "Contacts Center") {
 			var portletId = "com_liferay_contacts_web_portlet_ContactsCenterPortlet";
+		}
+		else if ("${widgetName}" == "CSS Cadmin Sample") {
+			var portletId = "com_liferay_frontend_css_cadmin_sample_web_internal_portlet_CadminSampleWebPortlet";
 		}
 		else if ("${widgetName}" == "Custom Filter") {
 			var portletId = "com_liferay_portal_search_web_internal_custom_filter_portlet_CustomFilterPortlet";
@@ -82,11 +95,14 @@ definition {
 		else if ("${widgetName}" == "Invite Members") {
 			var portletId = "com_liferay_invitation_invite_members_web_portlet_InviteMembersPortlet";
 		}
-		else if ("${widgetName}" == "JS A11y Sample Web") {
+		else if ("${widgetName}" == "JS A11y Sample") {
 			var portletId = "com_liferay_frontend_js_a11y_sample_web_internal_portlet_FrontendJSA11ySampleWebPortlet";
 		}
-		else if ("${widgetName}" == "JS Clay Sample Web") {
+		else if ("${widgetName}" == "JS Clay Sample") {
 			var portletId = "com_liferay_frontend_js_clay_sample_web_internal_portlet_FrontendJSClaySampleWebPortlet";
+		}
+		else if ("${widgetName}" == "JS Components Sample") {
+			var portletId = "com_liferay_frontend_js_components_sample_web_portlet_FrontendJSComponentsSampleWebPortlet";
 		}
 		else if ("${widgetName}" == "Knowledge Base Article") {
 			var portletId = "com_liferay_knowledge_base_web_portlet_ArticlePortlet";
@@ -124,7 +140,7 @@ definition {
 		else if ("${widgetName}" == "My Sites") {
 			var portletId = "com_liferay_site_my_sites_web_portlet_MySitesPortlet";
 		}
-		else if ("${widgetName}" == "Navigation Menu") {
+		else if ("${widgetName}" == "Menu Display") {
 			var portletId = "com_liferay_site_navigation_menu_web_portlet_SiteNavigationMenuPortlet";
 		}
 		else if ("${widgetName}" == "Nested Applications") {
@@ -132,6 +148,9 @@ definition {
 		}
 		else if ("${widgetName}" == "Profile") {
 			var portletId = "com_liferay_contacts_web_portlet_ProfilePortlet";
+		}
+		else if ("${widgetName}" == "Product Details") {
+			var portletId = "com_liferay_commerce_product_content_web_internal_portlet_CPContentPortlet";
 		}
 		else if ("${widgetName}" == "Questions") {
 			var portletId = "com_liferay_questions_web_internal_portlet_QuestionsPortlet";
@@ -166,14 +185,20 @@ definition {
 		else if ("${widgetName}" == "Sites Directory") {
 			var portletId = "com_liferay_site_navigation_directory_web_portlet_SitesDirectoryPortlet";
 		}
-		else if ("${widgetName}" == "Tags Navigation") {
+		else if ("${widgetName}" == "Tag Filter") {
 			var portletId = "com_liferay_asset_tags_navigation_web_portlet_AssetTagsNavigationPortlet";
+		}
+		else if ("${widgetName}" == "Tree Menu") {
+			var portletId = "com_liferay_wiki_navigation_web_portlet_WikiNavigationTreeMenuPortlet";
 		}
 		else if ("${widgetName}" == "Type Facet") {
 			var portletId = "com_liferay_portal_search_web_type_facet_portlet_TypeFacetPortlet";
 		}
 		else if ("${widgetName}" == "User Statistics") {
 			var portletId = "com_liferay_social_user_statistics_web_portlet_SocialUserStatisticsPortlet";
+		}
+		else if ("${widgetName}" == "Vanilla Counter") {
+			var portletId = "com_liferay_remote_app_web_internal_portlet_RemoteAppEntryPortlet_remoteAppEntryId";
 		}
 		else if ("${widgetName}" == "Web Content Display") {
 			var portletId = "com_liferay_journal_content_web_portlet_JournalContentPortlet";
@@ -195,7 +220,6 @@ definition {
 		}
 
 		var instanceId = StringUtil.randomString("12");
-
 		var nonRepeatableWidgets = "Blogs,Bookmarks,Knowledge Base Display,Language Selector,Message Boards,My Sites,Sign In,Web Content Search,Wiki";
 
 		if (contains("${nonRepeatableWidgets}", "${widgetName}")) {
@@ -214,46 +238,46 @@ definition {
 		}
 
 		if ("${layoutTemplate}" == "1 Column") {
-			layoutTemplateId = "1_column";
+			var layoutTemplateId = "1_column";
 		}
 		else if ("${layoutTemplate}" == "2 Columns (50/50)") {
-			layoutTemplateId = "2_columns_i";
+			var layoutTemplateId = "2_columns_i";
 		}
 		else if ("${layoutTemplate}" == "2 Columns (30/70)") {
-			layoutTemplateId = "2_columns_ii";
+			var layoutTemplateId = "2_columns_ii";
 		}
 		else if ("${layoutTemplate}" == "2 Columns (70/30)") {
-			layoutTemplateId = "2_columns_iii";
+			var layoutTemplateId = "2_columns_iii";
 		}
 		else if ("${layoutTemplate}" == "3 Columns") {
-			layoutTemplateId = "3_columns";
+			var layoutTemplateId = "3_columns";
 		}
 		else if ("${layoutTemplate}" == "1-2 Columns (30/70)") {
-			layoutTemplateId = "1_2_columns_i";
+			var layoutTemplateId = "1_2_columns_i";
 		}
 		else if ("${layoutTemplate}" == "1-2 Columns (70/30)") {
-			layoutTemplateId = "1_2_columns_ii";
+			var layoutTemplateId = "1_2_columns_ii";
 		}
 		else if ("${layoutTemplate}" == "1-2-1 Columns (50/50)") {
-			layoutTemplateId = "1_2_1_columns_i";
+			var layoutTemplateId = "1_2_1_columns_i";
 		}
 		else if ("${layoutTemplate}" == "1-2-1 Columns (70/30)") {
-			layoutTemplateId = "1_2_1_columns_ii";
+			var layoutTemplateId = "1_2_1_columns_ii";
 		}
 		else if ("${layoutTemplate}" == "1-3-1 Columns") {
-			layoutTemplateId = "1_3_1_columns";
+			var layoutTemplateId = "1_3_1_columns";
 		}
 		else if ("${layoutTemplate}" == "1-3-2 Columns") {
-			layoutTemplateId = "1_3_2_columns";
+			var layoutTemplateId = "1_3_2_columns";
 		}
 		else if ("${layoutTemplate}" == "2-1-2 Columns") {
-			layoutTemplateId = "2_1_2_columns";
+			var layoutTemplateId = "2_1_2_columns";
 		}
 		else if ("${layoutTemplate}" == "2-2 Columns") {
-			layoutTemplateId = "2_2_columns";
+			var layoutTemplateId = "2_2_columns";
 		}
 		else if ("${layoutTemplate}" == "3-2-3 Columns") {
-			layoutTemplateId = "3_2_3_columns";
+			var layoutTemplateId = "3_2_3_columns";
 		}
 		else {
 			fail("'layoutTemplate' could not find a valid layoutTemplateId");
@@ -273,7 +297,7 @@ definition {
 
 		var layoutTemplateId = JSONLayoutUtil._getLayoutTemplateId(layoutTemplate = "${layoutTemplate}");
 
-		var typeSettings = StringUtil.regexReplaceFirst("${typeSettings}","(layout-template-id=).*","$1${layoutTemplateId}");
+		var typeSettings = StringUtil.regexReplaceFirst("${typeSettings}", "(layout-template-id=).*", "$1${layoutTemplateId}");
 
 		return "${typeSettings}";
 	}

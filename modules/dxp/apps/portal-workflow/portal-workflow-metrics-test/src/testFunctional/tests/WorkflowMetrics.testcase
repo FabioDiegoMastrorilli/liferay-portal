@@ -53,7 +53,6 @@ definition {
 	}
 
 	@description = "LRQA-53648 - Automate LPS-89014: [SLA] Create new SLA for total process resolution"
-	@ignore = "true"
 	@priority = "5"
 	test AddSLAForTotalProcessResolution {
 		property portal.acceptance = "true";
@@ -218,59 +217,59 @@ definition {
 	test AddSLAtoSingleApprover {
 		property portal.acceptance = "true";
 
-		var key_testSLADefinitionDays = "1";
-		var key_testSLADefinitionHours = "00:00";
-		var key_testSLADefinitionDescription = "SLA Description";
-		var key_testSLADefinitionEnd = "Process Ends: Approved";
-		var key_testSLADefinitionName = "SLA Name";
-		var key_testSLADefinitionStart = "Process Begins";
+		var key_testSlaDefinitionDays = "1";
+		var key_testSlaDefinitionHours = "00:00";
+		var key_testSlaDefinitionDescription = "SLA Description";
+		var key_testSlaDefinitionEnd = "Process Ends: Approved";
+		var key_testSlaDefinitionName = "SLA Name";
+		var key_testSlaDefinitionStart = "Process Begins";
 
 		WorkflowMetrics.goToWorkflowSLASettings(workflowProcessName = "Single Approver");
 
 		Click(locator1 = "WorkflowMetricsSLA#ADD_NEW_SLA_BUTTON");
 
 		WorkflowMetrics.fillSLAForm(
-			slaDefinitionDays = "${key_testSLADefinitionDays}",
-			slaDefinitionDescription = "${key_testSLADefinitionDescription}",
-			slaDefinitionEnd = "${key_testSLADefinitionEnd}",
-			slaDefinitionHours = "${key_testSLADefinitionHours}",
-			slaDefinitionName = "${key_testSLADefinitionName}",
-			slaDefinitionStart = "${key_testSLADefinitionStart}");
+			slaDefinitionDays = "${key_testSlaDefinitionDays}",
+			slaDefinitionDescription = "${key_testSlaDefinitionDescription}",
+			slaDefinitionEnd = "${key_testSlaDefinitionEnd}",
+			slaDefinitionHours = "${key_testSlaDefinitionHours}",
+			slaDefinitionName = "${key_testSlaDefinitionName}",
+			slaDefinitionStart = "${key_testSlaDefinitionStart}");
 
 		Button.clickSave();
 
 		Alert.viewSuccessMessage();
 
-		WorkflowMetrics.goToCreatedSLAForm(workflowSLAName = "${key_testSLADefinitionName}");
+		WorkflowMetrics.goToCreatedSLAForm(workflowSlaName = "${key_testSlaDefinitionName}");
 
 		AssertTextEquals(
 			locator1 = "WorkflowMetricsSLA#SLA_DEFINITION_NAME",
-			value1 = "${key_testSLADefinitionName}");
+			value1 = "${key_testSlaDefinitionName}");
 
 		AssertTextEquals(
 			locator1 = "WorkflowMetricsSLA#SLA_DEFINITION_DESCRIPTION",
-			value1 = "${key_testSLADefinitionDescription}");
+			value1 = "${key_testSlaDefinitionDescription}");
 
 		AssertTextEquals(
 			locator1 = "WorkflowMetricsSLA#SLA_STEPS_START",
-			value1 = "${key_testSLADefinitionStart}");
+			value1 = "${key_testSlaDefinitionStart}");
 
 		AssertTextEquals(
 			locator1 = "WorkflowMetricsSLA#SLA_STEPS_STOP",
-			value1 = "${key_testSLADefinitionEnd}");
+			value1 = "${key_testSlaDefinitionEnd}");
 
 		AssertTextEquals(
 			locator1 = "WorkflowMetricsSLA#SLA_DEFINITION_DAYS",
-			value1 = "${key_testSLADefinitionDays}");
+			value1 = "${key_testSlaDefinitionDays}");
 	}
 
 	@description = "LRQA-55606 Automate LPS-106225: [Dashboard] Apply pagination on bulk reassign workflow instances"
 	@priority = "5"
 	test ApplyPaginationOnBulkReassign {
-		property portal.acceptance = "true";
 		property test.name.skip.portal.instance = "WorkflowMetrics#ApplyPaginationOnBulkReassign";
 
 		var siteName = TestCase.getSiteName(siteName = "${siteName}");
+
 		ProductMenu.gotoPortlet(
 			category = "Configuration",
 			panel = "Site Administration",
@@ -338,18 +337,23 @@ definition {
 		AssertElementPresent(
 			key_workflowAssetTitle = "Blogs Entry Title 1",
 			locator1 = "MyWorkflowTasks#TABLE_GENERIC_ASSET_TITLE");
+
 		AssertElementPresent(
 			key_workflowAssetTitle = "Blogs Entry Title 2",
 			locator1 = "MyWorkflowTasks#TABLE_GENERIC_ASSET_TITLE");
+
 		AssertElementPresent(
 			key_workflowAssetTitle = "Blogs Entry Title 3",
 			locator1 = "MyWorkflowTasks#TABLE_GENERIC_ASSET_TITLE");
+
 		AssertElementPresent(
 			key_workflowAssetTitle = "Blogs Entry Title 4",
 			locator1 = "MyWorkflowTasks#TABLE_GENERIC_ASSET_TITLE");
+
 		AssertElementPresent(
 			key_workflowAssetTitle = "Blogs Entry Title 5",
 			locator1 = "MyWorkflowTasks#TABLE_GENERIC_ASSET_TITLE");
+
 		AssertElementPresent(
 			key_workflowAssetTitle = "Blogs Entry Title 6",
 			locator1 = "MyWorkflowTasks#TABLE_GENERIC_ASSET_TITLE");
@@ -472,6 +476,7 @@ definition {
 		WorkflowMetrics.assertNewAssigneeModalTable();
 
 		AssertElementPresent(locator1 = "WorkflowReassignModal#PERMISSION_TOOLTIP");
+
 		AssertElementPresent(locator1 = "WorkflowReassignModal#NEXT_BUTTON_DISABLED");
 
 		WorkflowMetrics.selectNewAssignee(
@@ -490,18 +495,22 @@ definition {
 			key_workflowInstanceAssignee = "Test Test",
 			key_workflowInstanceName = "Blogs Entry: Blogs Entry Title 1",
 			locator1 = "WorkflowAllItems#WORKFLOW_ALL_ITEMS_TABLE_CURRENT_ASSIGNEE_VALUE");
+
 		AssertElementPresent(
 			key_workflowInstanceAssignee = "Test Test",
 			key_workflowInstanceName = "Blogs Entry: Blogs Entry Title 2",
 			locator1 = "WorkflowAllItems#WORKFLOW_ALL_ITEMS_TABLE_CURRENT_ASSIGNEE_VALUE");
+
 		AssertElementPresent(
 			key_workflowInstanceAssignee = "Test Test",
 			key_workflowInstanceName = "Blogs Entry: Blogs Entry Title 3",
 			locator1 = "WorkflowAllItems#WORKFLOW_ALL_ITEMS_TABLE_CURRENT_ASSIGNEE_VALUE");
+
 		AssertElementPresent(
 			key_workflowInstanceAssignee = "Test Test",
 			key_workflowInstanceName = "Blogs Entry: Blogs Entry Title 4",
 			locator1 = "WorkflowAllItems#WORKFLOW_ALL_ITEMS_TABLE_CURRENT_ASSIGNEE_VALUE");
+
 		AssertElementPresent(
 			key_workflowInstanceAssignee = "Test Test",
 			key_workflowInstanceName = "Blogs Entry: Blogs Entry Title 5",
@@ -512,15 +521,19 @@ definition {
 		AssertElementPresent(
 			key_workflowAssetTitle = "Blogs Entry Title 1",
 			locator1 = "MyWorkflowTasks#TABLE_GENERIC_ASSET_TITLE");
+
 		AssertElementPresent(
 			key_workflowAssetTitle = "Blogs Entry Title 2",
 			locator1 = "MyWorkflowTasks#TABLE_GENERIC_ASSET_TITLE");
+
 		AssertElementPresent(
 			key_workflowAssetTitle = "Blogs Entry Title 3",
 			locator1 = "MyWorkflowTasks#TABLE_GENERIC_ASSET_TITLE");
+
 		AssertElementPresent(
 			key_workflowAssetTitle = "Blogs Entry Title 4",
 			locator1 = "MyWorkflowTasks#TABLE_GENERIC_ASSET_TITLE");
+
 		AssertElementPresent(
 			key_workflowAssetTitle = "Blogs Entry Title 5",
 			locator1 = "MyWorkflowTasks#TABLE_GENERIC_ASSET_TITLE");
@@ -653,6 +666,7 @@ definition {
 		property portal.acceptance = "true";
 
 		var siteName = TestCase.getSiteName(siteName = "${siteName}");
+
 		var currentYear = DateUtil.getCurrentYear();
 		var futureYear = ${currentYear} + 1;
 		var futureYearShort = StringUtil.substring("${futureYear}", "2", "4");
@@ -850,6 +864,7 @@ definition {
 			key_rowName = "Update",
 			key_rowNumber = "1",
 			locator1 = "WorkflowMetrics#METRICS_PERFORMANCE_BY_STEP_ROW_ORDER_CHECK");
+
 		AssertElementPresent(
 			key_rowName = "Review",
 			key_rowNumber = "2",
@@ -861,6 +876,7 @@ definition {
 			key_rowName = "Review",
 			key_rowNumber = "1",
 			locator1 = "WorkflowMetrics#METRICS_PERFORMANCE_BY_STEP_ROW_ORDER_CHECK");
+
 		AssertElementPresent(
 			key_rowName = "Update",
 			key_rowNumber = "2",
@@ -872,6 +888,7 @@ definition {
 			key_rowName = "Review",
 			key_rowNumber = "1",
 			locator1 = "WorkflowMetrics#METRICS_PERFORMANCE_BY_STEP_ROW_ORDER_CHECK");
+
 		AssertElementPresent(
 			key_rowName = "Update",
 			key_rowNumber = "2",
@@ -935,7 +952,6 @@ definition {
 	}
 
 	@description = "LRQA-53660 Automate LPS-87571 [Reports] Filter the list of items for a certain process"
-	@ignore = "true"
 	@priority = "5"
 	test FilterAllItemsList {
 		var siteName = TestCase.getSiteName(siteName = "${siteName}");
@@ -1141,14 +1157,14 @@ definition {
 			site = "${siteName}");
 
 		ProductMenu.gotoPortlet(
-			category = "Content &amp; Data",
+			category = "Content & Data",
 			portlet = "Blogs",
 			site = "${siteName}");
 
 		WorkflowMetrics.executeWorkflowScript(scriptName = "CompleteTasksAssignedToUsers.groovy");
 
 		ProductMenu.gotoPortlet(
-			category = "Content &amp; Data",
+			category = "Content & Data",
 			portlet = "Blogs",
 			site = "${siteName}");
 
@@ -1163,10 +1179,10 @@ definition {
 		Navigator.gotoNavTab(navTab = "Assigned to My Roles");
 
 		for (var assignUserNumber : list "1,2,3") {
-			var InstanceNameNumber = ${assignUserNumber} + 4;
+			var instanceNameNumber = ${assignUserNumber} + 4;
 
 			Workflow.assignTaskToUser(
-				assetTitle = "Blogs Entry Title ${InstanceNameNumber}",
+				assetTitle = "Blogs Entry Title ${instanceNameNumber}",
 				assetType = "Blogs Entry",
 				assigneeName = "${assignUserNumber}user (${assignUserNumber}user user${assignUserNumber})",
 				workflowTask = "Review");
@@ -1478,12 +1494,12 @@ definition {
 
 		var siteName = TestCase.getSiteName(siteName = "${siteName}");
 
-		var key_testSLADefinitionDays = "0";
-		var key_testSLADefinitionHours = "00:02";
-		var key_testSLADefinitionDescription = "SLA Description";
-		var key_testSLADefinitionEnd = "Process Ends: Approved";
-		var key_testSLADefinitionName = "SLA Name";
-		var key_testSLADefinitionStart = "Process Begins";
+		var key_testSlaDefinitionDays = "0";
+		var key_testSlaDefinitionHours = "00:02";
+		var key_testSlaDefinitionDescription = "SLA Description";
+		var key_testSlaDefinitionEnd = "Process Ends: Approved";
+		var key_testSlaDefinitionName = "SLA Name";
+		var key_testSlaDefinitionStart = "Process Begins";
 
 		ProductMenu.gotoPortlet(
 			category = "Configuration",
@@ -1509,12 +1525,12 @@ definition {
 		Click(locator1 = "WorkflowMetricsSLA#ADD_NEW_SLA_BUTTON");
 
 		WorkflowMetrics.fillSLAForm(
-			slaDefinitionDays = "${key_testSLADefinitionDays}",
-			slaDefinitionDescription = "${key_testSLADefinitionDescription}",
-			slaDefinitionEnd = "${key_testSLADefinitionEnd}",
-			slaDefinitionHours = "${key_testSLADefinitionHours}",
-			slaDefinitionName = "${key_testSLADefinitionName}",
-			slaDefinitionStart = "${key_testSLADefinitionStart}");
+			slaDefinitionDays = "${key_testSlaDefinitionDays}",
+			slaDefinitionDescription = "${key_testSlaDefinitionDescription}",
+			slaDefinitionEnd = "${key_testSlaDefinitionEnd}",
+			slaDefinitionHours = "${key_testSlaDefinitionHours}",
+			slaDefinitionName = "${key_testSlaDefinitionName}",
+			slaDefinitionStart = "${key_testSlaDefinitionStart}");
 
 		Button.clickSave();
 
@@ -1693,6 +1709,7 @@ definition {
 		AssertElementPresent(
 			key_workflowInstanceName = "Blogs Entry Title 1",
 			locator1 = "WorkflowAllItems#WORKFLOW_INSTANCE_NAME");
+
 		AssertElementPresent(
 			key_workflowInstanceName = "Blogs Entry Title 2",
 			locator1 = "WorkflowAllItems#WORKFLOW_INSTANCE_NAME");
@@ -1916,6 +1933,7 @@ definition {
 		property portal.acceptance = "true";
 
 		var siteName = TestCase.getSiteName(siteName = "${siteName}");
+
 		var currentYear = DateUtil.getCurrentYear();
 		var futureYear = ${currentYear} + 1;
 		var futureYearShort = StringUtil.substring("${futureYear}", "2", "4");
@@ -1941,6 +1959,7 @@ definition {
 			workflowTask = "Review");
 
 		WorkflowMetrics.goToWorkflowAllItems(workflowProcessName = "Single Approver");
+
 		WorkflowMetrics.goToUpdateDueDateTasks();
 
 		Type(
@@ -1969,6 +1988,7 @@ definition {
 	@priority = "4"
 	test UpdateDueDateInvalidDateTime {
 		var siteName = TestCase.getSiteName(siteName = "${siteName}");
+
 		var currentYear = DateUtil.getCurrentYear();
 		var futureYear = ${currentYear} + 1;
 
@@ -2223,12 +2243,12 @@ definition {
 	test VerifyFilterTopStepPerformance {
 		property portal.acceptance = "true";
 
-		var key_testSLADefinitionDays = "0";
-		var key_testSLADefinitionHours = "00:01";
-		var key_testSLADefinitionDescription = "SLA Description";
-		var key_testSLADefinitionEnd = "Process Ends: Approved";
-		var key_testSLADefinitionName = "SLA Name";
-		var key_testSLADefinitionStart = "Process Begins";
+		var key_testSlaDefinitionDays = "0";
+		var key_testSlaDefinitionHours = "00:01";
+		var key_testSlaDefinitionDescription = "SLA Description";
+		var key_testSlaDefinitionEnd = "Process Ends: Approved";
+		var key_testSlaDefinitionName = "SLA Name";
+		var key_testSlaDefinitionStart = "Process Begins";
 
 		var siteName = TestCase.getSiteName(siteName = "${siteName}");
 
@@ -2237,12 +2257,12 @@ definition {
 		Click(locator1 = "WorkflowMetricsSLA#ADD_NEW_SLA_BUTTON");
 
 		WorkflowMetrics.fillSLAForm(
-			slaDefinitionDays = "${key_testSLADefinitionDays}",
-			slaDefinitionDescription = "${key_testSLADefinitionDescription}",
-			slaDefinitionEnd = "${key_testSLADefinitionEnd}",
-			slaDefinitionHours = "${key_testSLADefinitionHours}",
-			slaDefinitionName = "${key_testSLADefinitionName}",
-			slaDefinitionStart = "${key_testSLADefinitionStart}");
+			slaDefinitionDays = "${key_testSlaDefinitionDays}",
+			slaDefinitionDescription = "${key_testSlaDefinitionDescription}",
+			slaDefinitionEnd = "${key_testSlaDefinitionEnd}",
+			slaDefinitionHours = "${key_testSlaDefinitionHours}",
+			slaDefinitionName = "${key_testSlaDefinitionName}",
+			slaDefinitionStart = "${key_testSlaDefinitionStart}");
 
 		Button.clickSave();
 
@@ -2705,12 +2725,12 @@ definition {
 
 		var siteName = TestCase.getSiteName(siteName = "${siteName}");
 
-		var key_testSLADefinitionDays = "0";
-		var key_testSLADefinitionHours = "00:02";
-		var key_testSLADefinitionDescription = "SLA Description";
-		var key_testSLADefinitionEnd = "Process Ends: Approved";
-		var key_testSLADefinitionName = "SLA Name";
-		var key_testSLADefinitionStart = "Enters Task: Review";
+		var key_testSlaDefinitionDays = "0";
+		var key_testSlaDefinitionHours = "00:02";
+		var key_testSlaDefinitionDescription = "SLA Description";
+		var key_testSlaDefinitionEnd = "Process Ends: Approved";
+		var key_testSlaDefinitionName = "SLA Name";
+		var key_testSlaDefinitionStart = "Enters Task: Review";
 
 		ProductMenu.gotoPortlet(
 			category = "Configuration",
@@ -2738,12 +2758,12 @@ definition {
 		Click(locator1 = "WorkflowMetricsSLA#ADD_NEW_SLA_BUTTON");
 
 		WorkflowMetrics.fillSLAForm(
-			slaDefinitionDays = "${key_testSLADefinitionDays}",
-			slaDefinitionDescription = "${key_testSLADefinitionDescription}",
-			slaDefinitionEnd = "${key_testSLADefinitionEnd}",
-			slaDefinitionHours = "${key_testSLADefinitionHours}",
-			slaDefinitionName = "${key_testSLADefinitionName}",
-			slaDefinitionStart = "${key_testSLADefinitionStart}");
+			slaDefinitionDays = "${key_testSlaDefinitionDays}",
+			slaDefinitionDescription = "${key_testSlaDefinitionDescription}",
+			slaDefinitionEnd = "${key_testSlaDefinitionEnd}",
+			slaDefinitionHours = "${key_testSlaDefinitionHours}",
+			slaDefinitionName = "${key_testSlaDefinitionName}",
+			slaDefinitionStart = "${key_testSlaDefinitionStart}");
 
 		Button.clickSave();
 
@@ -2853,6 +2873,7 @@ definition {
 	@description = "LRQA-53662 Automate LPS-92053 View process item detail page"
 	@priority = "5"
 	test ViewProcessItemDetailPage {
+		property portal.upstream = "quarantine";
 		property test.name.skip.portal.instance = "WorkflowMetrics#ViewProcessItemDetailPage";
 
 		var siteName = TestCase.getSiteName(siteName = "${siteName}");
@@ -2939,6 +2960,7 @@ definition {
 		JSONBlog.addEntry(
 			entryContent = "Blogs Entry2 Content",
 			entryTitle = "Blogs Entry2 Title");
+
 		JSONBlog.addEntry(
 			entryContent = "Blogs Entry1 Content",
 			entryTitle = "Blogs Entry Title");

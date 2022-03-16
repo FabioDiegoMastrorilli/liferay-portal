@@ -198,6 +198,12 @@
 		<column name="purchaseOrderNumber" type="String" />
 		<column name="couponCode" type="String" />
 		<column name="lastPriceUpdateDate" type="Date" />
+		<column name="deliveryCommerceTermEntryId" type="long" />
+		<column db-name="deliveryCTermEntryDescription" name="deliveryCommerceTermEntryDescription" type="String" />
+		<column name="deliveryCommerceTermEntryName" type="String" />
+		<column name="paymentCommerceTermEntryId" type="long" />
+		<column db-name="paymentCTermEntryDescription" name="paymentCommerceTermEntryDescription" type="String" />
+		<column name="paymentCommerceTermEntryName" type="String" />
 		<column name="subtotal" type="BigDecimal" />
 		<column name="subtotalDiscountAmount" type="BigDecimal" />
 		<column db-name="subtotalDiscountPercentLevel1" name="subtotalDiscountPercentageLevel1" type="BigDecimal" />
@@ -323,9 +329,10 @@
 		<column name="commerceOrderId" type="long" />
 		<column name="commercePriceListId" type="long" />
 		<column name="CPInstanceId" type="long" />
+		<column name="CPMeasurementUnitId" type="long" />
 		<column name="CProductId" type="long" />
 		<column name="parentCommerceOrderItemId" type="long" />
-		<column name="shippingAddressId" type="long" />
+		<column name="decimalQuantity" type="BigDecimal" />
 		<column name="deliveryGroup" type="String" />
 		<column name="deliveryMaxSubscriptionCycles" type="long" />
 		<column name="deliverySubscriptionLength" type="int" />
@@ -355,6 +362,7 @@
 		<column name="promoPriceWithTaxAmount" type="BigDecimal" />
 		<column name="quantity" type="int" />
 		<column name="requestedDeliveryDate" type="Date" />
+		<column name="shippingAddressId" type="long" />
 		<column name="shipSeparately" type="boolean" />
 		<column name="shippable" type="boolean" />
 		<column name="shippedQuantity" type="int" />
@@ -517,6 +525,10 @@
 		<finder name="CompanyId" return-type="Collection">
 			<finder-column name="companyId" />
 		</finder>
+		<finder name="C_A" return-type="Collection">
+			<finder-column name="companyId" />
+			<finder-column name="active" />
+		</finder>
 		<finder name="LtD_S" return-type="Collection">
 			<finder-column comparator="&lt;" name="displayDate" />
 			<finder-column name="status" />
@@ -567,7 +579,7 @@
 			<finder-column name="commerceOrderTypeId" />
 		</finder>
 	</entity>
-	<entity local-service="true" name="CommerceShipment" remote-service="true">
+	<entity external-reference-code="true" local-service="true" name="CommerceShipment" remote-service="true">
 
 		<!-- PK fields -->
 
@@ -617,7 +629,7 @@
 			<finder-column name="status" />
 		</finder>
 	</entity>
-	<entity local-service="true" name="CommerceShipmentItem" remote-service="true">
+	<entity external-reference-code="true" local-service="true" name="CommerceShipmentItem" remote-service="true">
 
 		<!-- PK fields -->
 
@@ -871,6 +883,7 @@
 		<exception>CommerceOrderAccountLimit</exception>
 		<exception>CommerceOrderBillingAddress</exception>
 		<exception>CommerceOrderDate</exception>
+		<exception>CommerceOrderDefaultBillingAddress</exception>
 		<exception>CommerceOrderGuestCheckout</exception>
 		<exception>CommerceOrderItemRequestedDeliveryDate</exception>
 		<exception>CommerceOrderNoteContent</exception>

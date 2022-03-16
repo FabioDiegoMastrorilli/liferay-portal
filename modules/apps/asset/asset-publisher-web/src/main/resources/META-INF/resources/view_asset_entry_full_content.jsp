@@ -43,6 +43,7 @@ long previewClassNameId = ParamUtil.getLong(request, "previewClassNameId");
 long previewClassPK = ParamUtil.getLong(request, "previewClassPK");
 
 boolean print = GetterUtil.getBoolean(request.getAttribute("view.jsp-print"));
+boolean viewSingleAsset = ParamUtil.getBoolean(request, "viewSingleAsset", true);
 
 assetPublisherDisplayContext.setLayoutAssetEntry(assetEntry);
 
@@ -99,6 +100,7 @@ Map<String, Object> fragmentsEditorData = HashMapBuilder.<String, Object>put(
 						cssClass="header-back-to"
 						icon="angle-left"
 						markupView="lexicon"
+						message="back"
 						url="<%= redirect %>"
 					/>
 				</c:if>
@@ -255,7 +257,15 @@ Map<String, Object> fragmentsEditorData = HashMapBuilder.<String, Object>put(
 	</c:if>
 
 	<%
-	boolean showContextLink = assetPublisherDisplayContext.isShowContextLink() && !print && assetEntry.isVisible();
+	boolean showContextLink = false;
+
+	if (viewSingleAsset) {
+		showContextLink = assetPublisherDisplayContext.isShowContextLink(assetRenderer.getGroupId(), assetRendererFactory.getPortletId()) && !print && assetEntry.isVisible();
+	}
+	else {
+		showContextLink = assetPublisherDisplayContext.isShowContextLink() && !print && assetEntry.isVisible();
+	}
+
 	boolean showRatings = assetPublisherDisplayContext.isEnableRatings() && assetRenderer.isRatable();
 	%>
 
@@ -380,7 +390,7 @@ Map<String, Object> fragmentsEditorData = HashMapBuilder.<String, Object>put(
 						target="_blank"
 						title="<%= title %>"
 						types="<%= assetPublisherDisplayContext.getSocialBookmarksTypes() %>"
-						urlImpl="<%= viewFullContentURL %>"
+						url="<%= assetPublisherHelper.getAssetSocialURL(liferayPortletRequest, liferayPortletResponse, assetEntry) %>"
 					/>
 				</clay:content-col>
 			</c:if>

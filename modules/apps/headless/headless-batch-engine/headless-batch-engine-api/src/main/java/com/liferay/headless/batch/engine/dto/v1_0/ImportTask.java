@@ -22,6 +22,7 @@ import com.fasterxml.jackson.annotation.JsonValue;
 
 import com.liferay.petra.function.UnsafeSupplier;
 import com.liferay.petra.string.StringBundler;
+import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.vulcan.graphql.annotation.GraphQLField;
 import com.liferay.portal.vulcan.graphql.annotation.GraphQLName;
 import com.liferay.portal.vulcan.util.ObjectMapperUtil;
@@ -222,6 +223,35 @@ public class ImportTask implements Serializable {
 	@JsonProperty(access = JsonProperty.Access.READ_WRITE)
 	protected ExecuteStatus executeStatus;
 
+	@Schema
+	@Valid
+	public FailedItem[] getFailedItems() {
+		return failedItems;
+	}
+
+	public void setFailedItems(FailedItem[] failedItems) {
+		this.failedItems = failedItems;
+	}
+
+	@JsonIgnore
+	public void setFailedItems(
+		UnsafeSupplier<FailedItem[], Exception> failedItemsUnsafeSupplier) {
+
+		try {
+			failedItems = failedItemsUnsafeSupplier.get();
+		}
+		catch (RuntimeException re) {
+			throw re;
+		}
+		catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	@GraphQLField
+	@JsonProperty(access = JsonProperty.Access.READ_WRITE)
+	protected FailedItem[] failedItems;
+
 	@DecimalMin("0")
 	@Schema(description = "The task's ID.")
 	public Long getId() {
@@ -248,6 +278,49 @@ public class ImportTask implements Serializable {
 	@GraphQLField(description = "The task's ID.")
 	@JsonProperty(access = JsonProperty.Access.READ_WRITE)
 	protected Long id;
+
+	@Schema(
+		description = "Defines if import task will fail when error occurs or continue importing rest of the items."
+	)
+	@Valid
+	public ImportStrategy getImportStrategy() {
+		return importStrategy;
+	}
+
+	@JsonIgnore
+	public String getImportStrategyAsString() {
+		if (importStrategy == null) {
+			return null;
+		}
+
+		return importStrategy.toString();
+	}
+
+	public void setImportStrategy(ImportStrategy importStrategy) {
+		this.importStrategy = importStrategy;
+	}
+
+	@JsonIgnore
+	public void setImportStrategy(
+		UnsafeSupplier<ImportStrategy, Exception>
+			importStrategyUnsafeSupplier) {
+
+		try {
+			importStrategy = importStrategyUnsafeSupplier.get();
+		}
+		catch (RuntimeException re) {
+			throw re;
+		}
+		catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	@GraphQLField(
+		description = "Defines if import task will fail when error occurs or continue importing rest of the items."
+	)
+	@JsonProperty(access = JsonProperty.Access.READ_WRITE)
+	protected ImportStrategy importStrategy;
 
 	@Schema(description = "The operation of import task.")
 	@Valid
@@ -479,6 +552,26 @@ public class ImportTask implements Serializable {
 			sb.append("\"");
 		}
 
+		if (failedItems != null) {
+			if (sb.length() > 1) {
+				sb.append(", ");
+			}
+
+			sb.append("\"failedItems\": ");
+
+			sb.append("[");
+
+			for (int i = 0; i < failedItems.length; i++) {
+				sb.append(String.valueOf(failedItems[i]));
+
+				if ((i + 1) < failedItems.length) {
+					sb.append(", ");
+				}
+			}
+
+			sb.append("]");
+		}
+
 		if (id != null) {
 			if (sb.length() > 1) {
 				sb.append(", ");
@@ -487,6 +580,20 @@ public class ImportTask implements Serializable {
 			sb.append("\"id\": ");
 
 			sb.append(id);
+		}
+
+		if (importStrategy != null) {
+			if (sb.length() > 1) {
+				sb.append(", ");
+			}
+
+			sb.append("\"importStrategy\": ");
+
+			sb.append("\"");
+
+			sb.append(importStrategy);
+
+			sb.append("\"");
 		}
 
 		if (operation != null) {
@@ -588,6 +695,44 @@ public class ImportTask implements Serializable {
 
 	}
 
+	@GraphQLName("ImportStrategy")
+	public static enum ImportStrategy {
+
+		ON_ERROR_CONTINUE("ON_ERROR_CONTINUE"), ON_ERROR_FAIL("ON_ERROR_FAIL");
+
+		@JsonCreator
+		public static ImportStrategy create(String value) {
+			if ((value == null) || value.equals("")) {
+				return null;
+			}
+
+			for (ImportStrategy importStrategy : values()) {
+				if (Objects.equals(importStrategy.getValue(), value)) {
+					return importStrategy;
+				}
+			}
+
+			throw new IllegalArgumentException("Invalid enum value: " + value);
+		}
+
+		@JsonValue
+		public String getValue() {
+			return _value;
+		}
+
+		@Override
+		public String toString() {
+			return _value;
+		}
+
+		private ImportStrategy(String value) {
+			_value = value;
+		}
+
+		private final String _value;
+
+	}
+
 	@GraphQLName("Operation")
 	public static enum Operation {
 
@@ -627,9 +772,9 @@ public class ImportTask implements Serializable {
 	}
 
 	private static String _escape(Object object) {
-		String string = String.valueOf(object);
-
-		return string.replaceAll("\"", "\\\\\"");
+		return StringUtil.replace(
+			String.valueOf(object), _JSON_ESCAPE_STRINGS[0],
+			_JSON_ESCAPE_STRINGS[1]);
 	}
 
 	private static boolean _isArray(Object value) {
@@ -655,7 +800,7 @@ public class ImportTask implements Serializable {
 			Map.Entry<String, ?> entry = iterator.next();
 
 			sb.append("\"");
-			sb.append(entry.getKey());
+			sb.append(_escape(entry.getKey()));
 			sb.append("\": ");
 
 			Object value = entry.getValue();
@@ -687,7 +832,7 @@ public class ImportTask implements Serializable {
 			}
 			else if (value instanceof String) {
 				sb.append("\"");
-				sb.append(value);
+				sb.append(_escape(value));
 				sb.append("\"");
 			}
 			else {
@@ -703,5 +848,10 @@ public class ImportTask implements Serializable {
 
 		return sb.toString();
 	}
+
+	private static final String[][] _JSON_ESCAPE_STRINGS = {
+		{"\\", "\"", "\b", "\f", "\n", "\r", "\t"},
+		{"\\\\", "\\\"", "\\b", "\\f", "\\n", "\\r", "\\t"}
+	};
 
 }

@@ -574,7 +574,7 @@ public class FragmentEntryProcessorEditableTest {
 		return _fragmentEntryService.addFragmentEntry(
 			_group.getGroupId(), fragmentCollection.getFragmentCollectionId(),
 			"fragment-entry", "Fragment Entry", null,
-			_readFileToString(htmlFile), null, null, 0,
+			_readFileToString(htmlFile), null, false, null, null, 0,
 			FragmentConstants.TYPE_SECTION, WorkflowConstants.STATUS_APPROVED,
 			serviceContext);
 	}
@@ -597,8 +597,9 @@ public class FragmentEntryProcessorEditableTest {
 			null, TestPropsValues.getUserId(),
 			DLFolderConstants.DEFAULT_PARENT_FOLDER_ID,
 			RandomTestUtil.randomString(), ContentTypes.IMAGE_JPEG,
-			RandomTestUtil.randomString(), StringPool.BLANK, StringPool.BLANK,
-			inputStream, bytes.length, null, null, serviceContext);
+			RandomTestUtil.randomString(), RandomTestUtil.randomString(),
+			StringPool.BLANK, StringPool.BLANK, inputStream, bytes.length, null,
+			null, serviceContext);
 	}
 
 	private JournalArticle _addJournalArticle(
@@ -900,9 +901,9 @@ public class FragmentEntryProcessorEditableTest {
 
 		themeDisplay.setLookAndFeel(theme, null);
 
+		themeDisplay.setRealUser(TestPropsValues.getUser());
 		themeDisplay.setRequest(_getHttpServletRequest());
 		themeDisplay.setResponse(new MockHttpServletResponse());
-		themeDisplay.setRealUser(TestPropsValues.getUser());
 		themeDisplay.setUser(TestPropsValues.getUser());
 
 		return themeDisplay;

@@ -14,7 +14,6 @@
 
 package com.liferay.fragment.internal.upgrade.v2_5_0;
 
-import com.liferay.fragment.internal.upgrade.v2_5_0.util.FragmentEntryLinkTable;
 import com.liferay.portal.kernel.dao.jdbc.AutoBatchPreparedStatementUtil;
 import com.liferay.portal.kernel.model.Layout;
 import com.liferay.portal.kernel.upgrade.UpgradeProcess;
@@ -33,11 +32,11 @@ public class FragmentEntryLinkUpgradeProcess extends UpgradeProcess {
 
 	@Override
 	protected void doUpgrade() throws Exception {
-		upgradeRendererKey();
-		upgratePlid();
+		_upgradeRendererKey();
+		_upgratePlid();
 	}
 
-	protected void upgradeRendererKey() throws Exception {
+	private void _upgradeRendererKey() throws Exception {
 		try (PreparedStatement preparedStatement1 = connection.prepareStatement(
 				"select fragmentEntryLinkId, rendererKey from " +
 					"FragmentEntryLink where rendererKey like " +
@@ -69,11 +68,9 @@ public class FragmentEntryLinkUpgradeProcess extends UpgradeProcess {
 		}
 	}
 
-	protected void upgratePlid() throws Exception {
+	private void _upgratePlid() throws Exception {
 		if (!hasColumn("FragmentEntryLink", "plid")) {
-			alter(
-				FragmentEntryLinkTable.class,
-				new AlterTableAddColumn("plid", "LONG"));
+			alterTableAddColumn("FragmentEntryLink", "plid", "LONG");
 		}
 
 		runSQL(

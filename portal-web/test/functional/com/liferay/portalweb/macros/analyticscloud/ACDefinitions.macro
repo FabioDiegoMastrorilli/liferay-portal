@@ -12,7 +12,8 @@ definition {
 				Type(
 					locator1 = "ACDefinitions#SEARCH_QUERY_INPUT",
 					value1 = "${x}");
-				flag = "1"
+
+				var flag = "1";
 			}
 			else {
 				Click(
@@ -24,9 +25,10 @@ definition {
 					locator1 = "ACDefinitions#SEARCH_QUERY_INPUT_INDEX",
 					value1 = "${x}");
 
-				flag = MathUtil.sum("${flag}", "1");
+				var flag = ${flag} + 1;
 			}
-			aux = "${x}";
+
+			var aux = "${x}";
 		}
 
 		Button.clickSave();
@@ -46,8 +48,7 @@ definition {
 		Alert.viewSuccessMessage();
 	}
 
-	@summary = "Navigates to a definition in the Definitions screen. \
-	@param definitionType the name of the definition that will be navigated to."
+	@summary = "Navigates to a definition in the Definitions screen. \  @param definitionType the name of the definition that will be navigated to."
 	macro assertIndividualAttributesSource {
 		var key_dataSourceName = "${dataSourceName}";
 
@@ -63,6 +64,7 @@ definition {
 				value1 = "${dataSourceName}");
 
 			ACUtils.closeModal();
+
 			ACUtils.clearSearchBar();
 		}
 	}
@@ -107,7 +109,24 @@ definition {
 
 	macro goToDefinitionType {
 		var key_definitionType = "${definitionType}";
+
 		Click(locator1 = "ACDefinitions#DEFINITION_TYPE");
+	}
+
+	macro hideAllEvents {
+		var key_actionButton = "Hide";
+
+		KeyPress(
+			locator1 = "ACSettings#SELECT_ALL_CHECKBOX",
+			value1 = "\SPACE");
+
+		ACUtils.clickAnyButton(button = "${key_actionButton}");
+
+		ACUtils.clickAnyButton(button = "${key_actionButton}");
+
+		KeyPress(
+			locator1 = "ACSettings#SELECT_ALL_CHECKBOX",
+			value1 = "\SPACE");
 	}
 
 	macro noViewAddSearchQueryButton {
@@ -124,13 +143,69 @@ definition {
 
 	macro openIndividualAttributeDetails {
 		var key_attributeName = "${attributeName}";
+
 		Click(locator1 = "ACDefinitions#ATTRIBUTE_NAME");
+	}
+
+	macro unhideAllEvents {
+		var key_actionButton = "Show";
+
+		KeyPress(
+			locator1 = "ACSettings#SELECT_ALL_CHECKBOX",
+			value1 = "\SPACE");
+
+		ACUtils.clickAnyButton(button = "${key_actionButton}");
+
+		KeyPress(
+			locator1 = "ACSettings#SELECT_ALL_CHECKBOX",
+			value1 = "\SPACE");
+	}
+
+	macro unhideEvent {
+		var key_actionButton = "Show";
+		var key_nameList = "${customEventName}";
+
+		WaitForPageLoad();
+
+		while (IsElementNotPresent(locator1 = "ACUtils#NAME_LIST") && (maxIterations = "50")) {
+			ACUtils.searchBar(searchItem = "${customEventName}");
+		}
+
+		MouseOver(locator1 = "ACUtils#NAME_LIST");
+
+		Click(locator1 = "ACDefinitions#HIDE_UNHIDE_EVENT_BUTTON");
+	}
+
+	macro viewHiddenEvents {
+		for (var customEventName : list "${customEventNameList}") {
+			var key_actionButton = "Show";
+			var key_nameList = "${customEventName}";
+
+			AssertElementPresent(locator1 = "ACDefinitions#HIDE_EVENT_ICON");
+
+			MouseOver(locator1 = "ACUtils#NAME_LIST");
+
+			AssertElementPresent(locator1 = "ACDefinitions#HIDE_UNHIDE_EVENT_BUTTON");
+		}
 	}
 
 	macro viewSearchQuery {
 		AssertElementPresent(
 			key_query = "${query}",
 			locator1 = "ACDefinitions#PRESENT_SEARCH_QUERY_INPUT");
+	}
+
+	macro viewUnhideEvent {
+		for (var customEventName : list "${customEventNameList}") {
+			var key_actionButton = "Hide";
+			var key_nameList = "${customEventName}";
+
+			AssertElementNotPresent(locator1 = "ACDefinitions#HIDE_EVENT_ICON");
+
+			MouseOver(locator1 = "ACUtils#NAME_LIST");
+
+			AssertElementPresent(locator1 = "ACDefinitions#HIDE_UNHIDE_EVENT_BUTTON");
+		}
 	}
 
 }

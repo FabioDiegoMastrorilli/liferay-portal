@@ -16,6 +16,7 @@ package com.liferay.data.engine.rest.internal.resource.v2_0;
 
 import com.liferay.data.engine.rest.dto.v2_0.DataListView;
 import com.liferay.data.engine.rest.resource.v2_0.DataListViewResource;
+import com.liferay.petra.function.UnsafeBiConsumer;
 import com.liferay.petra.function.UnsafeConsumer;
 import com.liferay.petra.function.UnsafeFunction;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
@@ -88,7 +89,7 @@ public abstract class BaseDataListViewResourceImpl
 	@javax.ws.rs.Path("/data-definitions/{dataDefinitionId}/data-list-views")
 	@javax.ws.rs.Produces({"application/json", "application/xml"})
 	@Override
-	public void deleteDataListViewsDataDefinition(
+	public void deleteDataDefinitionDataListView(
 			@io.swagger.v3.oas.annotations.Parameter(hidden = true)
 			@javax.validation.constraints.NotNull
 			@javax.ws.rs.PathParam("dataDefinitionId")
@@ -423,8 +424,14 @@ public abstract class BaseDataListViewResourceImpl
 				Long.parseLong((String)parameters.get("dataDefinitionId")),
 				dataListView);
 
-		for (DataListView dataListView : dataListViews) {
-			dataListViewUnsafeConsumer.accept(dataListView);
+		if (contextBatchUnsafeConsumer != null) {
+			contextBatchUnsafeConsumer.accept(
+				dataListViews, dataListViewUnsafeConsumer);
+		}
+		else {
+			for (DataListView dataListView : dataListViews) {
+				dataListViewUnsafeConsumer.accept(dataListView);
+			}
 		}
 	}
 
@@ -503,6 +510,15 @@ public abstract class BaseDataListViewResourceImpl
 
 	public void setContextAcceptLanguage(AcceptLanguage contextAcceptLanguage) {
 		this.contextAcceptLanguage = contextAcceptLanguage;
+	}
+
+	public void setContextBatchUnsafeConsumer(
+		UnsafeBiConsumer
+			<java.util.Collection<DataListView>,
+			 UnsafeConsumer<DataListView, Exception>, Exception>
+				contextBatchUnsafeConsumer) {
+
+		this.contextBatchUnsafeConsumer = contextBatchUnsafeConsumer;
 	}
 
 	public void setContextCompany(
@@ -653,6 +669,10 @@ public abstract class BaseDataListViewResourceImpl
 	}
 
 	protected AcceptLanguage contextAcceptLanguage;
+	protected UnsafeBiConsumer
+		<java.util.Collection<DataListView>,
+		 UnsafeConsumer<DataListView, Exception>, Exception>
+			contextBatchUnsafeConsumer;
 	protected com.liferay.portal.kernel.model.Company contextCompany;
 	protected HttpServletRequest contextHttpServletRequest;
 	protected HttpServletResponse contextHttpServletResponse;

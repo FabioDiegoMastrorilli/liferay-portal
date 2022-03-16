@@ -182,10 +182,13 @@ public abstract class BaseOrderItemResourceTestCase {
 
 		orderItem.setDeliveryGroup(regex);
 		orderItem.setExternalReferenceCode(regex);
+		orderItem.setFormattedQuantity(regex);
+		orderItem.setOptions(regex);
 		orderItem.setOrderExternalReferenceCode(regex);
 		orderItem.setPrintedNote(regex);
 		orderItem.setSku(regex);
 		orderItem.setSkuExternalReferenceCode(regex);
+		orderItem.setUnitOfMeasure(regex);
 
 		String json = OrderItemSerDes.toJSON(orderItem);
 
@@ -195,10 +198,13 @@ public abstract class BaseOrderItemResourceTestCase {
 
 		Assert.assertEquals(regex, orderItem.getDeliveryGroup());
 		Assert.assertEquals(regex, orderItem.getExternalReferenceCode());
+		Assert.assertEquals(regex, orderItem.getFormattedQuantity());
+		Assert.assertEquals(regex, orderItem.getOptions());
 		Assert.assertEquals(regex, orderItem.getOrderExternalReferenceCode());
 		Assert.assertEquals(regex, orderItem.getPrintedNote());
 		Assert.assertEquals(regex, orderItem.getSku());
 		Assert.assertEquals(regex, orderItem.getSkuExternalReferenceCode());
+		Assert.assertEquals(regex, orderItem.getUnitOfMeasure());
 	}
 
 	@Test
@@ -792,6 +798,14 @@ public abstract class BaseOrderItemResourceTestCase {
 				continue;
 			}
 
+			if (Objects.equals("decimalQuantity", additionalAssertFieldName)) {
+				if (orderItem.getDecimalQuantity() == null) {
+					valid = false;
+				}
+
+				continue;
+			}
+
 			if (Objects.equals("deliveryGroup", additionalAssertFieldName)) {
 				if (orderItem.getDeliveryGroup() == null) {
 					valid = false;
@@ -938,8 +952,26 @@ public abstract class BaseOrderItemResourceTestCase {
 				continue;
 			}
 
+			if (Objects.equals(
+					"formattedQuantity", additionalAssertFieldName)) {
+
+				if (orderItem.getFormattedQuantity() == null) {
+					valid = false;
+				}
+
+				continue;
+			}
+
 			if (Objects.equals("name", additionalAssertFieldName)) {
 				if (orderItem.getName() == null) {
+					valid = false;
+				}
+
+				continue;
+			}
+
+			if (Objects.equals("options", additionalAssertFieldName)) {
+				if (orderItem.getOptions() == null) {
 					valid = false;
 				}
 
@@ -1062,6 +1094,14 @@ public abstract class BaseOrderItemResourceTestCase {
 
 			if (Objects.equals("subscription", additionalAssertFieldName)) {
 				if (orderItem.getSubscription() == null) {
+					valid = false;
+				}
+
+				continue;
+			}
+
+			if (Objects.equals("unitOfMeasure", additionalAssertFieldName)) {
+				if (orderItem.getUnitOfMeasure() == null) {
 					valid = false;
 				}
 
@@ -1192,6 +1232,17 @@ public abstract class BaseOrderItemResourceTestCase {
 				if (!equals(
 						(Map)orderItem1.getCustomFields(),
 						(Map)orderItem2.getCustomFields())) {
+
+					return false;
+				}
+
+				continue;
+			}
+
+			if (Objects.equals("decimalQuantity", additionalAssertFieldName)) {
+				if (!Objects.deepEquals(
+						orderItem1.getDecimalQuantity(),
+						orderItem2.getDecimalQuantity())) {
 
 					return false;
 				}
@@ -1383,6 +1434,19 @@ public abstract class BaseOrderItemResourceTestCase {
 				continue;
 			}
 
+			if (Objects.equals(
+					"formattedQuantity", additionalAssertFieldName)) {
+
+				if (!Objects.deepEquals(
+						orderItem1.getFormattedQuantity(),
+						orderItem2.getFormattedQuantity())) {
+
+					return false;
+				}
+
+				continue;
+			}
+
 			if (Objects.equals("id", additionalAssertFieldName)) {
 				if (!Objects.deepEquals(
 						orderItem1.getId(), orderItem2.getId())) {
@@ -1396,6 +1460,16 @@ public abstract class BaseOrderItemResourceTestCase {
 			if (Objects.equals("name", additionalAssertFieldName)) {
 				if (!equals(
 						(Map)orderItem1.getName(), (Map)orderItem2.getName())) {
+
+					return false;
+				}
+
+				continue;
+			}
+
+			if (Objects.equals("options", additionalAssertFieldName)) {
+				if (!Objects.deepEquals(
+						orderItem1.getOptions(), orderItem2.getOptions())) {
 
 					return false;
 				}
@@ -1563,6 +1637,17 @@ public abstract class BaseOrderItemResourceTestCase {
 				continue;
 			}
 
+			if (Objects.equals("unitOfMeasure", additionalAssertFieldName)) {
+				if (!Objects.deepEquals(
+						orderItem1.getUnitOfMeasure(),
+						orderItem2.getUnitOfMeasure())) {
+
+					return false;
+				}
+
+				continue;
+			}
+
 			if (Objects.equals("unitPrice", additionalAssertFieldName)) {
 				if (!Objects.deepEquals(
 						orderItem1.getUnitPrice(), orderItem2.getUnitPrice())) {
@@ -1693,6 +1778,11 @@ public abstract class BaseOrderItemResourceTestCase {
 				"Invalid entity field " + entityFieldName);
 		}
 
+		if (entityFieldName.equals("decimalQuantity")) {
+			throw new IllegalArgumentException(
+				"Invalid entity field " + entityFieldName);
+		}
+
 		if (entityFieldName.equals("deliveryGroup")) {
 			sb.append("'");
 			sb.append(String.valueOf(orderItem.getDeliveryGroup()));
@@ -1769,6 +1859,14 @@ public abstract class BaseOrderItemResourceTestCase {
 				"Invalid entity field " + entityFieldName);
 		}
 
+		if (entityFieldName.equals("formattedQuantity")) {
+			sb.append("'");
+			sb.append(String.valueOf(orderItem.getFormattedQuantity()));
+			sb.append("'");
+
+			return sb.toString();
+		}
+
 		if (entityFieldName.equals("id")) {
 			throw new IllegalArgumentException(
 				"Invalid entity field " + entityFieldName);
@@ -1777,6 +1875,14 @@ public abstract class BaseOrderItemResourceTestCase {
 		if (entityFieldName.equals("name")) {
 			throw new IllegalArgumentException(
 				"Invalid entity field " + entityFieldName);
+		}
+
+		if (entityFieldName.equals("options")) {
+			sb.append("'");
+			sb.append(String.valueOf(orderItem.getOptions()));
+			sb.append("'");
+
+			return sb.toString();
 		}
 
 		if (entityFieldName.equals("orderExternalReferenceCode")) {
@@ -1812,8 +1918,9 @@ public abstract class BaseOrderItemResourceTestCase {
 		}
 
 		if (entityFieldName.equals("quantity")) {
-			throw new IllegalArgumentException(
-				"Invalid entity field " + entityFieldName);
+			sb.append(String.valueOf(orderItem.getQuantity()));
+
+			return sb.toString();
 		}
 
 		if (entityFieldName.equals("requestedDeliveryDate")) {
@@ -1851,8 +1958,9 @@ public abstract class BaseOrderItemResourceTestCase {
 		}
 
 		if (entityFieldName.equals("shippedQuantity")) {
-			throw new IllegalArgumentException(
-				"Invalid entity field " + entityFieldName);
+			sb.append(String.valueOf(orderItem.getShippedQuantity()));
+
+			return sb.toString();
 		}
 
 		if (entityFieldName.equals("shippingAddress")) {
@@ -1889,6 +1997,14 @@ public abstract class BaseOrderItemResourceTestCase {
 		if (entityFieldName.equals("subscription")) {
 			throw new IllegalArgumentException(
 				"Invalid entity field " + entityFieldName);
+		}
+
+		if (entityFieldName.equals("unitOfMeasure")) {
+			sb.append("'");
+			sb.append(String.valueOf(orderItem.getUnitOfMeasure()));
+			sb.append("'");
+
+			return sb.toString();
 		}
 
 		if (entityFieldName.equals("unitPrice")) {
@@ -1950,7 +2066,10 @@ public abstract class BaseOrderItemResourceTestCase {
 					RandomTestUtil.randomString());
 				externalReferenceCode = StringUtil.toLowerCase(
 					RandomTestUtil.randomString());
+				formattedQuantity = StringUtil.toLowerCase(
+					RandomTestUtil.randomString());
 				id = RandomTestUtil.randomLong();
+				options = StringUtil.toLowerCase(RandomTestUtil.randomString());
 				orderExternalReferenceCode = StringUtil.toLowerCase(
 					RandomTestUtil.randomString());
 				orderId = RandomTestUtil.randomLong();
@@ -1965,6 +2084,8 @@ public abstract class BaseOrderItemResourceTestCase {
 					RandomTestUtil.randomString());
 				skuId = RandomTestUtil.randomLong();
 				subscription = RandomTestUtil.randomBoolean();
+				unitOfMeasure = StringUtil.toLowerCase(
+					RandomTestUtil.randomString());
 			}
 		};
 	}

@@ -35,6 +35,35 @@ public class ObjectField implements Cloneable, Serializable {
 		return ObjectFieldSerDes.toDTO(json);
 	}
 
+	public DBType getDBType() {
+		return DBType;
+	}
+
+	public String getDBTypeAsString() {
+		if (DBType == null) {
+			return null;
+		}
+
+		return DBType.toString();
+	}
+
+	public void setDBType(DBType DBType) {
+		this.DBType = DBType;
+	}
+
+	public void setDBType(
+		UnsafeSupplier<DBType, Exception> DBTypeUnsafeSupplier) {
+
+		try {
+			DBType = DBTypeUnsafeSupplier.get();
+		}
+		catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	protected DBType DBType;
+
 	public Map<String, Map<String, String>> getActions() {
 		return actions;
 	}
@@ -56,6 +85,35 @@ public class ObjectField implements Cloneable, Serializable {
 	}
 
 	protected Map<String, Map<String, String>> actions;
+
+	public BusinessType getBusinessType() {
+		return businessType;
+	}
+
+	public String getBusinessTypeAsString() {
+		if (businessType == null) {
+			return null;
+		}
+
+		return businessType.toString();
+	}
+
+	public void setBusinessType(BusinessType businessType) {
+		this.businessType = businessType;
+	}
+
+	public void setBusinessType(
+		UnsafeSupplier<BusinessType, Exception> businessTypeUnsafeSupplier) {
+
+		try {
+			businessType = businessTypeUnsafeSupplier.get();
+		}
+		catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	protected BusinessType businessType;
 
 	public Long getId() {
 		return id;
@@ -200,6 +258,60 @@ public class ObjectField implements Cloneable, Serializable {
 
 	protected String name;
 
+	public ObjectFieldSetting[] getObjectFieldSettings() {
+		return objectFieldSettings;
+	}
+
+	public void setObjectFieldSettings(
+		ObjectFieldSetting[] objectFieldSettings) {
+
+		this.objectFieldSettings = objectFieldSettings;
+	}
+
+	public void setObjectFieldSettings(
+		UnsafeSupplier<ObjectFieldSetting[], Exception>
+			objectFieldSettingsUnsafeSupplier) {
+
+		try {
+			objectFieldSettings = objectFieldSettingsUnsafeSupplier.get();
+		}
+		catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	protected ObjectFieldSetting[] objectFieldSettings;
+
+	public RelationshipType getRelationshipType() {
+		return relationshipType;
+	}
+
+	public String getRelationshipTypeAsString() {
+		if (relationshipType == null) {
+			return null;
+		}
+
+		return relationshipType.toString();
+	}
+
+	public void setRelationshipType(RelationshipType relationshipType) {
+		this.relationshipType = relationshipType;
+	}
+
+	public void setRelationshipType(
+		UnsafeSupplier<RelationshipType, Exception>
+			relationshipTypeUnsafeSupplier) {
+
+		try {
+			relationshipType = relationshipTypeUnsafeSupplier.get();
+		}
+		catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	protected RelationshipType relationshipType;
+
 	public Boolean getRequired() {
 		return required;
 	}
@@ -279,10 +391,116 @@ public class ObjectField implements Cloneable, Serializable {
 		return ObjectFieldSerDes.toJSON(this);
 	}
 
+	public static enum BusinessType {
+
+		ATTACHMENT("Attachment"), BOOLEAN("Boolean"), DATE("Date"),
+		DECIMAL("Decimal"), INTEGER("Integer"), LONG_INTEGER("LongInteger"),
+		LONG_TEXT("LongText"), PICKLIST("Picklist"),
+		PRECISION_DECIMAL("PrecisionDecimal"), RELATIONSHIP("Relationship"),
+		TEXT("Text");
+
+		public static BusinessType create(String value) {
+			for (BusinessType businessType : values()) {
+				if (Objects.equals(businessType.getValue(), value) ||
+					Objects.equals(businessType.name(), value)) {
+
+					return businessType;
+				}
+			}
+
+			return null;
+		}
+
+		public String getValue() {
+			return _value;
+		}
+
+		@Override
+		public String toString() {
+			return _value;
+		}
+
+		private BusinessType(String value) {
+			_value = value;
+		}
+
+		private final String _value;
+
+	}
+
+	public static enum DBType {
+
+		BIG_DECIMAL("BigDecimal"), BOOLEAN("Boolean"), CLOB("Clob"),
+		DATE("Date"), DOUBLE("Double"), INTEGER("Integer"), LONG("Long"),
+		STRING("String");
+
+		public static DBType create(String value) {
+			for (DBType dbType : values()) {
+				if (Objects.equals(dbType.getValue(), value) ||
+					Objects.equals(dbType.name(), value)) {
+
+					return dbType;
+				}
+			}
+
+			return null;
+		}
+
+		public String getValue() {
+			return _value;
+		}
+
+		@Override
+		public String toString() {
+			return _value;
+		}
+
+		private DBType(String value) {
+			_value = value;
+		}
+
+		private final String _value;
+
+	}
+
+	public static enum RelationshipType {
+
+		ONE_TO_MANY("oneToMany"), ONE_TO_ONE("oneToOne");
+
+		public static RelationshipType create(String value) {
+			for (RelationshipType relationshipType : values()) {
+				if (Objects.equals(relationshipType.getValue(), value) ||
+					Objects.equals(relationshipType.name(), value)) {
+
+					return relationshipType;
+				}
+			}
+
+			return null;
+		}
+
+		public String getValue() {
+			return _value;
+		}
+
+		@Override
+		public String toString() {
+			return _value;
+		}
+
+		private RelationshipType(String value) {
+			_value = value;
+		}
+
+		private final String _value;
+
+	}
+
 	public static enum Type {
 
-		BIG_DECIMAL("BigDecimal"), BOOLEAN("Boolean"), DATE("Date"),
-		DOUBLE("Double"), INTEGER("Integer"), LONG("Long"), STRING("String");
+		BIG_DECIMAL("BigDecimal"), BOOLEAN("Boolean"), CLOB("Clob"),
+		DATE("Date"), DOUBLE("Double"), INTEGER("Integer"), LONG("Long"),
+		STRING("String");
 
 		public static Type create(String value) {
 			for (Type type : values()) {

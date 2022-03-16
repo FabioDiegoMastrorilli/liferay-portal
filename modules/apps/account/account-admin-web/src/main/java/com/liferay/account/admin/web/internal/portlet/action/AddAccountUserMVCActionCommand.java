@@ -19,13 +19,14 @@ import com.liferay.account.constants.AccountPortletKeys;
 import com.liferay.account.model.AccountEntry;
 import com.liferay.account.model.AccountEntryUserRel;
 import com.liferay.account.service.AccountEntryService;
-import com.liferay.account.service.AccountEntryUserRelLocalService;
+import com.liferay.account.service.AccountEntryUserRelService;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.exception.UserEmailAddressException;
 import com.liferay.portal.kernel.exception.UserScreenNameException;
 import com.liferay.portal.kernel.portlet.bridges.mvc.BaseMVCActionCommand;
 import com.liferay.portal.kernel.portlet.bridges.mvc.MVCActionCommand;
 import com.liferay.portal.kernel.service.PortletPreferencesLocalService;
+import com.liferay.portal.kernel.service.ServiceContextFactory;
 import com.liferay.portal.kernel.service.UserLocalService;
 import com.liferay.portal.kernel.servlet.SessionErrors;
 import com.liferay.portal.kernel.theme.ThemeDisplay;
@@ -80,6 +81,7 @@ public class AddAccountUserMVCActionCommand extends BaseMVCActionCommand {
 		String lastName = ParamUtil.getString(actionRequest, "lastName");
 		long prefixId = ParamUtil.getLong(actionRequest, "prefixId");
 		long suffixId = ParamUtil.getLong(actionRequest, "suffixId");
+		String jobTitle = ParamUtil.getString(actionRequest, "jobTitle");
 
 		try {
 			AccountEntryUserRel accountEntryUserRel = null;
@@ -93,19 +95,26 @@ public class AddAccountUserMVCActionCommand extends BaseMVCActionCommand {
 					accountEntry.getType())) {
 
 				accountEntryUserRel =
-					_accountEntryUserRelLocalService.
+					_accountEntryUserRelService.
 						addPersonTypeAccountEntryUserRel(
 							accountEntryId, themeDisplay.getUserId(),
 							screenName, emailAddress,
 							LocaleUtil.fromLanguageId(languageId), firstName,
-							middleName, lastName, prefixId, suffixId);
+							middleName, lastName, prefixId, suffixId, jobTitle,
+							ServiceContextFactory.getInstance(
+								AccountEntryUserRel.class.getName(),
+								actionRequest));
 			}
 			else {
 				accountEntryUserRel =
-					_accountEntryUserRelLocalService.addAccountEntryUserRel(
+					_accountEntryUserRelService.addAccountEntryUserRel(
 						accountEntryId, themeDisplay.getUserId(), screenName,
 						emailAddress, LocaleUtil.fromLanguageId(languageId),
-						firstName, middleName, lastName, prefixId, suffixId);
+						firstName, middleName, lastName, prefixId, suffixId,
+						jobTitle,
+						ServiceContextFactory.getInstance(
+							AccountEntryUserRel.class.getName(),
+							actionRequest));
 			}
 
 			String portletId = _portal.getPortletId(actionRequest);
@@ -159,7 +168,7 @@ public class AddAccountUserMVCActionCommand extends BaseMVCActionCommand {
 	private AccountEntryService _accountEntryService;
 
 	@Reference
-	private AccountEntryUserRelLocalService _accountEntryUserRelLocalService;
+	private AccountEntryUserRelService _accountEntryUserRelService;
 
 	@Reference
 	private Http _http;

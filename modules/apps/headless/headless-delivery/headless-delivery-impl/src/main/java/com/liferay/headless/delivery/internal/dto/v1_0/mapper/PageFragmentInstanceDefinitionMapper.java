@@ -162,7 +162,7 @@ public class PageFragmentInstanceDefinitionMapper {
 							getConfigurationJSONObject(
 								fragmentEntryLink.getConfiguration(),
 								fragmentEntryLink.getEditableValues(),
-								new long[] {0L});
+								LocaleUtil.getMostRelevantLocale());
 
 					Set<String> keys = jsonObject.keySet();
 
@@ -194,6 +194,10 @@ public class PageFragmentInstanceDefinitionMapper {
 			};
 		}
 		catch (JSONException jsonException) {
+			if (_log.isDebugEnabled()) {
+				_log.debug(jsonException);
+			}
+
 			return null;
 		}
 	}
@@ -231,6 +235,10 @@ public class PageFragmentInstanceDefinitionMapper {
 				fragmentEntryLink.getEditableValues());
 		}
 		catch (JSONException jsonException) {
+			if (_log.isDebugEnabled()) {
+				_log.debug(jsonException);
+			}
+
 			return null;
 		}
 

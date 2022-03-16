@@ -18,9 +18,9 @@ const CHECK_AND_FIX_GLOBS = [
 	'/{,dxp/}*.{js,ts}',
 	'/{,dxp/}apps/*/*/*.{js,ts,tsx}',
 	'/{,dxp/}apps/*/*/*/*.{js,ts,tsx}',
-	'/{,dxp/}apps/*/*/*/{src,test}/**/*.{js,scss,ts,tsx}',
+	'/{,dxp/}apps/*/*/*/{src,test,extra}/**/*.{js,scss,ts,tsx}',
 	'/{,dxp/}apps/*/*/*/{src}/**/*.{jsp,jspf}',
-	'/{,dxp/}apps/*/*/{src,test}/**/*.{js,scss,ts,tsx}',
+	'/{,dxp/}apps/*/*/{src,test,extra}/**/*.{js,scss,ts,tsx}',
 	'/{,dxp/}apps/*/*/{src}/**/*.{jsp,jspf}',
 ];
 
@@ -55,6 +55,9 @@ module.exports = {
 						'/': '*',
 					},
 					'@liferay/frontend-taglib': {
+						'/': '*',
+					},
+					'@liferay/layout-content-page-editor-web': {
 						'/': '*',
 					},
 					'@liferay/map-common': {
@@ -138,20 +141,15 @@ module.exports = {
 					'frontend-js-node-shims': {
 						assert: '*',
 						buffer: '*',
-						console: '*',
 						domain: '*',
 						events: '*',
 						os: '*',
 						path: '*',
 						process: '*',
-						punycode: '*',
-						setimmediate: '*',
 						string_decoder: '*',
 						timers: '*',
-						tty: '*',
 						url: '*',
 						util: '*',
-						vm: '*',
 					},
 					'frontend-js-recharts': {
 						recharts: '*',
@@ -208,6 +206,7 @@ module.exports = {
 						'@clayui/card': '*',
 						'@clayui/charts': '*',
 						'@clayui/color-picker': '*',
+						'@clayui/core': '*',
 						'@clayui/css': '*',
 						'@clayui/data-provider': '*',
 						'@clayui/date-picker': '*',
@@ -220,6 +219,7 @@ module.exports = {
 						'@clayui/link': '*',
 						'@clayui/list': '*',
 						'@clayui/loading-indicator': '*',
+						'@clayui/localized-input': '*',
 						'@clayui/management-toolbar': '*',
 						'@clayui/modal': '*',
 						'@clayui/multi-select': '*',
@@ -237,6 +237,7 @@ module.exports = {
 						'@clayui/table': '*',
 						'@clayui/tabs': '*',
 						'@clayui/time-picker': '*',
+						'@clayui/toolbar': '*',
 						'@clayui/tooltip': '*',
 						'@clayui/upper-toolbar': '*',
 						'clay': '*',

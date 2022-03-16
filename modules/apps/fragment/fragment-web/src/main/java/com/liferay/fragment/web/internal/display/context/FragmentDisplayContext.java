@@ -15,6 +15,7 @@
 package com.liferay.fragment.web.internal.display.context;
 
 import com.liferay.fragment.constants.FragmentActionKeys;
+import com.liferay.fragment.constants.FragmentPortletKeys;
 import com.liferay.fragment.contributor.FragmentCollectionContributor;
 import com.liferay.fragment.contributor.FragmentCollectionContributorTracker;
 import com.liferay.fragment.model.FragmentCollection;
@@ -41,12 +42,12 @@ import com.liferay.portal.kernel.model.CompanyConstants;
 import com.liferay.portal.kernel.model.Group;
 import com.liferay.portal.kernel.portlet.LiferayPortletURL;
 import com.liferay.portal.kernel.portlet.LiferayWindowState;
+import com.liferay.portal.kernel.portlet.SearchOrderByUtil;
 import com.liferay.portal.kernel.service.GroupLocalServiceUtil;
 import com.liferay.portal.kernel.theme.ThemeDisplay;
 import com.liferay.portal.kernel.util.HashMapBuilder;
 import com.liferay.portal.kernel.util.HtmlUtil;
 import com.liferay.portal.kernel.util.ListUtil;
-import com.liferay.portal.kernel.util.OrderByComparator;
 import com.liferay.portal.kernel.util.ParamUtil;
 import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.Validator;
@@ -101,7 +102,7 @@ public class FragmentDisplayContext {
 					"/fragment/edit_fragment_collection", "redirect",
 					_themeDisplay.getURLCurrent());
 				dropdownItem.setLabel(
-					LanguageUtil.get(_httpServletRequest, "collection"));
+					LanguageUtil.get(_httpServletRequest, "fragment-set"));
 			}
 		).add(
 			dropdownItem -> {
@@ -212,15 +213,15 @@ public class FragmentDisplayContext {
 		contributedEntries.sort(
 			new FragmentCompositionFragmentEntryNameComparator(true));
 
-		contributedEntriesSearchContainer.setResults(
-			ListUtil.subList(
+		contributedEntriesSearchContainer.setResultsAndTotal(
+			() -> ListUtil.subList(
 				contributedEntries,
 				contributedEntriesSearchContainer.getStart(),
-				contributedEntriesSearchContainer.getEnd()));
+				contributedEntriesSearchContainer.getEnd()),
+			contributedEntries.size());
 
 		contributedEntriesSearchContainer.setRowChecker(
 			new EmptyOnClickRowChecker(_renderResponse));
-		contributedEntriesSearchContainer.setTotal(contributedEntries.size());
 
 		_contributedEntriesSearchContainer = contributedEntriesSearchContainer;
 
@@ -391,20 +392,11 @@ public class FragmentDisplayContext {
 
 		fragmentEntriesSearchContainer.setId(
 			"fragmentEntries" + getFragmentCollectionId());
-
-		fragmentEntriesSearchContainer.setRowChecker(
-			new EmptyOnClickRowChecker(_renderResponse));
-
-		OrderByComparator<Object> orderByComparator =
-			FragmentPortletUtil.getFragmentCompositionAndEntryOrderByComparator(
-				_getOrderByCol(), getOrderByType());
-
 		fragmentEntriesSearchContainer.setOrderByCol(_getOrderByCol());
-		fragmentEntriesSearchContainer.setOrderByComparator(orderByComparator);
+		fragmentEntriesSearchContainer.setOrderByComparator(
+			FragmentPortletUtil.getFragmentCompositionAndEntryOrderByComparator(
+				_getOrderByCol(), getOrderByType()));
 		fragmentEntriesSearchContainer.setOrderByType(getOrderByType());
-
-		List<Object> fragmentCompositionsAndEntries = null;
-		int fragmentCompositionsAndEntriesCount = 0;
 
 		FragmentCollection fragmentCollection = getFragmentCollection();
 
@@ -416,45 +408,47 @@ public class FragmentDisplayContext {
 			status = WorkflowConstants.STATUS_APPROVED;
 		}
 
-		if (isSearch()) {
-			fragmentCompositionsAndEntries =
-				FragmentEntryServiceUtil.
-					getFragmentCompositionsAndFragmentEntries(
-						fragmentCollection.getGroupId(),
-						fragmentCollection.getFragmentCollectionId(),
-						_getKeywords(), status,
-						fragmentEntriesSearchContainer.getStart(),
-						fragmentEntriesSearchContainer.getEnd(),
-						orderByComparator);
+		int fragmentEntryStatus = status;
 
-			fragmentCompositionsAndEntriesCount =
+		if (isSearch()) {
+			fragmentEntriesSearchContainer.setResultsAndTotal(
+				() ->
+					FragmentEntryServiceUtil.
+						getFragmentCompositionsAndFragmentEntries(
+							fragmentCollection.getGroupId(),
+							fragmentCollection.getFragmentCollectionId(),
+							_getKeywords(), fragmentEntryStatus,
+							fragmentEntriesSearchContainer.getStart(),
+							fragmentEntriesSearchContainer.getEnd(),
+							fragmentEntriesSearchContainer.
+								getOrderByComparator()),
 				FragmentEntryServiceUtil.
 					getFragmentCompositionsAndFragmentEntriesCount(
 						fragmentCollection.getGroupId(),
 						fragmentCollection.getFragmentCollectionId(),
-						_getKeywords(), status);
+						_getKeywords(), fragmentEntryStatus));
 		}
 		else {
-			fragmentCompositionsAndEntries =
-				FragmentEntryServiceUtil.
-					getFragmentCompositionsAndFragmentEntries(
-						fragmentCollection.getGroupId(),
-						fragmentCollection.getFragmentCollectionId(), status,
-						fragmentEntriesSearchContainer.getStart(),
-						fragmentEntriesSearchContainer.getEnd(),
-						orderByComparator);
-
-			fragmentCompositionsAndEntriesCount =
+			fragmentEntriesSearchContainer.setResultsAndTotal(
+				() ->
+					FragmentEntryServiceUtil.
+						getFragmentCompositionsAndFragmentEntries(
+							fragmentCollection.getGroupId(),
+							fragmentCollection.getFragmentCollectionId(),
+							fragmentEntryStatus,
+							fragmentEntriesSearchContainer.getStart(),
+							fragmentEntriesSearchContainer.getEnd(),
+							fragmentEntriesSearchContainer.
+								getOrderByComparator()),
 				FragmentEntryServiceUtil.
 					getFragmentCompositionsAndFragmentEntriesCount(
 						fragmentCollection.getGroupId(),
-						fragmentCollection.getFragmentCollectionId(), status);
+						fragmentCollection.getFragmentCollectionId(),
+						fragmentEntryStatus));
 		}
 
-		fragmentEntriesSearchContainer.setResults(
-			fragmentCompositionsAndEntries);
-		fragmentEntriesSearchContainer.setTotal(
-			fragmentCompositionsAndEntriesCount);
+		fragmentEntriesSearchContainer.setRowChecker(
+			new EmptyOnClickRowChecker(_renderResponse));
 
 		_fragmentEntriesSearchContainer = fragmentEntriesSearchContainer;
 
@@ -515,8 +509,9 @@ public class FragmentDisplayContext {
 			return _orderByType;
 		}
 
-		_orderByType = ParamUtil.getString(
-			_httpServletRequest, "orderByType", "asc");
+		_orderByType = SearchOrderByUtil.getOrderByType(
+			_httpServletRequest, FragmentPortletKeys.FRAGMENT,
+			"fragment-order-by-type", "asc");
 
 		return _orderByType;
 	}
@@ -706,8 +701,9 @@ public class FragmentDisplayContext {
 			return _orderByCol;
 		}
 
-		_orderByCol = ParamUtil.getString(
-			_httpServletRequest, "orderByCol", "create-date");
+		_orderByCol = SearchOrderByUtil.getOrderByCol(
+			_httpServletRequest, FragmentPortletKeys.FRAGMENT,
+			"fragment-order-by-col", "modified-date");
 
 		return _orderByCol;
 	}

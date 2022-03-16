@@ -270,7 +270,12 @@ renderResponse.setTitle(workflowTaskDisplayContext.getHeaderTitle(workflowTask))
 						</c:if>
 					</liferay-ui:panel>
 
-					<c:if test="<%= assetEntry != null %>">
+					<c:if test="<%= (assetEntry != null) && workflowHandler.isCommentable() %>">
+
+						<%
+						long discussionClassPK = workflowHandler.getDiscussionClassPK(workflowTask.getOptionalAttributes());
+						%>
+
 						<liferay-ui:panel
 							extended="<%= true %>"
 							markupView="lexicon"
@@ -279,8 +284,8 @@ renderResponse.setTitle(workflowTaskDisplayContext.getHeaderTitle(workflowTask))
 							<liferay-comment:discussion
 								assetEntryVisible="<%= false %>"
 								className="<%= assetRenderer.getClassName() %>"
-								classPK="<%= classPK %>"
-								formName='<%= "fm" + classPK %>'
+								classPK="<%= discussionClassPK %>"
+								formName='<%= "fm" + discussionClassPK %>'
 								ratingsEnabled="<%= false %>"
 								redirect="<%= currentURL %>"
 								userId="<%= user.getUserId() %>"

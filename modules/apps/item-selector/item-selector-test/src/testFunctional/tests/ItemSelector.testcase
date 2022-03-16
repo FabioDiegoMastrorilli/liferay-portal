@@ -1,6 +1,7 @@
-@component-name = "portal-collaboration"
+@component-name = "portal-lima"
 definition {
 
+	property portal.acceptance = "true";
 	property portal.release = "true";
 	property portal.upstream = "true";
 	property testray.main.component.name = "Item Selector";
@@ -30,7 +31,6 @@ definition {
 	@priority = "5"
 	@refactordone
 	test CanAddBlogsImageViaURL {
-		property portal.acceptance = "true";
 		property test.name.skip.portal.instance = "ItemSelector#AddBlogsImageViaURL";
 
 		JSONDocument.addFileWithUploadedFile(
@@ -459,13 +459,17 @@ definition {
 	}
 
 	@description = "This is a test for LPS-136947. It checks that unsupported files cannot be uploaded to Blogs."
-	@ignore = "true"
 	@priority = "3"
 	test CannotUploadUnsupportedFilesToBlogs {
 		property portal.acceptance = "false";
 
-		// TODO LPS-136947 CannotUploadUnsupportedFilesToBlogs pending implementation
+		BlogsNavigator.openToAddEntry(siteURLKey = "guest");
 
+		BlogsNavigator.gotoSelectFile();
+
+		ItemSelector.uploadFile(
+			invalidFileValidation = "Please enter a file with a valid extension (.gif,.jpeg,.jpg,.png).",
+			uploadFileName = "Document_1.pdf");
 	}
 
 	@description = "This test covers LPS-119709. It ensures that the blog images can not filter by the everywhere and the current site."
@@ -730,6 +734,8 @@ definition {
 	@priority = "3"
 	@refactordone
 	test CanSearchForUploadedImageFromBlogsImages {
+		property portal.acceptance = "false";
+
 		BlogsNavigator.openBlogsAdmin(siteURLKey = "guest");
 
 		Blogs.addEntryWithUploadedCoverImage(
@@ -753,6 +759,8 @@ definition {
 	@priority = "3"
 	@refactordone
 	test CanSearchForUploadedImageFromDMImages {
+		property portal.acceptance = "false";
+
 		BlogsNavigator.openBlogsAdmin(siteURLKey = "guest");
 
 		Blogs.addEntryWithUploadedCoverImage(
@@ -772,7 +780,7 @@ definition {
 		ItemSelector.searchDMImages(imageFileName = "Document_1.jpg");
 	}
 
-	@description = "This ensures that the background image of a fragment can be added."
+	@description = "This is a use case for LPS-106776. This ensures that the background image of a fragment can be added."
 	@priority = "5"
 	@refactordone
 	test CanSelectBackgroundImageForFragment {
@@ -1081,7 +1089,7 @@ definition {
 		ItemSelector.viewWCEverywhereFilterResults(
 			folderWebContentTitle = "WC WebContent From Depot",
 			siteName = "Test Depot Name",
-			viewFolderWC = "true",
+			viewFolderWc = "true",
 			wcFolderName = "WC Folder Name",
 			webContentTitle = "WC WebContent From Site");
 	}
@@ -1253,34 +1261,61 @@ definition {
 		Pagination.viewResults(results = "Showing 21 to 30 of 30 entries.");
 	}
 
-	@description = "This is a test for LPS-136945. It checks that only 'File Upload,' 'Folder,' and 'External Video Shortcut' options appear when adding a document."
-	@ignore = "true"
+	@description = "This is a test for LPS-136945. It checks that only 'File Upload,' 'Folder,' 'Google Drive Shortcut' and 'External Video Shortcut' options appear when adding a document."
 	@priority = "3"
 	test OnlyRelevantSelectionsAppearWhenAddingDocuments {
+		property osgi.app.includes = "document-library-google-docs";
 		property portal.acceptance = "false";
 
-		// TODO LPS-136945 OnlyRelevantSelectionsAppearWhenAddingDocuments pending implementation
+		WebContentNavigator.openWebContentAdmin(siteURLKey = "guest");
 
+		NavItem.gotoStructures();
+
+		WebContentStructures.addCP(structureName = "Structure Name");
+
+		DataEngine.addField(
+			fieldFieldLabel = "Upload",
+			fieldName = "Upload");
+
+		WebContentStructures.saveCP(structureName = "Structure Name");
+
+		WebContentNavigator.openWebContentAdmin(siteURLKey = "guest");
+
+		LexiconEntry.gotoAddMenuItem(menuItem = "Structure Name");
+
+		Click(
+			key_text = "Select",
+			locator1 = "Button#ANY_LAST");
+
+		ItemSelector.viewRelevantSelections(addDocumentOptions = "true");
 	}
 
 	@description = "This is a test for LPS-136943. It checks that only 'File Upload' and 'Folder' options appear when adding images."
-	@ignore = "true"
 	@priority = "3"
 	test OnlyRelevantSelectionsAppearWhenAddingImages {
 		property portal.acceptance = "false";
 
-		// TODO LPS-136943 OnlyRelevantSelectionsAppearWhenAddingImages pending implementation
+		WebContentNavigator.openWebContentAdmin(siteURLKey = "guest");
 
+		LexiconEntry.gotoAddMenuItem(menuItem = "Basic Web Content");
+
+		ItemSelector.gotoItemSelectorViaCKEditor();
+
+		ItemSelector.viewRelevantSelections(addImageOptions = "true");
 	}
 
 	@description = "This is a test for LPS-136944. It checks that only 'File Upload,' 'Folder,' and 'External Video Shortcut' options appear when adding a video."
-	@ignore = "true"
 	@priority = "3"
 	test OnlyRelevantSelectionsAppearWhenAddingVideos {
 		property portal.acceptance = "false";
 
-		// TODO LPS-136944 OnlyRelevantSelectionsAppearWhenAddingVideos pending implementation
+		WebContentNavigator.openWebContentAdmin(siteURLKey = "guest");
 
+		LexiconEntry.gotoAddMenuItem(menuItem = "Basic Web Content");
+
+		ItemSelector.gotoItemSelectorViaCKEditor(video = "true");
+
+		ItemSelector.viewRelevantSelections(addVideoOptions = "true");
 	}
 
 	@description = "This test covers LPS-96564. It ensures that a private site cannot be viewed by a non-site member in calendar widget."
@@ -1293,7 +1328,7 @@ definition {
 
 		JSONGroup.addGroup(
 			groupName = "Site A",
-			type = "Private");
+			membershipType = "Private");
 
 		JSONGroup.addGroup(groupName = "Site X");
 
@@ -1312,7 +1347,7 @@ definition {
 
 		User.gotoAddPage(userName = "userfn userln");
 
-		SitePages.addPrivatePage(pageName = "Private Test Page");
+		PagesAdmin.addPrivatePage(pageName = "Private Test Page");
 
 		Navigator.gotoSpecificURLPage(
 			pageName = "Private Test Page",

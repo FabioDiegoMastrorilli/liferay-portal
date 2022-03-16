@@ -72,8 +72,8 @@ definition {
 		User.logoutPG();
 
 		CommerceLogin.miniumLogin(
+			newPassword = "test",
 			password = "ttest",
-			resetPassword = "test",
 			urlAppend = "web/minium",
 			userEmailAddress = "buyer@liferay.com");
 
@@ -139,15 +139,15 @@ definition {
 		Refresh();
 
 		AssertElementPresent(
-			key_FilterOption = "Cancelled",
+			key_filterOption = "Cancelled",
 			locator1 = "AppBuilder#CHOOSE_APP_SEARCH_FILTER_BY_OPTION");
 	}
 
 	@description = "This is a test for COMMERCE-6218. MoneyOrder Payment Method lifecycle"
 	@priority = "3"
 	test MoneyOrderCheckout {
-		property portal.acceptance = "Intern Test";
-		property test.name.skip.portal.instance ="CommercePayments#MoneyOrderCheckout";
+		property portal.acceptance = "true";
+		property test.name.skip.portal.instance = "CommercePayments#MoneyOrderCheckout";
 
 		// TODO Review
 

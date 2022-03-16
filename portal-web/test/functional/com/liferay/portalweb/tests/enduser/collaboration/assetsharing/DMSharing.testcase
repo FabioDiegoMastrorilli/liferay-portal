@@ -1,4 +1,4 @@
-@component-name = "portal-collaboration"
+@component-name = "portal-lima"
 definition {
 
 	property custom.properties = "jsonws.web.service.paths.excludes=";
@@ -248,7 +248,7 @@ definition {
 
 		Navigator.gotoPage(pageName = "Documents and Media Page");
 
-		LexiconEntry.viewNoEntryMenuItem(
+		DMDocument.viewNoPermission(
 			menuItem = "Share",
 			rowEntry = "DM Document Title");
 	}
@@ -878,7 +878,7 @@ definition {
 			locator1 = "Sharing#EMAIL_VIEW_DOCUMENT_BUTTON",
 			value1 = "View Document");
 
-		SelectWindow(locator1 = "title=- ${siteName}");
+		SelectWindow.selectPopUp(locator1 = "null");
 
 		DMDocumentSharing.viewDocumentViaSharedContent(
 			contentSharingPermission = "View",

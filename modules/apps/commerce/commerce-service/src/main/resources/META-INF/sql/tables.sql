@@ -86,6 +86,12 @@ create table CommerceOrder (
 	purchaseOrderNumber VARCHAR(75) null,
 	couponCode VARCHAR(75) null,
 	lastPriceUpdateDate DATE null,
+	deliveryCommerceTermEntryId LONG,
+	deliveryCTermEntryDescription TEXT null,
+	deliveryCommerceTermEntryName VARCHAR(75) null,
+	paymentCommerceTermEntryId LONG,
+	paymentCTermEntryDescription TEXT null,
+	paymentCommerceTermEntryName VARCHAR(75) null,
 	subtotal DECIMAL(30, 16) null,
 	subtotalDiscountAmount DECIMAL(30, 16) null,
 	subtotalDiscountPercentLevel1 DECIMAL(30, 16) null,
@@ -150,9 +156,10 @@ create table CommerceOrderItem (
 	commerceOrderId LONG,
 	commercePriceListId LONG,
 	CPInstanceId LONG,
+	CPMeasurementUnitId LONG,
 	CProductId LONG,
 	parentCommerceOrderItemId LONG,
-	shippingAddressId LONG,
+	decimalQuantity DECIMAL(30, 16) null,
 	deliveryGroup VARCHAR(75) null,
 	deliveryMaxSubscriptionCycles LONG,
 	deliverySubscriptionLength INTEGER,
@@ -182,6 +189,7 @@ create table CommerceOrderItem (
 	promoPriceWithTaxAmount DECIMAL(30, 16) null,
 	quantity INTEGER,
 	requestedDeliveryDate DATE null,
+	shippingAddressId LONG,
 	shipSeparately BOOLEAN,
 	shippable BOOLEAN,
 	shippedQuantity INTEGER,
@@ -265,6 +273,7 @@ create table CommerceOrderTypeRel (
 
 create table CommerceShipment (
 	mvccVersion LONG default 0 not null,
+	externalReferenceCode VARCHAR(75) null,
 	commerceShipmentId LONG not null primary key,
 	groupId LONG,
 	companyId LONG,
@@ -285,6 +294,7 @@ create table CommerceShipment (
 
 create table CommerceShipmentItem (
 	mvccVersion LONG default 0 not null,
+	externalReferenceCode VARCHAR(75) null,
 	commerceShipmentItemId LONG not null primary key,
 	groupId LONG,
 	companyId LONG,

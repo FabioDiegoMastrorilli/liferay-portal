@@ -21,13 +21,14 @@ import React, {useContext, useState} from 'react';
 import ViewsContext from '../../views/ViewsContext';
 import ActiveViewSelector from './ActiveViewSelector';
 import CreationMenu from './CreationMenu';
+import CustomViewDropdown from './CustomViewDropdown';
 import FiltersDropdown from './FiltersDropdown';
 import MainSearch from './MainSearch';
 import FiltersContext from './filters/FiltersContext';
 
 function NavBar({creationMenu, showSearch}) {
 	const filtersState = useContext(FiltersContext);
-	const [{views}] = useContext(ViewsContext);
+	const [{customViewsEnabled, views}] = useContext(ViewsContext);
 	const [showMobile, setShowMobile] = useState(false);
 
 	return (
@@ -71,6 +72,13 @@ function NavBar({creationMenu, showSearch}) {
 						<ActiveViewSelector views={views} />
 					</ClayManagementToolbar.Item>
 				)}
+
+				{customViewsEnabled && (
+					<ClayManagementToolbar.Item>
+						<CustomViewDropdown />
+					</ClayManagementToolbar.Item>
+				)}
+
 				{creationMenu && (
 					<ClayManagementToolbar.Item>
 						<CreationMenu {...creationMenu} />

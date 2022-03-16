@@ -45,6 +45,8 @@ import java.io.Serializable;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.stream.Stream;
 
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
@@ -63,7 +65,34 @@ public class PinResourceImpl
 
 	@Override
 	public void deletePin(Long pinId) throws Exception {
-		_csDiagramPinService.deleteCSDiagramPin(pinId);
+		CSDiagramPin csDiagramPin = _csDiagramPinService.getCSDiagramPin(pinId);
+
+		CSDiagramEntry csDiagramEntry =
+			_csDiagramEntryService.fetchCSDiagramEntry(
+				csDiagramPin.getCPDefinitionId(), csDiagramPin.getSequence());
+
+		if (csDiagramEntry != null) {
+			List<CSDiagramPin> csDiagramPins =
+				_csDiagramPinService.getCSDiagramPins(
+					csDiagramPin.getCPDefinitionId(), -1, -1);
+
+			Stream<CSDiagramPin> csDiagramPinsStream = csDiagramPins.stream();
+
+			if (csDiagramPinsStream.filter(
+					curCSDiagramPin ->
+						curCSDiagramPin.getCSDiagramPinId() !=
+							csDiagramPin.getCSDiagramPinId()
+				).noneMatch(
+					curCSDiagramPin -> Objects.equals(
+						curCSDiagramPin.getSequence(),
+						csDiagramPin.getSequence())
+				)) {
+
+				_csDiagramEntryService.deleteCSDiagramEntry(csDiagramEntry);
+			}
+		}
+
+		_csDiagramPinService.deleteCSDiagramPin(csDiagramPin);
 	}
 
 	@Override

@@ -19,7 +19,6 @@ import com.liferay.expando.kernel.util.ExpandoBridgeFactoryUtil;
 import com.liferay.exportimport.kernel.lar.StagedModelType;
 import com.liferay.fragment.model.FragmentEntry;
 import com.liferay.fragment.model.FragmentEntryModel;
-import com.liferay.fragment.model.FragmentEntrySoap;
 import com.liferay.fragment.model.FragmentEntryVersion;
 import com.liferay.petra.string.StringBundler;
 import com.liferay.portal.kernel.bean.AutoEscapeBeanHandler;
@@ -45,12 +44,10 @@ import java.lang.reflect.InvocationHandler;
 import java.sql.Blob;
 import java.sql.Types;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.BiConsumer;
@@ -89,10 +86,11 @@ public class FragmentEntryModelImpl
 		{"fragmentEntryKey", Types.VARCHAR}, {"name", Types.VARCHAR},
 		{"css", Types.CLOB}, {"html", Types.CLOB}, {"js", Types.CLOB},
 		{"cacheable", Types.BOOLEAN}, {"configuration", Types.CLOB},
-		{"previewFileEntryId", Types.BIGINT}, {"readOnly", Types.BOOLEAN},
-		{"type_", Types.INTEGER}, {"lastPublishDate", Types.TIMESTAMP},
-		{"status", Types.INTEGER}, {"statusByUserId", Types.BIGINT},
-		{"statusByUserName", Types.VARCHAR}, {"statusDate", Types.TIMESTAMP}
+		{"icon", Types.VARCHAR}, {"previewFileEntryId", Types.BIGINT},
+		{"readOnly", Types.BOOLEAN}, {"type_", Types.INTEGER},
+		{"lastPublishDate", Types.TIMESTAMP}, {"status", Types.INTEGER},
+		{"statusByUserId", Types.BIGINT}, {"statusByUserName", Types.VARCHAR},
+		{"statusDate", Types.TIMESTAMP}
 	};
 
 	public static final Map<String, Integer> TABLE_COLUMNS_MAP =
@@ -119,6 +117,7 @@ public class FragmentEntryModelImpl
 		TABLE_COLUMNS_MAP.put("js", Types.CLOB);
 		TABLE_COLUMNS_MAP.put("cacheable", Types.BOOLEAN);
 		TABLE_COLUMNS_MAP.put("configuration", Types.CLOB);
+		TABLE_COLUMNS_MAP.put("icon", Types.VARCHAR);
 		TABLE_COLUMNS_MAP.put("previewFileEntryId", Types.BIGINT);
 		TABLE_COLUMNS_MAP.put("readOnly", Types.BOOLEAN);
 		TABLE_COLUMNS_MAP.put("type_", Types.INTEGER);
@@ -130,7 +129,7 @@ public class FragmentEntryModelImpl
 	}
 
 	public static final String TABLE_SQL_CREATE =
-		"create table FragmentEntry (mvccVersion LONG default 0 not null,ctCollectionId LONG default 0 not null,uuid_ VARCHAR(75) null,headId LONG,head BOOLEAN,fragmentEntryId LONG not null,groupId LONG,companyId LONG,userId LONG,userName VARCHAR(75) null,createDate DATE null,modifiedDate DATE null,fragmentCollectionId LONG,fragmentEntryKey VARCHAR(75) null,name VARCHAR(75) null,css TEXT null,html TEXT null,js TEXT null,cacheable BOOLEAN,configuration TEXT null,previewFileEntryId LONG,readOnly BOOLEAN,type_ INTEGER,lastPublishDate DATE null,status INTEGER,statusByUserId LONG,statusByUserName VARCHAR(75) null,statusDate DATE null,primary key (fragmentEntryId, ctCollectionId))";
+		"create table FragmentEntry (mvccVersion LONG default 0 not null,ctCollectionId LONG default 0 not null,uuid_ VARCHAR(75) null,headId LONG,head BOOLEAN,fragmentEntryId LONG not null,groupId LONG,companyId LONG,userId LONG,userName VARCHAR(75) null,createDate DATE null,modifiedDate DATE null,fragmentCollectionId LONG,fragmentEntryKey VARCHAR(75) null,name VARCHAR(75) null,css TEXT null,html TEXT null,js TEXT null,cacheable BOOLEAN,configuration TEXT null,icon VARCHAR(75) null,previewFileEntryId LONG,readOnly BOOLEAN,type_ INTEGER,lastPublishDate DATE null,status INTEGER,statusByUserId LONG,statusByUserName VARCHAR(75) null,statusDate DATE null,primary key (fragmentEntryId, ctCollectionId))";
 
 	public static final String TABLE_SQL_DROP = "drop table FragmentEntry";
 
@@ -218,75 +217,6 @@ public class FragmentEntryModelImpl
 	 */
 	@Deprecated
 	public static void setFinderCacheEnabled(boolean finderCacheEnabled) {
-	}
-
-	/**
-	 * Converts the soap model instance into a normal model instance.
-	 *
-	 * @param soapModel the soap model instance to convert
-	 * @return the normal model instance
-	 * @deprecated As of Athanasius (7.3.x), with no direct replacement
-	 */
-	@Deprecated
-	public static FragmentEntry toModel(FragmentEntrySoap soapModel) {
-		if (soapModel == null) {
-			return null;
-		}
-
-		FragmentEntry model = new FragmentEntryImpl();
-
-		model.setMvccVersion(soapModel.getMvccVersion());
-		model.setCtCollectionId(soapModel.getCtCollectionId());
-		model.setUuid(soapModel.getUuid());
-		model.setHeadId(soapModel.getHeadId());
-		model.setFragmentEntryId(soapModel.getFragmentEntryId());
-		model.setGroupId(soapModel.getGroupId());
-		model.setCompanyId(soapModel.getCompanyId());
-		model.setUserId(soapModel.getUserId());
-		model.setUserName(soapModel.getUserName());
-		model.setCreateDate(soapModel.getCreateDate());
-		model.setModifiedDate(soapModel.getModifiedDate());
-		model.setFragmentCollectionId(soapModel.getFragmentCollectionId());
-		model.setFragmentEntryKey(soapModel.getFragmentEntryKey());
-		model.setName(soapModel.getName());
-		model.setCss(soapModel.getCss());
-		model.setHtml(soapModel.getHtml());
-		model.setJs(soapModel.getJs());
-		model.setCacheable(soapModel.isCacheable());
-		model.setConfiguration(soapModel.getConfiguration());
-		model.setPreviewFileEntryId(soapModel.getPreviewFileEntryId());
-		model.setReadOnly(soapModel.isReadOnly());
-		model.setType(soapModel.getType());
-		model.setLastPublishDate(soapModel.getLastPublishDate());
-		model.setStatus(soapModel.getStatus());
-		model.setStatusByUserId(soapModel.getStatusByUserId());
-		model.setStatusByUserName(soapModel.getStatusByUserName());
-		model.setStatusDate(soapModel.getStatusDate());
-
-		return model;
-	}
-
-	/**
-	 * Converts the soap model instances into normal model instances.
-	 *
-	 * @param soapModels the soap model instances to convert
-	 * @return the normal model instances
-	 * @deprecated As of Athanasius (7.3.x), with no direct replacement
-	 */
-	@Deprecated
-	public static List<FragmentEntry> toModels(FragmentEntrySoap[] soapModels) {
-		if (soapModels == null) {
-			return null;
-		}
-
-		List<FragmentEntry> models = new ArrayList<FragmentEntry>(
-			soapModels.length);
-
-		for (FragmentEntrySoap soapModel : soapModels) {
-			models.add(toModel(soapModel));
-		}
-
-		return models;
 	}
 
 	public FragmentEntryModelImpl() {
@@ -494,6 +424,9 @@ public class FragmentEntryModelImpl
 		attributeSetterBiConsumers.put(
 			"configuration",
 			(BiConsumer<FragmentEntry, String>)FragmentEntry::setConfiguration);
+		attributeGetterFunctions.put("icon", FragmentEntry::getIcon);
+		attributeSetterBiConsumers.put(
+			"icon", (BiConsumer<FragmentEntry, String>)FragmentEntry::setIcon);
 		attributeGetterFunctions.put(
 			"previewFileEntryId", FragmentEntry::getPreviewFileEntryId);
 		attributeSetterBiConsumers.put(
@@ -559,6 +492,7 @@ public class FragmentEntryModelImpl
 		fragmentEntryVersion.setJs(getJs());
 		fragmentEntryVersion.setCacheable(getCacheable());
 		fragmentEntryVersion.setConfiguration(getConfiguration());
+		fragmentEntryVersion.setIcon(getIcon());
 		fragmentEntryVersion.setPreviewFileEntryId(getPreviewFileEntryId());
 		fragmentEntryVersion.setReadOnly(getReadOnly());
 		fragmentEntryVersion.setType(getType());
@@ -1024,6 +958,26 @@ public class FragmentEntryModelImpl
 
 	@JSON
 	@Override
+	public String getIcon() {
+		if (_icon == null) {
+			return "";
+		}
+		else {
+			return _icon;
+		}
+	}
+
+	@Override
+	public void setIcon(String icon) {
+		if (_columnOriginalValues == Collections.EMPTY_MAP) {
+			_setColumnOriginalValues();
+		}
+
+		_icon = icon;
+	}
+
+	@JSON
+	@Override
 	public long getPreviewFileEntryId() {
 		return _previewFileEntryId;
 	}
@@ -1350,6 +1304,7 @@ public class FragmentEntryModelImpl
 		fragmentEntryImpl.setJs(getJs());
 		fragmentEntryImpl.setCacheable(isCacheable());
 		fragmentEntryImpl.setConfiguration(getConfiguration());
+		fragmentEntryImpl.setIcon(getIcon());
 		fragmentEntryImpl.setPreviewFileEntryId(getPreviewFileEntryId());
 		fragmentEntryImpl.setReadOnly(isReadOnly());
 		fragmentEntryImpl.setType(getType());
@@ -1401,6 +1356,7 @@ public class FragmentEntryModelImpl
 			this.<Boolean>getColumnOriginalValue("cacheable"));
 		fragmentEntryImpl.setConfiguration(
 			this.<String>getColumnOriginalValue("configuration"));
+		fragmentEntryImpl.setIcon(this.<String>getColumnOriginalValue("icon"));
 		fragmentEntryImpl.setPreviewFileEntryId(
 			this.<Long>getColumnOriginalValue("previewFileEntryId"));
 		fragmentEntryImpl.setReadOnly(
@@ -1596,6 +1552,14 @@ public class FragmentEntryModelImpl
 			fragmentEntryCacheModel.configuration = null;
 		}
 
+		fragmentEntryCacheModel.icon = getIcon();
+
+		String icon = fragmentEntryCacheModel.icon;
+
+		if ((icon != null) && (icon.length() == 0)) {
+			fragmentEntryCacheModel.icon = null;
+		}
+
 		fragmentEntryCacheModel.previewFileEntryId = getPreviewFileEntryId();
 
 		fragmentEntryCacheModel.readOnly = isReadOnly();
@@ -1743,6 +1707,7 @@ public class FragmentEntryModelImpl
 	private String _js;
 	private boolean _cacheable;
 	private String _configuration;
+	private String _icon;
 	private long _previewFileEntryId;
 	private boolean _readOnly;
 	private int _type;
@@ -1806,6 +1771,7 @@ public class FragmentEntryModelImpl
 		_columnOriginalValues.put("js", _js);
 		_columnOriginalValues.put("cacheable", _cacheable);
 		_columnOriginalValues.put("configuration", _configuration);
+		_columnOriginalValues.put("icon", _icon);
 		_columnOriginalValues.put("previewFileEntryId", _previewFileEntryId);
 		_columnOriginalValues.put("readOnly", _readOnly);
 		_columnOriginalValues.put("type_", _type);
@@ -1878,21 +1844,23 @@ public class FragmentEntryModelImpl
 
 		columnBitmasks.put("configuration", 524288L);
 
-		columnBitmasks.put("previewFileEntryId", 1048576L);
+		columnBitmasks.put("icon", 1048576L);
 
-		columnBitmasks.put("readOnly", 2097152L);
+		columnBitmasks.put("previewFileEntryId", 2097152L);
 
-		columnBitmasks.put("type_", 4194304L);
+		columnBitmasks.put("readOnly", 4194304L);
 
-		columnBitmasks.put("lastPublishDate", 8388608L);
+		columnBitmasks.put("type_", 8388608L);
 
-		columnBitmasks.put("status", 16777216L);
+		columnBitmasks.put("lastPublishDate", 16777216L);
 
-		columnBitmasks.put("statusByUserId", 33554432L);
+		columnBitmasks.put("status", 33554432L);
 
-		columnBitmasks.put("statusByUserName", 67108864L);
+		columnBitmasks.put("statusByUserId", 67108864L);
 
-		columnBitmasks.put("statusDate", 134217728L);
+		columnBitmasks.put("statusByUserName", 134217728L);
+
+		columnBitmasks.put("statusDate", 268435456L);
 
 		_columnBitmasks = Collections.unmodifiableMap(columnBitmasks);
 	}

@@ -19,6 +19,7 @@ import com.liferay.frontend.taglib.clay.servlet.taglib.util.CreationMenu;
 import com.liferay.frontend.taglib.clay.servlet.taglib.util.CreationMenuBuilder;
 import com.liferay.frontend.taglib.clay.servlet.taglib.util.DropdownItem;
 import com.liferay.frontend.taglib.clay.servlet.taglib.util.DropdownItemListBuilder;
+import com.liferay.layout.admin.web.internal.configuration.FFBulkTranslationConfiguration;
 import com.liferay.petra.portlet.url.builder.PortletURLBuilder;
 import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.exception.PortalException;
@@ -30,10 +31,13 @@ import com.liferay.portal.kernel.model.Layout;
 import com.liferay.portal.kernel.model.LayoutSetPrototype;
 import com.liferay.portal.kernel.portlet.LiferayPortletRequest;
 import com.liferay.portal.kernel.portlet.LiferayPortletResponse;
+import com.liferay.portal.kernel.portlet.RequestBackedPortletURLFactoryUtil;
 import com.liferay.portal.kernel.service.ClassNameLocalServiceUtil;
 import com.liferay.portal.kernel.theme.ThemeDisplay;
 import com.liferay.portal.kernel.util.HtmlUtil;
+import com.liferay.portal.kernel.util.PortalUtil;
 import com.liferay.portal.kernel.util.WebKeys;
+import com.liferay.translation.url.provider.TranslationURLProvider;
 
 import java.util.List;
 import java.util.Objects;
@@ -59,8 +63,14 @@ public class LayoutsAdminManagementToolbarDisplayContext
 
 		_layoutsAdminDisplayContext = layoutsAdminDisplayContext;
 
+		_ffBulkTranslationConfiguration =
+			(FFBulkTranslationConfiguration)httpServletRequest.getAttribute(
+				FFBulkTranslationConfiguration.class.getName());
 		_themeDisplay = (ThemeDisplay)httpServletRequest.getAttribute(
 			WebKeys.THEME_DISPLAY);
+		_translationURLProvider =
+			(TranslationURLProvider)httpServletRequest.getAttribute(
+				TranslationURLProvider.class.getName());
 	}
 
 	@Override
@@ -83,6 +93,28 @@ public class LayoutsAdminManagementToolbarDisplayContext
 				dropdownItem.setLabel(
 					LanguageUtil.get(
 						httpServletRequest, "convert-to-content-page"));
+				dropdownItem.setQuickAction(true);
+			}
+		).add(
+			_ffBulkTranslationConfiguration::bulkTranslationEnabled,
+			dropdownItem -> {
+				dropdownItem.putData("action", "exportTranslation");
+				dropdownItem.putData(
+					"exportTranslationURL",
+					PortletURLBuilder.create(
+						_translationURLProvider.getExportTranslationURL(
+							_themeDisplay.getScopeGroupId(),
+							PortalUtil.getClassNameId(Layout.class),
+							RequestBackedPortletURLFactoryUtil.create(
+								httpServletRequest))
+					).setRedirect(
+						_themeDisplay.getURLCurrent()
+					).buildString());
+				dropdownItem.setDisabled(false);
+				dropdownItem.setIcon("import-export");
+				dropdownItem.setLabel(
+					LanguageUtil.get(
+						httpServletRequest, "export-for-translations"));
 				dropdownItem.setQuickAction(true);
 			}
 		).add(
@@ -131,7 +163,7 @@ public class LayoutsAdminManagementToolbarDisplayContext
 
 		return CreationMenuBuilder.addPrimaryDropdownItem(
 			() ->
-				_layoutsAdminDisplayContext.isShowPublicPages() &&
+				_layoutsAdminDisplayContext.isShowPublicLayouts() &&
 				_layoutsAdminDisplayContext.isShowAddChildPageAction(
 					selLayout) &&
 				(!_layoutsAdminDisplayContext.isPrivateLayout() ||
@@ -147,7 +179,7 @@ public class LayoutsAdminManagementToolbarDisplayContext
 			}
 		).addPrimaryDropdownItem(
 			() ->
-				_layoutsAdminDisplayContext.isShowPublicPages() &&
+				_layoutsAdminDisplayContext.isShowPublicLayouts() &&
 				_layoutsAdminDisplayContext.isShowAddChildPageAction(
 					selLayout) &&
 				(!_layoutsAdminDisplayContext.isPrivateLayout() ||
@@ -161,7 +193,7 @@ public class LayoutsAdminManagementToolbarDisplayContext
 			}
 		).addPrimaryDropdownItem(
 			() ->
-				_layoutsAdminDisplayContext.isShowPrivatePages() &&
+				_layoutsAdminDisplayContext.isShowUserPrivateLayouts() &&
 				((_layoutsAdminDisplayContext.isShowAddChildPageAction(
 					selLayout) &&
 				  _layoutsAdminDisplayContext.isPrivateLayout()) ||
@@ -177,7 +209,7 @@ public class LayoutsAdminManagementToolbarDisplayContext
 			}
 		).addPrimaryDropdownItem(
 			() ->
-				_layoutsAdminDisplayContext.isShowPrivatePages() &&
+				_layoutsAdminDisplayContext.isShowUserPrivateLayouts() &&
 				(_layoutsAdminDisplayContext.isPrivateLayout() ||
 				 _layoutsAdminDisplayContext.isFirstColumn() ||
 				 !_layoutsAdminDisplayContext.hasLayouts()),
@@ -258,7 +290,7 @@ public class LayoutsAdminManagementToolbarDisplayContext
 		}
 		catch (PortalException portalException) {
 			if (_log.isDebugEnabled()) {
-				_log.debug(portalException, portalException);
+				_log.debug(portalException);
 			}
 		}
 
@@ -297,7 +329,12 @@ public class LayoutsAdminManagementToolbarDisplayContext
 				httpServletRequest, "private-collection-page");
 		}
 
-		return LanguageUtil.get(httpServletRequest, "public-collection-page");
+		if (_layoutsAdminDisplayContext.isPrivateLayoutsEnabled()) {
+			return LanguageUtil.get(
+				httpServletRequest, "public-collection-page");
+		}
+
+		return LanguageUtil.get(httpServletRequest, "collection-page");
 	}
 
 	private String _getLabel(boolean privateLayout) {
@@ -318,7 +355,11 @@ public class LayoutsAdminManagementToolbarDisplayContext
 			return LanguageUtil.get(httpServletRequest, "private-page");
 		}
 
-		return LanguageUtil.get(httpServletRequest, "public-page");
+		if (_layoutsAdminDisplayContext.isPrivateLayoutsEnabled()) {
+			return LanguageUtil.get(httpServletRequest, "public-page");
+		}
+
+		return LanguageUtil.get(httpServletRequest, "page");
 	}
 
 	private boolean _isSiteTemplate() {
@@ -341,7 +382,10 @@ public class LayoutsAdminManagementToolbarDisplayContext
 	private static final Log _log = LogFactoryUtil.getLog(
 		LayoutsAdminManagementToolbarDisplayContext.class);
 
+	private final FFBulkTranslationConfiguration
+		_ffBulkTranslationConfiguration;
 	private final LayoutsAdminDisplayContext _layoutsAdminDisplayContext;
 	private final ThemeDisplay _themeDisplay;
+	private final TranslationURLProvider _translationURLProvider;
 
 }

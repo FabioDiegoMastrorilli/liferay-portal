@@ -90,6 +90,15 @@ public class CommerceOrderItemServiceUtil {
 		getService().deleteCommerceOrderItems(commerceOrderId);
 	}
 
+	public static void deleteMissingCommerceOrderItems(
+			long commerceOrderId, Long[] commerceOrderItemIds,
+			String[] externalReferenceCodes)
+		throws PortalException {
+
+		getService().deleteMissingCommerceOrderItems(
+			commerceOrderId, commerceOrderItemIds, externalReferenceCodes);
+	}
+
 	public static CommerceOrderItem fetchByExternalReferenceCode(
 			String externalReferenceCode, long companyId)
 		throws PortalException {
@@ -189,6 +198,20 @@ public class CommerceOrderItemServiceUtil {
 		return getService().getOSGiServiceIdentifier();
 	}
 
+	public static CommerceOrderItem importCommerceOrderItem(
+			String externalReferenceCode, long commerceOrderItemId,
+			long commerceOrderId, long cpInstanceId,
+			String cpMeasurementUnitKey, java.math.BigDecimal decimalQuantity,
+			int quantity, int shippedQuantity,
+			com.liferay.portal.kernel.service.ServiceContext serviceContext)
+		throws PortalException {
+
+		return getService().importCommerceOrderItem(
+			externalReferenceCode, commerceOrderItemId, commerceOrderId,
+			cpInstanceId, cpMeasurementUnitKey, decimalQuantity, quantity,
+			shippedQuantity, serviceContext);
+	}
+
 	public static com.liferay.portal.kernel.search.BaseModelSearchResult
 		<CommerceOrderItem> searchCommerceOrderItems(
 				long commerceOrderId, long parentCommerceOrderItemId,
@@ -230,6 +253,17 @@ public class CommerceOrderItemServiceUtil {
 
 		return getService().updateCommerceOrderItem(
 			commerceOrderItemId, quantity, commerceContext, serviceContext);
+	}
+
+	public static CommerceOrderItem updateCommerceOrderItem(
+			long commerceOrderItemId, long cpMeasurementUnitId, int quantity,
+			com.liferay.commerce.context.CommerceContext commerceContext,
+			com.liferay.portal.kernel.service.ServiceContext serviceContext)
+		throws PortalException {
+
+		return getService().updateCommerceOrderItem(
+			commerceOrderItemId, cpMeasurementUnitId, quantity, commerceContext,
+			serviceContext);
 	}
 
 	public static CommerceOrderItem updateCommerceOrderItem(
@@ -351,6 +385,15 @@ public class CommerceOrderItemServiceUtil {
 	}
 
 	public static CommerceOrderItem updateCommerceOrderItemUnitPrice(
+			long commerceOrderItemId, java.math.BigDecimal decimalQuantity,
+			java.math.BigDecimal unitPrice)
+		throws PortalException {
+
+		return getService().updateCommerceOrderItemUnitPrice(
+			commerceOrderItemId, decimalQuantity, unitPrice);
+	}
+
+	public static CommerceOrderItem updateCommerceOrderItemUnitPrice(
 			long commerceOrderItemId, int quantity,
 			java.math.BigDecimal unitPrice)
 		throws PortalException {
@@ -366,6 +409,14 @@ public class CommerceOrderItemServiceUtil {
 
 		return getService().updateCustomFields(
 			commerceOrderItemId, serviceContext);
+	}
+
+	public static CommerceOrderItem updateExternalReferenceCode(
+			long commerceOrderItemId, String externalReferenceCode)
+		throws PortalException {
+
+		return getService().updateExternalReferenceCode(
+			commerceOrderItemId, externalReferenceCode);
 	}
 
 	public static CommerceOrderItemService getService() {

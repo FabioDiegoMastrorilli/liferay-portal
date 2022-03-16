@@ -16,6 +16,7 @@ package com.liferay.headless.admin.taxonomy.internal.resource.v1_0;
 
 import com.liferay.headless.admin.taxonomy.dto.v1_0.TaxonomyCategory;
 import com.liferay.headless.admin.taxonomy.resource.v1_0.TaxonomyCategoryResource;
+import com.liferay.petra.function.UnsafeBiConsumer;
 import com.liferay.petra.function.UnsafeConsumer;
 import com.liferay.petra.function.UnsafeFunction;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
@@ -43,6 +44,7 @@ import com.liferay.portal.vulcan.batch.engine.VulcanBatchEngineTaskItemDelegate;
 import com.liferay.portal.vulcan.batch.engine.resource.VulcanBatchEngineImportTaskResource;
 import com.liferay.portal.vulcan.pagination.Page;
 import com.liferay.portal.vulcan.pagination.Pagination;
+import com.liferay.portal.vulcan.permission.ModelPermissionsUtil;
 import com.liferay.portal.vulcan.permission.PermissionUtil;
 import com.liferay.portal.vulcan.resource.EntityModelResource;
 import com.liferay.portal.vulcan.util.ActionUtil;
@@ -579,8 +581,9 @@ public abstract class BaseTaxonomyCategoryResourceImpl
 			).put(
 				"replace",
 				addAction(
-					ActionKeys.PERMISSIONS, "putTaxonomyCategoryPermission",
-					resourceName, resourceId)
+					ActionKeys.PERMISSIONS,
+					"putTaxonomyCategoryPermissionsPage", resourceName,
+					resourceId)
 			).build(),
 			resourceId, resourceName, roleNames);
 	}
@@ -612,10 +615,42 @@ public abstract class BaseTaxonomyCategoryResourceImpl
 				@io.swagger.v3.oas.annotations.Parameter(hidden = true)
 				@javax.validation.constraints.NotNull
 				@javax.ws.rs.PathParam("taxonomyCategoryId")
-				String taxonomyCategoryId)
+				String taxonomyCategoryId,
+				com.liferay.portal.vulcan.permission.Permission[] permissions)
 		throws Exception {
 
-		return Page.of(Collections.emptyList());
+		String resourceName = getPermissionCheckerResourceName(
+			taxonomyCategoryId);
+		Long resourceId = getPermissionCheckerResourceId(taxonomyCategoryId);
+
+		PermissionUtil.checkPermission(
+			ActionKeys.PERMISSIONS, groupLocalService, resourceName, resourceId,
+			getPermissionCheckerGroupId(taxonomyCategoryId));
+
+		resourcePermissionLocalService.updateResourcePermissions(
+			contextCompany.getCompanyId(),
+			getPermissionCheckerGroupId(taxonomyCategoryId), resourceName,
+			String.valueOf(resourceId),
+			ModelPermissionsUtil.toModelPermissions(
+				contextCompany.getCompanyId(), permissions, resourceId,
+				resourceName, resourceActionLocalService,
+				resourcePermissionLocalService, roleLocalService));
+
+		return toPermissionPage(
+			HashMapBuilder.put(
+				"get",
+				addAction(
+					ActionKeys.PERMISSIONS,
+					"getTaxonomyCategoryPermissionsPage", resourceName,
+					resourceId)
+			).put(
+				"replace",
+				addAction(
+					ActionKeys.PERMISSIONS,
+					"putTaxonomyCategoryPermissionsPage", resourceName,
+					resourceId)
+			).build(),
+			resourceId, resourceName, null);
 	}
 
 	/**
@@ -927,8 +962,14 @@ public abstract class BaseTaxonomyCategoryResourceImpl
 						(String)parameters.get("taxonomyVocabularyId")),
 					taxonomyCategory);
 
-		for (TaxonomyCategory taxonomyCategory : taxonomyCategories) {
-			taxonomyCategoryUnsafeConsumer.accept(taxonomyCategory);
+		if (contextBatchUnsafeConsumer != null) {
+			contextBatchUnsafeConsumer.accept(
+				taxonomyCategories, taxonomyCategoryUnsafeConsumer);
+		}
+		else {
+			for (TaxonomyCategory taxonomyCategory : taxonomyCategories) {
+				taxonomyCategoryUnsafeConsumer.accept(taxonomyCategory);
+			}
 		}
 	}
 
@@ -1066,6 +1107,15 @@ public abstract class BaseTaxonomyCategoryResourceImpl
 
 	public void setContextAcceptLanguage(AcceptLanguage contextAcceptLanguage) {
 		this.contextAcceptLanguage = contextAcceptLanguage;
+	}
+
+	public void setContextBatchUnsafeConsumer(
+		UnsafeBiConsumer
+			<java.util.Collection<TaxonomyCategory>,
+			 UnsafeConsumer<TaxonomyCategory, Exception>, Exception>
+				contextBatchUnsafeConsumer) {
+
+		this.contextBatchUnsafeConsumer = contextBatchUnsafeConsumer;
 	}
 
 	public void setContextCompany(
@@ -1221,6 +1271,10 @@ public abstract class BaseTaxonomyCategoryResourceImpl
 	}
 
 	protected AcceptLanguage contextAcceptLanguage;
+	protected UnsafeBiConsumer
+		<java.util.Collection<TaxonomyCategory>,
+		 UnsafeConsumer<TaxonomyCategory, Exception>, Exception>
+			contextBatchUnsafeConsumer;
 	protected com.liferay.portal.kernel.model.Company contextCompany;
 	protected HttpServletRequest contextHttpServletRequest;
 	protected HttpServletResponse contextHttpServletResponse;

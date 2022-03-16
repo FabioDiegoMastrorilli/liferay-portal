@@ -15,35 +15,38 @@
 package com.liferay.translation.web.internal.portlet.action;
 
 import com.liferay.document.library.kernel.exception.FileSizeException;
+import com.liferay.info.exception.InfoItemPermissionException;
+import com.liferay.info.item.InfoItemFieldValues;
 import com.liferay.info.item.InfoItemReference;
 import com.liferay.info.item.InfoItemServiceTracker;
-import com.liferay.info.item.provider.InfoItemObjectProvider;
-import com.liferay.info.item.provider.InfoItemPermissionProvider;
+import com.liferay.petra.function.UnsafeSupplier;
 import com.liferay.petra.portlet.url.builder.PortletURLBuilder;
+import com.liferay.portal.configuration.metatype.bnd.util.ConfigurableUtil;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.language.Language;
 import com.liferay.portal.kernel.model.Layout;
 import com.liferay.portal.kernel.portlet.RequestBackedPortletURLFactoryUtil;
 import com.liferay.portal.kernel.portlet.bridges.mvc.BaseMVCActionCommand;
 import com.liferay.portal.kernel.portlet.bridges.mvc.MVCActionCommand;
-import com.liferay.portal.kernel.security.auth.PrincipalException;
-import com.liferay.portal.kernel.security.permission.ActionKeys;
-import com.liferay.portal.kernel.security.permission.PermissionChecker;
 import com.liferay.portal.kernel.service.ServiceContextFactory;
+import com.liferay.portal.kernel.service.WorkflowDefinitionLinkLocalService;
 import com.liferay.portal.kernel.servlet.MultiSessionMessages;
 import com.liferay.portal.kernel.servlet.SessionErrors;
 import com.liferay.portal.kernel.theme.ThemeDisplay;
+import com.liferay.portal.kernel.upload.FileItem;
 import com.liferay.portal.kernel.upload.LiferayFileItemException;
 import com.liferay.portal.kernel.upload.UploadException;
 import com.liferay.portal.kernel.upload.UploadPortletRequest;
 import com.liferay.portal.kernel.upload.UploadRequestSizeException;
 import com.liferay.portal.kernel.util.ContentTypes;
 import com.liferay.portal.kernel.util.HashMapBuilder;
+import com.liferay.portal.kernel.util.MimeTypesUtil;
 import com.liferay.portal.kernel.util.ParamUtil;
 import com.liferay.portal.kernel.util.Portal;
 import com.liferay.portal.kernel.util.ResourceBundleUtil;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.kernel.util.WebKeys;
+import com.liferay.portal.kernel.workflow.WorkflowConstants;
 import com.liferay.portal.kernel.zip.ZipReader;
 import com.liferay.portal.kernel.zip.ZipReaderFactoryUtil;
 import com.liferay.translation.constants.TranslationPortletKeys;
@@ -52,7 +55,9 @@ import com.liferay.translation.service.TranslationEntryService;
 import com.liferay.translation.snapshot.TranslationSnapshot;
 import com.liferay.translation.snapshot.TranslationSnapshotProvider;
 import com.liferay.translation.url.provider.TranslationURLProvider;
+import com.liferay.translation.web.internal.configuration.FFBulkTranslationConfiguration;
 import com.liferay.translation.web.internal.display.context.ImportTranslationResultsDisplayContext;
+import com.liferay.translation.web.internal.helper.TranslationRequestHelper;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -65,6 +70,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.ResourceBundle;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 import javax.portlet.ActionRequest;
 import javax.portlet.ActionResponse;
@@ -72,13 +78,16 @@ import javax.portlet.ActionResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
+import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Modified;
 import org.osgi.service.component.annotations.Reference;
 
 /**
  * @author Alicia Garcia
  */
 @Component(
+	configurationPid = "com.liferay.translation.web.internal.configuration.FFBulkTranslationConfiguration",
 	property = {
 		"javax.portlet.name=" + TranslationPortletKeys.TRANSLATION,
 		"mvc.command.name=/translation/import_translation"
@@ -86,6 +95,13 @@ import org.osgi.service.component.annotations.Reference;
 	service = MVCActionCommand.class
 )
 public class ImportTranslationMVCActionCommand extends BaseMVCActionCommand {
+
+	@Activate
+	@Modified
+	protected void activate(Map<String, Object> properties) {
+		_ffBulkTranslationConfiguration = ConfigurableUtil.createConfigurable(
+			FFBulkTranslationConfiguration.class, properties);
+	}
 
 	@Override
 	protected void doProcessAction(
@@ -96,19 +112,6 @@ public class ImportTranslationMVCActionCommand extends BaseMVCActionCommand {
 			ThemeDisplay themeDisplay =
 				(ThemeDisplay)actionRequest.getAttribute(WebKeys.THEME_DISPLAY);
 
-			long classNameId = ParamUtil.getLong(actionRequest, "classNameId");
-			long classPK = ParamUtil.getLong(actionRequest, "classPK");
-			long groupId = ParamUtil.getLong(actionRequest, "groupId");
-			String title = ParamUtil.getString(actionRequest, "title");
-
-			String className = _portal.getClassName(classNameId);
-
-			InfoItemObjectProvider<Object> infoItemObjectProvider =
-				_infoItemServiceTracker.getFirstInfoItemService(
-					InfoItemObjectProvider.class, className);
-
-			Object object = infoItemObjectProvider.getInfoItem(classPK);
-
 			UploadPortletRequest uploadPortletRequest =
 				_portal.getUploadPortletRequest(actionRequest);
 
@@ -116,19 +119,32 @@ public class ImportTranslationMVCActionCommand extends BaseMVCActionCommand {
 
 			_checkContentType(uploadPortletRequest.getContentType("file"));
 
-			_checkPermission(
-				className, classPK, object,
-				themeDisplay.getPermissionChecker());
-
+			TranslationRequestHelper translationRequestHelper =
+				new TranslationRequestHelper(
+					_infoItemServiceTracker, actionRequest);
 			Map<String, String> failureMessages = new HashMap<>();
 			List<String> successMessages = new ArrayList<>();
-
 			String fileName = uploadPortletRequest.getFileName("file");
 
-			_processUploadedFile(
-				actionRequest, uploadPortletRequest, groupId, className,
-				classPK, fileName, successMessages, failureMessages,
-				themeDisplay.getLocale());
+			if (_ffBulkTranslationConfiguration.enabled()) {
+				_processUploadedFiles(
+					actionRequest, uploadPortletRequest,
+					translationRequestHelper.getGroupId(),
+					translationRequestHelper.getModelClassName(),
+					translationRequestHelper.getModelClassPK(), successMessages,
+					failureMessages, themeDisplay.getLocale());
+			}
+			else {
+				_processXLIFFTranslation(
+					actionRequest, translationRequestHelper.getGroupId(),
+					translationRequestHelper.getModelClassName(),
+					translationRequestHelper.getModelClassPK(),
+					new Translation(
+						() -> uploadPortletRequest.getContentType("file"),
+						fileName,
+						() -> uploadPortletRequest.getFileAsStream("file")),
+					successMessages, failureMessages, themeDisplay.getLocale());
+			}
 
 			String portletResource = ParamUtil.getString(
 				actionRequest, "portletResource");
@@ -140,6 +156,8 @@ public class ImportTranslationMVCActionCommand extends BaseMVCActionCommand {
 					actionRequest, portletResource + "requestProcessed");
 			}
 
+			String title = ParamUtil.getString(actionRequest, "title");
+
 			actionRequest.setAttribute(
 				WebKeys.REDIRECT,
 				PortletURLBuilder.createRenderURL(
@@ -149,13 +167,13 @@ public class ImportTranslationMVCActionCommand extends BaseMVCActionCommand {
 				).setRedirect(
 					ParamUtil.getString(actionRequest, "redirect")
 				).setParameter(
-					"classNameId", classNameId
+					"classNameId", translationRequestHelper.getClassNameId()
 				).setParameter(
-					"classPK", classPK
+					"classPK", translationRequestHelper.getModelClassPK()
 				).setParameter(
 					"fileName", fileName
 				).setParameter(
-					"groupId", groupId
+					"groupId", translationRequestHelper.getGroupId()
 				).setParameter(
 					"title", title
 				).buildString());
@@ -166,11 +184,20 @@ public class ImportTranslationMVCActionCommand extends BaseMVCActionCommand {
 
 			HttpSession httpSession = httpServletRequest.getSession();
 
+			int workflowAction = ParamUtil.getInteger(
+				actionRequest, "workflowAction",
+				WorkflowConstants.ACTION_PUBLISH);
+
 			httpSession.setAttribute(
 				ImportTranslationResultsDisplayContext.class.getName(),
 				new ImportTranslationResultsDisplayContext(
-					classNameId, classPK, groupId, failureMessages, fileName,
-					successMessages, title));
+					translationRequestHelper.getClassNameId(),
+					translationRequestHelper.getModelClassPK(),
+					themeDisplay.getCompanyId(),
+					translationRequestHelper.getGroupId(), failureMessages,
+					_ffBulkTranslationConfiguration, fileName, successMessages,
+					title, workflowAction,
+					_workflowDefinitionLinkLocalService));
 		}
 		catch (Exception exception) {
 			try {
@@ -245,56 +272,106 @@ public class ImportTranslationMVCActionCommand extends BaseMVCActionCommand {
 		}
 	}
 
-	private void _checkPermission(
-			String className, long classPK, Object object,
-			PermissionChecker permissionChecker)
-		throws PortalException {
+	private InfoItemReference _getInfoItemReference(
+		String className, long classPK) {
 
-		InfoItemPermissionProvider<Object> infoItemPermissionProvider =
-			_infoItemServiceTracker.getFirstInfoItemService(
-				InfoItemPermissionProvider.class, className);
-
-		if (!infoItemPermissionProvider.hasPermission(
-				permissionChecker, object, ActionKeys.UPDATE)) {
-
-			throw new PrincipalException.MustHavePermission(
-				permissionChecker, className, classPK, ActionKeys.UPDATE);
+		if (classPK == 0) {
+			return null;
 		}
+
+		return new InfoItemReference(className, classPK);
 	}
 
-	private void _importXLIFFFile(
+	private void _importXLIFFInputStream(
 			ActionRequest actionRequest, long groupId, String className,
 			long classPK, InputStream inputStream)
 		throws IOException, PortalException {
 
 		TranslationSnapshot translationSnapshot =
 			_translationSnapshotProvider.getTranslationSnapshot(
-				groupId, new InfoItemReference(className, classPK),
+				groupId, _getInfoItemReference(className, classPK),
 				inputStream);
 
-		_translationEntryService.addOrUpdateTranslationEntry(
-			groupId,
-			_language.getLanguageId(translationSnapshot.getTargetLocale()),
-			new InfoItemReference(className, classPK),
-			translationSnapshot.getInfoItemFieldValues(),
-			ServiceContextFactory.getInstance(actionRequest));
+		InfoItemFieldValues infoItemFieldValues =
+			translationSnapshot.getInfoItemFieldValues();
+
+		try {
+			_translationEntryService.addOrUpdateTranslationEntry(
+				groupId,
+				_language.getLanguageId(translationSnapshot.getTargetLocale()),
+				infoItemFieldValues.getInfoItemReference(), infoItemFieldValues,
+				ServiceContextFactory.getInstance(actionRequest));
+		}
+		catch (InfoItemPermissionException infoItemPermissionException) {
+			throw new XLIFFFileException.MustHaveValidModel(
+				infoItemPermissionException.getMessage());
+		}
 	}
 
-	private void _processUploadedFile(
+	private void _processUploadedFiles(
 			ActionRequest actionRequest,
 			UploadPortletRequest uploadPortletRequest, long groupId,
-			String className, long classPK, String fileName,
-			List<String> successMessages, Map<String, String> failureMessages,
+			String className, long classPK, List<String> successMessages,
+			Map<String, String> failureMessages, Locale locale)
+		throws IOException, PortalException {
+
+		Map<String, FileItem[]> multipartParameterMap =
+			uploadPortletRequest.getMultipartParameterMap();
+
+		for (Map.Entry<String, FileItem[]> entry :
+				multipartParameterMap.entrySet()) {
+
+			for (FileItem fileItem : entry.getValue()) {
+				_processXLIFFTranslation(
+					actionRequest, groupId, className, classPK,
+					new Translation(
+						() -> MimeTypesUtil.getContentType(
+							fileItem.getFileName()),
+						fileItem.getFileName(), fileItem::getInputStream),
+					successMessages, failureMessages, locale);
+			}
+		}
+	}
+
+	private void _processXLIFFInputStream(
+			ActionRequest actionRequest, long groupId, String className,
+			long classPK, String fileName, List<String> successMessages,
+			Map<String, String> failureMessages, InputStream inputStream,
 			Locale locale)
 		throws IOException, PortalException {
 
+		try {
+			_importXLIFFInputStream(
+				actionRequest, groupId, className, classPK, inputStream);
+
+			successMessages.add(fileName);
+		}
+		catch (XLIFFFileException xliffFileException) {
+			ResourceBundle resourceBundle = ResourceBundleUtil.getBundle(
+				locale, getClass());
+
+			Function<String, String> exceptionMessageFunction =
+				_exceptionMessageFunctions.getOrDefault(
+					xliffFileException.getClass(),
+					s -> "the-xliff-file-is-invalid");
+
+			failureMessages.put(
+				fileName,
+				_language.get(
+					resourceBundle, exceptionMessageFunction.apply(className)));
+		}
+	}
+
+	private void _processXLIFFTranslation(
+			ActionRequest actionRequest, long groupId, String className,
+			long classPK, Translation translation, List<String> successMessages,
+			Map<String, String> failureMessages, Locale locale)
+		throws IOException, PortalException {
+
 		if (Objects.equals(
-				uploadPortletRequest.getContentType("file"),
-				ContentTypes.APPLICATION_ZIP)) {
+				translation.getContentType(), ContentTypes.APPLICATION_ZIP)) {
 
-			try (InputStream inputStream1 =
-					uploadPortletRequest.getFileAsStream("file")) {
-
+			try (InputStream inputStream1 = translation.getInputStream()) {
 				ZipReader zipReader = ZipReaderFactoryUtil.getZipReader(
 					inputStream1);
 
@@ -303,7 +380,7 @@ public class ImportTranslationMVCActionCommand extends BaseMVCActionCommand {
 						try (InputStream inputStream2 =
 								zipReader.getEntryAsInputStream(entry)) {
 
-							_processXLIFFFile(
+							_processXLIFFInputStream(
 								actionRequest, groupId, className, classPK,
 								entry, successMessages, failureMessages,
 								inputStream2, locale);
@@ -316,40 +393,12 @@ public class ImportTranslationMVCActionCommand extends BaseMVCActionCommand {
 			}
 		}
 		else {
-			try (InputStream inputStream = uploadPortletRequest.getFileAsStream(
-					"file")) {
-
-				_processXLIFFFile(
-					actionRequest, groupId, className, classPK, fileName,
-					successMessages, failureMessages, inputStream, locale);
+			try (InputStream inputStream = translation.getInputStream()) {
+				_processXLIFFInputStream(
+					actionRequest, groupId, className, classPK,
+					translation.getFileName(), successMessages, failureMessages,
+					inputStream, locale);
 			}
-		}
-	}
-
-	private void _processXLIFFFile(
-			ActionRequest actionRequest, long groupId, String className,
-			long classPK, String fileName, List<String> successMessages,
-			Map<String, String> failureMessages, InputStream inputStream,
-			Locale locale)
-		throws IOException, PortalException {
-
-		try {
-			_importXLIFFFile(
-				actionRequest, groupId, className, classPK, inputStream);
-
-			successMessages.add(fileName);
-		}
-		catch (XLIFFFileException xliffFileException) {
-			ResourceBundle resourceBundle = ResourceBundleUtil.getBundle(
-				locale, getClass());
-
-			Function<String, String> exceptionMessageFunction =
-				_exceptionMessageFunctions.get(xliffFileException.getClass());
-
-			failureMessages.put(
-				fileName,
-				_language.get(
-					resourceBundle, exceptionMessageFunction.apply(className)));
 		}
 	}
 
@@ -378,12 +427,20 @@ public class ImportTranslationMVCActionCommand extends BaseMVCActionCommand {
 						ImportTranslationMVCActionCommand::
 							_getMustHaveValidIdMessage
 					).put(
+						XLIFFFileException.MustHaveValidModel.class,
+						s ->
+							"the-xliff-file-contains-a-translation-for-an-" +
+								"invalid-model"
+					).put(
 						XLIFFFileException.MustHaveValidParameter.class,
 						s -> "the-xliff-file-has-invalid-parameters"
 					).put(
 						XLIFFFileException.MustNotHaveMoreThanOne.class,
 						s -> "the-xliff-file-is-invalid"
 					).build();
+
+	private volatile FFBulkTranslationConfiguration
+		_ffBulkTranslationConfiguration;
 
 	@Reference
 	private InfoItemServiceTracker _infoItemServiceTracker;
@@ -402,5 +459,40 @@ public class ImportTranslationMVCActionCommand extends BaseMVCActionCommand {
 
 	@Reference
 	private TranslationURLProvider _translationURLProvider;
+
+	@Reference
+	private WorkflowDefinitionLinkLocalService
+		_workflowDefinitionLinkLocalService;
+
+	private static class Translation {
+
+		public Translation(
+			Supplier<String> contentTypeSupplier, String fileName,
+			UnsafeSupplier<InputStream, IOException>
+				inputStreamUnsafeSupplier) {
+
+			_contentTypeSupplier = contentTypeSupplier;
+			_fileName = fileName;
+			_inputStreamUnsafeSupplier = inputStreamUnsafeSupplier;
+		}
+
+		public String getContentType() {
+			return _contentTypeSupplier.get();
+		}
+
+		public String getFileName() {
+			return _fileName;
+		}
+
+		public InputStream getInputStream() throws IOException {
+			return _inputStreamUnsafeSupplier.get();
+		}
+
+		private final Supplier<String> _contentTypeSupplier;
+		private final String _fileName;
+		private final UnsafeSupplier<InputStream, IOException>
+			_inputStreamUnsafeSupplier;
+
+	}
 
 }

@@ -196,19 +196,19 @@ public abstract class BaseDataListViewResourceTestCase {
 	}
 
 	@Test
-	public void testDeleteDataListViewsDataDefinition() throws Exception {
+	public void testDeleteDataDefinitionDataListView() throws Exception {
 		@SuppressWarnings("PMD.UnusedLocalVariable")
 		DataListView dataListView =
-			testDeleteDataListViewsDataDefinition_addDataListView();
+			testDeleteDataDefinitionDataListView_addDataListView();
 
 		assertHttpResponseStatusCode(
 			204,
-			dataListViewResource.deleteDataListViewsDataDefinitionHttpResponse(
+			dataListViewResource.deleteDataDefinitionDataListViewHttpResponse(
 				dataListView.getDataDefinitionId()));
 	}
 
 	protected DataListView
-			testDeleteDataListViewsDataDefinition_addDataListView()
+			testDeleteDataDefinitionDataListView_addDataListView()
 		throws Exception {
 
 		throw new UnsupportedOperationException(
@@ -328,6 +328,20 @@ public abstract class BaseDataListViewResourceTestCase {
 				BeanUtils.setProperty(
 					dataListView1, entityField.getName(),
 					DateUtils.addMinutes(new Date(), -2));
+			});
+	}
+
+	@Test
+	public void testGetDataDefinitionDataListViewsPageWithSortDouble()
+		throws Exception {
+
+		testGetDataDefinitionDataListViewsPageWithSort(
+			EntityField.Type.DOUBLE,
+			(entityField, dataListView1, dataListView2) -> {
+				BeanUtils.setProperty(
+					dataListView1, entityField.getName(), 0.1);
+				BeanUtils.setProperty(
+					dataListView2, entityField.getName(), 0.5);
 			});
 	}
 

@@ -31,7 +31,7 @@ import com.liferay.blogs.model.BlogsEntry;
 import com.liferay.blogs.service.BlogsEntryLocalService;
 import com.liferay.blogs.service.BlogsEntryService;
 import com.liferay.blogs.web.internal.bulk.selection.BlogsEntryBulkSelectionFactory;
-import com.liferay.blogs.web.internal.util.BlogsEntryImageSelectorHelper;
+import com.liferay.blogs.web.internal.helper.BlogsEntryImageSelectorHelper;
 import com.liferay.bulk.selection.BulkSelection;
 import com.liferay.document.library.kernel.exception.FileSizeException;
 import com.liferay.friendly.url.exception.DuplicateFriendlyURLEntryException;
@@ -259,6 +259,8 @@ public class EditEntryMVCActionCommand extends BaseMVCActionCommand {
 		}
 		catch (Throwable throwable) {
 			_log.error(throwable, throwable);
+
+			SessionErrors.add(actionRequest, throwable.getClass());
 
 			actionResponse.setRenderParameter("mvcPath", "/blogs/error.jsp");
 

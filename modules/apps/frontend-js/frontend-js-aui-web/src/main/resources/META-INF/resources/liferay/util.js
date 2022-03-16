@@ -1,3 +1,4 @@
+/* eslint-disable @liferay/aui/no-one */
 /**
  * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
@@ -252,8 +253,11 @@
 			return totalOn;
 		},
 
+		/**
+		 * @deprecated As of Cavanaugh (7.4.x), with no direct replacement
+		 */
 		checkTab(box) {
-			if (document.all && window.event.keyCode == 9) {
+			if (document.all && Number(window.event.keyCode) === 9) {
 				box.selection = document.selection.createRange();
 
 				setTimeout(() => {
@@ -335,10 +339,10 @@
 			return str.replace(/<!\[CDATA\[|\]\]>/gi, (match) => {
 				var str = '';
 
-				if (match == ']]>') {
+				if (match === ']]>') {
 					str = ']]&gt;';
 				}
-				else if (match == '<![CDATA[') {
+				else if (match === '<![CDATA[') {
 					str = '&lt;![CDATA[';
 				}
 
@@ -359,7 +363,7 @@
 				}
 
 				const newWindow =
-					currentElement.getAttribute('target') == '_blank';
+					currentElement.getAttribute('target') === '_blank';
 
 				const hrefFm = document.hrefFm;
 
@@ -373,6 +377,9 @@
 			}
 		},
 
+		/**
+		 * @deprecated As of Cavanaugh (7.4.x), with no direct replacement
+		 */
 		getAttributes(element, attributeGetter) {
 			var result = null;
 
@@ -419,6 +426,9 @@
 			return result;
 		},
 
+		/**
+		 * @deprecated As of Cavanaugh (7.4.x), with no direct replacement
+		 */
 		getColumnId(str) {
 			var columnId = str.replace(/layout-column_/, '');
 
@@ -486,9 +496,9 @@
 
 				var parentThemeDisplay;
 
-				while (parentWindow != window) {
+				while (parentWindow !== window) {
 					try {
-						if (typeof parentWindow.location.href == 'undefined') {
+						if (typeof parentWindow.location.href === 'undefined') {
 							break;
 						}
 
@@ -506,7 +516,7 @@
 					}
 					else if (
 						!parentThemeDisplay.isStatePopUp() ||
-						parentWindow == parentWindow.parent
+						parentWindow === parentWindow.parent
 					) {
 						topWindow = parentWindow;
 
@@ -555,7 +565,7 @@
 			if (x > -1) {
 				var y = url.lastIndexOf('/');
 
-				if (x + 1 == y) {
+				if (x + 1 === y) {
 					return url + '/' + sessionId;
 				}
 			}
@@ -651,7 +661,13 @@
 
 			var currentTarget = Util.getElement(event.currentTarget);
 
-			config = A.mix(A.merge({}, currentTarget.dataset), config);
+			// eslint-disable-next-line prefer-object-spread
+			config = Object.assign(
+				{},
+				// eslint-disable-next-line prefer-object-spread
+				Object.assign({}, currentTarget.dataset),
+				config
+			);
 
 			if (!config.uri) {
 				config.uri =
@@ -676,6 +692,9 @@
 			topUtil._openWindowProvider(config, callback);
 		},
 
+		/**
+		 * @deprecated As of Cavanaugh (7.4.x), with no direct replacement
+		 */
 		processTab(id) {
 			document.all[id].selection.text = String.fromCharCode(9);
 			document.all[id].focus();
@@ -719,7 +738,7 @@
 			box = Util.getElement(box);
 
 			if (box) {
-				if (box.getAttribute('selectedIndex') == -1) {
+				if (box.getAttribute('selectedIndex') === -1) {
 					box.setAttribute('selectedIndex', 0);
 				}
 				else {
@@ -1046,7 +1065,7 @@
 				var toggle = function () {
 					var currentValue = selectBox.value;
 
-					var visible = value == currentValue;
+					var visible = value === currentValue;
 
 					if (dynamicValue) {
 						visible = value(currentValue, value);
@@ -1071,6 +1090,7 @@
 		Util,
 		'afterIframeLoaded',
 		(event) => {
+			// eslint-disable-next-line @liferay/aui/no-node
 			var nodeInstances = A.Node._instances;
 
 			var docEl = event.doc;
@@ -1166,7 +1186,7 @@
 			var defaultValues = {
 				eventName: 'selectStructure',
 			};
-
+			// eslint-disable-next-line @liferay/aui/no-merge
 			config = A.merge(defaultValues, config);
 
 			var params = {
@@ -1471,6 +1491,7 @@
 
 				var editURL = new Liferay.Util.PortletURL.createPortletURL(
 					config.uri,
+					// eslint-disable-next-line @liferay/aui/no-merge
 					A.merge(
 						{
 							eventName,
@@ -1481,6 +1502,7 @@
 
 				config.uri = editURL.toString();
 
+				// eslint-disable-next-line @liferay/aui/no-merge
 				config.dialogIframe = A.merge(
 					{
 						bodyCssClass: 'dialog-with-footer',
@@ -1538,6 +1560,7 @@
 				);
 
 				if (selectedData) {
+					// eslint-disable-next-line @liferay/aui/no-each
 					A.each(selectorButtons, (item) => {
 						var assetEntryId =
 							item.attr('data-entityid') ||

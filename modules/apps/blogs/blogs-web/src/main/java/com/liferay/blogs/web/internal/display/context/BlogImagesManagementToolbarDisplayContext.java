@@ -28,6 +28,8 @@ import com.liferay.portal.kernel.portlet.LiferayPortletRequest;
 import com.liferay.portal.kernel.portlet.LiferayPortletResponse;
 import com.liferay.portal.kernel.portlet.PortalPreferences;
 import com.liferay.portal.kernel.portlet.PortletPreferencesFactoryUtil;
+import com.liferay.portal.kernel.portlet.SearchDisplayStyleUtil;
+import com.liferay.portal.kernel.portlet.SearchOrderByUtil;
 import com.liferay.portal.kernel.repository.model.FileEntry;
 import com.liferay.portal.kernel.security.permission.ActionKeys;
 import com.liferay.portal.kernel.theme.ThemeDisplay;
@@ -101,23 +103,15 @@ public class BlogImagesManagementToolbarDisplayContext
 
 	@Override
 	public String getDisplayStyle() {
-		String displayStyle = ParamUtil.getString(
-			_httpServletRequest, "displayStyle");
-
-		if (Validator.isNull(displayStyle)) {
-			displayStyle = _portalPreferences.getValue(
-				BlogsPortletKeys.BLOGS_ADMIN, "images-display-style", "icon");
-		}
-		else {
-			_portalPreferences.setValue(
-				BlogsPortletKeys.BLOGS_ADMIN, "images-display-style",
-				displayStyle);
-
-			_httpServletRequest.setAttribute(
-				WebKeys.SINGLE_PAGE_APPLICATION_CLEAR_CACHE, Boolean.TRUE);
+		if (Validator.isNotNull(_displayStyle)) {
+			return _displayStyle;
 		}
 
-		return displayStyle;
+		_displayStyle = SearchDisplayStyleUtil.getDisplayStyle(
+			_httpServletRequest, BlogsPortletKeys.BLOGS_ADMIN,
+			"images-display-style", "icon", true);
+
+		return _displayStyle;
 	}
 
 	@Override
@@ -133,12 +127,28 @@ public class BlogImagesManagementToolbarDisplayContext
 
 	@Override
 	public String getOrderByCol() {
-		return ParamUtil.getString(_httpServletRequest, "orderByCol", "title");
+		if (Validator.isNotNull(_orderByCol)) {
+			return _orderByCol;
+		}
+
+		_orderByCol = SearchOrderByUtil.getOrderByCol(
+			_httpServletRequest, BlogsPortletKeys.BLOGS_ADMIN,
+			"images-order-by-col", "title");
+
+		return _orderByCol;
 	}
 
 	@Override
 	public String getOrderByType() {
-		return ParamUtil.getString(_httpServletRequest, "orderByType", "desc");
+		if (Validator.isNotNull(_orderByType)) {
+			return _orderByType;
+		}
+
+		_orderByType = SearchOrderByUtil.getOrderByType(
+			_httpServletRequest, BlogsPortletKeys.BLOGS_ADMIN,
+			"images-order-by-type", "asc");
+
+		return _orderByType;
 	}
 
 	@Override
@@ -263,9 +273,12 @@ public class BlogImagesManagementToolbarDisplayContext
 		).build();
 	}
 
+	private String _displayStyle;
 	private final HttpServletRequest _httpServletRequest;
 	private final LiferayPortletRequest _liferayPortletRequest;
 	private final LiferayPortletResponse _liferayPortletResponse;
+	private String _orderByCol;
+	private String _orderByType;
 	private final PortalPreferences _portalPreferences;
 
 }

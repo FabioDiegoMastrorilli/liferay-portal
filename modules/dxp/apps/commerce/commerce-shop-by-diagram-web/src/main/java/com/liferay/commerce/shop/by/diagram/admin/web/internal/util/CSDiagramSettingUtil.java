@@ -45,6 +45,10 @@ public class CSDiagramSettingUtil {
 	private static FileEntry _fetchFileEntry(CSDiagramSetting csDiagramSetting)
 		throws Exception {
 
+		if (csDiagramSetting == null) {
+			return null;
+		}
+
 		try {
 			CPAttachmentFileEntry cpAttachmentFileEntry =
 				csDiagramSetting.getCPAttachmentFileEntry();
@@ -55,9 +59,7 @@ public class CSDiagramSettingUtil {
 					noSuchCPAttachmentFileEntryException) {
 
 			if (_log.isInfoEnabled()) {
-				_log.info(
-					noSuchCPAttachmentFileEntryException,
-					noSuchCPAttachmentFileEntryException);
+				_log.info(noSuchCPAttachmentFileEntryException);
 			}
 
 			return null;

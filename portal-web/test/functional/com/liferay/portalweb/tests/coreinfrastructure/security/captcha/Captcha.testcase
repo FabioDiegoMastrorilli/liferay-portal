@@ -18,14 +18,15 @@ definition {
 		else {
 			User.firstLoginPG();
 
-			Page.tearDownCP();
+			PagesAdmin.tearDownCP();
 		}
 	}
 
-	@description = "This is a use case for LRQA-29540."
+	@description = "This is a use case for LRQA-29540. Verify CAPTCHA is enabled when creating an account."
 	@priority = "4"
-	test ViewCaptchaEnabled {
+	test AssertCaptchaEnabled {
 		property captcha.enabled = "true";
+		property portal.acceptance = "true";
 
 		task ("View captcha") {
 			SignInNavigator.gotoCreateAccount();
@@ -34,12 +35,13 @@ definition {
 		}
 	}
 
-	@description = "This is a use case for LPS-84310. This test will deploy an OSGI configuration file."
+	@description = "This is a use case for LPS-84310. Verify reCAPTCHA is enabled in account creation after deploying a CAPTCHA OSGi config file."
 	@priority = "4"
-	test ViewRecaptchaEnabled {
+	test AssertRecaptchaEnabled {
 		property captcha.enabled = "true";
 		property osgi.module.configuration.file.names = "com.liferay.captcha.configuration.CaptchaConfiguration.config";
 		property osgi.module.configurations = "maxChallenges=&quot;0&quot;";
+		property portal.acceptance = "true";
 		property test.name.skip.portal.instance = "Captcha#ViewRecaptchaEnabled";
 
 		var recaptchaPrivateKey = PropsUtil.get("recaptcha.private.key");
@@ -48,10 +50,7 @@ definition {
 		task ("go to reCAPTCHA setting") {
 			User.firstLoginPG();
 
-			ApplicationsMenu.gotoPortlet(
-				category = "Configuration",
-				panel = "Control Panel",
-				portlet = "System Settings");
+			SystemSettings.openSystemSettingsAdmin();
 
 			SystemSettings.gotoConfiguration(
 				configurationCategory = "Security Tools",

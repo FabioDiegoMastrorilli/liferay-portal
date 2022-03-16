@@ -34,7 +34,7 @@ definition {
 
 			KBArticle.tearDownCP();
 
-			Page.tearDownCP();
+			PagesAdmin.tearDownCP();
 		}
 	}
 
@@ -379,7 +379,7 @@ definition {
 		Navigator.openURL();
 
 		ProductMenu.gotoScopedPortlet(
-			category = "Content &amp; Data",
+			category = "Content & Data",
 			portlet = "Knowledge Base",
 			scope = "Knowledge Base Display Page");
 
@@ -390,7 +390,7 @@ definition {
 		Navigator.openURL();
 
 		ProductMenu.gotoScopedPortlet(
-			category = "Content &amp; Data",
+			category = "Content & Data",
 			portlet = "Knowledge Base",
 			scope = "Knowledge Base Display Page 2");
 
@@ -648,7 +648,7 @@ definition {
 			kbArticleContentAddedDiff = "Edit",
 			kbArticleVersionNew = "2",
 			kbArticleVersionOld = "1",
-			viewNoXMLInTitle = "true");
+			viewNoXmlInTitle = "true");
 	}
 
 	@priority = "4"

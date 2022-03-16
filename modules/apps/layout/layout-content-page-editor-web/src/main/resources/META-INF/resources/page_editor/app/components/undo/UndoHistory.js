@@ -66,7 +66,10 @@ export default function UndoHistory() {
 				alignmentPosition={Align.BottomRight}
 				className="ml-2"
 				menuElementAttrs={{
-					className: 'cadmin page-editor__undo-history',
+					className: 'page-editor__undo-history',
+					containerProps: {
+						className: 'cadmin',
+					},
 				}}
 				onActiveChange={setActive}
 				trigger={
@@ -87,12 +90,15 @@ export default function UndoHistory() {
 						onHistoryItemClick={onHistoryItemClick}
 						type={UNDO_TYPES.redo}
 					/>
+
 					<History
 						actions={undoHistory}
 						onHistoryItemClick={onHistoryItemClick}
 						type={UNDO_TYPES.undo}
 					/>
+
 					<ClayDropDownDivider />
+
 					<ClayDropDown.Item
 						disabled={!undoHistory.length}
 						onClick={(event) =>

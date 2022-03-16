@@ -14,6 +14,7 @@
 
 package com.liferay.rss.internal.export;
 
+import com.liferay.normalizer.Normalizer;
 import com.liferay.petra.string.CharPool;
 import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.kernel.log.Log;
@@ -39,6 +40,7 @@ import java.util.List;
 import org.jdom2.IllegalDataException;
 
 import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
 
 /**
  * @author Shuyang Zhou
@@ -58,7 +60,7 @@ public class RSSExporterImpl implements RSSExporter {
 		}
 		catch (IllegalDataException illegalDataException) {
 			if (_log.isDebugEnabled()) {
-				_log.debug(illegalDataException, illegalDataException);
+				_log.debug(illegalDataException);
 			}
 
 			// LEP-4450
@@ -77,9 +79,23 @@ public class RSSExporterImpl implements RSSExporter {
 		}
 	}
 
-	private static void _regexpStrip(
-		com.rometools.rome.feed.synd.SyndFeed syndFeed) {
+	private String _regexpStrip(String text) {
+		text = _normalizer.normalizeToAscii(text);
 
+		char[] array = text.toCharArray();
+
+		for (int i = 0; i < array.length; i++) {
+			String s = String.valueOf(array[i]);
+
+			if (!s.matches(_REGEXP_STRIP)) {
+				array[i] = CharPool.SPACE;
+			}
+		}
+
+		return new String(array);
+	}
+
+	private void _regexpStrip(com.rometools.rome.feed.synd.SyndFeed syndFeed) {
 		syndFeed.setTitle(_regexpStrip(syndFeed.getTitle()));
 		syndFeed.setDescription(_regexpStrip(syndFeed.getDescription()));
 
@@ -95,22 +111,6 @@ public class RSSExporterImpl implements RSSExporter {
 
 			syndContent.setValue(_regexpStrip(syndContent.getValue()));
 		}
-	}
-
-	private static String _regexpStrip(String text) {
-		text = Normalizer.normalizeToAscii(text);
-
-		char[] array = text.toCharArray();
-
-		for (int i = 0; i < array.length; i++) {
-			String s = String.valueOf(array[i]);
-
-			if (!s.matches(_REGEXP_STRIP)) {
-				array[i] = CharPool.SPACE;
-			}
-		}
-
-		return new String(array);
 	}
 
 	private com.rometools.rome.feed.synd.SyndContent _toRealSyncContent(
@@ -226,5 +226,8 @@ public class RSSExporterImpl implements RSSExporter {
 
 	private static final Log _log = LogFactoryUtil.getLog(
 		RSSExporterImpl.class);
+
+	@Reference
+	private Normalizer _normalizer;
 
 }

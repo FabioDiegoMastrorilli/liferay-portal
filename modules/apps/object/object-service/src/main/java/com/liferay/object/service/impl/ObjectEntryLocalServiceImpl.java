@@ -18,8 +18,10 @@ import com.liferay.asset.kernel.model.AssetEntry;
 import com.liferay.asset.kernel.model.AssetLinkConstants;
 import com.liferay.asset.kernel.service.AssetEntryLocalService;
 import com.liferay.asset.kernel.service.AssetLinkLocalService;
+import com.liferay.document.library.kernel.service.DLFileEntryLocalService;
 import com.liferay.list.type.model.ListTypeEntry;
 import com.liferay.list.type.service.ListTypeEntryLocalService;
+import com.liferay.object.constants.ObjectFieldConstants;
 import com.liferay.object.constants.ObjectRelationshipConstants;
 import com.liferay.object.exception.NoSuchObjectFieldException;
 import com.liferay.object.exception.ObjectDefinitionScopeException;
@@ -51,7 +53,10 @@ import com.liferay.petra.string.StringBundler;
 import com.liferay.petra.string.StringPool;
 import com.liferay.portal.aop.AopService;
 import com.liferay.portal.dao.jdbc.postgresql.PostgreSQLJDBCUtil;
-import com.liferay.portal.kernel.dao.jdbc.CurrentConnectionUtil;
+import com.liferay.portal.kernel.dao.db.DB;
+import com.liferay.portal.kernel.dao.db.DBManagerUtil;
+import com.liferay.portal.kernel.dao.db.DBType;
+import com.liferay.portal.kernel.dao.jdbc.CurrentConnection;
 import com.liferay.portal.kernel.dao.orm.Session;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.exception.SystemException;
@@ -98,11 +103,17 @@ import com.liferay.portal.search.sort.SortFieldBuilder;
 import com.liferay.portal.search.sort.SortOrder;
 import com.liferay.portal.search.sort.Sorts;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.io.Serializable;
+import java.io.StringReader;
 
 import java.math.BigDecimal;
 
+import java.nio.charset.StandardCharsets;
+
 import java.sql.Blob;
+import java.sql.Clob;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -111,6 +122,7 @@ import java.sql.Timestamp;
 import java.sql.Types;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -118,6 +130,8 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import org.apache.commons.io.IOUtils;
 
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
@@ -270,6 +284,10 @@ public class ObjectEntryLocalServiceImpl
 			objectEntry.getGroupId(), objectDefinition.getObjectDefinitionId(),
 			objectEntry.getPrimaryKey());
 
+		_deleteFileEntries(
+			Collections.emptyMap(), objectDefinition.getObjectDefinitionId(),
+			objectEntry.getValues());
+
 		Indexer<ObjectEntry> indexer = IndexerRegistryUtil.getIndexer(
 			objectDefinition.getClassName());
 
@@ -360,6 +378,16 @@ public class ObjectEntryLocalServiceImpl
 
 		return objectEntryPersistence.findByG_ODI(
 			groupId, objectDefinitionId, start, end);
+	}
+
+	@Override
+	public List<ObjectEntry> getObjectEntries(
+			long groupId, long objectDefinitionId, int status, int start,
+			int end)
+		throws PortalException {
+
+		return objectEntryPersistence.findByG_ODI_S(
+			groupId, objectDefinitionId, status, start, end);
 	}
 
 	@Override
@@ -648,10 +676,15 @@ public class ObjectEntryLocalServiceImpl
 			_objectDefinitionPersistence.findByPrimaryKey(
 				objectEntry.getObjectDefinitionId());
 
-		boolean visible = false;
+		String title = StringPool.BLANK;
 
-		if (objectEntry.isApproved()) {
-			visible = true;
+		try {
+			title = objectEntry.getTitleValue();
+		}
+		catch (PortalException portalException) {
+			if (_log.isWarnEnabled()) {
+				_log.warn(portalException);
+			}
 		}
 
 		AssetEntry assetEntry = _assetEntryLocalService.updateEntry(
@@ -659,8 +692,8 @@ public class ObjectEntryLocalServiceImpl
 			objectEntry.getCreateDate(), objectEntry.getModifiedDate(),
 			objectDefinition.getClassName(), objectEntry.getObjectEntryId(),
 			objectEntry.getUuid(), 0, assetCategoryIds, assetTagNames, true,
-			visible, null, null, null, null, ContentTypes.TEXT_PLAIN,
-			String.valueOf(objectEntry.getObjectEntryId()),
+			objectEntry.isApproved(), null, null, null, null,
+			ContentTypes.TEXT_PLAIN, title,
 			String.valueOf(objectEntry.getObjectEntryId()), null, null, null, 0,
 			0, priority);
 
@@ -680,7 +713,9 @@ public class ObjectEntryLocalServiceImpl
 
 		_validateValues(objectEntry.getObjectDefinitionId(), values);
 
-		objectEntry.setTransientValues(objectEntry.getValues());
+		Map<String, Serializable> transientValues = objectEntry.getValues();
+
+		objectEntry.setTransientValues(transientValues);
 
 		_updateTable(
 			_getDynamicObjectDefinitionTable(
@@ -704,6 +739,9 @@ public class ObjectEntryLocalServiceImpl
 			serviceContext.getAssetPriority());
 
 		_startWorkflowInstance(userId, objectEntry, serviceContext);
+
+		_deleteFileEntries(
+			values, objectEntry.getObjectDefinitionId(), transientValues);
 
 		_reindex(objectEntry);
 
@@ -737,6 +775,39 @@ public class ObjectEntryLocalServiceImpl
 		_reindex(objectEntry);
 
 		return objectEntry;
+	}
+
+	private void _deleteFileEntries(
+		Map<String, Serializable> newValues, long objectDefinitionId,
+		Map<String, Serializable> oldValues) {
+
+		List<ObjectField> objectFields =
+			_objectFieldPersistence.findByObjectDefinitionId(
+				objectDefinitionId);
+
+		for (ObjectField objectField : objectFields) {
+			String objectFieldName = objectField.getName();
+
+			if (!Objects.equals(
+					objectField.getBusinessType(),
+					ObjectFieldConstants.BUSINESS_TYPE_ATTACHMENT) ||
+				Objects.equals(
+					GetterUtil.getLong(newValues.get(objectFieldName)),
+					GetterUtil.getLong(oldValues.get(objectFieldName)))) {
+
+				continue;
+			}
+
+			try {
+				_dlFileEntryLocalService.deleteFileEntry(
+					GetterUtil.getLong(oldValues.get(objectFieldName)));
+			}
+			catch (PortalException portalException) {
+				if (_log.isDebugEnabled()) {
+					_log.debug(portalException);
+				}
+			}
+		}
 	}
 
 	private void _deleteFromTable(
@@ -858,7 +929,7 @@ public class ObjectEntryLocalServiceImpl
 					}
 
 					return _inlineSQLHelper.getPermissionWherePredicate(
-						dynamicObjectDefinitionTable.getName(),
+						objectDefinition2.getClassName(),
 						dynamicObjectDefinitionTable.getPrimaryKeyColumn());
 				}
 			)
@@ -933,8 +1004,12 @@ public class ObjectEntryLocalServiceImpl
 						return null;
 					}
 
+					ObjectDefinition objectDefinition2 =
+						_objectDefinitionPersistence.findByPrimaryKey(
+							objectRelationship.getObjectDefinitionId2());
+
 					return _inlineSQLHelper.getPermissionWherePredicate(
-						dynamicObjectDefinitionTable.getName(),
+						objectDefinition2.getClassName(),
 						dynamicObjectDefinitionTable.getPrimaryKeyColumn());
 				}
 			)
@@ -959,6 +1034,15 @@ public class ObjectEntryLocalServiceImpl
 		}
 		else if (sqlType == Types.BOOLEAN) {
 			return resultSet.getBoolean(name);
+		}
+		else if (sqlType == Types.CLOB) {
+			DB db = DBManagerUtil.getDB();
+
+			if (db.getDBType() == DBType.POSTGRESQL) {
+				return resultSet.getString(name);
+			}
+
+			return resultSet.getClob(name);
 		}
 		else if (sqlType == Types.DATE) {
 			return resultSet.getTimestamp(name);
@@ -989,7 +1073,7 @@ public class ObjectEntryLocalServiceImpl
 		}
 		catch (JSONException jsonException) {
 			if (_log.isDebugEnabled()) {
-				_log.debug(jsonException, jsonException);
+				_log.debug(jsonException);
 			}
 		}
 
@@ -1093,7 +1177,7 @@ public class ObjectEntryLocalServiceImpl
 			_log.debug("SQL: " + sql);
 		}
 
-		Connection connection = CurrentConnectionUtil.getConnection(
+		Connection connection = _currentConnection.getConnection(
 			objectEntryPersistence.getDataSource());
 
 		try (PreparedStatement preparedStatement = connection.prepareStatement(
@@ -1244,6 +1328,34 @@ public class ObjectEntryLocalServiceImpl
 
 			values.put(name, (Boolean)object);
 		}
+		else if (clazz == Clob.class) {
+			if (object == null) {
+				values.put(name, StringPool.BLANK);
+			}
+			else {
+				DB db = DBManagerUtil.getDB();
+
+				if (db.getDBType() == DBType.POSTGRESQL) {
+					values.put(name, (String)object);
+				}
+				else {
+					Clob clob = (Clob)object;
+
+					try {
+						InputStream inputStream = clob.getAsciiStream();
+
+						values.put(
+							name,
+							GetterUtil.getString(
+								IOUtils.toString(
+									inputStream, StandardCharsets.UTF_8)));
+					}
+					catch (IOException | SQLException exception) {
+						throw new SystemException(exception);
+					}
+				}
+			}
+		}
 		else if (clazz == Date.class) {
 			values.put(name, (Date)object);
 		}
@@ -1326,6 +1438,17 @@ public class ObjectEntryLocalServiceImpl
 		}
 		else if (sqlType == Types.BOOLEAN) {
 			preparedStatement.setBoolean(index, GetterUtil.getBoolean(value));
+		}
+		else if (sqlType == Types.CLOB) {
+			DB db = DBManagerUtil.getDB();
+
+			if (db.getDBType() == DBType.POSTGRESQL) {
+				preparedStatement.setString(index, String.valueOf(value));
+			}
+			else {
+				preparedStatement.setClob(
+					index, new StringReader(String.valueOf(value)));
+			}
 		}
 		else if (sqlType == Types.DATE) {
 			String valueString = GetterUtil.getString(value);
@@ -1453,7 +1576,7 @@ public class ObjectEntryLocalServiceImpl
 			_log.debug("SQL: " + sql);
 		}
 
-		Connection connection = CurrentConnectionUtil.getConnection(
+		Connection connection = _currentConnection.getConnection(
 			objectEntryPersistence.getDataSource());
 
 		try (PreparedStatement preparedStatement = connection.prepareStatement(
@@ -1546,7 +1669,7 @@ public class ObjectEntryLocalServiceImpl
 
 		int count = 0;
 
-		Connection connection = CurrentConnectionUtil.getConnection(
+		Connection connection = _currentConnection.getConnection(
 			objectEntryPersistence.getDataSource());
 
 		try (PreparedStatement preparedStatement = connection.prepareStatement(
@@ -1585,7 +1708,7 @@ public class ObjectEntryLocalServiceImpl
 
 		int count = 0;
 
-		Connection connection = CurrentConnectionUtil.getConnection(
+		Connection connection = _currentConnection.getConnection(
 			objectEntryPersistence.getDataSource());
 
 		try (PreparedStatement preparedStatement = connection.prepareStatement(
@@ -1627,14 +1750,13 @@ public class ObjectEntryLocalServiceImpl
 			}
 			catch (NoSuchObjectFieldException noSuchObjectFieldException) {
 				if (_log.isDebugEnabled()) {
-					_log.debug(
-						noSuchObjectFieldException, noSuchObjectFieldException);
+					_log.debug(noSuchObjectFieldException);
 				}
 
 				continue;
 			}
 
-			if (StringUtil.equals(objectField.getType(), "String")) {
+			if (StringUtil.equals(objectField.getDBType(), "String")) {
 				_validateObjectFieldStringTypeLength(entry);
 			}
 
@@ -1652,6 +1774,12 @@ public class ObjectEntryLocalServiceImpl
 
 	@Reference
 	private AssetLinkLocalService _assetLinkLocalService;
+
+	@Reference
+	private CurrentConnection _currentConnection;
+
+	@Reference
+	private DLFileEntryLocalService _dlFileEntryLocalService;
 
 	@Reference
 	private GroupLocalService _groupLocalService;

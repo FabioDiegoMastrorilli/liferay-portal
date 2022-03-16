@@ -53,16 +53,18 @@ public interface RemoteAppEntryService extends BaseService {
 	 * Never modify this interface directly. Add custom service methods to <code>com.liferay.remote.app.service.impl.RemoteAppEntryServiceImpl</code> and rerun ServiceBuilder to automatically copy the method declarations to this interface. Consume the remote app entry remote service via injection or a <code>org.osgi.util.tracker.ServiceTracker</code>. Use {@link RemoteAppEntryServiceUtil} if injection and service tracking are not available.
 	 */
 	public RemoteAppEntry addCustomElementRemoteAppEntry(
-			String customElementCSSURLs, String customElementHTMLElementName,
-			String customElementURLs, String friendlyURLMapping,
-			boolean instanceable, Map<Locale, String> nameMap,
-			String portletCategoryName, String properties)
+			String externalReferenceCode, String customElementCSSURLs,
+			String customElementHTMLElementName, String customElementURLs,
+			boolean customElementUseESM, String description,
+			String friendlyURLMapping, boolean instanceable,
+			Map<Locale, String> nameMap, String portletCategoryName,
+			String properties, String sourceCodeURL)
 		throws PortalException;
 
 	public RemoteAppEntry addIFrameRemoteAppEntry(
-			String friendlyURLMapping, String iFrameURL, boolean instanceable,
-			Map<Locale, String> nameMap, String portletCategoryName,
-			String properties)
+			String description, String friendlyURLMapping, String iFrameURL,
+			boolean instanceable, Map<Locale, String> nameMap,
+			String portletCategoryName, String properties, String sourceCodeURL)
 		throws PortalException;
 
 	public RemoteAppEntry deleteRemoteAppEntry(long remoteAppEntryId)
@@ -82,14 +84,16 @@ public interface RemoteAppEntryService extends BaseService {
 	public RemoteAppEntry updateCustomElementRemoteAppEntry(
 			long remoteAppEntryId, String customElementCSSURLs,
 			String customElementHTMLElementName, String customElementURLs,
+			boolean customElementUseESM, String description,
 			String friendlyURLMapping, Map<Locale, String> nameMap,
-			String portletCategoryName, String properties)
+			String portletCategoryName, String properties, String sourceCodeURL)
 		throws PortalException;
 
 	public RemoteAppEntry updateIFrameRemoteAppEntry(
-			long remoteAppEntryId, String friendlyURLMapping, String iFrameURL,
+			long remoteAppEntryId, String description,
+			String friendlyURLMapping, String iFrameURL,
 			Map<Locale, String> nameMap, String portletCategoryName,
-			String properties)
+			String properties, String sourceCodeURL)
 		throws PortalException;
 
 }

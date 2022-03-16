@@ -12,11 +12,13 @@
  * details.
  */
 
+import ClayAlert from '@clayui/alert';
 import ClayLayout from '@clayui/layout';
 import ClayLoadingIndicator from '@clayui/loading-indicator';
 import React, {useContext, useEffect, useMemo, useState} from 'react';
 
 import {COLUMN_SIZE_MODULE_PER_ROW_SIZES} from '../../config/constants/columnSizes';
+import {config} from '../../config/index';
 import {
 	CollectionItemContext,
 	CollectionItemContextProvider,
@@ -97,52 +99,68 @@ const Grid = ({
 	const maxNumberOfItems =
 		Math.min(
 			collectionLength,
-			collectionConfig.paginationType
-				? Math.min(
-						collectionConfig.numberOfItems,
-						collectionConfig.numberOfItemsPerPage
-				  )
-				: collectionConfig.numberOfItems
+			getNumberOfItems(collection, collectionConfig)
 		) || 1;
 	const numberOfRows = Math.ceil(
 		maxNumberOfItems / collectionConfig.numberOfColumns
 	);
 
-	return Array.from({length: numberOfRows}).map((_, i) => (
-		<ClayLayout.Row key={`row-${i}`}>
-			{Array.from({length: collectionConfig.numberOfColumns}).map(
-				(_, j) => {
-					const key = `col-${i}-${j}`;
-					const index = i * collectionConfig.numberOfColumns + j;
+	return (
+		<>
+			{Array.from({length: numberOfRows}).map((_, i) => (
+				<ClayLayout.Row key={`row-${i}`}>
+					{Array.from({length: collectionConfig.numberOfColumns}).map(
+						(_, j) => {
+							const key = `col-${i}-${j}`;
+							const index =
+								i * collectionConfig.numberOfColumns + j;
 
-					return (
-						<ClayLayout.Col
-							key={key}
-							size={
-								COLUMN_SIZE_MODULE_PER_ROW_SIZES[
-									collectionConfig.numberOfColumns
-								][collectionConfig.numberOfColumns][j]
-							}
-						>
-							{index < maxNumberOfItems && (
-								<ColumnContext
-									collectionConfig={collectionConfig}
-									collectionId={collectionId}
-									collectionItem={collection[index]}
-									customCollectionSelectorURL={
-										customCollectionSelectorURL
+							return (
+								<ClayLayout.Col
+									key={key}
+									size={
+										COLUMN_SIZE_MODULE_PER_ROW_SIZES[
+											collectionConfig.numberOfColumns
+										][collectionConfig.numberOfColumns][j]
 									}
-									index={index}
 								>
-									{child}
-								</ColumnContext>
-							)}
-						</ClayLayout.Col>
-					);
-				}
+									{index < maxNumberOfItems && (
+										<ColumnContext
+											collectionConfig={collectionConfig}
+											collectionId={collectionId}
+											collectionItem={
+												collection.items[index] ?? {}
+											}
+											customCollectionSelectorURL={
+												customCollectionSelectorURL
+											}
+											index={index}
+										>
+											{child}
+										</ColumnContext>
+									)}
+								</ClayLayout.Col>
+							);
+						}
+					)}
+				</ClayLayout.Row>
+			))}
+			{maxNumberOfItems > config.maxNumberOfItemsEditMode && (
+				<ClayAlert
+					className="border-0 mb-0"
+					displayType="info"
+					variant="stripe"
+				>
+					{Liferay.Util.sub(
+						Liferay.Language.get(
+							'in-edit-mode,-the-number-of-elements-displayed-is-limited-to-x-due-to-performance'
+						),
+						config.maxNumberOfItemsEditMode
+					)}
+				</ClayAlert>
 			)}
-		</ClayLayout.Row>
-	));
+		</>
+	);
 };
 
 const ColumnContext = ({
@@ -189,10 +207,7 @@ const Collection = React.memo(
 		const emptyCollection = useMemo(
 			() => ({
 				fakeCollection: true,
-				items: Array.from(
-					Array(collectionConfig.numberOfItems || 1),
-					() => ({})
-				),
+				items: {length: collectionConfig.numberOfItems || 1},
 				length: collectionConfig.numberOfItems || 1,
 				totalNumberOfItems: collectionConfig.numberOfItems || 1,
 			}),
@@ -206,22 +221,21 @@ const Collection = React.memo(
 		const [collection, setCollection] = useState(emptyCollection);
 		const [loading, setLoading] = useState(false);
 
-		const totalPages = Math.ceil(
-			Math.min(
-				collectionConfig.numberOfItems,
-				collection.totalNumberOfItems
-			) / collectionConfig.numberOfItemsPerPage
-		);
+		const numberOfItems = getNumberOfItems(collection, collectionConfig);
 
 		useEffect(() => {
-			if (activePage > totalPages) {
+			if (
+				activePage > collectionConfig.numberOfPages &&
+				!collectionConfig.displayAllPages
+			) {
 				setActivePage(1);
 			}
 		}, [
+			collectionConfig.displayAllPages,
 			collectionConfig.numberOfItems,
 			collectionConfig.numberOfItemsPerPage,
+			collectionConfig.numberOfPages,
 			activePage,
-			totalPages,
 		]);
 
 		const context = useContext(CollectionItemContext);
@@ -235,7 +249,11 @@ const Collection = React.memo(
 		const itemClassPK = classPK || displayPagePreviewItemData.classPK;
 
 		useEffect(() => {
-			if (collectionConfig.collection && activePage <= totalPages) {
+			if (
+				collectionConfig.collection &&
+				(activePage <= collectionConfig.numberOfPages ||
+					collectionConfig.displayAllPages)
+			) {
 				setLoading(true);
 
 				CollectionService.getCollectionField({
@@ -243,11 +261,14 @@ const Collection = React.memo(
 					classNameId: itemClassNameId,
 					classPK: itemClassPK,
 					collection: collectionConfig.collection,
+					displayAllItems: collectionConfig.displayAllItems,
+					displayAllPages: collectionConfig.displayAllPages,
 					languageId,
 					listItemStyle: collectionConfig.listItemStyle || null,
 					listStyle: collectionConfig.listStyle,
 					numberOfItems: collectionConfig.numberOfItems,
 					numberOfItemsPerPage: collectionConfig.numberOfItemsPerPage,
+					numberOfPages: collectionConfig.numberOfPages,
 					onNetworkStatus: dispatch,
 					paginationType: collectionConfig.paginationType,
 					templateKey: collectionConfig.templateKey || null,
@@ -319,7 +340,6 @@ const Collection = React.memo(
 			itemClassNameId,
 			itemClassPK,
 			languageId,
-			totalPages,
 		]);
 
 		const selectedViewportSize = useSelector(
@@ -359,7 +379,7 @@ const Collection = React.memo(
 						)}
 						<Grid
 							child={child}
-							collection={collection.items}
+							collection={collection}
 							collectionConfig={collectionConfig}
 							collectionId={item.itemId}
 							collectionLength={collection.items.length}
@@ -377,11 +397,12 @@ const Collection = React.memo(
 						collectionId={item.itemId}
 						onPageChange={setActivePage}
 						totalNumberOfItems={
-							collection.fakeCollection
-								? 0
-								: collection.totalNumberOfItems
+							collection.fakeCollection ? 0 : numberOfItems
 						}
-						totalPages={totalPages}
+						totalPages={getNumberOfPages(
+							collection,
+							collectionConfig
+						)}
 					/>
 				)}
 			</div>
@@ -390,5 +411,42 @@ const Collection = React.memo(
 );
 
 Collection.displayName = 'Collection';
+
+function getNumberOfItems(collection, collectionConfig) {
+	if (collectionConfig.paginationType) {
+		const itemsPerPage = Math.min(
+			collectionConfig.numberOfItemsPerPage,
+			config.searchContainerPageMaxDelta
+		);
+
+		return collectionConfig.displayAllPages
+			? collection.totalNumberOfItems
+			: Math.min(
+					collectionConfig.numberOfPages * itemsPerPage,
+					collection.totalNumberOfItems
+			  );
+	}
+
+	return collectionConfig.displayAllItems
+		? collection.totalNumberOfItems
+		: Math.min(
+				collectionConfig.numberOfItems,
+				collection.totalNumberOfItems
+		  );
+}
+
+function getNumberOfPages(collection, collectionConfig) {
+	const itemsPerPage = Math.min(
+		collectionConfig.numberOfItemsPerPage,
+		config.searchContainerPageMaxDelta
+	);
+
+	return collectionConfig.displayAllPages
+		? Math.ceil(collection.totalNumberOfItems / itemsPerPage)
+		: Math.min(
+				Math.ceil(collection.totalNumberOfItems / itemsPerPage),
+				collectionConfig.numberOfPages
+		  );
+}
 
 export default Collection;

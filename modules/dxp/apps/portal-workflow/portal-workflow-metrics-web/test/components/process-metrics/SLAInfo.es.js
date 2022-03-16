@@ -18,12 +18,14 @@ import {MockRouter} from '../../mock/MockRouter.es';
 import '@testing-library/jest-dom/extend-expect';
 
 describe('The SLAInfo component should', () => {
-	let container, getByText;
+	let container;
+	let getByText;
 
 	describe('SLA count 0', () => {
 		beforeAll(async () => {
 			fetch.mockResolvedValue({
 				json: () => Promise.resolve({items: [], totalCount: 0}),
+				ok: true,
 			});
 
 			const renderResult = render(
@@ -61,6 +63,7 @@ describe('The SLAInfo component should', () => {
 		beforeAll(async () => {
 			fetch.mockResolvedValue({
 				json: () => Promise.resolve({items: [], totalCount: 1}),
+				ok: true,
 			});
 
 			const renderResult = render(
@@ -98,6 +101,7 @@ describe('The SLAInfo component should', () => {
 		beforeAll(async () => {
 			fetch.mockResolvedValue({
 				json: () => Promise.resolve({items: [], totalCount: 2}),
+				ok: true,
 			});
 
 			const renderResult = render(

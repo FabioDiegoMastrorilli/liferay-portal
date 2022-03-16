@@ -27,7 +27,7 @@
 </tr>
 <tr>
 	<td>ANY_TOGGLE_SWITCH</td>
-	<td>//label[contains(.,'${key_toggleSwitchLabel}')]//input</td>
+	<td>//label[(contains(.,'${key_toggleSwitchLabel}')) or (contains(@for,'${key_toggleSwitchLabel}'))]//input</td>
 	<td></td>
 </tr>
 <tr>
@@ -56,11 +56,6 @@
 	<td></td>
 </tr>
 <tr>
-	<td>INHERIT_MOBILE_DEVICE_RULES_FROM_PAGE</td>
-	<td>//*[@id="mobileDeviceRulesContent"]/div/div[1]/label/span[1]/span/span</td>
-	<td></td>
-</tr>
-<tr>
 	<td>READY_FOR_PROPAGATION</td>
 	<td>//label[contains(.,'Ready for Propagation')]//span[contains(@class,'toggle-switch-handle')]</td>
 	<td></td>
@@ -73,11 +68,6 @@
 <tr>
 	<td>ENABLE_SPECIFIC_TOGGLE_SWITCH</td>
 	<td>//h4[contains(.,"${key_name}")]//span[contains(@id,'toggle-switch')]</td>
-	<td></td>
-</tr>
-<tr>
-	<td>USE_CUSTOM_TITLE</td>
-	<td>//label[contains(.,'Use Custom Title')]//input[@type='checkbox']</td>
 	<td></td>
 </tr>
 </tbody>

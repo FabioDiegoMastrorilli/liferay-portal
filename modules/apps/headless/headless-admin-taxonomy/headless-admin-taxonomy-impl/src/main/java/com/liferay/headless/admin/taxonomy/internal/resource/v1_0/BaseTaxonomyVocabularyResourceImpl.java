@@ -16,6 +16,7 @@ package com.liferay.headless.admin.taxonomy.internal.resource.v1_0;
 
 import com.liferay.headless.admin.taxonomy.dto.v1_0.TaxonomyVocabulary;
 import com.liferay.headless.admin.taxonomy.resource.v1_0.TaxonomyVocabularyResource;
+import com.liferay.petra.function.UnsafeBiConsumer;
 import com.liferay.petra.function.UnsafeConsumer;
 import com.liferay.petra.function.UnsafeFunction;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
@@ -43,6 +44,7 @@ import com.liferay.portal.vulcan.batch.engine.VulcanBatchEngineTaskItemDelegate;
 import com.liferay.portal.vulcan.batch.engine.resource.VulcanBatchEngineImportTaskResource;
 import com.liferay.portal.vulcan.pagination.Page;
 import com.liferay.portal.vulcan.pagination.Pagination;
+import com.liferay.portal.vulcan.permission.ModelPermissionsUtil;
 import com.liferay.portal.vulcan.permission.PermissionUtil;
 import com.liferay.portal.vulcan.resource.EntityModelResource;
 import com.liferay.portal.vulcan.util.ActionUtil;
@@ -279,8 +281,8 @@ public abstract class BaseTaxonomyVocabularyResourceImpl
 				"replace",
 				addAction(
 					ActionKeys.PERMISSIONS,
-					"putAssetLibraryTaxonomyVocabularyPermission", portletName,
-					assetLibraryId)
+					"putAssetLibraryTaxonomyVocabularyPermissionsPage",
+					portletName, assetLibraryId)
 			).build(),
 			assetLibraryId, portletName, roleNames);
 	}
@@ -314,10 +316,39 @@ public abstract class BaseTaxonomyVocabularyResourceImpl
 				@io.swagger.v3.oas.annotations.Parameter(hidden = true)
 				@javax.validation.constraints.NotNull
 				@javax.ws.rs.PathParam("assetLibraryId")
-				Long assetLibraryId)
+				Long assetLibraryId,
+				com.liferay.portal.vulcan.permission.Permission[] permissions)
 		throws Exception {
 
-		return Page.of(Collections.emptyList());
+		String portletName = getPermissionCheckerPortletName(assetLibraryId);
+
+		PermissionUtil.checkPermission(
+			ActionKeys.PERMISSIONS, groupLocalService, portletName,
+			assetLibraryId, assetLibraryId);
+
+		resourcePermissionLocalService.updateResourcePermissions(
+			contextCompany.getCompanyId(), assetLibraryId, portletName,
+			String.valueOf(assetLibraryId),
+			ModelPermissionsUtil.toModelPermissions(
+				contextCompany.getCompanyId(), permissions, assetLibraryId,
+				portletName, resourceActionLocalService,
+				resourcePermissionLocalService, roleLocalService));
+
+		return toPermissionPage(
+			HashMapBuilder.put(
+				"get",
+				addAction(
+					ActionKeys.PERMISSIONS,
+					"getAssetLibraryTaxonomyVocabularyPermissionsPage",
+					portletName, assetLibraryId)
+			).put(
+				"replace",
+				addAction(
+					ActionKeys.PERMISSIONS,
+					"putAssetLibraryTaxonomyVocabularyPermissionsPage",
+					portletName, assetLibraryId)
+			).build(),
+			assetLibraryId, portletName, null);
 	}
 
 	/**
@@ -661,7 +692,8 @@ public abstract class BaseTaxonomyVocabularyResourceImpl
 				"replace",
 				addAction(
 					ActionKeys.PERMISSIONS,
-					"putSiteTaxonomyVocabularyPermission", portletName, siteId)
+					"putSiteTaxonomyVocabularyPermissionsPage", portletName,
+					siteId)
 			).build(),
 			siteId, portletName, roleNames);
 	}
@@ -693,10 +725,39 @@ public abstract class BaseTaxonomyVocabularyResourceImpl
 				@io.swagger.v3.oas.annotations.Parameter(hidden = true)
 				@javax.validation.constraints.NotNull
 				@javax.ws.rs.PathParam("siteId")
-				Long siteId)
+				Long siteId,
+				com.liferay.portal.vulcan.permission.Permission[] permissions)
 		throws Exception {
 
-		return Page.of(Collections.emptyList());
+		String portletName = getPermissionCheckerPortletName(siteId);
+
+		PermissionUtil.checkPermission(
+			ActionKeys.PERMISSIONS, groupLocalService, portletName, siteId,
+			siteId);
+
+		resourcePermissionLocalService.updateResourcePermissions(
+			contextCompany.getCompanyId(), siteId, portletName,
+			String.valueOf(siteId),
+			ModelPermissionsUtil.toModelPermissions(
+				contextCompany.getCompanyId(), permissions, siteId, portletName,
+				resourceActionLocalService, resourcePermissionLocalService,
+				roleLocalService));
+
+		return toPermissionPage(
+			HashMapBuilder.put(
+				"get",
+				addAction(
+					ActionKeys.PERMISSIONS,
+					"getSiteTaxonomyVocabularyPermissionsPage", portletName,
+					siteId)
+			).put(
+				"replace",
+				addAction(
+					ActionKeys.PERMISSIONS,
+					"putSiteTaxonomyVocabularyPermissionsPage", portletName,
+					siteId)
+			).build(),
+			siteId, portletName, null);
 	}
 
 	/**
@@ -1060,8 +1121,9 @@ public abstract class BaseTaxonomyVocabularyResourceImpl
 			).put(
 				"replace",
 				addAction(
-					ActionKeys.PERMISSIONS, "putTaxonomyVocabularyPermission",
-					resourceName, resourceId)
+					ActionKeys.PERMISSIONS,
+					"putTaxonomyVocabularyPermissionsPage", resourceName,
+					resourceId)
 			).build(),
 			resourceId, resourceName, roleNames);
 	}
@@ -1095,10 +1157,42 @@ public abstract class BaseTaxonomyVocabularyResourceImpl
 				@io.swagger.v3.oas.annotations.Parameter(hidden = true)
 				@javax.validation.constraints.NotNull
 				@javax.ws.rs.PathParam("taxonomyVocabularyId")
-				Long taxonomyVocabularyId)
+				Long taxonomyVocabularyId,
+				com.liferay.portal.vulcan.permission.Permission[] permissions)
 		throws Exception {
 
-		return Page.of(Collections.emptyList());
+		String resourceName = getPermissionCheckerResourceName(
+			taxonomyVocabularyId);
+		Long resourceId = getPermissionCheckerResourceId(taxonomyVocabularyId);
+
+		PermissionUtil.checkPermission(
+			ActionKeys.PERMISSIONS, groupLocalService, resourceName, resourceId,
+			getPermissionCheckerGroupId(taxonomyVocabularyId));
+
+		resourcePermissionLocalService.updateResourcePermissions(
+			contextCompany.getCompanyId(),
+			getPermissionCheckerGroupId(taxonomyVocabularyId), resourceName,
+			String.valueOf(resourceId),
+			ModelPermissionsUtil.toModelPermissions(
+				contextCompany.getCompanyId(), permissions, resourceId,
+				resourceName, resourceActionLocalService,
+				resourcePermissionLocalService, roleLocalService));
+
+		return toPermissionPage(
+			HashMapBuilder.put(
+				"get",
+				addAction(
+					ActionKeys.PERMISSIONS,
+					"getTaxonomyVocabularyPermissionsPage", resourceName,
+					resourceId)
+			).put(
+				"replace",
+				addAction(
+					ActionKeys.PERMISSIONS,
+					"putTaxonomyVocabularyPermissionsPage", resourceName,
+					resourceId)
+			).build(),
+			resourceId, resourceName, null);
 	}
 
 	@Override
@@ -1123,8 +1217,14 @@ public abstract class BaseTaxonomyVocabularyResourceImpl
 					(Long)parameters.get("siteId"), taxonomyVocabulary);
 		}
 
-		for (TaxonomyVocabulary taxonomyVocabulary : taxonomyVocabularies) {
-			taxonomyVocabularyUnsafeConsumer.accept(taxonomyVocabulary);
+		if (contextBatchUnsafeConsumer != null) {
+			contextBatchUnsafeConsumer.accept(
+				taxonomyVocabularies, taxonomyVocabularyUnsafeConsumer);
+		}
+		else {
+			for (TaxonomyVocabulary taxonomyVocabulary : taxonomyVocabularies) {
+				taxonomyVocabularyUnsafeConsumer.accept(taxonomyVocabulary);
+			}
 		}
 	}
 
@@ -1264,6 +1364,15 @@ public abstract class BaseTaxonomyVocabularyResourceImpl
 
 	public void setContextAcceptLanguage(AcceptLanguage contextAcceptLanguage) {
 		this.contextAcceptLanguage = contextAcceptLanguage;
+	}
+
+	public void setContextBatchUnsafeConsumer(
+		UnsafeBiConsumer
+			<java.util.Collection<TaxonomyVocabulary>,
+			 UnsafeConsumer<TaxonomyVocabulary, Exception>, Exception>
+				contextBatchUnsafeConsumer) {
+
+		this.contextBatchUnsafeConsumer = contextBatchUnsafeConsumer;
 	}
 
 	public void setContextCompany(
@@ -1419,6 +1528,10 @@ public abstract class BaseTaxonomyVocabularyResourceImpl
 	}
 
 	protected AcceptLanguage contextAcceptLanguage;
+	protected UnsafeBiConsumer
+		<java.util.Collection<TaxonomyVocabulary>,
+		 UnsafeConsumer<TaxonomyVocabulary, Exception>, Exception>
+			contextBatchUnsafeConsumer;
 	protected com.liferay.portal.kernel.model.Company contextCompany;
 	protected HttpServletRequest contextHttpServletRequest;
 	protected HttpServletResponse contextHttpServletResponse;

@@ -145,6 +145,8 @@ public class SXPElementPersistenceTest {
 
 		newSXPElement.setReadOnly(RandomTestUtil.randomBoolean());
 
+		newSXPElement.setSchemaVersion(RandomTestUtil.randomString());
+
 		newSXPElement.setTitle(RandomTestUtil.randomString());
 
 		newSXPElement.setType(RandomTestUtil.nextInt());
@@ -187,6 +189,9 @@ public class SXPElementPersistenceTest {
 		Assert.assertEquals(
 			existingSXPElement.isReadOnly(), newSXPElement.isReadOnly());
 		Assert.assertEquals(
+			existingSXPElement.getSchemaVersion(),
+			newSXPElement.getSchemaVersion());
+		Assert.assertEquals(
 			existingSXPElement.getTitle(), newSXPElement.getTitle());
 		Assert.assertEquals(
 			existingSXPElement.getType(), newSXPElement.getType());
@@ -217,6 +222,14 @@ public class SXPElementPersistenceTest {
 		_persistence.countByCompanyId(RandomTestUtil.nextLong());
 
 		_persistence.countByCompanyId(0L);
+	}
+
+	@Test
+	public void testCountByC_R() throws Exception {
+		_persistence.countByC_R(
+			RandomTestUtil.nextLong(), RandomTestUtil.randomBoolean());
+
+		_persistence.countByC_R(0L, RandomTestUtil.randomBoolean());
 	}
 
 	@Test
@@ -264,8 +277,8 @@ public class SXPElementPersistenceTest {
 			"SXPElement", "mvccVersion", true, "uuid", true, "sxpElementId",
 			true, "companyId", true, "userId", true, "userName", true,
 			"createDate", true, "modifiedDate", true, "description", true,
-			"hidden", true, "readOnly", true, "title", true, "type", true,
-			"status", true);
+			"hidden", true, "readOnly", true, "schemaVersion", true, "title",
+			true, "type", true, "status", true);
 	}
 
 	@Test
@@ -503,6 +516,8 @@ public class SXPElementPersistenceTest {
 		sxpElement.setHidden(RandomTestUtil.randomBoolean());
 
 		sxpElement.setReadOnly(RandomTestUtil.randomBoolean());
+
+		sxpElement.setSchemaVersion(RandomTestUtil.randomString());
 
 		sxpElement.setTitle(RandomTestUtil.randomString());
 

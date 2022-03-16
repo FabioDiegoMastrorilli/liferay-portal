@@ -27,9 +27,10 @@ import com.liferay.document.library.kernel.model.DLFolderConstants;
 import com.liferay.document.library.kernel.service.DLAppServiceUtil;
 import com.liferay.document.library.kernel.service.DLFileEntryTypeLocalServiceUtil;
 import com.liferay.document.library.kernel.util.DLUtil;
+import com.liferay.document.library.web.internal.configuration.FFManagementToolbarConfigurationUtil;
 import com.liferay.document.library.web.internal.constants.DLWebKeys;
-import com.liferay.document.library.web.internal.display.context.logic.DLPortletInstanceSettingsHelper;
-import com.liferay.document.library.web.internal.display.context.util.DLRequestHelper;
+import com.liferay.document.library.web.internal.display.context.helper.DLPortletInstanceSettingsHelper;
+import com.liferay.document.library.web.internal.display.context.helper.DLRequestHelper;
 import com.liferay.document.library.web.internal.helper.DLTrashHelper;
 import com.liferay.document.library.web.internal.settings.DLPortletInstanceSettings;
 import com.liferay.frontend.taglib.clay.servlet.taglib.display.context.SearchContainerManagementToolbarDisplayContext;
@@ -309,6 +310,9 @@ public class DLAdminManagementToolbarDisplayContext
 						_httpServletRequest, "filter-by-navigation"));
 			}
 		).addGroup(
+			() ->
+				!FFManagementToolbarConfigurationUtil.
+					enableDesignImprovements(),
 			dropdownGroupItem -> {
 				dropdownGroupItem.setDropdownItems(_getOrderByDropdownItems());
 				dropdownGroupItem.setLabel(
@@ -385,6 +389,17 @@ public class DLAdminManagementToolbarDisplayContext
 	@Override
 	public String getInfoPanelId() {
 		return "infoPanelId";
+	}
+
+	@Override
+	public List<DropdownItem> getOrderDropdownItems() {
+		if (_isSearch() ||
+			!FFManagementToolbarConfigurationUtil.enableDesignImprovements()) {
+
+			return null;
+		}
+
+		return _getOrderByDropdownItems();
 	}
 
 	@Override

@@ -22,6 +22,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.util.ISO8601DateFormat;
 
+import com.liferay.headless.delivery.client.dto.v1_0.Field;
 import com.liferay.headless.delivery.client.dto.v1_0.NavigationMenu;
 import com.liferay.headless.delivery.client.http.HttpInvoker;
 import com.liferay.headless.delivery.client.pagination.Page;
@@ -370,10 +371,10 @@ public abstract class BaseNavigationMenuResourceTestCase {
 	}
 
 	@Test
-	public void testPutNavigationMenuPermission() throws Exception {
+	public void testPutNavigationMenuPermissionsPage() throws Exception {
 		@SuppressWarnings("PMD.UnusedLocalVariable")
 		NavigationMenu navigationMenu =
-			testPutNavigationMenuPermission_addNavigationMenu();
+			testPutNavigationMenuPermissionsPage_addNavigationMenu();
 
 		@SuppressWarnings("PMD.UnusedLocalVariable")
 		com.liferay.portal.kernel.model.Role role = RoleTestUtil.addRole(
@@ -381,7 +382,7 @@ public abstract class BaseNavigationMenuResourceTestCase {
 
 		assertHttpResponseStatusCode(
 			200,
-			navigationMenuResource.putNavigationMenuPermissionHttpResponse(
+			navigationMenuResource.putNavigationMenuPermissionsPageHttpResponse(
 				navigationMenu.getId(),
 				new Permission[] {
 					new Permission() {
@@ -394,7 +395,7 @@ public abstract class BaseNavigationMenuResourceTestCase {
 
 		assertHttpResponseStatusCode(
 			404,
-			navigationMenuResource.putNavigationMenuPermissionHttpResponse(
+			navigationMenuResource.putNavigationMenuPermissionsPageHttpResponse(
 				0L,
 				new Permission[] {
 					new Permission() {
@@ -406,7 +407,8 @@ public abstract class BaseNavigationMenuResourceTestCase {
 				}));
 	}
 
-	protected NavigationMenu testPutNavigationMenuPermission_addNavigationMenu()
+	protected NavigationMenu
+			testPutNavigationMenuPermissionsPage_addNavigationMenu()
 		throws Exception {
 
 		return navigationMenuResource.postSiteNavigationMenu(
@@ -619,10 +621,10 @@ public abstract class BaseNavigationMenuResourceTestCase {
 	}
 
 	@Test
-	public void testPutSiteNavigationMenuPermission() throws Exception {
+	public void testPutSiteNavigationMenuPermissionsPage() throws Exception {
 		@SuppressWarnings("PMD.UnusedLocalVariable")
 		NavigationMenu navigationMenu =
-			testPutSiteNavigationMenuPermission_addNavigationMenu();
+			testPutSiteNavigationMenuPermissionsPage_addNavigationMenu();
 
 		@SuppressWarnings("PMD.UnusedLocalVariable")
 		com.liferay.portal.kernel.model.Role role = RoleTestUtil.addRole(
@@ -630,33 +632,35 @@ public abstract class BaseNavigationMenuResourceTestCase {
 
 		assertHttpResponseStatusCode(
 			200,
-			navigationMenuResource.putSiteNavigationMenuPermissionHttpResponse(
-				navigationMenu.getSiteId(),
-				new Permission[] {
-					new Permission() {
-						{
-							setActionIds(new String[] {"PERMISSIONS"});
-							setRoleName(role.getName());
+			navigationMenuResource.
+				putSiteNavigationMenuPermissionsPageHttpResponse(
+					navigationMenu.getSiteId(),
+					new Permission[] {
+						new Permission() {
+							{
+								setActionIds(new String[] {"PERMISSIONS"});
+								setRoleName(role.getName());
+							}
 						}
-					}
-				}));
+					}));
 
 		assertHttpResponseStatusCode(
 			404,
-			navigationMenuResource.putSiteNavigationMenuPermissionHttpResponse(
-				navigationMenu.getSiteId(),
-				new Permission[] {
-					new Permission() {
-						{
-							setActionIds(new String[] {"-"});
-							setRoleName("-");
+			navigationMenuResource.
+				putSiteNavigationMenuPermissionsPageHttpResponse(
+					navigationMenu.getSiteId(),
+					new Permission[] {
+						new Permission() {
+							{
+								setActionIds(new String[] {"-"});
+								setRoleName("-");
+							}
 						}
-					}
-				}));
+					}));
 	}
 
 	protected NavigationMenu
-			testPutSiteNavigationMenuPermission_addNavigationMenu()
+			testPutSiteNavigationMenuPermissionsPage_addNavigationMenu()
 		throws Exception {
 
 		return navigationMenuResource.postSiteNavigationMenu(

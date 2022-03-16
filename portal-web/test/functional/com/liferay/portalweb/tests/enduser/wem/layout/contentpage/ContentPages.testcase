@@ -36,8 +36,10 @@ definition {
 	}
 
 	@description = "This is a test for LPS-134599. The fragmentElementId variable will have the same value with the id of wrapping div in a fragment on page."
-	@priority = "4"
+	@priority = "5"
 	test AddFragmentWithFreemarkerVariableToContentPage {
+		property portal.acceptance = "true";
+
 		task ("Add a fragment collection") {
 			JSONFragment.addFragmentCollection(
 				groupName = "Test Site Name",
@@ -131,6 +133,8 @@ definition {
 	@description = "This is a test for LPS-125985. The Page Creater can configure configuration template of widget in page editor."
 	@priority = "5"
 	test ConfigureConfigurationTemplateOfAssetPublisherInPageEditor {
+		property portal.acceptance = "true";
+
 		task ("Add a web content") {
 			JSONWebcontent.addWebContent(
 				content = "Web Content Content",
@@ -297,11 +301,11 @@ definition {
 				key_text = "Publish",
 				locator1 = "Button#ANY_ENABLED");
 
-			SitePages.openPagesAdmin(siteURLKey = "test-site-name");
+			PagesAdmin.openPagesAdmin(siteURLKey = "test-site-name");
 
 			WaitForPageLoad();
 
-			SitePages.clickPageMenu(pageName = "Test Content Page Name");
+			PagesAdmin.openPageEllipsisMenu(pageName = "Test Content Page Name");
 
 			MenuItem.viewNotPresent(menuItem = "Discard Draft");
 		}
@@ -317,7 +321,7 @@ definition {
 		}
 
 		task ("Discard the draft") {
-			SitePages.openPagesAdmin(siteURLKey = "test-site-name");
+			PagesAdmin.openPagesAdmin(siteURLKey = "test-site-name");
 
 			PageEditor.clickDiscardDraft(pageName = "Test Content Page Name");
 		}
@@ -335,11 +339,11 @@ definition {
 				key_text = "Publish",
 				locator1 = "Button#ANY_ENABLED");
 
-			SitePages.openPagesAdmin(siteURLKey = "test-site-name");
+			PagesAdmin.openPagesAdmin(siteURLKey = "test-site-name");
 
 			WaitForPageLoad();
 
-			SitePages.clickPageMenu(pageName = "Test Content Page Name");
+			PagesAdmin.openPageEllipsisMenu(pageName = "Test Content Page Name");
 
 			MenuItem.viewNotPresent(menuItem = "Discard Draft");
 		}
@@ -359,11 +363,11 @@ definition {
 				key_text = "Publish",
 				locator1 = "Button#ANY_ENABLED");
 
-			SitePages.openPagesAdmin(siteURLKey = "test-site-name");
+			PagesAdmin.openPagesAdmin(siteURLKey = "test-site-name");
 
 			WaitForPageLoad();
 
-			SitePages.clickPageMenu(pageName = "Test Content Page Name");
+			PagesAdmin.openPageEllipsisMenu(pageName = "Test Content Page Name");
 
 			MenuItem.viewPresent(menuItem = "Discard Draft");
 		}
@@ -387,11 +391,11 @@ definition {
 				key_text = "Publish",
 				locator1 = "Button#ANY_ENABLED");
 
-			SitePages.openPagesAdmin(siteURLKey = "test-site-name");
+			PagesAdmin.openPagesAdmin(siteURLKey = "test-site-name");
 
 			WaitForPageLoad();
 
-			SitePages.clickPageMenu(pageName = "Test Content Page Name");
+			PagesAdmin.openPageEllipsisMenu(pageName = "Test Content Page Name");
 
 			MenuItem.viewNotPresent(menuItem = "Discard Draft");
 		}
@@ -412,11 +416,11 @@ definition {
 				key_text = "Publish",
 				locator1 = "Button#ANY_ENABLED");
 
-			SitePages.openPagesAdmin(siteURLKey = "test-site-name");
+			PagesAdmin.openPagesAdmin(siteURLKey = "test-site-name");
 
 			WaitForPageLoad();
 
-			SitePages.clickPageMenu(pageName = "Test Content Page Name");
+			PagesAdmin.openPageEllipsisMenu(pageName = "Test Content Page Name");
 
 			MenuItem.viewPresent(menuItem = "Discard Draft");
 		}
@@ -445,11 +449,11 @@ definition {
 				key_text = "Publish",
 				locator1 = "Button#ANY_ENABLED");
 
-			SitePages.openPagesAdmin(siteURLKey = "test-site-name");
+			PagesAdmin.openPagesAdmin(siteURLKey = "test-site-name");
 
 			WaitForPageLoad();
 
-			SitePages.clickPageMenu(pageName = "Test Content Page Name");
+			PagesAdmin.openPageEllipsisMenu(pageName = "Test Content Page Name");
 
 			MenuItem.viewNotPresent(menuItem = "Discard Draft");
 		}
@@ -470,11 +474,11 @@ definition {
 				key_text = "Publish",
 				locator1 = "Button#ANY_ENABLED");
 
-			SitePages.openPagesAdmin(siteURLKey = "test-site-name");
+			PagesAdmin.openPagesAdmin(siteURLKey = "test-site-name");
 
 			WaitForPageLoad();
 
-			SitePages.clickPageMenu(pageName = "Test Content Page Name");
+			PagesAdmin.openPageEllipsisMenu(pageName = "Test Content Page Name");
 
 			MenuItem.viewPresent(menuItem = "Discard Draft");
 		}
@@ -500,17 +504,17 @@ definition {
 				key_text = "Publish",
 				locator1 = "Button#ANY_ENABLED");
 
-			SitePages.openPagesAdmin(siteURLKey = "test-site-name");
+			PagesAdmin.openPagesAdmin(siteURLKey = "test-site-name");
 
 			WaitForPageLoad();
 
-			SitePages.clickPageMenu(pageName = "Test Content Page Name");
+			PagesAdmin.openPageEllipsisMenu(pageName = "Test Content Page Name");
 
 			MenuItem.viewNotPresent(menuItem = "Discard Draft");
 		}
 	}
 
-	@description = "This is a test for LPS-134844. Fragments can be hidden and shown."
+	@description = "This is a test for LPS-134844 and LPS-106776. Fragments can be hidden and shown. Could add widget to react page editor."
 	@priority = "5"
 	@uitest
 	test FragmentsCanBeHiddenAndShown {
@@ -523,6 +527,7 @@ definition {
 
 			PageEditor.addWidget(portletName = "Blogs");
 		}
+
 		task ("Add fragments to page") {
 			PageEditor.addFragment(
 				collectionName = "Basic Components",
@@ -543,9 +548,11 @@ definition {
 		task ("Hide Blogs from topper options") {
 			PageEditor.hideFragmentViaHeader(fragmentName = "Blogs");
 		}
+
 		task ("Hide Button fragment from fragment options") {
 			PageEditor.hideFragmentViaPageStyles(fragmentName = "Button");
 		}
+
 		task ("Hide Heading fragment from the sidebar fragment tree") {
 			PageEditor.hideFragmentViaPageStructure(fragmentName = "Heading");
 		}
@@ -704,6 +711,7 @@ definition {
 
 		task ("Hide Blogs and HTML") {
 			PageEditor.hideFragmentViaPageStructure(fragmentName = "Blogs");
+
 			PageEditor.hideFragmentViaPageStructure(fragmentName = "HTML");
 		}
 
@@ -799,10 +807,10 @@ definition {
 
 			PageEditor.viewFragmentHeaderNotVisible(fragmentName = "Asset Publisher");
 
-			MouseOver.mouseOverInvisible(
+			MouseOver(
+				index = "1",
 				key_fragmentName = "Asset Publisher",
-				key_index = "1",
-				locator1 = "Fragment#FRAGMENT_HEADER_ANY");
+				locator1 = "Fragment#FRAGMENT_CONTENT");
 
 			PageEditor.viewFragmentHeaderNotVisible(fragmentName = "Asset Publisher");
 		}
@@ -814,10 +822,10 @@ definition {
 
 			PageEditor.viewFragmentHeaderNotVisible(fragmentName = "Heading");
 
-			MouseOver.mouseOverInvisible(
+			MouseOver(
+				index = "1",
 				key_fragmentName = "Heading",
-				key_index = "1",
-				locator1 = "Fragment#FRAGMENT_HEADER_ANY");
+				locator1 = "Fragment#FRAGMENT_CONTENT");
 
 			PageEditor.viewFragmentHeaderNotVisible(fragmentName = "Heading");
 		}
@@ -874,12 +882,13 @@ definition {
 				fragmentName = "Heading",
 				index = "1");
 		}
+
 		task ("Publish page template") {
 			PageEditor.clickPublish();
 		}
 
 		task ("Add a page based on content page template") {
-			SitePages.openPagesAdmin(siteURLKey = "test-site-name");
+			PagesAdmin.openPagesAdmin(siteURLKey = "test-site-name");
 
 			ContentPages.addPage(
 				collectionName = "Page Template Collection",
@@ -924,7 +933,7 @@ definition {
 		}
 	}
 
-	@description = "This is a test for LPS-106778. Reorganize fragments in page editor."
+	@description = "This is a use case for LPS-106776. Reorganize fragments in page editor."
 	@priority = "5"
 	@uitest
 	test ReorganizeFragmentsInPageEditor {
@@ -1154,7 +1163,7 @@ definition {
 		}
 	}
 
-	@description = "This is a test for LPS-130083. View the ellipsis button on the topper of fragment when the fragment is inside a nested Grid."
+	@description = "This is a test for LPS-130083 and LPS-106776. View the ellipsis button on the topper of fragment when the fragment is inside a nested Grid."
 	@priority = "4"
 	@uitest
 	test ViewEllipsisButtonOnTheTopperOfFragmentInsideNestedGrid {
@@ -1247,9 +1256,9 @@ definition {
 
 		task ("Assert Header of Card is shown over body when doesn't reach the management toolbar") {
 			ScrollWebElementIntoView(
+				index = "1",
 				key_fragmentName = "Card",
-				key_index = "1",
-				locator1 = "Fragment#FRAGMENT_HEADER_ANY");
+				locator1 = "Fragment#FRAGMENT_LABEL");
 
 			PageEditor.clickConfigurableField(fragmentName = "Card");
 
@@ -1260,9 +1269,9 @@ definition {
 
 		task ("Assert Header of Card moves inside body when reach the management toolbar") {
 			ScrollWebElementIntoView(
+				index = "1",
 				key_fragmentName = "Image",
-				key_index = "1",
-				locator1 = "Fragment#FRAGMENT_HEADER_ANY");
+				locator1 = "Fragment#FRAGMENT_LABEL");
 
 			AssertElementPresent(
 				key_fragmentName = "Card",
@@ -1296,9 +1305,9 @@ definition {
 
 		task ("Assert Header of Blogs is shown over body when doesn't reach the management toolbar") {
 			ScrollWebElementIntoView(
+				index = "1",
 				key_fragmentName = "Blogs",
-				key_index = "1",
-				locator1 = "Fragment#FRAGMENT_HEADER_ANY");
+				locator1 = "Fragment#FRAGMENT_LABEL");
 
 			PageEditor.clickConfigurableField(fragmentName = "Blogs");
 
@@ -1309,9 +1318,9 @@ definition {
 
 		task ("Assert Header of Blogs moves inside body when reach the management toolbar") {
 			ScrollWebElementIntoView(
+				index = "1",
 				key_fragmentName = "My Sites",
-				key_index = "1",
-				locator1 = "Fragment#FRAGMENT_HEADER_ANY");
+				locator1 = "Fragment#FRAGMENT_LABEL");
 
 			AssertElementPresent(
 				key_fragmentName = "Blogs",
@@ -1380,7 +1389,7 @@ definition {
 		}
 
 		task ("Add a page based on content page template") {
-			SitePages.openPagesAdmin(siteURLKey = "test-site-name");
+			PagesAdmin.openPagesAdmin(siteURLKey = "test-site-name");
 
 			ContentPages.addPage(
 				collectionName = "Page Template Collection",
@@ -1495,7 +1504,7 @@ definition {
 		}
 
 		task ("Assert the Asset Publisher is invisible to Guest") {
-			SitePages.openPagesAdmin(siteURLKey = "test-site-name");
+			PagesAdmin.openPagesAdmin(siteURLKey = "test-site-name");
 
 			User.logoutPG();
 

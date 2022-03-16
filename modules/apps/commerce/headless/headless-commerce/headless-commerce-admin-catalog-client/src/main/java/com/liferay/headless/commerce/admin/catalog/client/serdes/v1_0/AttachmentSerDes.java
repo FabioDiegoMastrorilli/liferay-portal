@@ -59,7 +59,7 @@ public class AttachmentSerDes {
 		sb.append("{");
 
 		DateFormat liferayToJSONDateFormat = new SimpleDateFormat(
-			"yyyy-MM-dd'T'HH:mm:ss'Z'");
+			"yyyy-MM-dd'T'HH:mm:ssXX");
 
 		if (attachment.getAttachment() != null) {
 			if (sb.length() > 1) {
@@ -95,6 +95,20 @@ public class AttachmentSerDes {
 			sb.append("\"");
 
 			sb.append(_escape(attachment.getCdnURL()));
+
+			sb.append("\"");
+		}
+
+		if (attachment.getContentType() != null) {
+			if (sb.length() > 1) {
+				sb.append(", ");
+			}
+
+			sb.append("\"contentType\": ");
+
+			sb.append("\"");
+
+			sb.append(_escape(attachment.getContentType()));
 
 			sb.append("\"");
 		}
@@ -256,7 +270,7 @@ public class AttachmentSerDes {
 		Map<String, String> map = new TreeMap<>();
 
 		DateFormat liferayToJSONDateFormat = new SimpleDateFormat(
-			"yyyy-MM-dd'T'HH:mm:ss'Z'");
+			"yyyy-MM-dd'T'HH:mm:ssXX");
 
 		if (attachment.getAttachment() == null) {
 			map.put("attachment", null);
@@ -277,6 +291,13 @@ public class AttachmentSerDes {
 		}
 		else {
 			map.put("cdnURL", String.valueOf(attachment.getCdnURL()));
+		}
+
+		if (attachment.getContentType() == null) {
+			map.put("contentType", null);
+		}
+		else {
+			map.put("contentType", String.valueOf(attachment.getContentType()));
 		}
 
 		if (attachment.getCustomFields() == null) {
@@ -397,6 +418,11 @@ public class AttachmentSerDes {
 			else if (Objects.equals(jsonParserFieldName, "cdnURL")) {
 				if (jsonParserFieldValue != null) {
 					attachment.setCdnURL((String)jsonParserFieldValue);
+				}
+			}
+			else if (Objects.equals(jsonParserFieldName, "contentType")) {
+				if (jsonParserFieldValue != null) {
+					attachment.setContentType((String)jsonParserFieldValue);
 				}
 			}
 			else if (Objects.equals(jsonParserFieldName, "customFields")) {

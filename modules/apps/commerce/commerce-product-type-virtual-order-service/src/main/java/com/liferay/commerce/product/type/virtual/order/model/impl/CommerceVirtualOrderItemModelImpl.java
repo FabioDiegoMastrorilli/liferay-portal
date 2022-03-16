@@ -16,7 +16,6 @@ package com.liferay.commerce.product.type.virtual.order.model.impl;
 
 import com.liferay.commerce.product.type.virtual.order.model.CommerceVirtualOrderItem;
 import com.liferay.commerce.product.type.virtual.order.model.CommerceVirtualOrderItemModel;
-import com.liferay.commerce.product.type.virtual.order.model.CommerceVirtualOrderItemSoap;
 import com.liferay.expando.kernel.model.ExpandoBridge;
 import com.liferay.expando.kernel.util.ExpandoBridgeFactoryUtil;
 import com.liferay.exportimport.kernel.lar.StagedModelType;
@@ -44,12 +43,10 @@ import java.lang.reflect.InvocationHandler;
 import java.sql.Blob;
 import java.sql.Types;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.BiConsumer;
@@ -79,10 +76,11 @@ public class CommerceVirtualOrderItemModelImpl
 	public static final String TABLE_NAME = "CommerceVirtualOrderItem";
 
 	public static final Object[][] TABLE_COLUMNS = {
-		{"uuid_", Types.VARCHAR}, {"commerceVirtualOrderItemId", Types.BIGINT},
-		{"groupId", Types.BIGINT}, {"companyId", Types.BIGINT},
-		{"userId", Types.BIGINT}, {"userName", Types.VARCHAR},
-		{"createDate", Types.TIMESTAMP}, {"modifiedDate", Types.TIMESTAMP},
+		{"mvccVersion", Types.BIGINT}, {"uuid_", Types.VARCHAR},
+		{"commerceVirtualOrderItemId", Types.BIGINT}, {"groupId", Types.BIGINT},
+		{"companyId", Types.BIGINT}, {"userId", Types.BIGINT},
+		{"userName", Types.VARCHAR}, {"createDate", Types.TIMESTAMP},
+		{"modifiedDate", Types.TIMESTAMP},
 		{"commerceOrderItemId", Types.BIGINT}, {"fileEntryId", Types.BIGINT},
 		{"url", Types.VARCHAR}, {"activationStatus", Types.INTEGER},
 		{"duration", Types.BIGINT}, {"usages", Types.INTEGER},
@@ -94,6 +92,7 @@ public class CommerceVirtualOrderItemModelImpl
 		new HashMap<String, Integer>();
 
 	static {
+		TABLE_COLUMNS_MAP.put("mvccVersion", Types.BIGINT);
 		TABLE_COLUMNS_MAP.put("uuid_", Types.VARCHAR);
 		TABLE_COLUMNS_MAP.put("commerceVirtualOrderItemId", Types.BIGINT);
 		TABLE_COLUMNS_MAP.put("groupId", Types.BIGINT);
@@ -115,7 +114,7 @@ public class CommerceVirtualOrderItemModelImpl
 	}
 
 	public static final String TABLE_SQL_CREATE =
-		"create table CommerceVirtualOrderItem (uuid_ VARCHAR(75) null,commerceVirtualOrderItemId LONG not null primary key,groupId LONG,companyId LONG,userId LONG,userName VARCHAR(75) null,createDate DATE null,modifiedDate DATE null,commerceOrderItemId LONG,fileEntryId LONG,url VARCHAR(75) null,activationStatus INTEGER,duration LONG,usages INTEGER,maxUsages INTEGER,active_ BOOLEAN,startDate DATE null,endDate DATE null)";
+		"create table CommerceVirtualOrderItem (mvccVersion LONG default 0 not null,uuid_ VARCHAR(75) null,commerceVirtualOrderItemId LONG not null primary key,groupId LONG,companyId LONG,userId LONG,userName VARCHAR(75) null,createDate DATE null,modifiedDate DATE null,commerceOrderItemId LONG,fileEntryId LONG,url VARCHAR(75) null,activationStatus INTEGER,duration LONG,usages INTEGER,maxUsages INTEGER,active_ BOOLEAN,startDate DATE null,endDate DATE null)";
 
 	public static final String TABLE_SQL_DROP =
 		"drop table CommerceVirtualOrderItem";
@@ -180,71 +179,6 @@ public class CommerceVirtualOrderItemModelImpl
 	 */
 	@Deprecated
 	public static final long CREATEDATE_COLUMN_BITMASK = 16L;
-
-	/**
-	 * Converts the soap model instance into a normal model instance.
-	 *
-	 * @param soapModel the soap model instance to convert
-	 * @return the normal model instance
-	 * @deprecated As of Athanasius (7.3.x), with no direct replacement
-	 */
-	@Deprecated
-	public static CommerceVirtualOrderItem toModel(
-		CommerceVirtualOrderItemSoap soapModel) {
-
-		if (soapModel == null) {
-			return null;
-		}
-
-		CommerceVirtualOrderItem model = new CommerceVirtualOrderItemImpl();
-
-		model.setUuid(soapModel.getUuid());
-		model.setCommerceVirtualOrderItemId(
-			soapModel.getCommerceVirtualOrderItemId());
-		model.setGroupId(soapModel.getGroupId());
-		model.setCompanyId(soapModel.getCompanyId());
-		model.setUserId(soapModel.getUserId());
-		model.setUserName(soapModel.getUserName());
-		model.setCreateDate(soapModel.getCreateDate());
-		model.setModifiedDate(soapModel.getModifiedDate());
-		model.setCommerceOrderItemId(soapModel.getCommerceOrderItemId());
-		model.setFileEntryId(soapModel.getFileEntryId());
-		model.setUrl(soapModel.getUrl());
-		model.setActivationStatus(soapModel.getActivationStatus());
-		model.setDuration(soapModel.getDuration());
-		model.setUsages(soapModel.getUsages());
-		model.setMaxUsages(soapModel.getMaxUsages());
-		model.setActive(soapModel.isActive());
-		model.setStartDate(soapModel.getStartDate());
-		model.setEndDate(soapModel.getEndDate());
-
-		return model;
-	}
-
-	/**
-	 * Converts the soap model instances into normal model instances.
-	 *
-	 * @param soapModels the soap model instances to convert
-	 * @return the normal model instances
-	 * @deprecated As of Athanasius (7.3.x), with no direct replacement
-	 */
-	@Deprecated
-	public static List<CommerceVirtualOrderItem> toModels(
-		CommerceVirtualOrderItemSoap[] soapModels) {
-
-		if (soapModels == null) {
-			return null;
-		}
-
-		List<CommerceVirtualOrderItem> models =
-			new ArrayList<CommerceVirtualOrderItem>(soapModels.length);
-
-		for (CommerceVirtualOrderItemSoap soapModel : soapModels) {
-			models.add(toModel(soapModel));
-		}
-
-		return models;
-	}
 
 	public static final long LOCK_EXPIRATION_TIME = GetterUtil.getLong(
 		com.liferay.commerce.product.type.virtual.order.service.util.
@@ -381,6 +315,12 @@ public class CommerceVirtualOrderItemModelImpl
 				new LinkedHashMap
 					<String, BiConsumer<CommerceVirtualOrderItem, ?>>();
 
+		attributeGetterFunctions.put(
+			"mvccVersion", CommerceVirtualOrderItem::getMvccVersion);
+		attributeSetterBiConsumers.put(
+			"mvccVersion",
+			(BiConsumer<CommerceVirtualOrderItem, Long>)
+				CommerceVirtualOrderItem::setMvccVersion);
 		attributeGetterFunctions.put("uuid", CommerceVirtualOrderItem::getUuid);
 		attributeSetterBiConsumers.put(
 			"uuid",
@@ -494,6 +434,21 @@ public class CommerceVirtualOrderItemModelImpl
 			attributeGetterFunctions);
 		_attributeSetterBiConsumers = Collections.unmodifiableMap(
 			(Map)attributeSetterBiConsumers);
+	}
+
+	@JSON
+	@Override
+	public long getMvccVersion() {
+		return _mvccVersion;
+	}
+
+	@Override
+	public void setMvccVersion(long mvccVersion) {
+		if (_columnOriginalValues == Collections.EMPTY_MAP) {
+			_setColumnOriginalValues();
+		}
+
+		_mvccVersion = mvccVersion;
 	}
 
 	@JSON
@@ -912,6 +867,7 @@ public class CommerceVirtualOrderItemModelImpl
 		CommerceVirtualOrderItemImpl commerceVirtualOrderItemImpl =
 			new CommerceVirtualOrderItemImpl();
 
+		commerceVirtualOrderItemImpl.setMvccVersion(getMvccVersion());
 		commerceVirtualOrderItemImpl.setUuid(getUuid());
 		commerceVirtualOrderItemImpl.setCommerceVirtualOrderItemId(
 			getCommerceVirtualOrderItemId());
@@ -943,6 +899,8 @@ public class CommerceVirtualOrderItemModelImpl
 		CommerceVirtualOrderItemImpl commerceVirtualOrderItemImpl =
 			new CommerceVirtualOrderItemImpl();
 
+		commerceVirtualOrderItemImpl.setMvccVersion(
+			this.<Long>getColumnOriginalValue("mvccVersion"));
 		commerceVirtualOrderItemImpl.setUuid(
 			this.<String>getColumnOriginalValue("uuid_"));
 		commerceVirtualOrderItemImpl.setCommerceVirtualOrderItemId(
@@ -1058,6 +1016,8 @@ public class CommerceVirtualOrderItemModelImpl
 	public CacheModel<CommerceVirtualOrderItem> toCacheModel() {
 		CommerceVirtualOrderItemCacheModel commerceVirtualOrderItemCacheModel =
 			new CommerceVirtualOrderItemCacheModel();
+
+		commerceVirtualOrderItemCacheModel.mvccVersion = getMvccVersion();
 
 		commerceVirtualOrderItemCacheModel.uuid = getUuid();
 
@@ -1240,6 +1200,7 @@ public class CommerceVirtualOrderItemModelImpl
 
 	}
 
+	private long _mvccVersion;
 	private String _uuid;
 	private long _commerceVirtualOrderItemId;
 	private long _groupId;
@@ -1289,6 +1250,7 @@ public class CommerceVirtualOrderItemModelImpl
 	private void _setColumnOriginalValues() {
 		_columnOriginalValues = new HashMap<String, Object>();
 
+		_columnOriginalValues.put("mvccVersion", _mvccVersion);
 		_columnOriginalValues.put("uuid_", _uuid);
 		_columnOriginalValues.put(
 			"commerceVirtualOrderItemId", _commerceVirtualOrderItemId);
@@ -1332,41 +1294,43 @@ public class CommerceVirtualOrderItemModelImpl
 	static {
 		Map<String, Long> columnBitmasks = new HashMap<>();
 
-		columnBitmasks.put("uuid_", 1L);
+		columnBitmasks.put("mvccVersion", 1L);
 
-		columnBitmasks.put("commerceVirtualOrderItemId", 2L);
+		columnBitmasks.put("uuid_", 2L);
 
-		columnBitmasks.put("groupId", 4L);
+		columnBitmasks.put("commerceVirtualOrderItemId", 4L);
 
-		columnBitmasks.put("companyId", 8L);
+		columnBitmasks.put("groupId", 8L);
 
-		columnBitmasks.put("userId", 16L);
+		columnBitmasks.put("companyId", 16L);
 
-		columnBitmasks.put("userName", 32L);
+		columnBitmasks.put("userId", 32L);
 
-		columnBitmasks.put("createDate", 64L);
+		columnBitmasks.put("userName", 64L);
 
-		columnBitmasks.put("modifiedDate", 128L);
+		columnBitmasks.put("createDate", 128L);
 
-		columnBitmasks.put("commerceOrderItemId", 256L);
+		columnBitmasks.put("modifiedDate", 256L);
 
-		columnBitmasks.put("fileEntryId", 512L);
+		columnBitmasks.put("commerceOrderItemId", 512L);
 
-		columnBitmasks.put("url", 1024L);
+		columnBitmasks.put("fileEntryId", 1024L);
 
-		columnBitmasks.put("activationStatus", 2048L);
+		columnBitmasks.put("url", 2048L);
 
-		columnBitmasks.put("duration", 4096L);
+		columnBitmasks.put("activationStatus", 4096L);
 
-		columnBitmasks.put("usages", 8192L);
+		columnBitmasks.put("duration", 8192L);
 
-		columnBitmasks.put("maxUsages", 16384L);
+		columnBitmasks.put("usages", 16384L);
 
-		columnBitmasks.put("active_", 32768L);
+		columnBitmasks.put("maxUsages", 32768L);
 
-		columnBitmasks.put("startDate", 65536L);
+		columnBitmasks.put("active_", 65536L);
 
-		columnBitmasks.put("endDate", 131072L);
+		columnBitmasks.put("startDate", 131072L);
+
+		columnBitmasks.put("endDate", 262144L);
 
 		_columnBitmasks = Collections.unmodifiableMap(columnBitmasks);
 	}

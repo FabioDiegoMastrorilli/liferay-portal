@@ -20,30 +20,51 @@ definition {
 		else {
 			PortalSettings.tearDownAuthenticationCP();
 
-			Page.tearDownCP();
+			PagesAdmin.tearDownCP();
+		}
+	}
+
+	@description = "This is a use case for LPS-143257. LDAP credentials should not expose in URL."
+	@priority = "5"
+	test AssertLDAPCredentialsDoesNotExposeInURL {
+		property apacheds.multiple.users.enabled = "true";
+		property portal.acceptance = "true";
+		property test.name.skip.portal.instance = "LDAP#AssertLDAPCredentialsDoesNotExposeInURL";
+
+		task ("Add LDAP server and test connection") {
+			LDAP.addLDAPServerAndTestConnection(ldapServerName = "ApacheDS Server");
+		}
+
+		task ("Assert no pagination display in the page") {
+			LDAP.assertNoPagination(ldapServerName = "ApacheDS Server");
+		}
+
+		task ("Assert LDAP security credentials are obscured") {
+			AssertTextEquals(
+				locator1 = "LDAP#LDAP_CONNECTION_CREDENTIAL_FIELD",
+				value1 = "TEMP_OBFUSCATION_VALUE");
 		}
 	}
 
 	@description = "This is a use case for LPS-65498. LDAP user can be imported with blank password."
 	@priority = "5"
-	@uitest
 	test CanImportLDAPUserWithBlankPassword {
 		property apacheds.blank.user.password.enabled = "true";
-		property apacheds.enabled = "true";
 		property app.server.types = "tomcat";
 		property database.types = "db2,hypersonic,mariadb,mysql,oracle,postgresql,sqlserver,sybase";
 		property environment.acceptance = "false";
+		property portal.acceptance = "true";
 		property test.name.skip.portal.instance = "LDAP#ImportLDAPUserWithBlankPassword";
 
 		task ("Add LDAP server and test connection") {
-			PortalSettings.addLDAPServer(LDAPServerName = "ApacheDS Server");
+			PortalSettings.addLDAPServer(ldapServerName = "ApacheDS Server");
 
-			PortalSettings.editLDAPServer(LDAPServerName = "ApacheDS Server");
+			PortalSettings.editLDAPServer(ldapServerName = "ApacheDS Server");
 
 			PortalSettings.testLDAPConnection();
 		}
 
-		task ("Configure LDAP settigs") {
+		task ("Configure LDAP settings") {
 			var enableSettingList = "enabled,ldapImportEnabled,importOnStartup";
 
 			PortalSettings.configureLDAPSetting(enableSettingList = "${enableSettingList}");
@@ -57,10 +78,8 @@ definition {
 			Portlet.startServer(deleteLiferayHome = "false");
 		}
 
-		task ("Login and reindex sarch indexes") {
+		task ("Login and reindex search indexes") {
 			User.firstLoginPG();
-
-			// LRQA-46018
 
 			SearchAdministration.executeReindex();
 		}
@@ -86,9 +105,9 @@ definition {
 		property test.name.skip.portal.instance = "LDAP#ResetFieldsValueForImportedLDAPUser";
 
 		task ("Add LDAP server and test connection") {
-			PortalSettings.addLDAPServer(LDAPServerName = "ApacheDS Server");
+			PortalSettings.addLDAPServer(ldapServerName = "ApacheDS Server");
 
-			PortalSettings.editLDAPServer(LDAPServerName = "ApacheDS Server");
+			PortalSettings.editLDAPServer(ldapServerName = "ApacheDS Server");
 
 			PortalSettings.testLDAPConnection();
 		}
@@ -109,8 +128,6 @@ definition {
 
 		task ("Login and reindex search indexes") {
 			User.firstLoginPG();
-
-			// LRQA-46018
 
 			SearchAdministration.executeReindex();
 		}
@@ -212,7 +229,6 @@ definition {
 
 	@description = "This is a use case for LPS-73381. LDAP security credentials are obscured when entered."
 	@priority = "4"
-	@uitest
 	test LDAPSecurityCredentialsAreHidden {
 		property test.name.skip.portal.instance = "LDAP#ViewHiddenSecurityCredential";
 

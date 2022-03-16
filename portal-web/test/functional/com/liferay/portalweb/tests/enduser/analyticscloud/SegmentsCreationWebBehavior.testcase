@@ -71,7 +71,7 @@ definition {
 
 		ACSegments.createDynamicSegment();
 
-		ACSegments.nameSegment(segmentName = "Dynamic Segment Test");
+		ACUtils.setItemName(itemName = "Dynamic Segment Test");
 
 		ACSegments.addSegmentField(segmentField = "Commented on Blog");
 
@@ -115,6 +115,8 @@ definition {
 	@description = "Feature ID: Legacy | Automation ID: LRAC-9221 | Test Summary: Create a Web Behavior criteria at least/at most times"
 	@priority = "4"
 	test CanCreateWebBehaviorSegmentCriteriaLeastMostTimes {
+		property portal.upstream = "quarantine";
+
 		ACUtils.createWCAndAddToPage();
 
 		var propertyName = ACDXPSettings.connectDXPtoAnalyticsCloud(siteName = "Site Name");
@@ -145,7 +147,7 @@ definition {
 
 		ACSegments.createDynamicSegment();
 
-		ACSegments.nameSegment(segmentName = "Dynamic Segment Test");
+		ACUtils.setItemName(itemName = "Dynamic Segment Test");
 
 		ACSegments.addSegmentField(segmentField = "Viewed Web Content");
 
@@ -182,7 +184,7 @@ definition {
 
 		ACNavigation.goToSegments();
 
-		ACSegments.editSegment(searchTerm = "Dynamic Segment Test");
+		ACSegments.editSegment(segmentName = "Dynamic Segment Test");
 
 		ACSegments.editWebBehaviorCriterion(
 			atLeastMost = "at most",
@@ -200,6 +202,10 @@ definition {
 	@description = "Create a segment with behavior of downloading a document"
 	@priority = "5"
 	test CanCreateWebBehaviorSegmentDownloadingDocument {
+		property portal.upstream = "quarantine";
+
+		// AC Refactor ticket: LRAC-9707
+
 		ACUtils.createDMAndAddToPage();
 
 		var propertyName = ACDXPSettings.connectDXPtoAnalyticsCloud(siteName = "Site Name");
@@ -232,7 +238,7 @@ definition {
 
 		ACSegments.createDynamicSegment();
 
-		ACSegments.nameSegment(segmentName = "Dynamic Segment Test");
+		ACUtils.setItemName(itemName = "Dynamic Segment Test");
 
 		ACSegments.addSegmentField(segmentField = "Downloaded Document & Media");
 
@@ -272,6 +278,8 @@ definition {
 	@description = "Feature ID: Legacy | Automation ID: LRAC-9222 | Test Summary: Create a Web Behavior since X days"
 	@priority = "4"
 	test CanCreateWebBehaviorSegmentSinceXdays {
+		property test.name.skip.portal.instance = "SegmentsCreationWebBehavior#CanCreateWebBehaviorSegmentSinceXdays";
+
 		ACUtils.createWCAndAddToPage();
 
 		var propertyName = ACDXPSettings.connectDXPtoAnalyticsCloud(siteName = "Site Name");
@@ -302,7 +310,7 @@ definition {
 
 		ACSegments.createDynamicSegment();
 
-		ACSegments.nameSegment(segmentName = "Dynamic Segment Test");
+		ACUtils.setItemName(itemName = "Dynamic Segment Test");
 
 		ACSegments.addSegmentField(segmentField = "Viewed Web Content");
 
@@ -342,6 +350,10 @@ definition {
 	@description = "Create a Web Behavior Segment Submitting a Form"
 	@priority = "5"
 	test CanCreateWebBehaviorSegmentSubmittingForm {
+		property portal.upstream = "quarantine";
+
+		// AC Refactor ticket: LRAC-9707
+
 		ACUtils.createFormAndAddToPage();
 
 		Navigator.openURL();
@@ -376,7 +388,7 @@ definition {
 
 		ACSegments.createDynamicSegment();
 
-		ACSegments.nameSegment(segmentName = "Dynamic Segment Test");
+		ACUtils.setItemName(itemName = "Dynamic Segment Test");
 
 		ACSegments.addSegmentField(segmentField = "Submitted Form");
 
@@ -417,6 +429,8 @@ definition {
 	@description = "Feature ID: Legacy | Automation ID: LRAC-9216 | Test Summary: Add segment using a web behavior 'after' some time"
 	@priority = "4"
 	test CanCreateWebBehaviorSegmentUsingAfter {
+		property portal.upstream = "quarantine";
+
 		ACUtils.createWCAndAddToPage();
 
 		var propertyName = ACDXPSettings.connectDXPtoAnalyticsCloud(siteName = "Site Name");
@@ -447,7 +461,7 @@ definition {
 
 		ACSegments.createDynamicSegment();
 
-		ACSegments.nameSegment(segmentName = "Dynamic Segment Test");
+		ACUtils.setItemName(itemName = "Dynamic Segment Test");
 
 		ACSegments.addSegmentField(segmentField = "Viewed Web Content");
 
@@ -491,6 +505,8 @@ definition {
 	@description = "Feature ID: Legacy | Automation ID: LRAC-9217 | Test Summary: Add segment using a web behavior 'before' some time"
 	@priority = "4"
 	test CanCreateWebBehaviorSegmentUsingBefore {
+		property portal.upstream = "quarantine";
+
 		ACUtils.createWCAndAddToPage();
 
 		var propertyName = ACDXPSettings.connectDXPtoAnalyticsCloud(siteName = "Site Name");
@@ -522,7 +538,7 @@ definition {
 
 		ACSegments.createDynamicSegment();
 
-		ACSegments.nameSegment(segmentName = "Dynamic Segment Test");
+		ACUtils.setItemName(itemName = "Dynamic Segment Test");
 
 		ACSegments.addSegmentField(segmentField = "Viewed Web Content");
 
@@ -565,6 +581,8 @@ definition {
 	@description = "Feature ID: Legacy | Automation ID: LRAC-9218 | Test Summary: Add segment using a web behavior 'between' some time"
 	@priority = "4"
 	test CanCreateWebBehaviorSegmentUsingBetween {
+		property portal.upstream = "quarantine";
+
 		ACUtils.createWCAndAddToPage();
 
 		var propertyName = ACDXPSettings.connectDXPtoAnalyticsCloud(siteName = "Site Name");
@@ -595,7 +613,7 @@ definition {
 
 		ACSegments.createDynamicSegment();
 
-		ACSegments.nameSegment(segmentName = "Dynamic Segment Test");
+		ACUtils.setItemName(itemName = "Dynamic Segment Test");
 
 		ACSegments.addSegmentField(segmentField = "Viewed Web Content");
 
@@ -644,6 +662,8 @@ definition {
 	@description = "Add segment using a web behavior 'ever' done"
 	@priority = "5"
 	test CanCreateWebBehaviorSegmentUsingEver {
+		property portal.upstream = "quarantine";
+
 		ACUtils.createWCAndAddToPage();
 
 		var propertyName = ACDXPSettings.connectDXPtoAnalyticsCloud(siteName = "Site Name");
@@ -674,7 +694,7 @@ definition {
 
 		ACSegments.createDynamicSegment();
 
-		ACSegments.nameSegment(segmentName = "Dynamic Segment Test");
+		ACUtils.setItemName(itemName = "Dynamic Segment Test");
 
 		ACSegments.addSegmentField(segmentField = "Viewed Web Content");
 
@@ -713,6 +733,8 @@ definition {
 	@description = "Create a Web Behavior using 'has not' segment"
 	@priority = "5"
 	test CanCreateWebBehaviorSegmentUsingHasNot {
+		property portal.upstream = "quarantine";
+
 		ACUtils.createBlogsAndAddToPage();
 
 		var propertyName = ACDXPSettings.connectDXPtoAnalyticsCloud(siteName = "Site Name");
@@ -745,7 +767,7 @@ definition {
 
 		ACSegments.createDynamicSegment();
 
-		ACSegments.nameSegment(segmentName = "Dynamic Segment Test");
+		ACUtils.setItemName(itemName = "Dynamic Segment Test");
 
 		ACSegments.addSegmentField(segmentField = "Viewed Blog");
 
@@ -789,6 +811,8 @@ definition {
 	@description = "Feature ID: Legacy | Automation ID: LRAC-9219 | Test Summary: Add segment using a web behavior 'on' some time"
 	@priority = "4"
 	test CanCreateWebBehaviorSegmentUsingOn {
+		property portal.upstream = "quarantine";
+
 		ACUtils.createWCAndAddToPage();
 
 		var propertyName = ACDXPSettings.connectDXPtoAnalyticsCloud(siteName = "Site Name");
@@ -820,7 +844,7 @@ definition {
 
 		ACSegments.createDynamicSegment();
 
-		ACSegments.nameSegment(segmentName = "Dynamic Segment Test");
+		ACUtils.setItemName(itemName = "Dynamic Segment Test");
 
 		ACSegments.addSegmentField(segmentField = "Viewed Web Content");
 
@@ -863,6 +887,8 @@ definition {
 	@description = "Add segment using a web behavior 'since' some time"
 	@priority = "5"
 	test CanCreateWebBehaviorSegmentUsingSince {
+		property test.name.skip.portal.instance = "SegmentsCreationWebBehavior#CanCreateWebBehaviorSegmentUsingSince";
+
 		ACUtils.createBlogsAndAddToPage();
 
 		var propertyName = ACDXPSettings.connectDXPtoAnalyticsCloud(siteName = "Site Name");
@@ -895,7 +921,7 @@ definition {
 
 		ACSegments.createDynamicSegment();
 
-		ACSegments.nameSegment(segmentName = "Dynamic Segment Test");
+		ACUtils.setItemName(itemName = "Dynamic Segment Test");
 
 		ACSegments.addSegmentField(segmentField = "Viewed Blog");
 
@@ -974,7 +1000,7 @@ definition {
 
 		ACSegments.createDynamicSegment();
 
-		ACSegments.nameSegment(segmentName = "Dynamic Segment Test");
+		ACUtils.setItemName(itemName = "Dynamic Segment Test");
 
 		ACSegments.addSegmentField(segmentField = "Viewed Blog");
 
@@ -1013,6 +1039,8 @@ definition {
 	@description = "Feature ID: Legacy | Automation ID: LRAC-9224 | Test Summary: Create a Web Behavior Segment of Viewing Document & Media in a Topic"
 	@priority = "4"
 	test CanCreateWebBehaviorSegmentViewingDM {
+		property test.name.skip.portal.instance = "SegmentsCreationWebBehavior#CanCreateWebBehaviorSegmentViewingDM";
+
 		var username = "ac";
 
 		ACUtils.createDMAndAddToPage();
@@ -1047,7 +1075,7 @@ definition {
 
 		ACSegments.createDynamicSegment();
 
-		ACSegments.nameSegment(segmentName = "Dynamic Segment Test");
+		ACUtils.setItemName(itemName = "Dynamic Segment Test");
 
 		ACSegments.addSegmentField(segmentField = "Viewed Document & Media");
 
@@ -1087,6 +1115,8 @@ definition {
 	@description = "Create a segment with behavior of viewing a form"
 	@priority = "5"
 	test CanCreateWebBehaviorSegmentViewingForm {
+		property portal.upstream = "quarantine";
+
 		var username = "ac";
 
 		ACUtils.createFormAndAddToPage();
@@ -1122,7 +1152,7 @@ definition {
 
 		ACSegments.createDynamicSegment();
 
-		ACSegments.nameSegment(segmentName = "Dynamic Segment Test");
+		ACUtils.setItemName(itemName = "Dynamic Segment Test");
 
 		ACSegments.addSegmentField(segmentField = "Viewed Form");
 
@@ -1163,11 +1193,13 @@ definition {
 	@description = "Feature ID: Legacy | Automation ID: LRAC-9225 | Test Summary: Create a Web Behavior Segment of Viewing a Page"
 	@priority = "4"
 	test CanCreateWebBehaviorSegmentViewingPage {
+		property portal.upstream = "quarantine";
+
 		var username = "ac";
 
 		var propertyName = ACDXPSettings.connectDXPtoAnalyticsCloud(siteName = "Site Name");
 
-		var dataSource = StringUtil.extractFirst("${propertyName}"," ");
+		var dataSource = StringUtil.extractFirst("${propertyName}", " ");
 
 		JSONUser.addUser(
 			userEmailAddress = "${username}@liferay.com",
@@ -1195,7 +1227,7 @@ definition {
 
 		ACSegments.createDynamicSegment();
 
-		ACSegments.nameSegment(segmentName = "Dynamic Segment Test");
+		ACUtils.setItemName(itemName = "Dynamic Segment Test");
 
 		ACSegments.addSegmentField(segmentField = "Viewed Page");
 
@@ -1264,7 +1296,7 @@ definition {
 
 		ACSegments.createDynamicSegment();
 
-		ACSegments.nameSegment(segmentName = "Dynamic Segment Test");
+		ACUtils.setItemName(itemName = "Dynamic Segment Test");
 
 		ACSegments.addSegmentField(segmentField = "Viewed Web Content");
 

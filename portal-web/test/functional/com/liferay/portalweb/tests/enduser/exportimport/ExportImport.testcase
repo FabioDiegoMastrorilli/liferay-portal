@@ -22,7 +22,7 @@ definition {
 				userLoginEmailAddress = "test@liferay.com",
 				userLoginFullName = "Test Test");
 
-			Page.tearDownCP();
+			PagesAdmin.tearDownCP();
 
 			Site.tearDownCP();
 		}
@@ -271,8 +271,8 @@ definition {
 
 		var larFileName = LAR.getLarFileName();
 
-		AssertTextEquals.assertPartialText(
-			locator1 = "SitePagesExport#CURRENT_AND_PREVIOUS_STATUS",
+		AssertTextEquals(
+			locator1 = "ExportImport#CURRENT_AND_PREVIOUS_STATUS_1",
 			value1 = "Successful");
 
 		LAR.downloadLar();
@@ -360,7 +360,7 @@ definition {
 			category = "Site Builder",
 			portlet = "Pages");
 
-		SitePages.gotoPageMenuItem(
+		PagesAdmin.gotoPageEllipsisMenuItem(
 			menuItem = "Edit",
 			pageName = "Test Template Content Page");
 
@@ -416,9 +416,7 @@ definition {
 			dmDocumentFile = "Document_1.jpg",
 			dmDocumentTitle = "DM Document Title");
 
-		DMNavigator.openDocumentsAndMediaAdmin(siteURLKey = "site-name");
-
-		DMNavigator.gotoDocumentType();
+		DMNavigator.openDocumentTypesAdmin(siteURLKey = "site-name");
 
 		DMDocumentType.add(
 			dmDocumentTypeDescription = "DM Document Type Description",
@@ -461,7 +459,7 @@ definition {
 		PageTemplatesAdmin.openPageTemplatesAdmin(siteURLKey = "global");
 
 		ProductMenu.gotoPortlet(
-			category = "Content &amp; Data",
+			category = "Content & Data",
 			portlet = "Dynamic Data Lists");
 
 		DDLDataDefinition.addCP(
@@ -478,7 +476,7 @@ definition {
 		PageTemplatesAdmin.openPageTemplatesAdmin(siteURLKey = "global");
 
 		ProductMenu.gotoPortlet(
-			category = "Content &amp; Data",
+			category = "Content & Data",
 			portlet = "Dynamic Data Lists");
 
 		DDLList.addCP(
@@ -504,7 +502,7 @@ definition {
 		PageTemplatesAdmin.openPageTemplatesAdmin(siteURLKey = "global");
 
 		ProductMenu.gotoPortlet(
-			category = "Content &amp; Data",
+			category = "Content & Data",
 			portlet = "Dynamic Data Lists");
 
 		LAR.exportPortlet(
@@ -514,7 +512,7 @@ definition {
 		Navigator.openSiteURL(siteName = "Site Name");
 
 		ProductMenu.gotoPortlet(
-			category = "Content &amp; Data",
+			category = "Content & Data",
 			portlet = "Dynamic Data Lists");
 
 		LAR.importPortlet(
@@ -526,7 +524,7 @@ definition {
 		Navigator.openSiteURL(siteName = "Site Name");
 
 		ProductMenu.gotoPortlet(
-			category = "Content &amp; Data",
+			category = "Content & Data",
 			portlet = "Dynamic Data Lists");
 
 		DDLNavigator.gotoListRecords(ddlListName = "DDL List");
@@ -594,13 +592,14 @@ definition {
 			uncheckContentNameList = "Documents and Media,Pages");
 
 		AssertClick(
-			locator1 = "SitePagesExport#EXPORT_BUTTON",
+			key_text = "Export",
+			locator1 = "Button#ANY",
 			value1 = "Export");
 
 		var key_larFileName = "${larFileName}";
 
-		AssertTextEquals.assertPartialText(
-			locator1 = "SitePagesExport#CURRENT_AND_PREVIOUS_STATUS",
+		AssertTextEquals(
+			locator1 = "ExportImport#CURRENT_AND_PREVIOUS_STATUS_1",
 			value1 = "Successful");
 
 		var larFileName = LAR.getLarFileName();
@@ -645,13 +644,14 @@ definition {
 			uncheckContentNameList = "Documents and Media,Web Content");
 
 		AssertClick(
-			locator1 = "SitePagesExport#EXPORT_BUTTON",
+			key_text = "Export",
+			locator1 = "Button#ANY",
 			value1 = "Export");
 
 		var key_larFileName = "${larFileName}";
 
-		AssertTextEquals.assertPartialText(
-			locator1 = "SitePagesExport#CURRENT_AND_PREVIOUS_STATUS",
+		AssertTextEquals(
+			locator1 = "ExportImport#CURRENT_AND_PREVIOUS_STATUS_1",
 			value1 = "Successful");
 
 		var larFileName = LAR.getLarFileName();
@@ -755,10 +755,6 @@ definition {
 				siteName = "Site A");
 
 			WebContentDisplayPortlet.selectWebContent(webContentTitle = "Web Content Title ${count}");
-
-			WebContent.viewPGViaWCD(
-				linkName = "Link to Page",
-				linkToPage = "true");
 		}
 
 		LAR.exportSiteCP(siteScopeName = "Site A");
@@ -787,13 +783,15 @@ definition {
 			pageName = "Page A",
 			siteName = "Site B");
 
-		WebContentDisplayPortlet.viewLinkToPageFieldViaWCD(
-			linkedPageName = "Page B",
-			linkName = "Link to Page");
+		WebContentDisplayPortlet.viewContent(
+			displayText = "Link to Page",
+			pageName = "Page B",
+			webContentTitle = "Web Content Title A");
 
-		WebContentDisplayPortlet.viewLinkToPageFieldViaWCD(
-			linkedPageName = "Page C",
-			linkName = "Link to Page");
+		WebContentDisplayPortlet.viewContent(
+			displayText = "Link to Page",
+			pageName = "Page C",
+			webContentTitle = "Web Content Title B");
 	}
 
 	@description = "This is a use case for LPS-88378."
@@ -876,16 +874,17 @@ definition {
 
 		WebContentDisplayPortlet.selectWebContent(webContentTitle = "WC WebContent Title 2");
 
-		WebContent.viewPGViaWCD(
-			linkName = "Link to Page",
-			linkToPage = "true");
+		WebContentDisplayPortlet.viewContent(
+			displayText = "Link to Page",
+			pageName = "Site Child Child Page",
+			webContentTitle = "WC WebContent Title 2");
 
 		LAR.exportSiteCP(siteScopeName = "Site Name");
 
 		var key_larFileName = "${larFileName}";
 
-		AssertTextEquals.assertPartialText(
-			locator1 = "SitePagesExport#CURRENT_AND_PREVIOUS_STATUS",
+		AssertTextEquals(
+			locator1 = "ExportImport#CURRENT_AND_PREVIOUS_STATUS_1",
 			value1 = "Successful");
 
 		var larFileName = LAR.getLarFileName();
@@ -919,9 +918,7 @@ definition {
 
 		IFrame.selectConfigurationFrame();
 
-		Portlet.configureCustomTitleViaLookandfeelPG(portletName = "IFrame");
-
-		PortletEntry.save();
+		Portlet.configureGeneralViaLookAndFeelPG(customTitle = "IFrame Custom");
 
 		IFrame.closeFrame();
 
@@ -1019,7 +1016,7 @@ definition {
 			category = "Site Builder",
 			portlet = "Pages");
 
-		SitePages.addPrivatePage(pageName = "Private Page");
+		PagesAdmin.addPrivatePage(pageName = "Private Page");
 
 		Navigator.gotoPrivateSitePage(
 			pageName = "Private Page",
@@ -1080,8 +1077,8 @@ definition {
 
 		var key_larFileName = "${larFileName}";
 
-		AssertTextEquals.assertPartialText(
-			locator1 = "SitePagesExport#CURRENT_AND_PREVIOUS_STATUS",
+		AssertTextEquals(
+			locator1 = "ExportImport#CURRENT_AND_PREVIOUS_STATUS_1",
 			value1 = "Successful");
 
 		var larFileName = LAR.getLarFileName();
@@ -1105,6 +1102,86 @@ definition {
 			siteName = "Site Name A");
 
 		AssetPublisherPortlet.viewConfigureSiteScope(siteName = "Site Name B");
+	}
+
+	@description = "This is a test for LPS-142076. Can import site with the 'Copy as new' option in the Update data section."
+	@priority = "3"
+	test ExportImportSiteWithCopyAsNew {
+		task ("Add a new site and add a widget page to site") {
+			JSONGroup.addGroup(groupName = "Test Site Name");
+
+			JSONLayout.addPublicLayout(
+				groupName = "Test Site Name",
+				layoutName = "Test Site Name");
+		}
+
+		task ("Add a Web Content Display widget to new page") {
+			JSONLayout.addWidgetToPublicLayout(
+				groupName = "Test Site Name",
+				layoutName = "Test Site Name",
+				widgetName = "Web Content Display");
+		}
+
+		task ("Add a web content with a link as content") {
+			WebContentNavigator.openWebContentAdmin(siteURLKey = "test-site-name");
+
+			WebContentNavigator.gotoAddCP();
+
+			WebContent.addCP(webContentTitle = "WC WebContent 1");
+
+			CKEditor.addSourceContent(content = '''
+<p>Test: <a href="/web/test-site-name/test-site-name">Link</a></p>
+''');
+
+			PortletEntry.publish();
+		}
+
+		task ("Add the second web content") {
+			WebContentNavigator.openWebContentAdmin(siteURLKey = "test-site-name");
+
+			WebContentNavigator.gotoAddCP();
+
+			WebContent.addCP(
+				webContentContent = "WC WebContent Content",
+				webContentTitle = "WC WebContent 2");
+
+			PortletEntry.publish();
+		}
+
+		task ("Select display the second Web Content article in WCD") {
+			Navigator.gotoSitePage(
+				pageName = "Test Site Name",
+				siteName = "Test Site Name");
+
+			WebContentDisplayPortlet.selectWebContent(webContentTitle = "WC WebContent 2");
+		}
+
+		task ("Export the site") {
+			LAR.openExportAdmin(siteScopeName = "test-site-name");
+
+			LexiconEntry.gotoAdd();
+
+			LAR.exportWithAssertionOnSuccess();
+
+			LAR.downloadLar();
+		}
+
+		task ("Add a new site based on Blank Site") {
+			JSONGroup.addGroup(groupName = "Site Name");
+		}
+
+		task ("Import the lar into the new site") {
+			var larFileName = LAR.getLarFileName();
+
+			LAR.importSiteCP(
+				copyAsNew = "true",
+				larFileName = "${larFileName}",
+				siteName = "Site Name");
+		}
+
+		task ("Assert the console no errors occur") {
+			AssertConsoleTextNotPresent(value1 = "Could not execute JDBC batch update");
+		}
 	}
 
 	@description = "This is a use case for LPS-88331."
@@ -1219,13 +1296,13 @@ definition {
 	test ExportImportThemeSettings {
 		JSONGroup.addGroup(groupName = "Site Name");
 
-		SitePages.openPagesAdmin(siteURLKey = "Site Name");
+		PagesAdmin.openPagesAdmin(siteURLKey = "Site Name");
 
-		SitePages.addPublicPage(pageName = "Test Page");
+		PagesAdmin.addPublicPage(pageName = "Test Page");
 
-		SitePages.openPagesAdmin(siteURLKey = "Site Name");
+		PagesAdmin.openPagesAdmin(siteURLKey = "Site Name");
 
-		SitePages.gotoPageMenuItem(
+		PagesAdmin.gotoPageEllipsisMenuItem(
 			menuItem = "Configure",
 			pageName = "Test Page");
 
@@ -1246,11 +1323,12 @@ definition {
 			uncheckSiteTemplateSettings = "true");
 
 		AssertClick(
-			locator1 = "SitePagesExport#EXPORT_BUTTON",
+			key_text = "Export",
+			locator1 = "Button#ANY",
 			value1 = "Export");
 
-		AssertTextEquals.assertPartialText(
-			locator1 = "SitePagesExport#CURRENT_AND_PREVIOUS_STATUS",
+		AssertTextEquals(
+			locator1 = "ExportImport#CURRENT_AND_PREVIOUS_STATUS_1",
 			value1 = "Successful");
 
 		var larFileName = LAR.getLarFileName();
@@ -1267,7 +1345,7 @@ definition {
 			pageName = "Test Page",
 			siteName = "Site Name 2");
 
-		Page.viewCurrentThemeSettings(
+		PagesAdmin.viewWidgetPageCurrentTheme(
 			checkThemeSettingList = "Show Maximize/Minimize Application Links",
 			pageName = "Test Page",
 			uncheckThemeSettingList = "Show Header Search");
@@ -1401,7 +1479,7 @@ definition {
 		AssertConsoleTextNotPresent(value1 = "com.liferay.journal.exception.NoSuchArticleException");
 	}
 
-	@description = "This is a use case for LPS-83326."
+	@description = "This is a use case for LPS-83326 and LPS-99287."
 	@priority = "5"
 	test ExportImportWebContentFolderWithWorkflow {
 		property portal.acceptance = "true";
@@ -1421,6 +1499,14 @@ definition {
 
 		LAR.exportPortlet(larFileName = "WebContent_portlet.lar");
 
+		WebContentNavigator.openWebContentAdmin(siteURLKey = "guest");
+
+		WebContentFolder.moveToRecycleBinCP(folderName = "WC Folder Name");
+
+		RecycleBin.openRecycleBinAdmin(siteURLKey = "guest");
+
+		RecycleBin.emptyCP();
+
 		JSONGroup.addGroup(groupName = "Site Name");
 
 		WebContentNavigator.openWebContentAdmin(siteURLKey = "site-name");
@@ -1432,6 +1518,8 @@ definition {
 		WebContentFolder.viewFolderWorkflow(
 			folderName = "WC Folder Name",
 			workflowResourceValue = "Single Approver");
+
+		AssertConsoleTextNotPresent(value1 = "com.liferay.exportimport.kernel.lar.PortletDataException");
 	}
 
 	@description = "This is a use case for LPS-86608."
@@ -1607,7 +1695,7 @@ definition {
 
 		LAR.exportSiteCP(siteScopeName = "Guest");
 
-		var downloadURL = selenium.getAttribute("//ul/li/div/h2/span/a@href");
+		var downloadURL = selenium.getAttribute("//dl/dd/div/h2/span/a@href");
 
 		User.logoutAndLoginPG(
 			userLoginEmailAddress = "userea@liferay.com",
@@ -1700,7 +1788,7 @@ definition {
 		Navigator.openURL();
 
 		ProductMenu.gotoPortlet(
-			category = "Content &amp; Data",
+			category = "Content & Data",
 			portlet = "Bookmarks");
 
 		AssertTextEquals(
@@ -1709,8 +1797,6 @@ definition {
 
 		LAR.importPortlet(
 			cannotImport = "true",
-			compressedFile = "true",
-			filePath = "enduser/exportimport",
 			larFileName = "bookmarks-corrupted.portlet.lar",
 			uploadFrom = "dependencies");
 	}
@@ -1943,17 +2029,10 @@ definition {
 			pageName = "Page A",
 			siteName = "Site Name");
 
-		WebContent.viewPGViaWCD(
-			linkName = "Link to Page",
-			linkToPage = "true");
-
-		Navigator.gotoSitePage(
+		WebContentDisplayPortlet.viewContent(
+			displayText = "Link to Page",
 			pageName = "Page B",
-			siteName = "Site Name");
-
-		AssertTextEquals.assertPartialText(
-			locator1 = "WCD#WEB_CONTENT_TITLE",
-			value1 = "WC WebContent Title 2");
+			webContentTitle = "WC WebContent Title 1");
 
 		LAR.exportSiteCP(siteScopeName = "Site Name");
 
@@ -1992,11 +2071,13 @@ definition {
 			pageName = "Test Page",
 			siteName = "Site Name A");
 
-		WebContent.addPGViaWCD(
+		WebContentDisplayPortlet.add(
 			webContentContent = "WebContent Content",
 			webContentTitle = "WebContent Title");
 
-		WebContent.viewPGViaWCD(webContentContent = "WebContent Content");
+		WebContentDisplayPortlet.viewContent(
+			webContentContent = "WebContent Content",
+			webContentTitle = "WebContent Title");
 
 		LAR.exportSiteCP(siteScopeName = "Site Name A");
 
@@ -2020,7 +2101,9 @@ definition {
 			pageName = "Test Page",
 			siteName = "Site Name B");
 
-		WebContent.viewPGViaWCD(webContentContent = "WebContent Content");
+		WebContentDisplayPortlet.viewContent(
+			webContentContent = "WebContent Content",
+			webContentTitle = "WebContent Title");
 	}
 
 	@description = "This is a test for LPS-91233."

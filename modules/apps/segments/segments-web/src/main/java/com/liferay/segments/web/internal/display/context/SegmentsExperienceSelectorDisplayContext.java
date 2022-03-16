@@ -14,11 +14,14 @@
 
 package com.liferay.segments.web.internal.display.context;
 
+import com.liferay.petra.sql.dsl.DSLQueryFactoryUtil;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.json.JSONArray;
 import com.liferay.portal.kernel.json.JSONFactoryUtil;
 import com.liferay.portal.kernel.json.JSONObject;
 import com.liferay.portal.kernel.json.JSONUtil;
+import com.liferay.portal.kernel.log.Log;
+import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.model.Layout;
 import com.liferay.portal.kernel.theme.ThemeDisplay;
 import com.liferay.portal.kernel.util.GetterUtil;
@@ -31,8 +34,13 @@ import com.liferay.segments.constants.SegmentsExperienceConstants;
 import com.liferay.segments.constants.SegmentsWebKeys;
 import com.liferay.segments.model.SegmentsEntry;
 import com.liferay.segments.model.SegmentsExperience;
+import com.liferay.segments.model.SegmentsExperiment;
+import com.liferay.segments.model.SegmentsExperimentRel;
+import com.liferay.segments.model.SegmentsExperimentRelTable;
 import com.liferay.segments.service.SegmentsEntryLocalServiceUtil;
 import com.liferay.segments.service.SegmentsExperienceLocalServiceUtil;
+import com.liferay.segments.service.SegmentsExperimentLocalServiceUtil;
+import com.liferay.segments.service.SegmentsExperimentRelLocalServiceUtil;
 
 import java.util.List;
 
@@ -56,13 +64,13 @@ public class SegmentsExperienceSelectorDisplayContext {
 		JSONArray segmentsExperiencesJSONArray =
 			JSONFactoryUtil.createJSONArray();
 
+		boolean addedDefault = false;
+
 		List<SegmentsExperience> segmentsExperiences =
 			SegmentsExperienceLocalServiceUtil.getSegmentsExperiences(
 				_themeDisplay.getScopeGroupId(),
 				PortalUtil.getClassNameId(Layout.class.getName()),
 				_themeDisplay.getPlid(), true);
-
-		boolean addedDefault = false;
 
 		for (SegmentsExperience segmentsExperience : segmentsExperiences) {
 			if ((segmentsExperience.getPriority() <
@@ -84,12 +92,15 @@ public class SegmentsExperienceSelectorDisplayContext {
 				_getDefaultSegmentsExperienceJSONObject());
 		}
 
+		_calculateActiveSegmentsExperiencesJSONArray(
+			segmentsExperiencesJSONArray);
+
 		return segmentsExperiencesJSONArray;
 	}
 
 	public String getSelectedSegmentsExperienceName() {
 		long segmentsExperienceId = ParamUtil.getLong(
-			_httpServletRequest, "p_s_e_id", -1);
+			_httpServletRequest, "segmentsExperienceId", -1);
 
 		if (segmentsExperienceId == -1) {
 			long[] segmentsExperienceIds = GetterUtil.getLongValues(
@@ -111,16 +122,52 @@ public class SegmentsExperienceSelectorDisplayContext {
 				_themeDisplay.getLocale());
 		}
 
+		SegmentsExperience parentSegmentsExperience =
+			_getParentSegmentExperience(segmentsExperience);
+
+		if (parentSegmentsExperience != null) {
+			segmentsExperience = parentSegmentsExperience;
+		}
+
 		return segmentsExperience.getName(_themeDisplay.getLocale());
+	}
+
+	private void _calculateActiveSegmentsExperiencesJSONArray(
+		JSONArray segmentsExperiencesJSONArray) {
+
+		for (int i = 0; i < segmentsExperiencesJSONArray.length(); i++) {
+			JSONObject segmentsExperiencesJSONObject =
+				segmentsExperiencesJSONArray.getJSONObject(i);
+
+			JSONObject firstSegmentsExperienceJSONObject =
+				_getFirstSegmentsExperienceJSONObject(
+					segmentsExperiencesJSONObject.getLong("segmentsEntryId"),
+					segmentsExperiencesJSONArray);
+
+			long firstSegmentsExperienceId =
+				firstSegmentsExperienceJSONObject.getLong(
+					"segmentsExperienceId");
+
+			if (firstSegmentsExperienceId ==
+					segmentsExperiencesJSONObject.getLong(
+						"segmentsExperienceId")) {
+
+				segmentsExperiencesJSONObject.put("active", true);
+
+				break;
+			}
+		}
 	}
 
 	private JSONObject _getDefaultSegmentsExperienceJSONObject() {
 		return JSONUtil.put(
-			"active", true
+			"segmentsEntryId", SegmentsEntryConstants.ID_DEFAULT
 		).put(
 			"segmentsEntryName",
 			SegmentsEntryConstants.getDefaultSegmentsEntryName(
 				_themeDisplay.getLocale())
+		).put(
+			"segmentsExperienceId", SegmentsExperienceConstants.ID_DEFAULT
 		).put(
 			"segmentsExperienceName",
 			SegmentsExperienceConstants.getDefaultSegmentsExperienceName(
@@ -128,16 +175,77 @@ public class SegmentsExperienceSelectorDisplayContext {
 		).put(
 			"url",
 			HttpUtil.setParameter(
-				PortalUtil.getCurrentURL(_httpServletRequest), "p_s_e_id",
-				SegmentsExperienceConstants.ID_DEFAULT)
+				PortalUtil.getCurrentURL(_httpServletRequest),
+				"segmentsExperienceId", SegmentsExperienceConstants.ID_DEFAULT)
 		);
+	}
+
+	private JSONObject _getFirstSegmentsExperienceJSONObject(
+		long segmentsEntryId, JSONArray segmentsExperiencesJSONArray) {
+
+		JSONObject firstSegmentsExperienceJSONObject =
+			JSONFactoryUtil.createJSONObject();
+
+		for (int i = 0; i < segmentsExperiencesJSONArray.length(); i++) {
+			JSONObject segmentsExperiencesJSONObject =
+				segmentsExperiencesJSONArray.getJSONObject(i);
+
+			if ((segmentsExperiencesJSONObject.getLong("segmentsEntryId") ==
+					segmentsEntryId) ||
+				(segmentsExperiencesJSONObject.getLong("segmentsEntryId") ==
+					SegmentsEntryConstants.ID_DEFAULT)) {
+
+				firstSegmentsExperienceJSONObject =
+					segmentsExperiencesJSONObject;
+
+				break;
+			}
+		}
+
+		return firstSegmentsExperienceJSONObject;
+	}
+
+	private SegmentsExperience _getParentSegmentExperience(
+		SegmentsExperience segmentsExperience) {
+
+		List<SegmentsExperimentRel> segmentsExperimentRels =
+			SegmentsExperimentRelLocalServiceUtil.dslQuery(
+				DSLQueryFactoryUtil.select(
+					SegmentsExperimentRelTable.INSTANCE
+				).from(
+					SegmentsExperimentRelTable.INSTANCE
+				).where(
+					SegmentsExperimentRelTable.INSTANCE.segmentsExperienceId.eq(
+						segmentsExperience.getSegmentsExperienceId())
+				));
+
+		if (segmentsExperimentRels.isEmpty()) {
+			return null;
+		}
+
+		SegmentsExperimentRel segmentsExperimentRel =
+			segmentsExperimentRels.get(0);
+
+		try {
+			SegmentsExperiment segmentsExperiment =
+				SegmentsExperimentLocalServiceUtil.getSegmentsExperiment(
+					segmentsExperimentRel.getSegmentsExperimentId());
+
+			return SegmentsExperienceLocalServiceUtil.getSegmentsExperience(
+				segmentsExperiment.getSegmentsExperienceId());
+		}
+		catch (PortalException portalException) {
+			_log.error(portalException);
+		}
+
+		return null;
 	}
 
 	private JSONObject _getSegmentsExperienceJSONObject(
 		SegmentsExperience segmentsExperience) {
 
 		return JSONUtil.put(
-			"active", segmentsExperience.isActive()
+			"segmentsEntryId", segmentsExperience.getSegmentsEntryId()
 		).put(
 			"segmentsEntryName",
 			() -> {
@@ -153,15 +261,21 @@ public class SegmentsExperienceSelectorDisplayContext {
 					_themeDisplay.getLocale());
 			}
 		).put(
+			"segmentsExperienceId", segmentsExperience.getSegmentsExperienceId()
+		).put(
 			"segmentsExperienceName",
 			segmentsExperience.getName(_themeDisplay.getLocale())
 		).put(
 			"url",
 			HttpUtil.setParameter(
-				PortalUtil.getCurrentURL(_httpServletRequest), "p_s_e_id",
+				PortalUtil.getCurrentURL(_httpServletRequest),
+				"segmentsExperienceId",
 				segmentsExperience.getSegmentsExperienceId())
 		);
 	}
+
+	private static final Log _log = LogFactoryUtil.getLog(
+		SegmentsExperienceSelectorDisplayContext.class);
 
 	private final HttpServletRequest _httpServletRequest;
 	private final ThemeDisplay _themeDisplay;

@@ -46,7 +46,6 @@ import com.liferay.portal.kernel.util.MethodKey;
  * </p>
  *
  * @author Marco Leo
- * @see ObjectDefinitionServiceSoap
  * @generated
  */
 public class ObjectDefinitionServiceHttp {
@@ -369,11 +368,11 @@ public class ObjectDefinitionServiceHttp {
 
 	public static com.liferay.object.model.ObjectDefinition
 			updateCustomObjectDefinition(
-				HttpPrincipal httpPrincipal, Long objectDefinitionId,
+				HttpPrincipal httpPrincipal, long objectDefinitionId,
 				long descriptionObjectFieldId, long titleObjectFieldId,
 				boolean active,
 				java.util.Map<java.util.Locale, String> labelMap, String name,
-				String panelAppOrder, String panelCategoryKey,
+				String panelAppOrder, String panelCategoryKey, boolean portlet,
 				java.util.Map<java.util.Locale, String> pluralLabelMap,
 				String scope)
 		throws com.liferay.portal.kernel.exception.PortalException {
@@ -387,7 +386,49 @@ public class ObjectDefinitionServiceHttp {
 			MethodHandler methodHandler = new MethodHandler(
 				methodKey, objectDefinitionId, descriptionObjectFieldId,
 				titleObjectFieldId, active, labelMap, name, panelAppOrder,
-				panelCategoryKey, pluralLabelMap, scope);
+				panelCategoryKey, portlet, pluralLabelMap, scope);
+
+			Object returnObj = null;
+
+			try {
+				returnObj = TunnelUtil.invoke(httpPrincipal, methodHandler);
+			}
+			catch (Exception exception) {
+				if (exception instanceof
+						com.liferay.portal.kernel.exception.PortalException) {
+
+					throw (com.liferay.portal.kernel.exception.PortalException)
+						exception;
+				}
+
+				throw new com.liferay.portal.kernel.exception.SystemException(
+					exception);
+			}
+
+			return (com.liferay.object.model.ObjectDefinition)returnObj;
+		}
+		catch (com.liferay.portal.kernel.exception.SystemException
+					systemException) {
+
+			_log.error(systemException, systemException);
+
+			throw systemException;
+		}
+	}
+
+	public static com.liferay.object.model.ObjectDefinition
+			updateTitleObjectFieldId(
+				HttpPrincipal httpPrincipal, long objectDefinitionId,
+				long titleObjectFieldId)
+		throws com.liferay.portal.kernel.exception.PortalException {
+
+		try {
+			MethodKey methodKey = new MethodKey(
+				ObjectDefinitionServiceUtil.class, "updateTitleObjectFieldId",
+				_updateTitleObjectFieldIdParameterTypes9);
+
+			MethodHandler methodHandler = new MethodHandler(
+				methodKey, objectDefinitionId, titleObjectFieldId);
 
 			Object returnObj = null;
 
@@ -443,9 +484,11 @@ public class ObjectDefinitionServiceHttp {
 		};
 	private static final Class<?>[]
 		_updateCustomObjectDefinitionParameterTypes8 = new Class[] {
-			Long.class, long.class, long.class, boolean.class,
+			long.class, long.class, long.class, boolean.class,
 			java.util.Map.class, String.class, String.class, String.class,
-			java.util.Map.class, String.class
+			boolean.class, java.util.Map.class, String.class
 		};
+	private static final Class<?>[] _updateTitleObjectFieldIdParameterTypes9 =
+		new Class[] {long.class, long.class};
 
 }

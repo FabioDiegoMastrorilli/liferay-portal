@@ -23,6 +23,7 @@ import com.liferay.portal.kernel.language.LanguageUtil;
 import com.liferay.portal.kernel.model.Company;
 import com.liferay.portal.kernel.model.Group;
 import com.liferay.portal.kernel.module.framework.ModuleServiceLifecycle;
+import com.liferay.portal.kernel.security.permission.ActionKeys;
 import com.liferay.portal.kernel.service.GroupService;
 import com.liferay.portal.kernel.theme.ThemeDisplay;
 import com.liferay.portal.kernel.util.LinkedHashMapBuilder;
@@ -85,26 +86,26 @@ public class DepotAdminGroupSearchProvider {
 
 		GroupSearch groupSearch = new GroupSearch(portletRequest, portletURL);
 
-		groupSearch.setTotal(
-			_depotEntryService.getGroupConnectedDepotEntriesCount(
-				themeDisplay.getScopeGroupId()));
-
-		List<DepotEntry> depotEntries =
-			_depotEntryService.getGroupConnectedDepotEntries(
-				themeDisplay.getScopeGroupId(), groupSearch.getStart(),
-				groupSearch.getEnd());
-
-		List<Group> groups = new ArrayList<>();
-
-		for (DepotEntry depotEntry : depotEntries) {
-			groups.add(depotEntry.getGroup());
-		}
-
-		groupSearch.setResults(groups);
-
 		groupSearch.setEmptyResultsMessage(
 			LanguageUtil.get(
 				portletRequest.getLocale(), "no-asset-libraries-were-found"));
+		groupSearch.setResultsAndTotal(
+			() -> {
+				List<DepotEntry> depotEntries =
+					_depotEntryService.getGroupConnectedDepotEntries(
+						themeDisplay.getScopeGroupId(), groupSearch.getStart(),
+						groupSearch.getEnd());
+
+				List<Group> groups = new ArrayList<>();
+
+				for (DepotEntry depotEntry : depotEntries) {
+					groups.add(depotEntry.getGroup());
+				}
+
+				return groups;
+			},
+			_depotEntryService.getGroupConnectedDepotEntriesCount(
+				themeDisplay.getScopeGroupId()));
 
 		return groupSearch;
 	}
@@ -120,6 +121,8 @@ public class DepotAdminGroupSearchProvider {
 
 		LinkedHashMap<String, Object> groupParams =
 			LinkedHashMapBuilder.<String, Object>put(
+				"actionId", ActionKeys.VIEW
+			).put(
 				"site", Boolean.FALSE
 			).build();
 
@@ -132,34 +135,28 @@ public class DepotAdminGroupSearchProvider {
 		GroupSearchTerms searchTerms =
 			(GroupSearchTerms)groupSearch.getSearchTerms();
 
-		List<Group> results = null;
-
 		if (searchTerms.hasSearchTerms()) {
-			int total = _groupService.searchCount(
-				company.getCompanyId(), _classNameIds,
-				searchTerms.getKeywords(), groupParams);
-
-			groupSearch.setTotal(total);
-
-			results = _groupService.search(
-				company.getCompanyId(), _classNameIds,
-				searchTerms.getKeywords(), groupParams, groupSearch.getStart(),
-				groupSearch.getEnd(), groupSearch.getOrderByComparator());
+			groupSearch.setResultsAndTotal(
+				() -> _groupService.search(
+					company.getCompanyId(), _classNameIds,
+					searchTerms.getKeywords(), groupParams,
+					groupSearch.getStart(), groupSearch.getEnd(),
+					groupSearch.getOrderByComparator()),
+				_groupService.searchCount(
+					company.getCompanyId(), _classNameIds,
+					searchTerms.getKeywords(), groupParams));
 		}
 		else {
-			int total = _groupService.searchCount(
-				company.getCompanyId(), _classNameIds,
-				searchTerms.getKeywords(), groupParams);
-
-			groupSearch.setTotal(total);
-
-			results = _groupService.search(
-				company.getCompanyId(), _classNameIds,
-				searchTerms.getKeywords(), groupParams, groupSearch.getStart(),
-				groupSearch.getEnd(), groupSearch.getOrderByComparator());
+			groupSearch.setResultsAndTotal(
+				() -> _groupService.search(
+					company.getCompanyId(), _classNameIds,
+					searchTerms.getKeywords(), groupParams,
+					groupSearch.getStart(), groupSearch.getEnd(),
+					groupSearch.getOrderByComparator()),
+				_groupService.searchCount(
+					company.getCompanyId(), _classNameIds,
+					searchTerms.getKeywords(), groupParams));
 		}
-
-		groupSearch.setResults(results);
 
 		return groupSearch;
 	}

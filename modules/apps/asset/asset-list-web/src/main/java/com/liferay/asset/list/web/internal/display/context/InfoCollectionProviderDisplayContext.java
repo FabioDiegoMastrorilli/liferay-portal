@@ -68,11 +68,11 @@ public class InfoCollectionProviderDisplayContext {
 		List<InfoCollectionProvider<?>> infoCollectionProviders =
 			_getInfoCollectionProviders();
 
-		searchContainer.setResults(
-			ListUtil.subList(
+		searchContainer.setResultsAndTotal(
+			() -> ListUtil.subList(
 				infoCollectionProviders, searchContainer.getStart(),
-				searchContainer.getEnd()));
-		searchContainer.setTotal(infoCollectionProviders.size());
+				searchContainer.getEnd()),
+			infoCollectionProviders.size());
 
 		return searchContainer;
 	}
@@ -113,7 +113,7 @@ public class InfoCollectionProviderDisplayContext {
 		}
 		catch (PortletException portletException) {
 			if (_log.isDebugEnabled()) {
-				_log.debug(portletException, portletException);
+				_log.debug(portletException);
 			}
 
 			return PortletURLBuilder.createRenderURL(

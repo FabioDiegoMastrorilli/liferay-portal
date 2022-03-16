@@ -7,6 +7,7 @@ dependencies {
 	compileOnly group: "org.apache.felix", name: "org.apache.felix.http.servlet-api", version: "1.1.2"
 	compileOnly group: "org.osgi", name: "org.osgi.service.component.annotations", version: "1.4.0"
 	compileOnly group: "org.osgi", name: "osgi.core", version: "6.0.0"
+	compileOnly project(":apps:account:account-api")
 	compileOnly project(":apps:adaptive-media:adaptive-media-image-taglib")
 	compileOnly project(":apps:commerce:commerce-account-api")
 	compileOnly project(":apps:commerce:commerce-api")
@@ -18,10 +19,13 @@ dependencies {
 	compileOnly project(":apps:commerce:commerce-payment-api")
 	compileOnly project(":apps:commerce:commerce-pricing-api")
 	compileOnly project(":apps:commerce:commerce-product-api")
+	compileOnly project(":apps:commerce:commerce-shipping-engine-fixed-api")
+	compileOnly project(":apps:commerce:commerce-shipping-engine-fixed-service")
 	compileOnly project(":apps:commerce:commerce-taglib")
+	compileOnly project(":apps:commerce:commerce-term-api")
+	compileOnly project(":apps:commerce:headless:headless-commerce:headless-commerce-delivery-cart-api")
 	compileOnly project(":apps:frontend-taglib:frontend-taglib")
 	compileOnly project(":apps:oauth2-provider:oauth2-provider-scope-liferay-api")
-	compileOnly project(":apps:petra:petra-encryptor")
 	compileOnly project(":apps:petra:petra-portlet-url-builder")
 	compileOnly project(":core:osgi-service-tracker-collections")
 	compileOnly project(":core:petra:petra-lang")

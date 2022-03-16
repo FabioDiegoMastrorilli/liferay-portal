@@ -69,18 +69,24 @@ public class DDLRecordModelDocumentContributor
 
 			DDMFormValues ddmFormValues = ddlRecordVersion.getDDMFormValues();
 
-			addContent(ddlRecordVersion, ddmFormValues, document);
+			_addContent(ddlRecordVersion, ddmFormValues, document);
 
 			ddmIndexer.addAttributes(document, ddmStructure, ddmFormValues);
 		}
 		catch (Exception exception) {
 			if (_log.isDebugEnabled()) {
-				_log.debug(exception, exception);
+				_log.debug(exception);
 			}
 		}
 	}
 
-	protected void addContent(
+	@Reference
+	protected ClassNameLocalService classNameLocalService;
+
+	@Reference
+	protected DDMIndexer ddmIndexer;
+
+	private void _addContent(
 			DDLRecordVersion ddlRecordVersion, DDMFormValues ddmFormValues,
 			Document document)
 		throws Exception {
@@ -90,11 +96,11 @@ public class DDLRecordModelDocumentContributor
 		for (Locale locale : locales) {
 			document.addText(
 				"ddmContent_" + LocaleUtil.toLanguageId(locale),
-				extractContent(ddlRecordVersion, locale));
+				_extractContent(ddlRecordVersion, locale));
 		}
 	}
 
-	protected String extractContent(
+	private String _extractContent(
 			DDLRecordVersion ddlRecordVersion, Locale locale)
 		throws Exception {
 
@@ -109,12 +115,6 @@ public class DDLRecordModelDocumentContributor
 		return ddmIndexer.extractIndexableAttributes(
 			ddlRecordSet.getDDMStructure(), ddmFormValues, locale);
 	}
-
-	@Reference
-	protected ClassNameLocalService classNameLocalService;
-
-	@Reference
-	protected DDMIndexer ddmIndexer;
 
 	private static final Log _log = LogFactoryUtil.getLog(
 		DDLRecordModelDocumentContributor.class);

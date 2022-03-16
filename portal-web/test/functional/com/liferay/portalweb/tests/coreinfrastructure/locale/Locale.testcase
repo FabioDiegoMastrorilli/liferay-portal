@@ -50,7 +50,8 @@ definition {
 			fieldType = "Campo de texto",
 			local = "true",
 			localeBasic = "Básico",
-			localeElements = "Elementos");
+			localeElements = "Elementos",
+			localeFields = "Campos");
 
 		Form.editFieldLabelMetal(
 			fieldValue = "label",
@@ -77,13 +78,13 @@ definition {
 		JSONLayout.addWidgetToPublicLayout(
 			groupName = "Guest",
 			layoutName = "Navigation Menu Page",
-			widgetName = "Navigation Menu");
+			widgetName = "Menu Display");
 
 		Navigator.openWithAppendToBaseURL(urlAppend = "fr/web/guest/navigation-menu-page");
 
 		task ("Assert preferred locale persists by asserting Widget name.") {
 			AssertElementPresent(
-				key_portletName = "Menu de Navigation",
+				key_portletName = "Menu Affichage",
 				locator1 = "Portlet#TITLE");
 		}
 
@@ -180,13 +181,13 @@ definition {
 		JSONLayout.addWidgetToPublicLayout(
 			groupName = "Guest",
 			layoutName = "Navigation Menu Page",
-			widgetName = "Navigation Menu");
+			widgetName = "Menu Display");
 
 		Navigator.openWithAppendToBaseURL(urlAppend = "fr/web/guest/navigation-menu-page");
 
 		task ("Assert preferred locale persists by asserting Widget name.") {
 			AssertElementPresent(
-				key_portletName = "Menu de Navigation",
+				key_portletName = "Menu Affichage",
 				locator1 = "Portlet#TITLE");
 		}
 
@@ -194,7 +195,7 @@ definition {
 
 		task ("Assert default locale returned by asserting Widget name.") {
 			AssertElementPresent(
-				key_portletName = "Navigation Menu",
+				key_portletName = "Menu Display",
 				locator1 = "Portlet#TITLE");
 		}
 	}
@@ -254,11 +255,13 @@ definition {
 		Navigator.openSpecificURL(url = "http://www.able.com:8080/site-page");
 
 		AssertElementPresent(locator1 = "//link[@hreflang='x-default'][@href='http://www.able.com:8080']");
+
 		AssertElementPresent(locator1 = "//link[@hreflang='en-US'][@href='http://www.able.com:8080']");
 
 		Navigator.openSpecificURL(url = "http://www.able.com:8080");
 
 		AssertElementPresent(locator1 = "//link[@hreflang='x-default'][@href='http://www.able.com:8080']");
+
 		AssertElementPresent(locator1 = "//link[@hreflang='en-US'][@href='http://www.able.com:8080']");
 	}
 
@@ -458,6 +461,66 @@ definition {
 		}
 	}
 
+	@description = "This is a use case for LRQA-67974 for user available time zones restricted by instance available time zones."
+	@priority = "3"
+	test RestrictInstanceAvailableTimeZones {
+		property custom.properties = "time.zones=America/Phoenix,UTC,Asia/Tokyo";
+		property test.name.skip.portal.instance = "Locale#RestrictInstanceAvailableTimeZones";
+
+		User.firstLoginPG();
+
+		ApplicationsMenu.gotoPortlet(
+			category = "Configuration",
+			panel = "Control Panel",
+			portlet = "Instance Settings");
+
+		SystemSettings.gotoConfiguration(
+			configurationCategory = "Localization",
+			configurationName = "Time Zone",
+			configurationScope = "Virtual Instance Scope");
+
+		task ("Assert some default available time zones for instances and users") {
+			Click(locator1 = "Select#TIME_ZONE");
+
+			for (var timeZone : list "(UTC -11:00) Samoa Standard Time,(UTC -10:00) Hawaii Standard Time") {
+				AssertTextNotPresent(
+					locator1 = "Select#TIME_ZONE",
+					value1 = "${timeZone}");
+			}
+
+			for (var timeZone : list "(UTC -07:00) Mountain Standard Time (America/Phoenix),(UTC) Coordinated Universal Time,(UTC +09:00) Japan Standard Time") {
+				AssertTextPresent(
+					locator1 = "Select#TIME_ZONE",
+					value1 = "${timeZone}");
+			}
+		}
+
+		ApplicationsMenu.gotoPortlet(
+			category = "Users",
+			panel = "Control Panel",
+			portlet = "Users and Organizations");
+
+		User.gotoEditCP(userScreenName = "test");
+
+		UserNavigator.gotoDisplaySettings();
+
+		task ("Assert some default available time zones for instances and users") {
+			Click(locator1 = "Select#TIME_ZONE");
+
+			for (var timeZone : list "(UTC -11:00) Samoa Standard Time,(UTC -10:00) Hawaii Standard Time") {
+				AssertTextNotPresent(
+					locator1 = "Select#TIME_ZONE",
+					value1 = "${timeZone}");
+			}
+
+			for (var timeZone : list "(UTC -07:00) Mountain Standard Time (America/Phoenix),(UTC) Coordinated Universal Time,(UTC +09:00) Japan Standard Time") {
+				AssertTextPresent(
+					locator1 = "Select#TIME_ZONE",
+					value1 = "${timeZone}");
+			}
+		}
+	}
+
 	@priority = "3"
 	test UserLockoutShowsTimezoneInformation {
 		property test.name.skip.portal.instance = "Locale#UserLockoutShowsTimezoneInformation";
@@ -565,7 +628,7 @@ definition {
 		task ("Assert the default enabled locales in Web Content match what is normally available") {
 			Click(locator1 = "Button#LOCALIZATION_GENERIC");
 
-			for (var language : list "ar_SA,ca_ES,zh_CN,nl_NL,fi_FI,fr_FR,de_DE,hu_HU,ja_JP,pt_BR,es_ES,sv_SE") {
+			for (var language : list "ar-SA,ca-ES,zh-CN,nl-NL,fi-FI,fr-FR,de-DE,hu-HU,ja-JP,pt-BR,es-ES,sv-SE") {
 				AssertElementPresent(
 					key_locale = "${language}",
 					locator1 = "Translation#LOCALIZATION_NAME");
@@ -639,6 +702,50 @@ definition {
 		}
 	}
 
+	@priority = "4"
+	test ViewTimeZoneIDInNonEnglishLocale {
+		property test.name.skip.portal.instance = "Locale#ViewTimeZoneIDInNonDefaultLocale";
+
+		User.firstLoginPG();
+
+		var baseURL = PropsUtil.get("portal.url");
+
+		task ("Assert time zone id America/Phoenix always displays in English") {
+			Navigator.openSpecificURL(url = "${baseURL}/ja/group/control_panel/manage?p_p_id=com_liferay_configuration_admin_web_portlet_InstanceSettingsPortlet");
+
+			SystemSettings.gotoConfiguration(
+				configurationCategory = "ローカライズ",
+				configurationName = "標準時",
+				configurationScope = "仮想インスタンススコープ");
+
+			AssertElementPresent(
+				locator1 = "Select#TIME_ZONE",
+				value1 = "(UTC -07:00) 山地標準時 (America/Phoenix)");
+
+			Navigator.openSpecificURL(url = "${baseURL}/es/group/control_panel/manage?p_p_id=com_liferay_configuration_admin_web_portlet_InstanceSettingsPortlet");
+
+			SystemSettings.gotoConfiguration(
+				configurationCategory = "Localización",
+				configurationName = "Zona horaria",
+				configurationScope = "Ámbito de instancia virtual");
+
+			AssertElementPresent(
+				locator1 = "Select#TIME_ZONE",
+				value1 = "(UTC -07:00) Hora estándar de las Rocosas (America/Phoenix)");
+
+			Navigator.openSpecificURL(url = "${baseURL}/zh/group/control_panel/manage?p_p_id=com_liferay_configuration_admin_web_portlet_InstanceSettingsPortlet");
+
+			SystemSettings.gotoConfiguration(
+				configurationCategory = "本地化",
+				configurationName = "时区",
+				configurationScope = "虚拟实例范围");
+
+			AssertElementPresent(
+				locator1 = "Select#TIME_ZONE",
+				value1 = "(UTC -07:00) Mountain 标准时间 (America/Phoenix)");
+		}
+	}
+
 	@priority = "5"
 	test ViewUserPreferredLocale {
 		property portal.acceptance = "true";
@@ -659,7 +766,7 @@ definition {
 			category = "Site Builder",
 			portlet = "Pages");
 
-		SitePages.addPublicPage(pageName = "Test Page");
+		PagesAdmin.addPublicPage(pageName = "Test Page");
 
 		JSONUser.addUser(
 			userEmailAddress = "userea@liferay.com",

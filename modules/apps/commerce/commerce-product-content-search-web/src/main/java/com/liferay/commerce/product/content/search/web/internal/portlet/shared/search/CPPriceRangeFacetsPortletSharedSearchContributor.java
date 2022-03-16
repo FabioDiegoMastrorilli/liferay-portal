@@ -64,7 +64,7 @@ public class CPPriceRangeFacetsPortletSharedSearchContributor
 			SearchContext searchContext =
 				portletSharedSearchSettings.getSearchContext();
 
-			Facet facet = getFacet(renderRequest, searchContext);
+			Facet facet = _getFacet(renderRequest, searchContext);
 
 			Optional<String[]> parameterValuesOptional =
 				portletSharedSearchSettings.getParameterValues71(
@@ -83,11 +83,11 @@ public class CPPriceRangeFacetsPortletSharedSearchContributor
 			portletSharedSearchSettings.addFacet(facet);
 		}
 		catch (Exception exception) {
-			_log.error(exception, exception);
+			_log.error(exception);
 		}
 	}
 
-	protected Facet getFacet(
+	private Facet _getFacet(
 			RenderRequest renderRequest, SearchContext searchContext)
 		throws PortalException {
 

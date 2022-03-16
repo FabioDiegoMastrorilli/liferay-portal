@@ -9,17 +9,72 @@
  * distribution rights of the Software.
  */
 
-import React from 'react';
+import React, {useState} from 'react';
+import {ReactFlowProvider} from 'react-flow-renderer';
 
 import '../../css/definition-builder/main.scss';
+import {DefinitionBuilderContextProvider} from './DefinitionBuilderContext';
 import DiagramBuilder from './diagram-builder/DiagramBuilder';
+import {defaultNodes} from './diagram-builder/components/nodes/utils';
 import UpperToolbar from './shared/components/toolbar/UpperToolbar';
+import SourceBuilder from './source-builder/SourceBuilder';
 
-export default function (props) {
+export default function DefinitionBuilder(props) {
+	const [active, setActive] = useState(true);
+	const [currentEditor, setCurrentEditor] = useState(null);
+	const [definitionDescription, setDefinitionDescription] = useState('');
+	const [definitionId, setDefinitionId] = useState(props.definitionName);
+	const [definitionTitle, setDefinitionTitle] = useState(props.title);
+	const [deserialize, setDeserialize] = useState(false);
+	const [elements, setElements] = useState(defaultNodes);
+	const [selectedLanguageId, setSelectedLanguageId] = useState('');
+	const [showInvalidContentMessage, setShowInvalidContentMessage] = useState(
+		false
+	);
+	const [sourceView, setSourceView] = useState(false);
+	const [translations, setTranslations] = useState(props.translations);
+	const [blockingErrors, setBlockingErrors] = useState({errorType: ''});
+
+	const contextProps = {
+		active,
+		blockingErrors,
+		currentEditor,
+		definitionDescription,
+		definitionId,
+		definitionTitle,
+		deserialize,
+		elements,
+		selectedLanguageId,
+		setActive,
+		setBlockingErrors,
+		setCurrentEditor,
+		setDefinitionDescription,
+		setDefinitionId,
+		setDefinitionTitle,
+		setDeserialize,
+		setElements,
+		setSelectedLanguageId,
+		setShowInvalidContentMessage,
+		setSourceView,
+		setTranslations,
+		showInvalidContentMessage,
+		sourceView,
+		translations,
+	};
+
 	return (
-		<div className="definition-builder-app">
-			<UpperToolbar {...props} />
-			<DiagramBuilder />
-		</div>
+		<DefinitionBuilderContextProvider {...contextProps}>
+			<div className="definition-builder-app">
+				<ReactFlowProvider>
+					<UpperToolbar {...props} />
+
+					{sourceView ? (
+						<SourceBuilder version={props.version} />
+					) : (
+						<DiagramBuilder version={props.version} />
+					)}
+				</ReactFlowProvider>
+			</div>
+		</DefinitionBuilderContextProvider>
 	);
 }

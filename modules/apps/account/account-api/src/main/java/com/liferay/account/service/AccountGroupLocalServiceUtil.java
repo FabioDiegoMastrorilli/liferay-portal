@@ -101,8 +101,11 @@ public class AccountGroupLocalServiceUtil {
 	 *
 	 * @param accountGroup the account group
 	 * @return the account group that was removed
+	 * @throws PortalException
 	 */
-	public static AccountGroup deleteAccountGroup(AccountGroup accountGroup) {
+	public static AccountGroup deleteAccountGroup(AccountGroup accountGroup)
+		throws PortalException {
+
 		return getService().deleteAccountGroup(accountGroup);
 	}
 
@@ -364,6 +367,16 @@ public class AccountGroupLocalServiceUtil {
 
 		return getService().searchAccountGroups(
 			companyId, keywords, start, end, orderByComparator);
+	}
+
+	public static com.liferay.portal.kernel.search.BaseModelSearchResult
+		<AccountGroup> searchAccountGroups(
+			long companyId, String keywords,
+			java.util.LinkedHashMap<String, Object> params, int start, int end,
+			OrderByComparator<AccountGroup> orderByComparator) {
+
+		return getService().searchAccountGroups(
+			companyId, keywords, params, start, end, orderByComparator);
 	}
 
 	/**

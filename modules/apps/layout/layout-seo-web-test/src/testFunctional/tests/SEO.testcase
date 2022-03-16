@@ -1,6 +1,7 @@
-@component-name = "portal-collaboration"
+@component-name = "portal-lima"
 definition {
 
+	property portal.acceptance = "true";
 	property portal.release = "true";
 	property portal.upstream = "true";
 	property testray.main.component.name = "SEO";
@@ -49,6 +50,20 @@ definition {
 
 		OpenGraph.viewDefaultMappedField(portlet = "SEO");
 
+		OpenGraph.mapEditableTextToField(
+			field = "Description",
+			mappedField = "description",
+			mappedFieldName = "Description",
+			mappedFieldText = "Description is ",
+			textType = "TextArea");
+
+		Button.clickSave();
+
+		OpenGraph.viewMappedField(
+			mappedField = "description",
+			mappedFieldValue = "Description is Description: ${description:Description}",
+			textType = "TextArea");
+
 		BlogsNavigator.openBlogsAdmin(siteURLKey = "test-site-name");
 
 		Blogs.addWithCustomAbstract(
@@ -70,7 +85,7 @@ definition {
 
 		Navigator.openWithAppendToBaseURL(urlAppend = "web/test-site-name/b/blogs-entry-title");
 
-		OpenGraph.viewOpenGraphProperties(ogPropertyList = '''Blogs Entry Title - Test Site Name - ${siteName},content="Custom Abstract"''');
+		OpenGraph.viewOpenGraphProperties(ogPropertyList = '''Blogs Entry Title - Test Site Name - ${siteName},content="Description is Description: Custom Abstract"''');
 	}
 
 	@description = "This test ensures that user can map the document with SEO meta tags for display pages."
@@ -138,15 +153,19 @@ definition {
 			pageName = "Display Page Template Name",
 			siteURLKey = "test-site-name");
 
-		var dmFileEntryID = JSONDocument.getFileEntryId(
+		var dmFileEntryId = JSONDocument.getFileEntryId(
 			dmDocumentTitle = "Document_1.jpg",
 			groupName = "Test Site Name");
+
 		var portalURL = PropsUtil.get("portal.url");
-		var siteID = JSONGroupAPI._getGroupIdByName(groupName = "Test Site Name", site = "true");
+
+		var siteId = JSONGroupAPI._getGroupIdByName(
+			groupName = "Test Site Name",
+			site = "true");
 
 		Navigator.openSpecificURL(url = "${portalURL}/c/portal/logout");
 
-		Navigator.openWithAppendToBaseURL(urlAppend = "web/test-site-name/d/${dmFileEntryID}");
+		Navigator.openWithAppendToBaseURL(urlAppend = "web/test-site-name/d/${dmFileEntryId}");
 
 		OpenGraph.viewOpenGraphProperties(ogPropertyList = '''HTML Title is File Name: Document_1.jpgAuthor Name: Test Test - Test Site Name - ${siteName}''');
 

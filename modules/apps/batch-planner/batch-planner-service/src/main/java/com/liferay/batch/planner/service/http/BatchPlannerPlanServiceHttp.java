@@ -46,7 +46,6 @@ import com.liferay.portal.kernel.util.MethodKey;
  * </p>
  *
  * @author Igor Beslic
- * @see BatchPlannerPlanServiceSoap
  * @generated
  */
 public class BatchPlannerPlanServiceHttp {
@@ -467,7 +466,7 @@ public class BatchPlannerPlanServiceHttp {
 	public static com.liferay.batch.planner.model.BatchPlannerPlan
 			updateBatchPlannerPlan(
 				HttpPrincipal httpPrincipal, long batchPlannerPlanId,
-				String name)
+				String externalType, String internalClassName, String name)
 		throws com.liferay.portal.kernel.exception.PortalException {
 
 		try {
@@ -476,7 +475,8 @@ public class BatchPlannerPlanServiceHttp {
 				_updateBatchPlannerPlanParameterTypes11);
 
 			MethodHandler methodHandler = new MethodHandler(
-				methodKey, batchPlannerPlanId, name);
+				methodKey, batchPlannerPlanId, externalType, internalClassName,
+				name);
 
 			Object returnObj = null;
 
@@ -544,6 +544,6 @@ public class BatchPlannerPlanServiceHttp {
 	private static final Class<?>[] _getBatchPlannerPlansCountParameterTypes10 =
 		new Class[] {long.class, boolean.class, boolean.class};
 	private static final Class<?>[] _updateBatchPlannerPlanParameterTypes11 =
-		new Class[] {long.class, String.class};
+		new Class[] {long.class, String.class, String.class, String.class};
 
 }

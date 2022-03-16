@@ -12,14 +12,13 @@
  * details.
  */
 
-import React from 'react';
-
-import {DataSet} from '@liferay/frontend-data-set-web';
+import {FrontendDataSet} from '@liferay/frontend-data-set-web';
 import {render} from '@liferay/frontend-js-react-web';
+import React from 'react';
 
 import '../../src/main/resources/META-INF/resources/styles/main.scss';
 
-const datasetDisplayLauncher = (...data) => render(DataSet, ...data);
+const datasetDisplayLauncher = (...data) => render(FrontendDataSet, ...data);
 
 const fluidDataSetProps = {
 	activeViewSettings: {},
@@ -107,7 +106,6 @@ const fluidDataSetProps = {
 		initialTotalItems: 40,
 	},
 	showPagination: true,
-	spritemap: './assets/clay/icons.svg',
 	style: 'fluid',
 	views: [
 		{
@@ -215,12 +213,14 @@ const fluidDataSetProps = {
 						<h4 className="bg-dark mb-0 p-3 text-center text-white">
 							Hey, I&apos;m a custom template from the outside
 						</h4>
+
 						{props.items.map((item) => (
 							<div
 								className="bg-white p-3 text-center"
 								key={item.skuId}
 							>
 								<strong className="mr-3">{item.skuId}</strong>
+
 								{item.name}
 							</div>
 						))}
@@ -277,7 +277,6 @@ const emailsDataSetProps = {
 		initialDelta: 10,
 	},
 	showPagination: true,
-	spritemap: './assets/clay/icons.svg',
 	style: 'stacked',
 	views: [
 		{
@@ -321,7 +320,6 @@ const selectableTableProps = {
 	},
 	selectedItemsKey: 'countryId',
 	showPagination: true,
-	spritemap: './assets/clay/icons.svg',
 	views: [
 		{
 			contentRenderer: 'selectableTable',
@@ -471,7 +469,6 @@ const ordersDataSetProps = {
 			key: 'createDate',
 		},
 	],
-	spritemap: './assets/clay/icons.svg',
 	views: [
 		{
 			contentRenderer: 'table',
@@ -676,7 +673,6 @@ const productsDataSetProps = {
 			key: 'modifiedDate',
 		},
 	],
-	spritemap: './assets/clay/icons.svg',
 	views: [
 		{
 			contentRenderer: 'table',
@@ -810,7 +806,6 @@ const priceListsDataSetProps = {
 	},
 	selectedItemsKey: 'id',
 	showPagination: true,
-	spritemap: './assets/clay/icons.svg',
 	views: [
 		{
 			contentRenderer: 'table',

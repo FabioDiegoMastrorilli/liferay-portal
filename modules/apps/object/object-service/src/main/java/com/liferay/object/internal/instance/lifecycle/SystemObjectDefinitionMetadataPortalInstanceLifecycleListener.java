@@ -14,7 +14,8 @@
 
 package com.liferay.object.internal.instance.lifecycle;
 
-import com.liferay.object.internal.related.models.SystemObject1toMObjectRelatedModelsProviderImpl;
+import com.liferay.object.constants.ObjectSAPConstants;
+import com.liferay.object.internal.related.models.ObjectEntry1toMObjectRelatedModelsProviderImpl;
 import com.liferay.object.internal.rest.context.path.RESTContextPathResolverImpl;
 import com.liferay.object.model.ObjectDefinition;
 import com.liferay.object.related.models.ObjectRelatedModelsProvider;
@@ -36,8 +37,13 @@ import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.model.Company;
 import com.liferay.portal.kernel.model.Release;
 import com.liferay.portal.kernel.service.CompanyLocalService;
-import com.liferay.portal.kernel.service.PersistedModelLocalServiceRegistry;
+import com.liferay.portal.kernel.service.ServiceContext;
+import com.liferay.portal.kernel.service.UserLocalService;
 import com.liferay.portal.kernel.util.HashMapDictionaryBuilder;
+import com.liferay.portal.kernel.util.ResourceBundleUtil;
+import com.liferay.portal.language.LanguageResources;
+import com.liferay.portal.security.service.access.policy.model.SAPEntry;
+import com.liferay.portal.security.service.access.policy.service.SAPEntryLocalService;
 
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
@@ -59,6 +65,16 @@ public class SystemObjectDefinitionMetadataPortalInstanceLifecycleListener
 	public void portalInstanceRegistered(Company company) {
 		if (_log.isDebugEnabled()) {
 			_log.debug("Registered portal instance " + company);
+		}
+
+		try {
+			_addSAPEntry(company.getCompanyId());
+		}
+		catch (PortalException portalException) {
+			_log.error(
+				"Unable to add service access policy entry for company " +
+					company.getCompanyId(),
+				portalException);
 		}
 
 		for (SystemObjectDefinitionMetadata systemObjectDefinitionMetadata :
@@ -136,6 +152,24 @@ public class SystemObjectDefinitionMetadataPortalInstanceLifecycleListener
 	protected void setRelease(Release release) {
 	}
 
+	private void _addSAPEntry(long companyId) throws PortalException {
+		SAPEntry sapEntry = _sapEntryLocalService.fetchSAPEntry(
+			companyId, ObjectSAPConstants.SAP_ENTRY_NAME);
+
+		if (sapEntry != null) {
+			return;
+		}
+
+		_sapEntryLocalService.addSAPEntry(
+			_userLocalService.getDefaultUserId(companyId),
+			ObjectSAPConstants.ALLOWED_SERVICE_SIGNATURES, true, true,
+			ObjectSAPConstants.SAP_ENTRY_NAME,
+			ResourceBundleUtil.getLocalizationMap(
+				LanguageResources.PORTAL_RESOURCE_BUNDLE_LOADER,
+				"service-access-policy-entry-default-object-title"),
+			new ServiceContext());
+	}
+
 	private void _apply(
 		long companyId,
 		SystemObjectDefinitionMetadata systemObjectDefinitionMetadata) {
@@ -154,11 +188,9 @@ public class SystemObjectDefinitionMetadataPortalInstanceLifecycleListener
 
 			_bundleContext.registerService(
 				ObjectRelatedModelsProvider.class,
-				new SystemObject1toMObjectRelatedModelsProviderImpl(
+				new ObjectEntry1toMObjectRelatedModelsProviderImpl(
 					objectDefinition, _objectEntryLocalService,
-					_objectFieldLocalService, _objectRelationshipLocalService,
-					_persistedModelLocalServiceRegistry,
-					systemObjectDefinitionMetadata),
+					_objectFieldLocalService, _objectRelationshipLocalService),
 				null);
 			_bundleContext.registerService(
 				RESTContextPathResolver.class,
@@ -172,7 +204,7 @@ public class SystemObjectDefinitionMetadataPortalInstanceLifecycleListener
 				).build());
 		}
 		catch (PortalException portalException) {
-			_log.error(portalException, portalException);
+			_log.error(portalException);
 		}
 	}
 
@@ -200,10 +232,12 @@ public class SystemObjectDefinitionMetadataPortalInstanceLifecycleListener
 	private ObjectScopeProviderRegistry _objectScopeProviderRegistry;
 
 	@Reference
-	private PersistedModelLocalServiceRegistry
-		_persistedModelLocalServiceRegistry;
+	private SAPEntryLocalService _sapEntryLocalService;
 
 	private ServiceTrackerList<SystemObjectDefinitionMetadata>
 		_serviceTrackerList;
+
+	@Reference
+	private UserLocalService _userLocalService;
 
 }

@@ -319,6 +319,43 @@ public abstract class BaseTaxonomyVocabularyResourceTestCase {
 	}
 
 	@Test
+	public void testGetAssetLibraryTaxonomyVocabulariesPageWithFilterDoubleEquals()
+		throws Exception {
+
+		List<EntityField> entityFields = getEntityFields(
+			EntityField.Type.DOUBLE);
+
+		if (entityFields.isEmpty()) {
+			return;
+		}
+
+		Long assetLibraryId =
+			testGetAssetLibraryTaxonomyVocabulariesPage_getAssetLibraryId();
+
+		TaxonomyVocabulary taxonomyVocabulary1 =
+			testGetAssetLibraryTaxonomyVocabulariesPage_addTaxonomyVocabulary(
+				assetLibraryId, randomTaxonomyVocabulary());
+
+		@SuppressWarnings("PMD.UnusedLocalVariable")
+		TaxonomyVocabulary taxonomyVocabulary2 =
+			testGetAssetLibraryTaxonomyVocabulariesPage_addTaxonomyVocabulary(
+				assetLibraryId, randomTaxonomyVocabulary());
+
+		for (EntityField entityField : entityFields) {
+			Page<TaxonomyVocabulary> page =
+				taxonomyVocabularyResource.
+					getAssetLibraryTaxonomyVocabulariesPage(
+						assetLibraryId, null,
+						getFilterString(entityField, "eq", taxonomyVocabulary1),
+						Pagination.of(1, 2), null);
+
+			assertEquals(
+				Collections.singletonList(taxonomyVocabulary1),
+				(List<TaxonomyVocabulary>)page.getItems());
+		}
+	}
+
+	@Test
 	public void testGetAssetLibraryTaxonomyVocabulariesPageWithFilterStringEquals()
 		throws Exception {
 
@@ -416,6 +453,20 @@ public abstract class BaseTaxonomyVocabularyResourceTestCase {
 				BeanUtils.setProperty(
 					taxonomyVocabulary1, entityField.getName(),
 					DateUtils.addMinutes(new Date(), -2));
+			});
+	}
+
+	@Test
+	public void testGetAssetLibraryTaxonomyVocabulariesPageWithSortDouble()
+		throws Exception {
+
+		testGetAssetLibraryTaxonomyVocabulariesPageWithSort(
+			EntityField.Type.DOUBLE,
+			(entityField, taxonomyVocabulary1, taxonomyVocabulary2) -> {
+				BeanUtils.setProperty(
+					taxonomyVocabulary1, entityField.getName(), 0.1);
+				BeanUtils.setProperty(
+					taxonomyVocabulary2, entityField.getName(), 0.5);
 			});
 	}
 
@@ -623,13 +674,29 @@ public abstract class BaseTaxonomyVocabularyResourceTestCase {
 			200,
 			taxonomyVocabularyResource.
 				putAssetLibraryTaxonomyVocabularyPermissionsPageHttpResponse(
-					testDepotEntry.getDepotEntryId()));
+					testDepotEntry.getDepotEntryId(),
+					new Permission[] {
+						new Permission() {
+							{
+								setActionIds(new String[] {"PERMISSIONS"});
+								setRoleName(role.getName());
+							}
+						}
+					}));
 
 		assertHttpResponseStatusCode(
 			404,
 			taxonomyVocabularyResource.
 				putAssetLibraryTaxonomyVocabularyPermissionsPageHttpResponse(
-					testDepotEntry.getDepotEntryId()));
+					testDepotEntry.getDepotEntryId(),
+					new Permission[] {
+						new Permission() {
+							{
+								setActionIds(new String[] {"-"});
+								setRoleName("-");
+							}
+						}
+					}));
 	}
 
 	protected TaxonomyVocabulary
@@ -718,6 +785,41 @@ public abstract class BaseTaxonomyVocabularyResourceTestCase {
 					siteId, null,
 					getFilterString(
 						entityField, "between", taxonomyVocabulary1),
+					Pagination.of(1, 2), null);
+
+			assertEquals(
+				Collections.singletonList(taxonomyVocabulary1),
+				(List<TaxonomyVocabulary>)page.getItems());
+		}
+	}
+
+	@Test
+	public void testGetSiteTaxonomyVocabulariesPageWithFilterDoubleEquals()
+		throws Exception {
+
+		List<EntityField> entityFields = getEntityFields(
+			EntityField.Type.DOUBLE);
+
+		if (entityFields.isEmpty()) {
+			return;
+		}
+
+		Long siteId = testGetSiteTaxonomyVocabulariesPage_getSiteId();
+
+		TaxonomyVocabulary taxonomyVocabulary1 =
+			testGetSiteTaxonomyVocabulariesPage_addTaxonomyVocabulary(
+				siteId, randomTaxonomyVocabulary());
+
+		@SuppressWarnings("PMD.UnusedLocalVariable")
+		TaxonomyVocabulary taxonomyVocabulary2 =
+			testGetSiteTaxonomyVocabulariesPage_addTaxonomyVocabulary(
+				siteId, randomTaxonomyVocabulary());
+
+		for (EntityField entityField : entityFields) {
+			Page<TaxonomyVocabulary> page =
+				taxonomyVocabularyResource.getSiteTaxonomyVocabulariesPage(
+					siteId, null,
+					getFilterString(entityField, "eq", taxonomyVocabulary1),
 					Pagination.of(1, 2), null);
 
 			assertEquals(
@@ -821,6 +923,20 @@ public abstract class BaseTaxonomyVocabularyResourceTestCase {
 				BeanUtils.setProperty(
 					taxonomyVocabulary1, entityField.getName(),
 					DateUtils.addMinutes(new Date(), -2));
+			});
+	}
+
+	@Test
+	public void testGetSiteTaxonomyVocabulariesPageWithSortDouble()
+		throws Exception {
+
+		testGetSiteTaxonomyVocabulariesPageWithSort(
+			EntityField.Type.DOUBLE,
+			(entityField, taxonomyVocabulary1, taxonomyVocabulary2) -> {
+				BeanUtils.setProperty(
+					taxonomyVocabulary1, entityField.getName(), 0.1);
+				BeanUtils.setProperty(
+					taxonomyVocabulary2, entityField.getName(), 0.5);
 			});
 	}
 
@@ -1274,13 +1390,29 @@ public abstract class BaseTaxonomyVocabularyResourceTestCase {
 			200,
 			taxonomyVocabularyResource.
 				putSiteTaxonomyVocabularyPermissionsPageHttpResponse(
-					taxonomyVocabulary.getSiteId()));
+					taxonomyVocabulary.getSiteId(),
+					new Permission[] {
+						new Permission() {
+							{
+								setActionIds(new String[] {"PERMISSIONS"});
+								setRoleName(role.getName());
+							}
+						}
+					}));
 
 		assertHttpResponseStatusCode(
 			404,
 			taxonomyVocabularyResource.
 				putSiteTaxonomyVocabularyPermissionsPageHttpResponse(
-					taxonomyVocabulary.getSiteId()));
+					taxonomyVocabulary.getSiteId(),
+					new Permission[] {
+						new Permission() {
+							{
+								setActionIds(new String[] {"-"});
+								setRoleName("-");
+							}
+						}
+					}));
 	}
 
 	protected TaxonomyVocabulary
@@ -1523,12 +1655,29 @@ public abstract class BaseTaxonomyVocabularyResourceTestCase {
 			200,
 			taxonomyVocabularyResource.
 				putTaxonomyVocabularyPermissionsPageHttpResponse(
-					taxonomyVocabulary.getId()));
+					taxonomyVocabulary.getId(),
+					new Permission[] {
+						new Permission() {
+							{
+								setActionIds(new String[] {"VIEW"});
+								setRoleName(role.getName());
+							}
+						}
+					}));
 
 		assertHttpResponseStatusCode(
 			404,
 			taxonomyVocabularyResource.
-				putTaxonomyVocabularyPermissionsPageHttpResponse(0L));
+				putTaxonomyVocabularyPermissionsPageHttpResponse(
+					0L,
+					new Permission[] {
+						new Permission() {
+							{
+								setActionIds(new String[] {"-"});
+								setRoleName("-");
+							}
+						}
+					}));
 	}
 
 	protected TaxonomyVocabulary
@@ -2356,8 +2505,11 @@ public abstract class BaseTaxonomyVocabularyResourceTestCase {
 		}
 
 		if (entityFieldName.equals("numberOfTaxonomyCategories")) {
-			throw new IllegalArgumentException(
-				"Invalid entity field " + entityFieldName);
+			sb.append(
+				String.valueOf(
+					taxonomyVocabulary.getNumberOfTaxonomyCategories()));
+
+			return sb.toString();
 		}
 
 		if (entityFieldName.equals("siteId")) {

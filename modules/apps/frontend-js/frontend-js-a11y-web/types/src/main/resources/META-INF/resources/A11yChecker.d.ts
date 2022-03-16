@@ -13,15 +13,9 @@
  */
 
 import {AxeResults, RunOptions} from 'axe-core';
-declare global {
-	interface Window {
-		requestIdleCallback(callback: Function): any;
-		cancelIdleCallback(handle: number): void;
-	}
-}
 declare type Task<T> = {
-	id: number;
 	callback: Function;
+	id: number;
 	target: T;
 };
 declare type Selector<T> = (

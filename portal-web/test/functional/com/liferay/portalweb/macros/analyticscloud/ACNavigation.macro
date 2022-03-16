@@ -6,6 +6,12 @@ definition {
 			value1 = "${headerTitle}");
 	}
 
+	macro backNavigation {
+		var key_pageName = "${pageName}";
+
+		Click(locator1 = "ACNavigation#BACK_NAVIGATION");
+	}
+
 	macro clickCancelButton {
 		Click(locator1 = "ACDXPSettings#AC_GENERIC_CANCEL_BUTTON");
 	}
@@ -40,6 +46,10 @@ definition {
 		ACNavigation.goToSidebarOption(sidebarOption = "assets");
 	}
 
+	macro goToEventAnalysis {
+		ACNavigation.goToSidebarOption(sidebarOption = "event-analysis");
+	}
+
 	macro goToIndividuals {
 		ACNavigation.goToSidebarOption(sidebarOption = "individuals");
 	}
@@ -53,7 +63,7 @@ definition {
 	}
 
 	macro goToSidebarOption {
-		var key_SidebarOption = "${sidebarOption}";
+		var key_sidebarOption = "${sidebarOption}";
 
 		Click(locator1 = "ACNavigation#GENERIC_SIDEBAR_OPTION");
 	}

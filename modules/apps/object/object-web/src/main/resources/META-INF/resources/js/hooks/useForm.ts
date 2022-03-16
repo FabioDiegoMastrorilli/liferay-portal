@@ -12,34 +12,17 @@
  * details.
  */
 
-import React, {useState} from 'react';
+import {ChangeEventHandler, FormEvent, FormEventHandler, useState} from 'react';
 
-type TFormEvent = React.FormEventHandler<HTMLFormElement>;
+export default function useForm<T, P = {}, K extends Partial<T> = Partial<T>>({
+	initialValues,
+	onSubmit,
+	validate,
+}: IProps<T, P, K>): IUseForm<T, P, K> {
+	const [values, setValues] = useState<K>(initialValues);
+	const [errors, setErrors] = useState<FormError<T & P>>({});
 
-type TUseFormProps = {
-	initialValues: {};
-	validate: (values: any) => {};
-	onSubmit: (values: any) => void;
-};
-
-type TGenericObject = {
-	[key: string]: any;
-};
-
-type TUseForm = (
-	props: TUseFormProps
-) => {
-	errors: TGenericObject;
-	handleChange: TFormEvent;
-	handleSubmit: TFormEvent;
-	values: TGenericObject;
-};
-
-const useForm: TUseForm = ({initialValues, onSubmit, validate}) => {
-	const [values, setValues] = useState(initialValues);
-	const [errors, setErrors] = useState({});
-
-	const handleSubmit: TFormEvent = (event) => {
+	const handleSubmit = (event: FormEvent) => {
 		event.preventDefault();
 
 		const errors = validate(values);
@@ -50,23 +33,38 @@ const useForm: TUseForm = ({initialValues, onSubmit, validate}) => {
 		else {
 			setErrors({});
 
-			onSubmit(values);
+			onSubmit((values as unknown) as T);
 		}
 	};
 
-	const handleChange: TFormEvent = ({target: {name, value}}: any) => {
-		setValues({
-			...values,
-			[name]: value,
-		});
-	};
+	const handleChange: ChangeEventHandler<HTMLInputElement> = ({
+		target: {name, value},
+	}) => setValues((values) => ({...values, [name]: value}));
 
 	return {
 		errors,
 		handleChange,
 		handleSubmit,
+		setValues: (values: Partial<T>) =>
+			setValues((currentValues) => ({...currentValues, ...values})),
 		values,
 	};
+}
+
+export type FormError<T> = {
+	[key in keyof T]?: string;
 };
 
-export default useForm;
+interface IProps<T, P = {}, K extends Partial<T> = Partial<T>> {
+	initialValues: K;
+	onSubmit: (values: T) => void;
+	validate: (values: K) => FormError<T & P>;
+}
+
+interface IUseForm<T, P = {}, K extends Partial<T> = Partial<T>> {
+	errors: FormError<T & P>;
+	handleChange: ChangeEventHandler<HTMLInputElement>;
+	handleSubmit: FormEventHandler<HTMLFormElement>;
+	setValues: (values: Partial<T>) => void;
+	values: K;
+}

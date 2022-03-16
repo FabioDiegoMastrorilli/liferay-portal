@@ -73,7 +73,7 @@ in ascending chronological order.
 
 ## Breaking Changes List
 
-### Concurrency Management for Inventory
+### Move Commerce administration from the Control Panel to the new 7.3 Global App menu
 - **Date:** 2020-Sep-3
 - **JIRA Ticket:** [COMMERCE-4565](https://issues.liferay.com/browse/COMMERCE-4565)
 
@@ -245,6 +245,51 @@ Alignment with Liferay DXP standards to support component extensibility.
 
 ---------------------------------------
 
+### CommerceCountry and CommerceRegion Removed
+- **Date:** 2021-Mar-02
+- **JIRA Ticket:** [LPS-125991](https://issues.liferay.com/browse/LPS-125991)
+
+#### What changed?
+
+* The `CommerceCountry` and `CommerceRegion` tables have been removed from
+the database.
+* Service and persistence classes for `CommerceCountry` and `CommerceRegion`
+have been removed.
+* Rerences to `com.liferay.commerce.model.CommerceCountry` and
+`com.liferay.commerce.model.CommerceRegion` have been replaced by
+`com.liferay.portal.kernel.model.Country` and
+`com.liferay.portal.kernel.model.Region`.
+* Foreign keys that references `CommerceCountry` and `CommerceRegion` have
+been renamed from `commerceCountryId` and `commerceRegionId` to `countryId` and
+`regionId` respectively. Tables that have columns that were updated are:
+  - `CommerceAddress`
+  - `CommerceAddressRestriction`
+  - `CommerceShippingFixedOptionRel`
+  - `CommerceTaxFixedRateAddressRel`
+* `com.liferay.commerce.country.CommerceCountryManager` is added for
+retrieving commerce-specific countries. Available methods are:
+  - `getBillingCountries`
+  - `getBillingCountriesByChannelId`
+  - `getShippingCountries`
+  - `getShippingCountriesByChannelId`
+  - `getWarehouseCountries`
+
+#### Who is affected?
+
+Anyone who references or uses these models and services.
+
+#### How should I update my code?
+
+Update any explicit reference to `CommerceCountry` and/or `CommerceRegion` with
+the new corresponding models and services.
+
+#### Why was this change made?
+
+This change was introduced to remove duplicate models and services in Liferay
+portal.
+
+---------------------------------------
+
 ### Mini Compare Widget + Mini Compare Component
 - **Date:** 2021-Mar-26
 - **JIRA Ticket:** [COMMERCE-2909](https://issues.liferay.com/browse/COMMERCE-2909)
@@ -394,5 +439,28 @@ not need to create products with the Diagram product type.
 
 This change was introduced to fix BOM issues and to better fullfill spare parts
 use cases.
+
+---------------------------------------
+
+### Remove the Accounts widget so it is no longer a module in Liferay Commerce
+- **Date:** 2021-Nov-21
+- **JIRA Ticket:** [COMMERCE-7288](https://issues.liferay.com/browse/COMMERCE-7288)
+
+#### What changed?
+
+Commerce Account widget is replaced by Account widget.
+All instances on a previously running system are updated.
+
+#### Who is affected?
+
+Developers who have customized the Commerce Account widget and/or used it with
+site initializers.
+
+End users (Account managers) that will use a different widget to manage accounts.
+
+#### Why was this change made?
+
+This change was introduced to be compliant with Commerce Account migration to
+Account.
 
 ---------------------------------------

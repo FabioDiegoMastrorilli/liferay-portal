@@ -19,13 +19,13 @@ import com.liferay.petra.lang.SafeCloseable;
 import com.liferay.petra.string.StringPool;
 import com.liferay.portal.db.partition.DBPartitionUtil;
 import com.liferay.portal.db.partition.test.util.BaseDBPartitionTestCase;
-import com.liferay.portal.kernel.dao.jdbc.CurrentConnection;
-import com.liferay.portal.kernel.dao.jdbc.CurrentConnectionUtil;
 import com.liferay.portal.kernel.dao.jdbc.DataAccess;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.model.CompanyConstants;
 import com.liferay.portal.kernel.security.auth.CompanyThreadLocal;
-import com.liferay.portal.kernel.test.ReflectionTestUtil;
+import com.liferay.portal.test.log.LogCapture;
+import com.liferay.portal.test.log.LogEntry;
+import com.liferay.portal.test.log.LoggerTestUtil;
 
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
@@ -36,18 +36,22 @@ import java.sql.Statement;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+import java.util.concurrent.ConcurrentSkipListSet;
 
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
 /**
  * @author Alberto Chaparro
  */
+@Ignore
 @RunWith(Arquillian.class)
 public class DBPartitionUtilTest extends BaseDBPartitionTestCase {
 
@@ -116,6 +120,30 @@ public class DBPartitionUtilTest extends BaseDBPartitionTestCase {
 	}
 
 	@Test
+	public void testAddDBPartitionUsesDBCharacterSetEncoding()
+		throws Exception {
+
+		try (LogCapture logCapture = LoggerTestUtil.configureLog4JLogger(
+				"com.liferay.portal.db.partition.DBPartitionUtil",
+				LoggerTestUtil.INFO)) {
+
+			addDBPartition();
+
+			List<LogEntry> logEntries = logCapture.getLogEntries();
+
+			Assert.assertEquals(logEntries.toString(), 1, logEntries.size());
+
+			String message = String.valueOf(logEntries.get(0));
+
+			Assert.assertTrue(
+				message,
+				message.contains(
+					"Obtained character set encoding" +
+						" from session with value:"));
+		}
+	}
+
+	@Test
 	public void testAddDefaultDBPartition() throws PortalException {
 		Assert.assertFalse(
 			DBPartitionUtil.addDBPartition(portal.getDefaultCompanyId()));
@@ -123,15 +151,40 @@ public class DBPartitionUtilTest extends BaseDBPartitionTestCase {
 
 	@Test
 	public void testForEachCompanyId() throws Exception {
-		CompanyThreadLocal.setCompanyId(CompanyConstants.SYSTEM);
+		try {
+			addDBPartition();
 
-		DBPartitionUtil.forEachCompanyId(
-			companyId -> Assert.assertEquals(
-				companyId, CompanyThreadLocal.getCompanyId()));
+			insertCompanyAndDefaultUser();
+
+			Set<Long> companyIds = new ConcurrentSkipListSet<>();
+			Set<Long> threadIds = new ConcurrentSkipListSet<>();
+
+			CompanyThreadLocal.setCompanyId(CompanyConstants.SYSTEM);
+
+			DBPartitionUtil.forEachCompanyId(
+				companyId -> {
+					Assert.assertEquals(
+						companyId, CompanyThreadLocal.getCompanyId());
+
+					Assert.assertTrue(CompanyThreadLocal.isLocked());
+
+					companyIds.add(companyId);
+
+					Thread thread = Thread.currentThread();
+
+					threadIds.add(thread.getId());
+				});
+
+			Assert.assertEquals(companyIds.toString(), 2, companyIds.size());
+			Assert.assertEquals(threadIds.toString(), 2, threadIds.size());
+		}
+		finally {
+			deleteCompanyAndDefaultUser();
+		}
 	}
 
 	@Test
-	public void testRemoveDBPartition() throws Exception {
+	public void testMigrateDBPartition() throws Exception {
 		addDBPartition();
 
 		List<String> viewNames = _getObjectNames("VIEW");
@@ -140,7 +193,7 @@ public class DBPartitionUtilTest extends BaseDBPartitionTestCase {
 
 		int tablesCount = _getTablesCount();
 
-		_removeDBPartition();
+		removeDBPartition(true);
 
 		Assert.assertEquals(tablesCount + viewNames.size(), _getTablesCount());
 		Assert.assertEquals(0, _getViewsCount());
@@ -153,7 +206,7 @@ public class DBPartitionUtilTest extends BaseDBPartitionTestCase {
 	}
 
 	@Test
-	public void testRemoveDBPartitionRollback() throws Exception {
+	public void testMigrateDBPartitionRollback() throws Exception {
 		addDBPartition();
 
 		int tablesCount = _getTablesCount();
@@ -167,7 +220,7 @@ public class DBPartitionUtilTest extends BaseDBPartitionTestCase {
 			createAndPopulateControlTable(fullTestTableName);
 
 			try {
-				_removeDBPartition();
+				removeDBPartition(true);
 
 				Assert.fail("Should throw an exception");
 			}
@@ -178,6 +231,23 @@ public class DBPartitionUtilTest extends BaseDBPartitionTestCase {
 		}
 		finally {
 			dropTable(TEST_CONTROL_TABLE_NAME);
+		}
+	}
+
+	@Test
+	public void testRemoveDBPartition() throws Exception {
+		addDBPartition();
+
+		removeDBPartition(false);
+
+		DatabaseMetaData databaseMetaData = connection.getMetaData();
+
+		try (ResultSet resultSet = databaseMetaData.getCatalogs()) {
+			while (resultSet.next()) {
+				String schemaName = resultSet.getString("TABLE_CAT");
+
+				Assert.assertNotEquals(getSchemaName(COMPANY_ID), schemaName);
+			}
 		}
 	}
 
@@ -236,26 +306,6 @@ public class DBPartitionUtilTest extends BaseDBPartitionTestCase {
 		List<String> viewNames = _getObjectNames("VIEW");
 
 		return viewNames.size();
-	}
-
-	private void _removeDBPartition() throws Exception {
-		CurrentConnection defaultCurrentConnection =
-			CurrentConnectionUtil.getCurrentConnection();
-
-		try {
-			CurrentConnection currentConnection = dataSource -> connection;
-
-			ReflectionTestUtil.setFieldValue(
-				CurrentConnectionUtil.class, "_currentConnection",
-				currentConnection);
-
-			DBPartitionUtil.removeDBPartition(COMPANY_ID);
-		}
-		finally {
-			ReflectionTestUtil.setFieldValue(
-				CurrentConnectionUtil.class, "_currentConnection",
-				defaultCurrentConnection);
-		}
 	}
 
 }

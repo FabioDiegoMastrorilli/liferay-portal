@@ -14,11 +14,13 @@
 
 package com.liferay.object.web.internal.object.definitions.display.context;
 
-import com.liferay.frontend.taglib.clay.data.set.servlet.taglib.util.ClayDataSetActionDropdownItem;
+import com.liferay.frontend.data.set.model.FDSActionDropdownItem;
 import com.liferay.frontend.taglib.clay.servlet.taglib.util.CreationMenu;
+import com.liferay.object.field.business.type.ObjectFieldBusinessTypeServicesTracker;
 import com.liferay.object.model.ObjectDefinition;
 import com.liferay.object.web.internal.constants.ObjectWebKeys;
-import com.liferay.object.web.internal.display.context.util.ObjectRequestHelper;
+import com.liferay.object.web.internal.display.context.helper.ObjectRequestHelper;
+import com.liferay.object.web.internal.util.ObjectFieldBusinessTypeUtil;
 import com.liferay.petra.portlet.url.builder.PortletURLBuilder;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.language.LanguageUtil;
@@ -29,6 +31,8 @@ import com.liferay.portal.kernel.security.permission.resource.ModelResourcePermi
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 
 import javax.portlet.PortletException;
 import javax.portlet.PortletURL;
@@ -43,10 +47,14 @@ public class ObjectDefinitionsLayoutsDisplayContext {
 	public ObjectDefinitionsLayoutsDisplayContext(
 		HttpServletRequest httpServletRequest,
 		ModelResourcePermission<ObjectDefinition>
-			objectDefinitionModelResourcePermission) {
+			objectDefinitionModelResourcePermission,
+		ObjectFieldBusinessTypeServicesTracker
+			objectFieldBusinessTypeServicesTracker) {
 
 		_objectDefinitionModelResourcePermission =
 			objectDefinitionModelResourcePermission;
+		_objectFieldBusinessTypeServicesTracker =
+			objectFieldBusinessTypeServicesTracker;
 
 		_objectRequestHelper = new ObjectRequestHelper(httpServletRequest);
 	}
@@ -54,30 +62,6 @@ public class ObjectDefinitionsLayoutsDisplayContext {
 	public String getAPIURL() {
 		return "/o/object-admin/v1.0/object-definitions/" +
 			getObjectDefinitionId() + "/object-layouts";
-	}
-
-	public List<ClayDataSetActionDropdownItem>
-			getClayDataSetActionDropdownItems()
-		throws Exception {
-
-		return Arrays.asList(
-			new ClayDataSetActionDropdownItem(
-				PortletURLBuilder.create(
-					getPortletURL()
-				).setMVCRenderCommandName(
-					"/object_definitions/edit_object_layout"
-				).setParameter(
-					"objectLayoutId", "{id}"
-				).setWindowState(
-					LiferayWindowState.POP_UP
-				).buildString(),
-				"view", "view",
-				LanguageUtil.get(_objectRequestHelper.getRequest(), "view"),
-				"get", null, "sidePanel"),
-			new ClayDataSetActionDropdownItem(
-				"/o/object-admin/v1.0/object-layouts/{id}", "trash", "delete",
-				LanguageUtil.get(_objectRequestHelper.getRequest(), "delete"),
-				"delete", "delete", "async"));
 	}
 
 	public CreationMenu getCreationMenu() throws PortalException {
@@ -100,6 +84,29 @@ public class ObjectDefinitionsLayoutsDisplayContext {
 		return creationMenu;
 	}
 
+	public List<FDSActionDropdownItem> getFDSActionDropdownItems()
+		throws Exception {
+
+		return Arrays.asList(
+			new FDSActionDropdownItem(
+				PortletURLBuilder.create(
+					getPortletURL()
+				).setMVCRenderCommandName(
+					"/object_definitions/edit_object_layout"
+				).setParameter(
+					"objectLayoutId", "{id}"
+				).setWindowState(
+					LiferayWindowState.POP_UP
+				).buildString(),
+				"view", "view",
+				LanguageUtil.get(_objectRequestHelper.getRequest(), "view"),
+				"get", null, "sidePanel"),
+			new FDSActionDropdownItem(
+				"/o/object-admin/v1.0/object-layouts/{id}", "trash", "delete",
+				LanguageUtil.get(_objectRequestHelper.getRequest(), "delete"),
+				"delete", "delete", "async"));
+	}
+
 	public long getObjectDefinitionId() {
 		HttpServletRequest httpServletRequest =
 			_objectRequestHelper.getRequest();
@@ -109,6 +116,15 @@ public class ObjectDefinitionsLayoutsDisplayContext {
 				ObjectWebKeys.OBJECT_DEFINITION);
 
 		return objectDefinition.getObjectDefinitionId();
+	}
+
+	public List<Map<String, String>> getObjectFieldBusinessTypeMaps(
+		Locale locale) {
+
+		return ObjectFieldBusinessTypeUtil.getObjectFieldBusinessTypeMaps(
+			locale,
+			_objectFieldBusinessTypeServicesTracker.
+				getObjectFieldBusinessTypes());
 	}
 
 	public PortletURL getPortletURL() throws PortletException {
@@ -129,6 +145,8 @@ public class ObjectDefinitionsLayoutsDisplayContext {
 
 	private final ModelResourcePermission<ObjectDefinition>
 		_objectDefinitionModelResourcePermission;
+	private final ObjectFieldBusinessTypeServicesTracker
+		_objectFieldBusinessTypeServicesTracker;
 	private final ObjectRequestHelper _objectRequestHelper;
 
 }

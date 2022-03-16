@@ -14,6 +14,8 @@
 
 package com.liferay.commerce.order.web.internal.portlet.action;
 
+import com.liferay.commerce.configuration.CommerceOrderItemDecimalQuantityConfiguration;
+import com.liferay.commerce.constants.CommerceOrderConstants;
 import com.liferay.commerce.constants.CommercePortletKeys;
 import com.liferay.commerce.exception.NoSuchOrderException;
 import com.liferay.commerce.notification.service.CommerceNotificationQueueEntryLocalService;
@@ -21,28 +23,38 @@ import com.liferay.commerce.order.engine.CommerceOrderEngine;
 import com.liferay.commerce.order.status.CommerceOrderStatusRegistry;
 import com.liferay.commerce.order.web.internal.display.context.CommerceOrderEditDisplayContext;
 import com.liferay.commerce.payment.service.CommercePaymentMethodGroupRelLocalService;
+import com.liferay.commerce.product.service.CPMeasurementUnitService;
 import com.liferay.commerce.product.service.CommerceChannelLocalService;
 import com.liferay.commerce.service.CommerceOrderItemService;
 import com.liferay.commerce.service.CommerceOrderNoteService;
 import com.liferay.commerce.service.CommerceOrderService;
 import com.liferay.commerce.service.CommerceOrderTypeService;
 import com.liferay.commerce.service.CommerceShipmentService;
+import com.liferay.commerce.term.service.CommerceTermEntryService;
+import com.liferay.portal.configuration.metatype.bnd.util.ConfigurableUtil;
 import com.liferay.portal.kernel.portlet.bridges.mvc.MVCRenderCommand;
 import com.liferay.portal.kernel.security.auth.PrincipalException;
+import com.liferay.portal.kernel.security.permission.resource.PortletResourcePermission;
 import com.liferay.portal.kernel.servlet.SessionErrors;
 import com.liferay.portal.kernel.util.WebKeys;
+
+import java.util.Map;
 
 import javax.portlet.PortletException;
 import javax.portlet.RenderRequest;
 import javax.portlet.RenderResponse;
 
+import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Modified;
 import org.osgi.service.component.annotations.Reference;
 
 /**
  * @author Andrea Di Giorgi
+ * @author Alessio Antonio Rendina
  */
 @Component(
+	configurationPid = "com.liferay.commerce.configuration.CommerceOrderItemDecimalQuantityConfiguration",
 	enabled = false,
 	property = {
 		"javax.portlet.name=" + CommercePortletKeys.COMMERCE_ORDER,
@@ -62,11 +74,15 @@ public class EditCommerceOrderMVCRenderCommand implements MVCRenderCommand {
 				new CommerceOrderEditDisplayContext(
 					_commerceChannelLocalService,
 					_commerceNotificationQueueEntryLocalService,
-					_commerceOrderEngine, _commerceOrderItemService,
-					_commerceOrderNoteService, _commerceOrderService,
-					_commerceOrderStatusRegistry, _commerceOrderTypeService,
+					_commerceOrderEngine,
+					_commerceOrderItemDecimalQuantityConfiguration,
+					_commerceOrderItemService, _commerceOrderNoteService,
+					_commerceOrderPortletResourcePermission,
+					_commerceOrderService, _commerceOrderStatusRegistry,
+					_commerceOrderTypeService,
 					_commercePaymentMethodGroupRelLocalService,
-					_commerceShipmentService, renderRequest);
+					_commerceShipmentService, _cpMeasurementUnitService,
+					_commerceTermEntryService, renderRequest);
 
 			renderRequest.setAttribute(
 				WebKeys.PORTLET_DISPLAY_CONTEXT,
@@ -87,6 +103,15 @@ public class EditCommerceOrderMVCRenderCommand implements MVCRenderCommand {
 		return "/edit_commerce_order.jsp";
 	}
 
+	@Activate
+	@Modified
+	protected void activate(Map<String, Object> properties) {
+		_commerceOrderItemDecimalQuantityConfiguration =
+			ConfigurableUtil.createConfigurable(
+				CommerceOrderItemDecimalQuantityConfiguration.class,
+				properties);
+	}
+
 	@Reference
 	private CommerceChannelLocalService _commerceChannelLocalService;
 
@@ -97,11 +122,19 @@ public class EditCommerceOrderMVCRenderCommand implements MVCRenderCommand {
 	@Reference
 	private CommerceOrderEngine _commerceOrderEngine;
 
+	private volatile CommerceOrderItemDecimalQuantityConfiguration
+		_commerceOrderItemDecimalQuantityConfiguration;
+
 	@Reference
 	private CommerceOrderItemService _commerceOrderItemService;
 
 	@Reference
 	private CommerceOrderNoteService _commerceOrderNoteService;
+
+	@Reference(
+		target = "(resource.name=" + CommerceOrderConstants.RESOURCE_NAME + ")"
+	)
+	private PortletResourcePermission _commerceOrderPortletResourcePermission;
 
 	@Reference
 	private CommerceOrderService _commerceOrderService;
@@ -118,5 +151,11 @@ public class EditCommerceOrderMVCRenderCommand implements MVCRenderCommand {
 
 	@Reference
 	private CommerceShipmentService _commerceShipmentService;
+
+	@Reference
+	private CommerceTermEntryService _commerceTermEntryService;
+
+	@Reference
+	private CPMeasurementUnitService _cpMeasurementUnitService;
 
 }

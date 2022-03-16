@@ -26,21 +26,29 @@ import com.liferay.portal.kernel.service.ServiceWrapper;
 public class ObjectFieldServiceWrapper
 	implements ObjectFieldService, ServiceWrapper<ObjectFieldService> {
 
+	public ObjectFieldServiceWrapper() {
+		this(null);
+	}
+
 	public ObjectFieldServiceWrapper(ObjectFieldService objectFieldService) {
 		_objectFieldService = objectFieldService;
 	}
 
 	@Override
 	public com.liferay.object.model.ObjectField addCustomObjectField(
-			long listTypeDefinitionId, long objectDefinitionId, boolean indexed,
+			long listTypeDefinitionId, long objectDefinitionId,
+			String businessType, String dbType, boolean indexed,
 			boolean indexedAsKeyword, String indexedLanguageId,
 			java.util.Map<java.util.Locale, String> labelMap, String name,
-			boolean required, String type)
+			boolean required,
+			java.util.List<com.liferay.object.model.ObjectFieldSetting>
+				objectFieldSettings)
 		throws com.liferay.portal.kernel.exception.PortalException {
 
 		return _objectFieldService.addCustomObjectField(
-			listTypeDefinitionId, objectDefinitionId, indexed, indexedAsKeyword,
-			indexedLanguageId, labelMap, name, required, type);
+			listTypeDefinitionId, objectDefinitionId, businessType, dbType,
+			indexed, indexedAsKeyword, indexedLanguageId, labelMap, name,
+			required, objectFieldSettings);
 	}
 
 	@Override
@@ -71,15 +79,19 @@ public class ObjectFieldServiceWrapper
 
 	@Override
 	public com.liferay.object.model.ObjectField updateCustomObjectField(
-			long objectFieldId, long listTypeDefinitionId, boolean indexed,
-			boolean indexedAsKeyword, String indexedLanguageId,
+			long objectFieldId, long listTypeDefinitionId, String businessType,
+			String dbType, boolean indexed, boolean indexedAsKeyword,
+			String indexedLanguageId,
 			java.util.Map<java.util.Locale, String> labelMap, String name,
-			boolean required, String type)
+			boolean required,
+			java.util.List<com.liferay.object.model.ObjectFieldSetting>
+				objectFieldSettings)
 		throws com.liferay.portal.kernel.exception.PortalException {
 
 		return _objectFieldService.updateCustomObjectField(
-			objectFieldId, listTypeDefinitionId, indexed, indexedAsKeyword,
-			indexedLanguageId, labelMap, name, required, type);
+			objectFieldId, listTypeDefinitionId, businessType, dbType, indexed,
+			indexedAsKeyword, indexedLanguageId, labelMap, name, required,
+			objectFieldSettings);
 	}
 
 	@Override

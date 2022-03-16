@@ -19,7 +19,6 @@ import com.liferay.commerce.constants.CommercePortletKeys;
 import com.liferay.commerce.model.CommerceOrder;
 import com.liferay.commerce.order.CommerceOrderValidatorRegistry;
 import com.liferay.commerce.price.CommerceOrderPriceCalculation;
-import com.liferay.commerce.price.CommerceProductPriceCalculation;
 import com.liferay.commerce.product.constants.CPConstants;
 import com.liferay.commerce.product.service.CommerceChannelLocalService;
 import com.liferay.commerce.product.util.CPDefinitionHelper;
@@ -74,15 +73,15 @@ public class CommerceCartContentConfigurationAction
 						_commerceOrderPriceCalculation,
 						_commerceOrderValidatorRegistry,
 						_commerceProductPortletResourcePermission,
-						_commerceProductPriceCalculation, _cpDefinitionHelper,
-						_cpInstanceHelper, httpServletRequest, _portal);
+						_cpDefinitionHelper, _cpInstanceHelper,
+						httpServletRequest, _portal);
 
 			httpServletRequest.setAttribute(
 				WebKeys.PORTLET_DISPLAY_CONTEXT,
 				commerceCartContentDisplayContext);
 		}
 		catch (Exception exception) {
-			_log.error(exception, exception);
+			_log.error(exception);
 		}
 
 		super.include(portletConfig, httpServletRequest, httpServletResponse);
@@ -122,9 +121,6 @@ public class CommerceCartContentConfigurationAction
 		target = "(resource.name=" + CPConstants.RESOURCE_NAME_PRODUCT + ")"
 	)
 	private PortletResourcePermission _commerceProductPortletResourcePermission;
-
-	@Reference
-	private CommerceProductPriceCalculation _commerceProductPriceCalculation;
 
 	@Reference
 	private CPDefinitionHelper _cpDefinitionHelper;

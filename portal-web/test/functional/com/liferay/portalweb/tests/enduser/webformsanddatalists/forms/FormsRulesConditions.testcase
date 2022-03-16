@@ -2,6 +2,8 @@
 definition {
 
 	property custom.properties = "minifier.enabled=true";
+	property osgi.module.configuration.file.names = "com.liferay.frontend.js.loader.modules.extender.internal.configuration.Details.config";
+	property osgi.module.configurations = "waitTimeout=&quot;15&quot;";
 	property portal.release = "true";
 	property portal.upstream = "true";
 	property testray.main.component.name = "Forms";
@@ -22,7 +24,7 @@ definition {
 			Navigator.openURL();
 
 			ProductMenu.gotoPortlet(
-				category = "Content &amp; Data",
+				category = "Content & Data",
 				portlet = "Forms");
 
 			FormsAdmin.teardownForms();
@@ -31,7 +33,7 @@ definition {
 
 			FormsAdmin.teardownDataProviders();
 
-			Page.tearDownCP();
+			PagesAdmin.tearDownCP();
 		}
 	}
 
@@ -68,7 +70,7 @@ definition {
 	@description = "Verify that a Rule Condition can be deleted"
 	@priority = "5"
 	test CanBeDeleted {
-		property forms.functional = "true";
+		property portal.acceptance = "true";
 
 		FormsAdmin.addForm();
 
@@ -145,7 +147,7 @@ definition {
 	@description = "Verify that a Rule Condition can be edited"
 	@priority = "5"
 	test CanBeEdited {
-		property forms.functional = "true";
+		property portal.acceptance = "true";
 
 		FormsAdmin.addForm();
 
@@ -204,7 +206,7 @@ definition {
 	@description = "Verify that a Rule with 'Contains' condition can be created"
 	@priority = "4"
 	test CanCreateAContainsRule {
-		property forms.functional = "true";
+		property portal.acceptance = "true";
 
 		FormsAdmin.addForm();
 
@@ -269,15 +271,15 @@ definition {
 	@description = "Verify that a Rule with 'Does Not Contain' condition can be created"
 	@priority = "4"
 	test CanCreateADoesNotContainRule {
-		property forms.functional = "true";
+		property portal.acceptance = "true";
 
 		FormsAdmin.addForm();
 
 		Form.editName(formName = "Form 1");
 
 		for (var fieldAndPosition : list "Text-0,Numeric-1") {
-			var field = StringUtil.extractFirst("${fieldAndPosition}","-");
-			var position = StringUtil.extractLast("${fieldAndPosition}","-");
+			var field = StringUtil.extractFirst("${fieldAndPosition}", "-");
+			var position = StringUtil.extractLast("${fieldAndPosition}", "-");
 
 			Form.gotoAddField(
 				fieldPositionNumber = "${position}",
@@ -338,7 +340,7 @@ definition {
 	@description = "Verify that a Rule with 'Is Empty' condition can be created"
 	@priority = "4"
 	test CanCreateAnIsEmptyRule {
-		property forms.functional = "true";
+		property portal.acceptance = "true";
 
 		FormsAdmin.addForm();
 
@@ -398,7 +400,7 @@ definition {
 	@description = "Verify that a Rule with 'Is Equal To' condition can be created"
 	@priority = "4"
 	test CanCreateAnIsEqualToRule {
-		property forms.functional = "true";
+		property portal.acceptance = "true";
 
 		FormsAdmin.addForm();
 
@@ -465,7 +467,7 @@ definition {
 	@description = "Verify that a Rule with 'Is greater than or Equal To' condition is working fine on the numeric field"
 	@priority = "4"
 	test CanCreateAnIsGreaterThanOrEqualToRule {
-		property forms.functional = "true";
+		property portal.acceptance = "true";
 
 		FormsAdmin.addForm();
 
@@ -540,7 +542,7 @@ definition {
 	@description = "Verify that a Rule with 'Is greater than' condition is working fine on the numeric field"
 	@priority = "4"
 	test CanCreateAnIsGreaterThanRule {
-		property forms.functional = "true";
+		property portal.acceptance = "true";
 
 		FormsAdmin.addForm();
 
@@ -609,7 +611,7 @@ definition {
 	@description = "Verify that a Rule with 'Is less than or Equal To' condition is working fine on the numeric field"
 	@priority = "4"
 	test CanCreateAnIsLessThanOrEqualToRule {
-		property forms.functional = "true";
+		property portal.acceptance = "true";
 
 		FormsAdmin.addForm();
 
@@ -692,7 +694,7 @@ definition {
 	@description = "Verify that a Rule with 'Is less than' condition is working fine on the numeric field"
 	@priority = "4"
 	test CanCreateAnIsLessThanRule {
-		property forms.functional = "true";
+		property portal.acceptance = "true";
 
 		FormsAdmin.addForm();
 
@@ -820,7 +822,7 @@ definition {
 		Form.save();
 
 		ProductMenu.gotoPortlet(
-			category = "Content &amp; Data",
+			category = "Content & Data",
 			portlet = "Forms");
 
 		FormsAdminNavigator.gotoEditFormByName();
@@ -869,7 +871,7 @@ definition {
 	@description = "Verify that a Rule with 'Is Not Equal To' condition can be created"
 	@priority = "4"
 	test CanCreateAnIsNotEqualToRule {
-		property forms.functional = "true";
+		property portal.acceptance = "true";
 
 		FormsAdmin.addForm();
 
@@ -998,7 +1000,7 @@ definition {
 			category = "Site Builder",
 			portlet = "Pages");
 
-		SitePages.addPublicPage(pageName = "Form Page");
+		PagesAdmin.addPublicPage(pageName = "Form Page");
 
 		Navigator.gotoPage(pageName = "Form Page");
 
@@ -1066,7 +1068,7 @@ definition {
 		Navigator.openURL();
 
 		ProductMenu.gotoPortlet(
-			category = "Content &amp; Data",
+			category = "Content & Data",
 			portlet = "Forms");
 
 		FormsAdminNavigator.gotoViewEntries();
@@ -1186,15 +1188,15 @@ definition {
 	@description = "Verify that the OR operator on Condition is working as expected"
 	@priority = "5"
 	test CanCreateMultipleConditionsUsingOR {
-		property forms.functional = "true";
+		property portal.acceptance = "true";
 
 		FormsAdmin.addForm();
 
 		Form.editName(formName = "Form 1");
 
 		for (var fieldAndNumber : list "Text-0,Numeric-1,Paragraph-2") {
-			var field = StringUtil.extractFirst("${fieldAndNumber}","-");
-			var rowNumber = StringUtil.extractLast("${fieldAndNumber}","-");
+			var field = StringUtil.extractFirst("${fieldAndNumber}", "-");
+			var rowNumber = StringUtil.extractLast("${fieldAndNumber}", "-");
 
 			Form.gotoAddField(
 				fieldPositionNumber = "${rowNumber}",
@@ -1213,8 +1215,8 @@ definition {
 		FormRules.addRule();
 
 		for (var fieldAndNumber : list "Text-1,Numeric-2") {
-			var field = StringUtil.extractFirst("${fieldAndNumber}","-");
-			var rowNumber = StringUtil.extractLast("${fieldAndNumber}","-");
+			var field = StringUtil.extractFirst("${fieldAndNumber}", "-");
+			var rowNumber = StringUtil.extractLast("${fieldAndNumber}", "-");
 
 			FormRules.configureConditionOptions(
 				conditionField = "${field}",
@@ -1263,7 +1265,7 @@ definition {
 		var count = "0";
 
 		while ("${count}" != "3") {
-			if ("${count}" == "0" || "${count}" == "2") {
+			if (("${count}" == "0") || ("${count}" == "2")) {
 				FormFields.editText(
 					fieldName = "Text",
 					fieldValue = "Test");
@@ -1289,7 +1291,7 @@ definition {
 	@description = "Verify that the OR operator on Condition is disabled by default"
 	@priority = "5"
 	test OrOperatorisDisabledByDefault {
-		property forms.functional = "true";
+		property portal.acceptance = "true";
 
 		FormsAdmin.addForm();
 

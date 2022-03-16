@@ -21,6 +21,8 @@ import com.liferay.portal.kernel.dao.orm.DynamicQueryFactoryUtil;
 import com.liferay.portal.kernel.dao.orm.ProjectionFactoryUtil;
 import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.dao.orm.RestrictionsFactoryUtil;
+import com.liferay.portal.kernel.dao.orm.Session;
+import com.liferay.portal.kernel.test.ReflectionTestUtil;
 import com.liferay.portal.kernel.test.rule.AggregateTestRule;
 import com.liferay.portal.kernel.test.util.RandomTestUtil;
 import com.liferay.portal.kernel.transaction.Propagation;
@@ -126,6 +128,9 @@ public class RemoteAppEntryPersistenceTest {
 
 		newRemoteAppEntry.setUuid(RandomTestUtil.randomString());
 
+		newRemoteAppEntry.setExternalReferenceCode(
+			RandomTestUtil.randomString());
+
 		newRemoteAppEntry.setCompanyId(RandomTestUtil.nextLong());
 
 		newRemoteAppEntry.setUserId(RandomTestUtil.nextLong());
@@ -144,6 +149,11 @@ public class RemoteAppEntryPersistenceTest {
 
 		newRemoteAppEntry.setCustomElementURLs(RandomTestUtil.randomString());
 
+		newRemoteAppEntry.setCustomElementUseESM(
+			RandomTestUtil.randomBoolean());
+
+		newRemoteAppEntry.setDescription(RandomTestUtil.randomString());
+
 		newRemoteAppEntry.setFriendlyURLMapping(RandomTestUtil.randomString());
 
 		newRemoteAppEntry.setIFrameURL(RandomTestUtil.randomString());
@@ -156,7 +166,17 @@ public class RemoteAppEntryPersistenceTest {
 
 		newRemoteAppEntry.setProperties(RandomTestUtil.randomString());
 
+		newRemoteAppEntry.setSourceCodeURL(RandomTestUtil.randomString());
+
 		newRemoteAppEntry.setType(RandomTestUtil.randomString());
+
+		newRemoteAppEntry.setStatus(RandomTestUtil.nextInt());
+
+		newRemoteAppEntry.setStatusByUserId(RandomTestUtil.nextLong());
+
+		newRemoteAppEntry.setStatusByUserName(RandomTestUtil.randomString());
+
+		newRemoteAppEntry.setStatusDate(RandomTestUtil.nextDate());
 
 		_remoteAppEntries.add(_persistence.update(newRemoteAppEntry));
 
@@ -168,6 +188,9 @@ public class RemoteAppEntryPersistenceTest {
 			newRemoteAppEntry.getMvccVersion());
 		Assert.assertEquals(
 			existingRemoteAppEntry.getUuid(), newRemoteAppEntry.getUuid());
+		Assert.assertEquals(
+			existingRemoteAppEntry.getExternalReferenceCode(),
+			newRemoteAppEntry.getExternalReferenceCode());
 		Assert.assertEquals(
 			existingRemoteAppEntry.getRemoteAppEntryId(),
 			newRemoteAppEntry.getRemoteAppEntryId());
@@ -195,6 +218,12 @@ public class RemoteAppEntryPersistenceTest {
 			existingRemoteAppEntry.getCustomElementURLs(),
 			newRemoteAppEntry.getCustomElementURLs());
 		Assert.assertEquals(
+			existingRemoteAppEntry.isCustomElementUseESM(),
+			newRemoteAppEntry.isCustomElementUseESM());
+		Assert.assertEquals(
+			existingRemoteAppEntry.getDescription(),
+			newRemoteAppEntry.getDescription());
+		Assert.assertEquals(
 			existingRemoteAppEntry.getFriendlyURLMapping(),
 			newRemoteAppEntry.getFriendlyURLMapping());
 		Assert.assertEquals(
@@ -212,7 +241,21 @@ public class RemoteAppEntryPersistenceTest {
 			existingRemoteAppEntry.getProperties(),
 			newRemoteAppEntry.getProperties());
 		Assert.assertEquals(
+			existingRemoteAppEntry.getSourceCodeURL(),
+			newRemoteAppEntry.getSourceCodeURL());
+		Assert.assertEquals(
 			existingRemoteAppEntry.getType(), newRemoteAppEntry.getType());
+		Assert.assertEquals(
+			existingRemoteAppEntry.getStatus(), newRemoteAppEntry.getStatus());
+		Assert.assertEquals(
+			existingRemoteAppEntry.getStatusByUserId(),
+			newRemoteAppEntry.getStatusByUserId());
+		Assert.assertEquals(
+			existingRemoteAppEntry.getStatusByUserName(),
+			newRemoteAppEntry.getStatusByUserName());
+		Assert.assertEquals(
+			Time.getShortTimestamp(existingRemoteAppEntry.getStatusDate()),
+			Time.getShortTimestamp(newRemoteAppEntry.getStatusDate()));
 	}
 
 	@Test
@@ -231,6 +274,15 @@ public class RemoteAppEntryPersistenceTest {
 		_persistence.countByUuid_C("null", 0L);
 
 		_persistence.countByUuid_C((String)null, 0L);
+	}
+
+	@Test
+	public void testCountByC_ERC() throws Exception {
+		_persistence.countByC_ERC(RandomTestUtil.nextLong(), "");
+
+		_persistence.countByC_ERC(0L, "null");
+
+		_persistence.countByC_ERC(0L, (String)null);
 	}
 
 	@Test
@@ -259,11 +311,14 @@ public class RemoteAppEntryPersistenceTest {
 	protected OrderByComparator<RemoteAppEntry> getOrderByComparator() {
 		return OrderByComparatorFactoryUtil.create(
 			"RemoteAppEntry", "mvccVersion", true, "uuid", true,
-			"remoteAppEntryId", true, "companyId", true, "userId", true,
-			"userName", true, "createDate", true, "modifiedDate", true,
-			"customElementHTMLElementName", true, "friendlyURLMapping", true,
+			"externalReferenceCode", true, "remoteAppEntryId", true,
+			"companyId", true, "userId", true, "userName", true, "createDate",
+			true, "modifiedDate", true, "customElementHTMLElementName", true,
+			"customElementUseESM", true, "friendlyURLMapping", true,
 			"iFrameURL", true, "instanceable", true, "name", true,
-			"portletCategoryName", true, "type", true);
+			"portletCategoryName", true, "sourceCodeURL", true, "type", true,
+			"status", true, "statusByUserId", true, "statusByUserName", true,
+			"statusDate", true);
 	}
 
 	@Test
@@ -480,6 +535,69 @@ public class RemoteAppEntryPersistenceTest {
 		Assert.assertEquals(0, result.size());
 	}
 
+	@Test
+	public void testResetOriginalValues() throws Exception {
+		RemoteAppEntry newRemoteAppEntry = addRemoteAppEntry();
+
+		_persistence.clearCache();
+
+		_assertOriginalValues(
+			_persistence.findByPrimaryKey(newRemoteAppEntry.getPrimaryKey()));
+	}
+
+	@Test
+	public void testResetOriginalValuesWithDynamicQueryLoadFromDatabase()
+		throws Exception {
+
+		_testResetOriginalValuesWithDynamicQuery(true);
+	}
+
+	@Test
+	public void testResetOriginalValuesWithDynamicQueryLoadFromSession()
+		throws Exception {
+
+		_testResetOriginalValuesWithDynamicQuery(false);
+	}
+
+	private void _testResetOriginalValuesWithDynamicQuery(boolean clearSession)
+		throws Exception {
+
+		RemoteAppEntry newRemoteAppEntry = addRemoteAppEntry();
+
+		if (clearSession) {
+			Session session = _persistence.openSession();
+
+			session.flush();
+
+			session.clear();
+		}
+
+		DynamicQuery dynamicQuery = DynamicQueryFactoryUtil.forClass(
+			RemoteAppEntry.class, _dynamicQueryClassLoader);
+
+		dynamicQuery.add(
+			RestrictionsFactoryUtil.eq(
+				"remoteAppEntryId", newRemoteAppEntry.getRemoteAppEntryId()));
+
+		List<RemoteAppEntry> result = _persistence.findWithDynamicQuery(
+			dynamicQuery);
+
+		_assertOriginalValues(result.get(0));
+	}
+
+	private void _assertOriginalValues(RemoteAppEntry remoteAppEntry) {
+		Assert.assertEquals(
+			Long.valueOf(remoteAppEntry.getCompanyId()),
+			ReflectionTestUtil.<Long>invoke(
+				remoteAppEntry, "getColumnOriginalValue",
+				new Class<?>[] {String.class}, "companyId"));
+		Assert.assertEquals(
+			remoteAppEntry.getExternalReferenceCode(),
+			ReflectionTestUtil.invoke(
+				remoteAppEntry, "getColumnOriginalValue",
+				new Class<?>[] {String.class}, "externalReferenceCode"));
+	}
+
 	protected RemoteAppEntry addRemoteAppEntry() throws Exception {
 		long pk = RandomTestUtil.nextLong();
 
@@ -488,6 +606,8 @@ public class RemoteAppEntryPersistenceTest {
 		remoteAppEntry.setMvccVersion(RandomTestUtil.nextLong());
 
 		remoteAppEntry.setUuid(RandomTestUtil.randomString());
+
+		remoteAppEntry.setExternalReferenceCode(RandomTestUtil.randomString());
 
 		remoteAppEntry.setCompanyId(RandomTestUtil.nextLong());
 
@@ -506,6 +626,10 @@ public class RemoteAppEntryPersistenceTest {
 
 		remoteAppEntry.setCustomElementURLs(RandomTestUtil.randomString());
 
+		remoteAppEntry.setCustomElementUseESM(RandomTestUtil.randomBoolean());
+
+		remoteAppEntry.setDescription(RandomTestUtil.randomString());
+
 		remoteAppEntry.setFriendlyURLMapping(RandomTestUtil.randomString());
 
 		remoteAppEntry.setIFrameURL(RandomTestUtil.randomString());
@@ -518,7 +642,17 @@ public class RemoteAppEntryPersistenceTest {
 
 		remoteAppEntry.setProperties(RandomTestUtil.randomString());
 
+		remoteAppEntry.setSourceCodeURL(RandomTestUtil.randomString());
+
 		remoteAppEntry.setType(RandomTestUtil.randomString());
+
+		remoteAppEntry.setStatus(RandomTestUtil.nextInt());
+
+		remoteAppEntry.setStatusByUserId(RandomTestUtil.nextLong());
+
+		remoteAppEntry.setStatusByUserName(RandomTestUtil.randomString());
+
+		remoteAppEntry.setStatusDate(RandomTestUtil.nextDate());
 
 		_remoteAppEntries.add(_persistence.update(remoteAppEntry));
 

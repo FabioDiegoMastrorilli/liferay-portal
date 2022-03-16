@@ -1,6 +1,8 @@
 @component-name = "portal-publications"
 definition {
 
+	property app.server.types = "jboss,tomcat,weblogic,websphere,wildfly";
+	property database.types = "db2,hypersonic,mariadb,mysql,oracle,postgresql,sqlserver";
 	property portal.release = "true";
 	property portal.upstream = "true";
 	property testray.main.component.name = "Publications";
@@ -71,7 +73,7 @@ definition {
 		Publications.enablePublications();
 
 		AssertTextEquals(
-			locator1 = "Publications#MANGE_PUBLICATIONS_PAGE_TITLE",
+			locator1 = "Publications#MANAGE_PUBLICATIONS_PAGE_TITLE",
 			value1 = "Publications");
 
 		AssertTextPresent(

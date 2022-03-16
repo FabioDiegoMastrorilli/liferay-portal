@@ -28,7 +28,7 @@ import com.liferay.portal.kernel.exception.ImageTypeException;
 import com.liferay.portal.kernel.exception.NoSuchRepositoryException;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.image.ImageBag;
-import com.liferay.portal.kernel.image.ImageToolUtil;
+import com.liferay.portal.kernel.image.ImageTool;
 import com.liferay.portal.kernel.json.JSONFactoryUtil;
 import com.liferay.portal.kernel.json.JSONObject;
 import com.liferay.portal.kernel.json.JSONUtil;
@@ -53,10 +53,12 @@ import com.liferay.portal.kernel.util.FileUtil;
 import com.liferay.portal.kernel.util.MimeTypesUtil;
 import com.liferay.portal.kernel.util.ParamUtil;
 import com.liferay.portal.kernel.util.Portal;
+import com.liferay.portal.kernel.util.SetUtil;
 import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.TempFileEntryUtil;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.kernel.util.WebKeys;
+import com.liferay.portal.util.PropsValues;
 import com.liferay.users.admin.configuration.UserFileUploadsConfiguration;
 
 import java.awt.image.RenderedImage;
@@ -65,6 +67,7 @@ import java.io.File;
 import java.io.InputStream;
 
 import java.util.Map;
+import java.util.Set;
 
 import javax.portlet.ActionRequest;
 import javax.portlet.ActionResponse;
@@ -103,50 +106,6 @@ public class UploadImageMVCActionCommand extends BaseMVCActionCommand {
 			UserFileUploadsConfiguration.class, properties);
 	}
 
-	protected FileEntry addTempImageFileEntry(PortletRequest portletRequest)
-		throws Exception {
-
-		UploadPortletRequest uploadPortletRequest =
-			_portal.getUploadPortletRequest(portletRequest);
-
-		String contentType = uploadPortletRequest.getContentType("fileName");
-
-		String fileName = uploadPortletRequest.getFileName("fileName");
-
-		File file = uploadPortletRequest.getFile("fileName");
-
-		String mimeType = MimeTypesUtil.getContentType(file, fileName);
-
-		if (!StringUtil.equalsIgnoreCase(
-				ContentTypes.APPLICATION_OCTET_STREAM, mimeType)) {
-
-			contentType = mimeType;
-		}
-
-		if (!MimeTypesUtil.isWebImage(contentType)) {
-			throw new ImageTypeException();
-		}
-
-		ThemeDisplay themeDisplay = (ThemeDisplay)portletRequest.getAttribute(
-			WebKeys.THEME_DISPLAY);
-
-		try {
-			TempFileEntryUtil.deleteTempFileEntry(
-				themeDisplay.getScopeGroupId(), themeDisplay.getUserId(),
-				UploadImageUtil.getTempImageFolderName(), fileName);
-		}
-		catch (Exception exception) {
-			if (_log.isDebugEnabled()) {
-				_log.debug(exception, exception);
-			}
-		}
-
-		return TempFileEntryUtil.addTempFileEntry(
-			themeDisplay.getScopeGroupId(), themeDisplay.getUserId(),
-			UploadImageUtil.getTempImageFolderName(), fileName, file,
-			contentType);
-	}
-
 	@Override
 	protected void doProcessAction(
 			ActionRequest actionRequest, ActionResponse actionResponse)
@@ -156,7 +115,7 @@ public class UploadImageMVCActionCommand extends BaseMVCActionCommand {
 
 		String cmd = ParamUtil.getString(actionRequest, Constants.CMD);
 
-		long maxFileSize = getMaxFileSize(actionRequest);
+		long maxFileSize = UploadImageUtil.getMaxFileSize(actionRequest);
 
 		try {
 			UploadException uploadException =
@@ -183,7 +142,8 @@ public class UploadImageMVCActionCommand extends BaseMVCActionCommand {
 						"tempImageFileName",
 						() -> {
 							FileEntry tempImageFileEntry =
-								addTempImageFileEntry(actionRequest);
+								_addTempImageFileEntry(
+									actionRequest, maxFileSize);
 
 							return tempImageFileEntry.getTitle();
 						}));
@@ -195,10 +155,10 @@ public class UploadImageMVCActionCommand extends BaseMVCActionCommand {
 					actionRequest, "imageUploaded");
 
 				if (imageUploaded) {
-					fileEntry = saveTempImageFileEntry(actionRequest);
+					fileEntry = _saveTempImageFileEntry(actionRequest);
 
 					if (fileEntry.getSize() > maxFileSize) {
-						throw new FileSizeException();
+						throw new FileSizeException(maxFileSize);
 					}
 				}
 
@@ -208,38 +168,65 @@ public class UploadImageMVCActionCommand extends BaseMVCActionCommand {
 			}
 		}
 		catch (Exception exception) {
-			handleUploadException(
+			_handleUploadException(
 				actionRequest, actionResponse, cmd, maxFileSize, exception);
 		}
 	}
 
-	protected long getMaxFileSize(ActionRequest actionRequest) {
-		String currentLogoURL = actionRequest.getParameter("currentLogoURL");
+	private FileEntry _addTempImageFileEntry(
+			PortletRequest portletRequest, Long maxFileSize)
+		throws Exception {
 
-		ThemeDisplay themeDisplay = (ThemeDisplay)actionRequest.getAttribute(
-			WebKeys.THEME_DISPLAY);
+		UploadPortletRequest uploadPortletRequest =
+			_portal.getUploadPortletRequest(portletRequest);
 
-		if (StringUtil.startsWith(
-				currentLogoURL,
-				themeDisplay.getPathImage() + "/user_female_portrait") ||
-			StringUtil.startsWith(
-				currentLogoURL,
-				themeDisplay.getPathImage() + "/user_male_portrait") ||
-			StringUtil.startsWith(
-				currentLogoURL,
-				themeDisplay.getPathImage() + "/user_portrait")) {
+		File file = uploadPortletRequest.getFile("fileName");
 
-			return _userFileUploadsConfiguration.imageMaxSize();
+		if (file.length() > maxFileSize) {
+			throw new UploadRequestSizeException();
 		}
 
-		return ParamUtil.getLong(actionRequest, "maxFileSize");
+		String contentType = uploadPortletRequest.getContentType("fileName");
+
+		String fileName = uploadPortletRequest.getFileName("fileName");
+
+		String mimeType = MimeTypesUtil.getContentType(file, fileName);
+
+		if (!StringUtil.equalsIgnoreCase(
+				ContentTypes.APPLICATION_OCTET_STREAM, mimeType)) {
+
+			contentType = mimeType;
+		}
+
+		if (!_webImageMimeTypes.contains(contentType)) {
+			throw new ImageTypeException();
+		}
+
+		ThemeDisplay themeDisplay = (ThemeDisplay)portletRequest.getAttribute(
+			WebKeys.THEME_DISPLAY);
+
+		try {
+			TempFileEntryUtil.deleteTempFileEntry(
+				themeDisplay.getScopeGroupId(), themeDisplay.getUserId(),
+				UploadImageUtil.getTempImageFolderName(), fileName);
+		}
+		catch (Exception exception) {
+			if (_log.isDebugEnabled()) {
+				_log.debug(exception);
+			}
+		}
+
+		return TempFileEntryUtil.addTempFileEntry(
+			themeDisplay.getScopeGroupId(), themeDisplay.getUserId(),
+			UploadImageUtil.getTempImageFolderName(), fileName, file,
+			contentType);
 	}
 
-	protected String getTempImageFileName(PortletRequest portletRequest) {
+	private String _getTempImageFileName(PortletRequest portletRequest) {
 		return ParamUtil.getString(portletRequest, "tempImageFileName");
 	}
 
-	protected void handleUploadException(
+	private void _handleUploadException(
 			ActionRequest actionRequest, ActionResponse actionResponse,
 			String cmd, long maxFileSize, Exception exception)
 		throws Exception {
@@ -255,7 +242,9 @@ public class UploadImageMVCActionCommand extends BaseMVCActionCommand {
 				 exception instanceof ImageTypeException ||
 				 exception instanceof NoSuchFileException ||
 				 exception instanceof UploadException ||
-				 exception instanceof UploadRequestSizeException) {
+				 exception instanceof UploadRequestSizeException ||
+				 (exception.getCause() instanceof ImageTypeException) ||
+				 (exception.getCause() instanceof UploadRequestSizeException)) {
 
 			if (cmd.equals(Constants.ADD_TEMP)) {
 				hideDefaultErrorMessage(actionRequest);
@@ -291,7 +280,9 @@ public class UploadImageMVCActionCommand extends BaseMVCActionCommand {
 						LanguageUtil.formatStorageSize(
 							maxFileSize, themeDisplay.getLocale()));
 				}
-				else if (exception instanceof ImageTypeException) {
+				else if ((exception instanceof ImageTypeException) ||
+						 (exception.getCause() instanceof ImageTypeException)) {
+
 					errorMessage = themeDisplay.translate(
 						"please-enter-a-file-with-a-valid-file-type");
 				}
@@ -302,7 +293,10 @@ public class UploadImageMVCActionCommand extends BaseMVCActionCommand {
 						"an-unexpected-error-occurred-while-uploading-your-" +
 							"file");
 				}
-				else if (exception instanceof UploadRequestSizeException) {
+				else if ((exception instanceof UploadRequestSizeException) ||
+						 (exception.getCause() instanceof
+							 UploadRequestSizeException)) {
+
 					errorMessage = themeDisplay.translate(
 						"request-is-larger-than-x-and-could-not-be-processed",
 						LanguageUtil.formatStorageSize(
@@ -327,7 +321,7 @@ public class UploadImageMVCActionCommand extends BaseMVCActionCommand {
 		}
 	}
 
-	protected FileEntry saveTempImageFileEntry(ActionRequest actionRequest)
+	private FileEntry _saveTempImageFileEntry(ActionRequest actionRequest)
 		throws Exception {
 
 		try {
@@ -337,7 +331,7 @@ public class UploadImageMVCActionCommand extends BaseMVCActionCommand {
 			try (InputStream tempImageInputStream =
 					tempFileEntry.getContentStream()) {
 
-				ImageBag imageBag = ImageToolUtil.read(tempImageInputStream);
+				ImageBag imageBag = _imageTool.read(tempImageInputStream);
 
 				RenderedImage renderedImage = imageBag.getRenderedImage();
 
@@ -368,11 +362,11 @@ public class UploadImageMVCActionCommand extends BaseMVCActionCommand {
 						width = renderedImage.getWidth() - x;
 					}
 
-					renderedImage = ImageToolUtil.crop(
+					renderedImage = _imageTool.crop(
 						renderedImage, height, width, x, y);
 				}
 
-				byte[] bytes = ImageToolUtil.getBytes(
+				byte[] bytes = _imageTool.getBytes(
 					renderedImage, imageBag.getType());
 
 				ThemeDisplay themeDisplay =
@@ -386,18 +380,18 @@ public class UploadImageMVCActionCommand extends BaseMVCActionCommand {
 						themeDisplay.getScopeGroupId(),
 						themeDisplay.getUserId(),
 						UploadImageUtil.getTempImageFolderName(),
-						getTempImageFileName(actionRequest));
+						_getTempImageFileName(actionRequest));
 				}
 				catch (Exception exception) {
 					if (_log.isDebugEnabled()) {
-						_log.debug(exception, exception);
+						_log.debug(exception);
 					}
 				}
 
 				return TempFileEntryUtil.addTempFileEntry(
 					themeDisplay.getScopeGroupId(), themeDisplay.getUserId(),
 					UploadImageUtil.getTempImageFolderName(),
-					getTempImageFileName(actionRequest), file,
+					_getTempImageFileName(actionRequest), file,
 					tempFileEntry.getMimeType());
 			}
 		}
@@ -412,7 +406,13 @@ public class UploadImageMVCActionCommand extends BaseMVCActionCommand {
 	private static final Log _log = LogFactoryUtil.getLog(
 		UploadImageMVCActionCommand.class);
 
+	private static final Set<String> _webImageMimeTypes = SetUtil.fromArray(
+		PropsValues.MIME_TYPES_WEB_IMAGES);
+
 	private volatile DLConfiguration _dlConfiguration;
+
+	@Reference
+	private ImageTool _imageTool;
 
 	@Reference
 	private Portal _portal;

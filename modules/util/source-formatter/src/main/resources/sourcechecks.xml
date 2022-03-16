@@ -391,6 +391,10 @@
 			<category name="Naming Conventions" />
 			<description name="Checks if class names follow naming conventions." />
 		</check>
+		<check name="JavaCollapseImportsCheck">
+			<category name="Performance" />
+			<description name="Collapses imports that use wildcard" />
+		</check>
 		<check name="JavaCollatorUtilCheck">
 			<category name="Bug Prevention" />
 			<description name="Checks for correct use of `Collator`." />
@@ -500,10 +504,6 @@
 			<description name="Checks that the package name matches the file location." />
 			<property name="checkServicePath" value="false" />
 		</check>
-		<check name="JavaParameterAnnotationsCheck">
-			<category name="Bug Prevention" />
-			<description name="Performs several checks on parameters with annotations." />
-		</check>
 		<check name="JavaProcessCallableCheck">
 			<category name="Bug Prevention" />
 			<description name="Checks that a class implementing `ProcessCallable` assigns a `serialVersionUID`." />
@@ -603,14 +603,6 @@
 			<category name="Bug Prevention" />
 			<description name="Performs several checks on anonymous classes." />
 		</check>
-		<check name="JavaAPISignatureCheck">
-			<category name="Bug Prevention" />
-			<description name="Checks that types `HttpServletRequest`, `HttpServletResponse`, `ThemeDisplay`, and `ServiceContext` are not used in API method signatures." />
-			<property name="illegalAPIParameterTypes" value="HttpServletRequest" />
-			<property name="illegalAPIParameterTypes" value="HttpServletResponse" />
-			<property name="illegalAPIParameterTypes" value="ThemeDisplay" />
-			<property name="illegalAPIServiceParameterTypes" value="ServiceContext" />
-		</check>
 		<check name="JavaBaseUpgradeCallableCheck">
 			<category name="Bug Prevention" />
 			<description name="Checks that BaseUpgradeCallable is used instead of Callable or Runnable in Upgrade and Verify classes." />
@@ -679,6 +671,11 @@
 		<check name="JavaLogLevelCheck">
 			<category name="Bug Prevention" />
 			<description name="Checks that the correct log messages are printed." />
+		</check>
+		<check name="JavaMissingOverrideCheck">
+			<category name="Bug Prevention" />
+			<description name="Finds missing @Override annotations." />
+			<property name="enabled" value="false" />
 		</check>
 		<check name="JavaMissingXMLPublicIdsCheck">
 			<category name="Bug Prevention" />
@@ -806,6 +803,7 @@
 		<check name="LogParametersCheck">
 			<category name="Bug Prevention" />
 			<description name="Validates the values of parameters passed to `_log.*` calls." />
+			<property name="enabled" value="false" />
 		</check>
 		<check name="ResourceBundleCheck">
 			<category name="Bug Prevention" />
@@ -863,16 +861,6 @@
 		<check name="JavaOSGiReferenceCheck">
 			<category name="Bug Prevention" />
 			<description name="Performs several checks on classes with `@Component` annotation." />
-			<property name="serviceReferenceUtilClassNames" value="com.liferay.exportimport.kernel.lar.ExportImportHelperUtil" />
-			<property name="serviceReferenceUtilClassNames" value="com.liferay.exportimport.kernel.lar.ExportImportProcessCallbackRegistryUtil" />
-			<property name="serviceReferenceUtilClassNames" value="com.liferay.exportimport.kernel.lar.PortletDataContextFactoryUtil" />
-			<property name="serviceReferenceUtilClassNames" value="com.liferay.exportimport.kernel.lar.PortletDataHandlerStatusMessageSenderUtill" />
-			<property name="serviceReferenceUtilClassNames" value="com.liferay.exportimport.kernel.staging.StagingUtil" />
-			<property name="serviceReferenceUtilClassNames" value="com.liferay.portal.kernel.backgroundtask.BackgroundTaskManagerUtil" />
-			<property name="serviceReferenceUtilClassNames" value="com.liferay.portal.kernel.backgroundtask.display.BackgroundTaskDisplayFactoryUtil" />
-			<property name="serviceReferenceUtilClassNames" value="com.liferay.portal.kernel.comment.CommentManagerUtil" />
-			<property name="serviceReferenceUtilClassNames" value="com.liferay.portal.kernel.util.HttpUtil" />
-			<property name="serviceReferenceUtilClassNames" value="com.liferay.portal.kernel.util.PortalUtil" />
 		</check>
 
 		<!-- Plugin Source Checks -->
@@ -910,6 +898,11 @@
 		<check name="JSONPackageJSONDependencyVersionCheck">
 			<category name="Bug Prevention" />
 			<description name="Checks the version for dependencies in `package.json` files." />
+		</check>
+		<check name="JSONPackageJSONRedundantDependenciesCheck">
+			<category name="Performance" />
+			<description name="Checks for preventing internal dependencies from being added to `package.json`." />
+			<property name="enabled" value="false" />
 		</check>
 	</source-processor>
 	<source-processor name="JSPSourceProcessor">
@@ -1023,6 +1016,10 @@
 			<category name="Performance" />
 			<description name="Finds taglibs, variables and imports that are unused." />
 		</check>
+		<check name="JSPUpgradeRemovedTagsCheck">
+			<category name="Upgrade" />
+			<description name="Finds removed tags when upgrading." />
+		</check>
 		<check name="JSPVariableOrderCheck">
 			<category name="Styling" />
 			<description name="Checks if variable names are in alphabetical order." />
@@ -1093,6 +1090,7 @@
 		<check name="LogParametersCheck">
 			<category name="Bug Prevention" />
 			<description name="Validates the values of parameters passed to `_log.*` calls." />
+			<property name="enabled" value="false" />
 		</check>
 		<check name="ResourceBundleCheck">
 			<category name="Bug Prevention" />
@@ -1201,38 +1199,19 @@
 		</check>
 	</source-processor>
 	<source-processor name="PoshiSourceProcessor">
-		<check name="PoshiAnnotationsOrderCheck">
-			<category name="Styling" />
-			<description name="Checks the order of annotations." />
-		</check>
-		<check name="PoshiCommandsOrderCheck">
-			<category name="Styling" />
-			<description name="Checks the order of poshi commands." />
-		</check>
 		<check name="PoshiDependenciesFileLocationCheck">
 			<category name="Bug Prevention" />
 			<description name="Checks that dependencies files are located in the correct directory." />
 			<property name="enabled" value="false" />
 		</check>
-		<check name="PoshiEmptyLinesCheck">
-			<category name="Styling" />
-			<description name="Finds missing and unnecessary empty lines." />
-		</check>
-		<check name="PoshiIndentationCheck">
-			<category name="Styling" />
-			<description name="Finds incorrect indentation in poshi files." />
-		</check>
-		<check name="PoshiParametersOrderCheck">
-			<category name="Styling" />
-			<description name="Checks the order of parameters in `.function` and `.macro` files." />
-		</check>
 		<check name="PoshiStylingCheck">
 			<category name="Styling" />
 			<description name="Applies rules to enforce consisteny in code style." />
 		</check>
-		<check name="PoshiWhitespaceCheck">
+		<check name="PoshiVariableNameCheck">
 			<category name="Styling" />
-			<description name="Finds missing and unnecessary whitespace in poshi files." />
+			<description name="Checks variable names for correct use of `camelCase`." />
+			<property name="enabled" value="false" />
 		</check>
 	</source-processor>
 	<source-processor name="PropertiesSourceProcessor">
@@ -1423,6 +1402,12 @@
 			<description name="Applies rules to enforce consisteny in code style." />
 		</check>
 	</source-processor>
+	<source-processor name="UpgradeSourceProcessor">
+		<check name="UpgradeJavaCheck">
+			<category name="Upgrade" />
+			<description name="Performs upgrade checks for `java` files" />
+		</check>
+	</source-processor>
 	<source-processor name="XMLSourceProcessor">
 		<check name="XMLBuildFileCheck">
 			<category name="Bug Prevention" />
@@ -1447,6 +1432,11 @@
 		<check name="XMLDTDVersionCheck">
 			<category name="Styling" />
 			<description name="Checks the DTD version in `*.xml` file." />
+		</check>
+		<check name="XMLEchoMessageCheck">
+			<category name="Styling" />
+			<description name="Checks the echo message attributes in `*.xml` file." />
+			<property name="enabled" value="false" />
 		</check>
 		<check name="XMLFriendlyURLRoutesFileCheck">
 			<category name="Styling" />
@@ -1538,6 +1528,10 @@
 		<check name="XMLToggleFileCheck">
 			<category name="Styling" />
 			<description name="Checks the order of elements in `.toggle` file." />
+		</check>
+		<check name="XMLUpgradeRemovedDefinitionsCheck">
+			<category name="Upgrade" />
+			<description name="Finds removed XML definitions when upgrading." />
 		</check>
 		<check name="XMLWhitespaceCheck">
 			<category name="Styling" />

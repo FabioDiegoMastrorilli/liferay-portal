@@ -42,17 +42,17 @@
 </tr>
 <tr>
 	<td>OPTIONS_ENTRY_NAME</td>
-	<td>//div[@class='form-container']//td[contains(.,'${key_OptionEntryName}')]</td>
+	<td>//div[@class='form-container']//td[contains(.,'${key_optionEntryName}')]</td>
 	<td></td>
 </tr>
 <tr>
 	<td>SEARCH_FIELD</td>
-	<td>//input[contains(@aria-label,'Search')]</td>
+	<td>//input[contains(@aria-label,'Search')] | //input[contains(@name,'Keywords')]</td>
 	<td></td>
 </tr>
 <tr>
 	<td>SELECT_ALL_CHECKBOX</td>
-	<td>//input[contains (@id,'allRowIds') and (@type='checkbox')]</td>
+	<td>//input[contains (@id,'allRowIds') and (@type='checkbox')] | //input[contains (@name,'table-head-selector') and (@type='checkbox')]</td>
 	<td></td>
 </tr>
 <tr>

@@ -18,13 +18,13 @@ import com.liferay.commerce.constants.CommercePortletKeys;
 import com.liferay.commerce.constants.CommerceWebKeys;
 import com.liferay.commerce.context.CommerceContext;
 import com.liferay.commerce.exception.CommerceOrderImporterTypeException;
-import com.liferay.commerce.exception.CommerceOrderValidatorException;
 import com.liferay.commerce.exception.NoSuchOrderException;
 import com.liferay.commerce.model.CommerceOrder;
 import com.liferay.commerce.model.CommerceOrderItem;
 import com.liferay.commerce.order.importer.item.CommerceOrderImporterItem;
 import com.liferay.commerce.order.importer.type.CommerceOrderImporterType;
 import com.liferay.commerce.order.importer.type.CommerceOrderImporterTypeRegistry;
+import com.liferay.commerce.product.exception.NoSuchCPInstanceException;
 import com.liferay.commerce.service.CommerceOrderItemService;
 import com.liferay.commerce.service.CommerceOrderService;
 import com.liferay.petra.portlet.url.builder.PortletURLBuilder;
@@ -67,8 +67,8 @@ public class ImportCommerceOrderItemsMVCActionCommand
 			ActionRequest actionRequest, ActionResponse actionResponse)
 		throws Exception {
 
-		int notImportedRowsCount = 0;
 		int importedRowsCount = 0;
+		int notImportedRowsCount = 0;
 
 		long commerceOrderId = ParamUtil.getLong(
 			actionRequest, "commerceOrderId");
@@ -93,6 +93,12 @@ public class ImportCommerceOrderItemsMVCActionCommand
 				for (CommerceOrderImporterItem commerceOrderImporterItem :
 						commerceOrderImporterItems) {
 
+					if (commerceOrderImporterItem.getQuantity() < 1) {
+						notImportedRowsCount++;
+
+						continue;
+					}
+
 					try {
 						_commerceOrderItemService.addOrUpdateCommerceOrderItem(
 							commerceOrderId,
@@ -107,27 +113,32 @@ public class ImportCommerceOrderItemsMVCActionCommand
 
 						importedRowsCount++;
 					}
-					catch (CommerceOrderValidatorException
-								commerceOrderValidatorException) {
+					catch (Exception exception) {
+						if (exception instanceof
+								CommerceOrderImporterTypeException ||
+							exception instanceof NoSuchCPInstanceException ||
+							exception instanceof PrincipalException) {
 
-						notImportedRowsCount++;
+							notImportedRowsCount++;
+						}
 					}
 				}
 			}
 		}
 		catch (Exception exception) {
-			if (exception instanceof CommerceOrderImporterTypeException) {
+			if (exception instanceof CommerceOrderImporterTypeException ||
+				exception instanceof NoSuchCPInstanceException ||
+				exception instanceof PrincipalException) {
+
 				SessionErrors.add(
-					actionRequest, "commerceOrderImporterTypeKey",
+					actionRequest, CommerceOrderImporterTypeException.class,
 					commerceOrderImporterTypeKey);
 
 				sendRedirect(
 					actionRequest, actionResponse,
 					_getOrderDetailRedirect(commerceOrderId, actionRequest));
 			}
-			else if (exception instanceof NoSuchOrderException ||
-					 exception instanceof PrincipalException) {
-
+			else if (exception instanceof NoSuchOrderException) {
 				SessionErrors.add(actionRequest, exception.getClass());
 
 				actionResponse.setRenderParameter("mvcPath", "/error.jsp");
@@ -137,12 +148,18 @@ public class ImportCommerceOrderItemsMVCActionCommand
 			}
 		}
 
+		hideDefaultErrorMessage(actionRequest);
 		hideDefaultSuccessMessage(actionRequest);
 
-		SessionMessages.add(
-			actionRequest, "notImportedRowsCount", notImportedRowsCount);
-		SessionMessages.add(
-			actionRequest, "importedRowsCount", importedRowsCount);
+		if (importedRowsCount > 0) {
+			SessionMessages.add(
+				actionRequest, "importedRowsCount", importedRowsCount);
+		}
+
+		if (notImportedRowsCount > 0) {
+			SessionErrors.add(
+				actionRequest, "notImportedRowsCount", notImportedRowsCount);
+		}
 
 		sendRedirect(
 			actionRequest, actionResponse,

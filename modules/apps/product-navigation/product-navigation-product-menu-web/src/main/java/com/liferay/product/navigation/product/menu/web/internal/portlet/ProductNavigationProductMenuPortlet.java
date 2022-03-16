@@ -99,17 +99,17 @@ public class ProductNavigationProductMenuPortlet extends MVCPortlet {
 			ApplicationListWebKeys.PANEL_CATEGORY_REGISTRY,
 			_panelCategoryRegistry);
 
-		setLayoutsTreeDisplayContextRequestAttribute(renderRequest);
+		_setLayoutsTreeDisplayContextRequestAttribute(renderRequest);
 
 		super.doDispatch(renderRequest, renderResponse);
 	}
 
-	protected void setLayoutsTreeDisplayContextRequestAttribute(
+	private void _setLayoutsTreeDisplayContextRequestAttribute(
 		RenderRequest renderRequest) {
 
 		LayoutsTreeDisplayContext layoutsTreeDisplayContext =
 			new LayoutsTreeDisplayContext(
-				_groupProvider, _portal.getLiferayPortletRequest(renderRequest),
+				_groupProvider, renderRequest,
 				_siteNavigationMenuItemLocalService,
 				_siteNavigationMenuItemTypeRegistry,
 				_siteNavigationMenuLocalService);

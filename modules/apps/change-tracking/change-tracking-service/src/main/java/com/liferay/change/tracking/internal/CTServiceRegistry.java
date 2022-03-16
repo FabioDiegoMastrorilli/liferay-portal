@@ -14,6 +14,7 @@
 
 package com.liferay.change.tracking.internal;
 
+import com.liferay.change.tracking.internal.helper.CTTableMapperHelper;
 import com.liferay.change.tracking.model.CTCollection;
 import com.liferay.change.tracking.spi.exception.CTEventException;
 import com.liferay.change.tracking.spi.listener.CTEventListener;
@@ -92,10 +93,13 @@ public class CTServiceRegistry {
 					(key, ctTableMapperHelper) -> {
 						if (ctTableMapperHelper == null) {
 							return new CTTableMapperHelper(
-								ctService, mappingTableName, primaryKeyName);
+								ctService, mappingTableName, primaryKeyName,
+								ctService.getModelClass());
 						}
 
 						ctTableMapperHelper.setRightColumnName(primaryKeyName);
+						ctTableMapperHelper.setRightModelClass(
+							ctService.getModelClass());
 
 						return ctTableMapperHelper;
 					});

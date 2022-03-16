@@ -69,8 +69,12 @@ public class ScriptPostProcess {
 				startTag, endTag, ref, actionURL, actionParameterName);
 		}
 		catch (Exception exception) {
-			_log.error(exception, exception);
+			_log.error(exception);
 		}
+	}
+
+	public void setInitalPage(StringBundler sb) {
+		_sb = sb;
 	}
 
 	/**
@@ -82,10 +86,6 @@ public class ScriptPostProcess {
 		for (int i = 0; i < sb.index(); i++) {
 			_sb.append(sb.stringAt(0));
 		}
-	}
-
-	public void setInitalPage(StringBundler sb) {
-		_sb = sb;
 	}
 
 	protected void doProcessPage(

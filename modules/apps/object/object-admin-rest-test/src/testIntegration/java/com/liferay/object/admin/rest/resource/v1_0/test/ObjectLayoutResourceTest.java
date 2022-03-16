@@ -45,6 +45,7 @@ import org.junit.runner.RunWith;
 public class ObjectLayoutResourceTest extends BaseObjectLayoutResourceTestCase {
 
 	@Before
+	@Override
 	public void setUp() throws Exception {
 		super.setUp();
 
@@ -60,11 +61,13 @@ public class ObjectLayoutResourceTest extends BaseObjectLayoutResourceTestCase {
 
 		_objectField = _objectFieldLocalService.addCustomObjectField(
 			TestPropsValues.getUserId(), 0,
-			_objectDefinition.getObjectDefinitionId(), false, false, null,
-			LocalizedMapUtil.getLocalizedMap("Able"), "able", true, "String");
+			_objectDefinition.getObjectDefinitionId(), "Text", "String", false,
+			false, null, LocalizedMapUtil.getLocalizedMap("Able"), "able", true,
+			Collections.emptyList());
 	}
 
 	@After
+	@Override
 	public void tearDown() throws Exception {
 		super.tearDown();
 

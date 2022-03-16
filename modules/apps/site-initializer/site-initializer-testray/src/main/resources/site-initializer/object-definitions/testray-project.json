@@ -1,0 +1,33 @@
+{
+	"label": {
+		"en_US": "Testray Project"
+	},
+	"name": "TestrayProject",
+	"objectFields": [
+		{
+			"indexed": true,
+			"indexedAsKeyword": false,
+			"indexedLanguageId": "",
+			"label": {
+				"en_US": "Name"
+			},
+			"name": "name",
+			"required": true,
+			"type": "String"
+		},
+		{
+			"indexed": false,
+			"indexedAsKeyword": false,
+			"label": {
+				"en_US": "Description"
+			},
+			"name": "description",
+			"required": false,
+			"type": "String"
+		}
+	],
+	"pluralLabel": {
+		"en_US": "Testray Projects"
+	},
+	"scope": "company"
+}

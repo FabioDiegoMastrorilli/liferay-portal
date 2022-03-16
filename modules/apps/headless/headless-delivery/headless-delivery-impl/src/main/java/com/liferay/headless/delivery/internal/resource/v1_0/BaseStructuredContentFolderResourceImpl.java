@@ -16,6 +16,7 @@ package com.liferay.headless.delivery.internal.resource.v1_0;
 
 import com.liferay.headless.delivery.dto.v1_0.StructuredContentFolder;
 import com.liferay.headless.delivery.resource.v1_0.StructuredContentFolderResource;
+import com.liferay.petra.function.UnsafeBiConsumer;
 import com.liferay.petra.function.UnsafeConsumer;
 import com.liferay.petra.function.UnsafeFunction;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
@@ -304,7 +305,7 @@ public abstract class BaseStructuredContentFolderResourceImpl
 				"replace",
 				addAction(
 					ActionKeys.PERMISSIONS,
-					"putAssetLibraryStructuredContentFolderPermission",
+					"putAssetLibraryStructuredContentFolderPermissionsPage",
 					portletName, assetLibraryId)
 			).build(),
 			assetLibraryId, portletName, roleNames);
@@ -337,7 +338,7 @@ public abstract class BaseStructuredContentFolderResourceImpl
 	@javax.ws.rs.PUT
 	@Override
 	public Page<com.liferay.portal.vulcan.permission.Permission>
-			putAssetLibraryStructuredContentFolderPermission(
+			putAssetLibraryStructuredContentFolderPermissionsPage(
 				@io.swagger.v3.oas.annotations.Parameter(hidden = true)
 				@javax.validation.constraints.NotNull
 				@javax.ws.rs.PathParam("assetLibraryId")
@@ -370,7 +371,7 @@ public abstract class BaseStructuredContentFolderResourceImpl
 				"replace",
 				addAction(
 					ActionKeys.PERMISSIONS,
-					"putAssetLibraryStructuredContentFolderPermission",
+					"putAssetLibraryStructuredContentFolderPermissionsPage",
 					portletName, assetLibraryId)
 			).build(),
 			assetLibraryId, portletName, null);
@@ -600,8 +601,8 @@ public abstract class BaseStructuredContentFolderResourceImpl
 				"replace",
 				addAction(
 					ActionKeys.PERMISSIONS,
-					"putSiteStructuredContentFolderPermission", portletName,
-					siteId)
+					"putSiteStructuredContentFolderPermissionsPage",
+					portletName, siteId)
 			).build(),
 			siteId, portletName, roleNames);
 	}
@@ -631,7 +632,7 @@ public abstract class BaseStructuredContentFolderResourceImpl
 	@javax.ws.rs.PUT
 	@Override
 	public Page<com.liferay.portal.vulcan.permission.Permission>
-			putSiteStructuredContentFolderPermission(
+			putSiteStructuredContentFolderPermissionsPage(
 				@io.swagger.v3.oas.annotations.Parameter(hidden = true)
 				@javax.validation.constraints.NotNull
 				@javax.ws.rs.PathParam("siteId")
@@ -664,8 +665,8 @@ public abstract class BaseStructuredContentFolderResourceImpl
 				"replace",
 				addAction(
 					ActionKeys.PERMISSIONS,
-					"putSiteStructuredContentFolderPermission", portletName,
-					siteId)
+					"putSiteStructuredContentFolderPermissionsPage",
+					portletName, siteId)
 			).build(),
 			siteId, portletName, null);
 	}
@@ -731,7 +732,7 @@ public abstract class BaseStructuredContentFolderResourceImpl
 				"replace",
 				addAction(
 					ActionKeys.PERMISSIONS,
-					"putStructuredContentFolderPermission", resourceName,
+					"putStructuredContentFolderPermissionsPage", resourceName,
 					resourceId)
 			).build(),
 			resourceId, resourceName, roleNames);
@@ -764,7 +765,7 @@ public abstract class BaseStructuredContentFolderResourceImpl
 	@javax.ws.rs.PUT
 	@Override
 	public Page<com.liferay.portal.vulcan.permission.Permission>
-			putStructuredContentFolderPermission(
+			putStructuredContentFolderPermissionsPage(
 				@io.swagger.v3.oas.annotations.Parameter(hidden = true)
 				@javax.validation.constraints.NotNull
 				@javax.ws.rs.PathParam("structuredContentFolderId")
@@ -801,7 +802,7 @@ public abstract class BaseStructuredContentFolderResourceImpl
 				"replace",
 				addAction(
 					ActionKeys.PERMISSIONS,
-					"putStructuredContentFolderPermission", resourceName,
+					"putStructuredContentFolderPermissionsPage", resourceName,
 					resourceId)
 			).build(),
 			resourceId, resourceName, null);
@@ -1327,11 +1328,18 @@ public abstract class BaseStructuredContentFolderResourceImpl
 					(Long)parameters.get("siteId"), structuredContentFolder);
 		}
 
-		for (StructuredContentFolder structuredContentFolder :
-				structuredContentFolders) {
+		if (contextBatchUnsafeConsumer != null) {
+			contextBatchUnsafeConsumer.accept(
+				structuredContentFolders,
+				structuredContentFolderUnsafeConsumer);
+		}
+		else {
+			for (StructuredContentFolder structuredContentFolder :
+					structuredContentFolders) {
 
-			structuredContentFolderUnsafeConsumer.accept(
-				structuredContentFolder);
+				structuredContentFolderUnsafeConsumer.accept(
+					structuredContentFolder);
+			}
 		}
 	}
 
@@ -1494,6 +1502,15 @@ public abstract class BaseStructuredContentFolderResourceImpl
 		this.contextAcceptLanguage = contextAcceptLanguage;
 	}
 
+	public void setContextBatchUnsafeConsumer(
+		UnsafeBiConsumer
+			<java.util.Collection<StructuredContentFolder>,
+			 UnsafeConsumer<StructuredContentFolder, Exception>, Exception>
+				contextBatchUnsafeConsumer) {
+
+		this.contextBatchUnsafeConsumer = contextBatchUnsafeConsumer;
+	}
+
 	public void setContextCompany(
 		com.liferay.portal.kernel.model.Company contextCompany) {
 
@@ -1647,6 +1664,10 @@ public abstract class BaseStructuredContentFolderResourceImpl
 	}
 
 	protected AcceptLanguage contextAcceptLanguage;
+	protected UnsafeBiConsumer
+		<java.util.Collection<StructuredContentFolder>,
+		 UnsafeConsumer<StructuredContentFolder, Exception>, Exception>
+			contextBatchUnsafeConsumer;
 	protected com.liferay.portal.kernel.model.Company contextCompany;
 	protected HttpServletRequest contextHttpServletRequest;
 	protected HttpServletResponse contextHttpServletResponse;

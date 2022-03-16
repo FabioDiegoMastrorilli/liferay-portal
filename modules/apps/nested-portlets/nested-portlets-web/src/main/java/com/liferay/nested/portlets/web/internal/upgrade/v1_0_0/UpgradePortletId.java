@@ -32,8 +32,8 @@ public class UpgradePortletId extends BasePortletIdUpgradeProcess {
 	protected void doUpgrade() throws Exception {
 		super.doUpgrade();
 
-		updateNestedPortletLayoutRevisionTypeSettings();
-		updateNestedPortletLayoutTypeSettings();
+		_updateNestedPortletLayoutRevisionTypeSettings();
+		_updateNestedPortletLayoutTypeSettings();
 	}
 
 	@Override
@@ -43,7 +43,7 @@ public class UpgradePortletId extends BasePortletIdUpgradeProcess {
 		};
 	}
 
-	protected void updateNestedPortletLayoutRevisionTypeSettings()
+	private void _updateNestedPortletLayoutRevisionTypeSettings()
 		throws Exception {
 
 		try (PreparedStatement preparedStatement = connection.prepareStatement(
@@ -68,12 +68,12 @@ public class UpgradePortletId extends BasePortletIdUpgradeProcess {
 		}
 		catch (Exception exception) {
 			if (_log.isWarnEnabled()) {
-				_log.warn(exception, exception);
+				_log.warn(exception);
 			}
 		}
 	}
 
-	protected void updateNestedPortletLayoutTypeSettings() throws Exception {
+	private void _updateNestedPortletLayoutTypeSettings() throws Exception {
 		try (PreparedStatement preparedStatement = connection.prepareStatement(
 				"select plid, typeSettings from Layout where typeSettings " +
 					"LIKE '%nested-column-ids%'");
@@ -97,7 +97,7 @@ public class UpgradePortletId extends BasePortletIdUpgradeProcess {
 		}
 		catch (Exception exception) {
 			if (_log.isWarnEnabled()) {
-				_log.warn(exception, exception);
+				_log.warn(exception);
 			}
 		}
 	}

@@ -20,7 +20,7 @@ definition {
 
 		AddSelection(
 			locator1 = "MobileDevice#ADD_CLASSIFICATION_RULE_OPERATING_SYSTEM",
-			value1 = "${ruleOSScope}");
+			value1 = "${ruleOsScope}");
 
 		Select(
 			locator1 = "MobileDevice#ADD_CLASSIFICATION_RULE_DEVICE_TYPE",
@@ -59,18 +59,6 @@ definition {
 		var key_pageName = "${redirectPageName}";
 
 		AssertVisible(locator1 = "Home#PAGE_ACTIVE");
-	}
-
-	macro gotoMobileDeviceFamily {
-		var key_deviceFamilyName = "${mobileDeviceFamilyName}";
-
-		AssertClick(
-			locator1 = "MobileDevice#DEVICE_FAMILY_TABLE_NAME_LINK",
-			value1 = "${mobileDeviceFamilyName}");
-	}
-
-	macro openMobileDeviceAdmin {
-		Navigator.openWithAppendToBaseURL(urlAppend = "group/${siteURLKey}/~/control_panel/manage?p_p_id=com_liferay_mobile_device_rules_web_portlet_MDRPortlet");
 	}
 
 	macro previewPG {

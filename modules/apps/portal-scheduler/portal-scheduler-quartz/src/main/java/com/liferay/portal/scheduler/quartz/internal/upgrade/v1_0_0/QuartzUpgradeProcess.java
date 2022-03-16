@@ -29,10 +29,10 @@ public class QuartzUpgradeProcess extends UpgradeProcess {
 
 	@Override
 	protected void doUpgrade() throws Exception {
-		updateJobDetails();
+		_updateJobDetails();
 	}
 
-	protected void updateJobDetails() {
+	private void _updateJobDetails() {
 		try (LoggingTimer loggingTimer = new LoggingTimer();
 			PreparedStatement preparedStatement = connection.prepareStatement(
 				"update QUARTZ_JOB_DETAILS set job_class_name = ? where " +
@@ -49,7 +49,7 @@ public class QuartzUpgradeProcess extends UpgradeProcess {
 		}
 		catch (SQLException sqlException) {
 			if (_log.isWarnEnabled()) {
-				_log.warn(sqlException, sqlException);
+				_log.warn(sqlException);
 			}
 		}
 	}

@@ -243,7 +243,7 @@ public class NumericDDMFormFieldTypeReportProcessor
 		}
 		catch (Exception exception) {
 			if (_log.isWarnEnabled()) {
-				_log.warn(exception, exception);
+				_log.warn(exception);
 			}
 
 			return null;
@@ -261,7 +261,7 @@ public class NumericDDMFormFieldTypeReportProcessor
 						ddmFormInstanceRecord.getDDMFormValues();
 
 					Map<String, List<DDMFormFieldValue>> ddmFormFieldValuesMap =
-						ddmFormValues.getDDMFormFieldValuesMap(false);
+						ddmFormValues.getDDMFormFieldValuesMap(true);
 
 					List<DDMFormFieldValue> ddmFormFieldValues =
 						ddmFormFieldValuesMap.get(ddmFormFieldValueName);
@@ -277,7 +277,7 @@ public class NumericDDMFormFieldTypeReportProcessor
 				}
 				catch (PortalException portalException) {
 					if (_log.isWarnEnabled()) {
-						_log.warn(portalException, portalException);
+						_log.warn(portalException);
 					}
 
 					return null;

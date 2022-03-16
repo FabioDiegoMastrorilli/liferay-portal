@@ -18,16 +18,16 @@ import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.search.Hits;
 import com.liferay.portal.kernel.search.IndexerRegistry;
 import com.liferay.portal.kernel.search.SearchContext;
-import com.liferay.portal.kernel.search.SearchException;
 import com.liferay.portal.kernel.search.facet.faceted.searcher.FacetedSearcher;
 import com.liferay.portal.kernel.test.util.RandomTestUtil;
 import com.liferay.portal.search.asset.SearchableAssetClassNamesProvider;
 import com.liferay.portal.search.constants.SearchContextAttributes;
-import com.liferay.portal.search.internal.expando.ExpandoQueryContributorHelper;
-import com.liferay.portal.search.internal.indexer.AddSearchKeywordsQueryContributorHelper;
-import com.liferay.portal.search.internal.indexer.PostProcessSearchQueryContributorHelper;
-import com.liferay.portal.search.internal.indexer.PreFilterContributorHelper;
+import com.liferay.portal.search.internal.expando.helper.ExpandoQueryContributorHelper;
+import com.liferay.portal.search.internal.indexer.helper.AddSearchKeywordsQueryContributorHelper;
+import com.liferay.portal.search.internal.indexer.helper.PostProcessSearchQueryContributorHelper;
+import com.liferay.portal.search.internal.indexer.helper.PreFilterContributorHelper;
 import com.liferay.portal.search.internal.legacy.searcher.SearchRequestBuilderFactoryImpl;
+import com.liferay.portal.search.internal.searcher.helper.IndexSearcherHelper;
 import com.liferay.portal.search.internal.test.util.DocumentFixture;
 import com.liferay.portal.search.legacy.searcher.SearchRequestBuilderFactory;
 import com.liferay.portal.test.rule.LiferayUnitTestRule;
@@ -75,12 +75,12 @@ public class FacetedSearcherImplTest {
 
 		searchContext.setKeywords(StringPool.BLANK);
 
-		assertSearchSkipped(searchContext);
+		_assertSearchSkipped(searchContext);
 	}
 
 	@Test
 	public void testEmptySearchDisabledByDefault() throws Exception {
-		assertSearchSkipped(new SearchContext());
+		_assertSearchSkipped(new SearchContext());
 	}
 
 	@Test
@@ -89,7 +89,7 @@ public class FacetedSearcherImplTest {
 
 		searchContext.setKeywords(StringPool.FOUR_SPACES);
 
-		assertSearchSkipped(searchContext);
+		_assertSearchSkipped(searchContext);
 	}
 
 	@Test
@@ -112,34 +112,13 @@ public class FacetedSearcherImplTest {
 		);
 	}
 
-	protected void assertSearchSkipped(SearchContext searchContext)
-		throws SearchException {
-
-		Hits hits = facetedSearcher.search(searchContext);
-
-		Assert.assertEquals(hits.toString(), 0, hits.getLength());
-
-		Mockito.verifyZeroInteractions(indexSearcherHelper);
-	}
-
 	protected FacetedSearcherImpl createFacetedSearcher() {
 		return new FacetedSearcherImpl(
 			addSearchKeywordsQueryContributorHelper,
 			expandoQueryContributorHelper, indexerRegistry, indexSearcherHelper,
 			postProcessSearchQueryContributorHelper, preFilterContributorHelper,
 			searchableAssetClassNamesProvider,
-			createSearchRequestBuilderFactory());
-	}
-
-	protected SearchRequestBuilderFactory createSearchRequestBuilderFactory() {
-		SearchRequestBuilderFactoryImpl searchRequestBuilderFactoryImpl =
-			new SearchRequestBuilderFactoryImpl();
-
-		searchRequestBuilderFactoryImpl.setSearchRequestBuilderFactory(
-			new com.liferay.portal.search.internal.searcher.
-				SearchRequestBuilderFactoryImpl());
-
-		return searchRequestBuilderFactoryImpl;
+			_createSearchRequestBuilderFactory());
 	}
 
 	@Mock
@@ -167,6 +146,27 @@ public class FacetedSearcherImplTest {
 	@Mock
 	protected SearchableAssetClassNamesProvider
 		searchableAssetClassNamesProvider;
+
+	private void _assertSearchSkipped(SearchContext searchContext)
+		throws Exception {
+
+		Hits hits = facetedSearcher.search(searchContext);
+
+		Assert.assertEquals(hits.toString(), 0, hits.getLength());
+
+		Mockito.verifyZeroInteractions(indexSearcherHelper);
+	}
+
+	private SearchRequestBuilderFactory _createSearchRequestBuilderFactory() {
+		SearchRequestBuilderFactoryImpl searchRequestBuilderFactoryImpl =
+			new SearchRequestBuilderFactoryImpl();
+
+		searchRequestBuilderFactoryImpl.setSearchRequestBuilderFactory(
+			new com.liferay.portal.search.internal.searcher.
+				SearchRequestBuilderFactoryImpl());
+
+		return searchRequestBuilderFactoryImpl;
+	}
 
 	private DocumentFixture _documentFixture;
 

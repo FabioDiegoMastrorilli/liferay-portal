@@ -95,11 +95,35 @@ CommerceOrder commerceOrder = commerceOrderEditDisplayContext.getCommerceOrder()
 	url="<%= editPrintedNoteURL %>"
 />
 
+<liferay-portlet:renderURL var="editPaymentTermsURL" windowState="<%= LiferayWindowState.POP_UP.toString() %>">
+	<portlet:param name="mvcRenderCommandName" value="/commerce_order/edit_commerce_order_payment_terms" />
+	<portlet:param name="commerceOrderId" value="<%= String.valueOf(commerceOrderEditDisplayContext.getCommerceOrderId()) %>" />
+</liferay-portlet:renderURL>
+
+<commerce-ui:modal
+	id="payment-terms-modal"
+	refreshPageOnClose="<%= true %>"
+	size="xl"
+	url="<%= editPaymentTermsURL %>"
+/>
+
+<liferay-portlet:renderURL var="editDeliveryTermsURL" windowState="<%= LiferayWindowState.POP_UP.toString() %>">
+	<portlet:param name="mvcRenderCommandName" value="/commerce_order/edit_commerce_order_delivery_terms" />
+	<portlet:param name="commerceOrderId" value="<%= String.valueOf(commerceOrderEditDisplayContext.getCommerceOrderId()) %>" />
+</liferay-portlet:renderURL>
+
+<commerce-ui:modal
+	id="delivery-terms-modal"
+	refreshPageOnClose="<%= true %>"
+	size="xl"
+	url="<%= editDeliveryTermsURL %>"
+/>
+
 <div class="row">
 	<c:if test="<%= !commerceOrder.isOpen() %>">
 		<div class="col-12 mb-4">
 			<commerce-ui:step-tracker
-				spritemap='<%= themeDisplay.getPathThemeImages() + "/lexicon/icons.svg" %>'
+				spritemap='<%= themeDisplay.getPathThemeImages() + "/clay/icons.svg" %>'
 				steps="<%= commerceOrderEditDisplayContext.getOrderSteps() %>"
 			/>
 		</div>
@@ -114,51 +138,25 @@ CommerceOrder commerceOrder = commerceOrderEditDisplayContext.getCommerceOrder()
 				<div class="col-xl-3">
 
 					<%
-					CommerceAddress billingAddress = commerceOrder.getBillingAddress();
+					CommerceAccount commerceAccount = commerceOrder.getCommerceAccount();
 					%>
 
 					<commerce-ui:info-box
-						actionLabel='<%= LanguageUtil.get(request, (billingAddress == null) ? "add" : "edit") %>'
-						actionTargetId="billing-address-modal"
 						elementClasses="py-3"
-						title='<%= LanguageUtil.get(request, "billing-address") %>'
+						title='<%= LanguageUtil.get(request, "account-info") %>'
 					>
 						<c:choose>
-							<c:when test="<%= billingAddress == null %>">
+							<c:when test="<%= Validator.isNull(commerceAccount) %>">
 								<span class="text-muted">
-									<liferay-ui:message key="click-add-to-insert" />
+									<%= StringPool.BLANK %>
 								</span>
 							</c:when>
 							<c:otherwise>
-								<%= HtmlUtil.escape(commerceOrderEditDisplayContext.getDescriptiveCommerceAddress(billingAddress)) %>
+								<p class="mb-0"><%= commerceAccount.getName() %></p>
+								<p class="mb-0">#<%= commerceAccount.getCommerceAccountId() %></p>
 							</c:otherwise>
 						</c:choose>
 					</commerce-ui:info-box>
-
-					<%
-					CommerceAddress shippingAddress = commerceOrder.getShippingAddress();
-					%>
-
-					<commerce-ui:info-box
-						actionLabel='<%= LanguageUtil.get(request, (shippingAddress == null) ? "add" : "edit") %>'
-						actionTargetId="shipping-address-modal"
-						elementClasses="py-3"
-						title='<%= LanguageUtil.get(request, "shipping-address") %>'
-					>
-						<c:choose>
-							<c:when test="<%= shippingAddress == null %>">
-								<span class="text-muted">
-									<liferay-ui:message key="click-add-to-insert" />
-								</span>
-							</c:when>
-							<c:otherwise>
-								<%= HtmlUtil.escape(commerceOrderEditDisplayContext.getDescriptiveCommerceAddress(shippingAddress)) %>
-							</c:otherwise>
-						</c:choose>
-					</commerce-ui:info-box>
-				</div>
-
-				<div class="col-xl-3">
 
 					<%
 					String purchaseOrderNumber = commerceOrder.getPurchaseOrderNumber();
@@ -184,16 +182,128 @@ CommerceOrder commerceOrder = commerceOrderEditDisplayContext.getCommerceOrder()
 
 					<commerce-ui:info-box
 						elementClasses="py-3"
-						title='<%= LanguageUtil.get(request, "order-type") %>'
-					>
-						<%= HtmlUtil.escape(commerceOrderEditDisplayContext.getCommerceOrderTypeName(LanguageUtil.getLanguageId(locale))) %>
-					</commerce-ui:info-box>
-
-					<commerce-ui:info-box
-						elementClasses="py-3"
 						title='<%= LanguageUtil.get(request, "channel") %>'
 					>
 						<%= HtmlUtil.escape(commerceOrderEditDisplayContext.getCommerceChannelName()) %>
+					</commerce-ui:info-box>
+				</div>
+
+				<div class="col-xl-3">
+
+					<%
+					CommerceAddress billingCommerceAddress = commerceOrder.getBillingAddress();
+					%>
+
+					<commerce-ui:info-box
+						actionLabel='<%= LanguageUtil.get(request, (billingCommerceAddress == null) ? "add" : "edit") %>'
+						actionTargetId="billing-address-modal"
+						elementClasses="py-3"
+						title='<%= LanguageUtil.get(request, "billing-address") %>'
+					>
+						<c:choose>
+							<c:when test="<%= billingCommerceAddress == null %>">
+								<span class="text-muted">
+									<liferay-ui:message key="click-add-to-insert" />
+								</span>
+							</c:when>
+							<c:otherwise>
+								<p class="mb-0">
+									<%= billingCommerceAddress.getStreet1() %>
+								</p>
+
+								<c:if test="<%= !Validator.isBlank(billingCommerceAddress.getStreet2()) %>">
+									<p class="mb-0">
+										<%= billingCommerceAddress.getStreet2() %>
+									</p>
+
+									<p class="mb-0">
+										<%= billingCommerceAddress.getStreet3() %>
+									</p>
+								</c:if>
+
+								<p class="mb-0">
+									<%= commerceOrderEditDisplayContext.getDescriptiveAddress(billingCommerceAddress) %>
+								</p>
+							</c:otherwise>
+						</c:choose>
+					</commerce-ui:info-box>
+
+					<%
+					CommerceAddress shippingCommerceAddress = commerceOrder.getShippingAddress();
+					%>
+
+					<commerce-ui:info-box
+						actionLabel='<%= LanguageUtil.get(request, (shippingCommerceAddress == null) ? "add" : "edit") %>'
+						actionTargetId="shipping-address-modal"
+						elementClasses="py-3"
+						title='<%= LanguageUtil.get(request, "shipping-address") %>'
+					>
+						<c:choose>
+							<c:when test="<%= shippingCommerceAddress == null %>">
+								<span class="text-muted">
+									<liferay-ui:message key="click-add-to-insert" />
+								</span>
+							</c:when>
+							<c:otherwise>
+								<p class="mb-0">
+									<%= shippingCommerceAddress.getStreet1() %>
+								</p>
+
+								<c:if test="<%= !Validator.isBlank(shippingCommerceAddress.getStreet2()) %>">
+									<p class="mb-0">
+										<%= shippingCommerceAddress.getStreet2() %>
+									</p>
+
+									<p class="mb-0">
+										<%= shippingCommerceAddress.getStreet3() %>
+									</p>
+								</c:if>
+
+								<p class="mb-0">
+									<%= commerceOrderEditDisplayContext.getDescriptiveAddress(shippingCommerceAddress) %>
+								</p>
+							</c:otherwise>
+						</c:choose>
+					</commerce-ui:info-box>
+
+					<commerce-ui:info-box
+						actionLabel='<%= LanguageUtil.get(request, (commerceOrder.getPaymentCommerceTermEntryId() == 0) ? "add" : "edit") %>'
+						actionTargetId="payment-terms-modal"
+						elementClasses="py-3"
+						title='<%= LanguageUtil.get(request, "payment-terms") %>'
+					>
+						<c:choose>
+							<c:when test="<%= commerceOrder.getPaymentCommerceTermEntryId() == 0 %>">
+								<span class="text-muted">
+									<liferay-ui:message key="click-add-to-insert" />
+								</span>
+							</c:when>
+							<c:otherwise>
+								<p class="mb-0">
+									<%= commerceOrder.getPaymentCommerceTermEntryName() %>
+								</p>
+							</c:otherwise>
+						</c:choose>
+					</commerce-ui:info-box>
+
+					<commerce-ui:info-box
+						actionLabel='<%= LanguageUtil.get(request, (commerceOrder.getDeliveryCommerceTermEntryId() == 0) ? "add" : "edit") %>'
+						actionTargetId="delivery-terms-modal"
+						elementClasses="py-3"
+						title='<%= LanguageUtil.get(request, "delivery-terms") %>'
+					>
+						<c:choose>
+							<c:when test="<%= commerceOrder.getDeliveryCommerceTermEntryId() == 0 %>">
+								<span class="text-muted">
+									<liferay-ui:message key="click-add-to-insert" />
+								</span>
+							</c:when>
+							<c:otherwise>
+								<p class="mb-0">
+									<%= commerceOrder.getDeliveryCommerceTermEntryName() %>
+								</p>
+							</c:otherwise>
+						</c:choose>
 					</commerce-ui:info-box>
 				</div>
 
@@ -231,6 +341,13 @@ CommerceOrder commerceOrder = commerceOrderEditDisplayContext.getCommerceOrder()
 								<%= commerceOrderEditDisplayContext.getCommerceOrderDateTime(requestedDeliveryDate) %>
 							</c:otherwise>
 						</c:choose>
+					</commerce-ui:info-box>
+
+					<commerce-ui:info-box
+						elementClasses="py-3"
+						title='<%= LanguageUtil.get(request, "order-type") %>'
+					>
+						<%= HtmlUtil.escape(commerceOrderEditDisplayContext.getCommerceOrderTypeName(LanguageUtil.getLanguageId(locale))) %>
 					</commerce-ui:info-box>
 				</div>
 

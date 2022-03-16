@@ -37,6 +37,7 @@ import com.liferay.portal.kernel.util.OrderByComparator;
 
 import java.io.Serializable;
 
+import java.util.LinkedHashMap;
 import java.util.List;
 
 import org.osgi.annotation.versioning.ProviderType;
@@ -110,10 +111,12 @@ public interface AccountGroupLocalService
 	 *
 	 * @param accountGroup the account group
 	 * @return the account group that was removed
+	 * @throws PortalException
 	 */
 	@Indexable(type = IndexableType.DELETE)
 	@SystemEvent(type = SystemEventConstants.TYPE_DELETE)
-	public AccountGroup deleteAccountGroup(AccountGroup accountGroup);
+	public AccountGroup deleteAccountGroup(AccountGroup accountGroup)
+		throws PortalException;
 
 	/**
 	 * Deletes the account group with the primary key from the database. Also notifies the appropriate model listeners.
@@ -320,6 +323,11 @@ public interface AccountGroupLocalService
 	public BaseModelSearchResult<AccountGroup> searchAccountGroups(
 		long companyId, String keywords, int start, int end,
 		OrderByComparator<AccountGroup> orderByComparator);
+
+	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
+	public BaseModelSearchResult<AccountGroup> searchAccountGroups(
+		long companyId, String keywords, LinkedHashMap<String, Object> params,
+		int start, int end, OrderByComparator<AccountGroup> orderByComparator);
 
 	/**
 	 * Updates the account group in the database or adds it if it does not yet exist. Also notifies the appropriate model listeners.

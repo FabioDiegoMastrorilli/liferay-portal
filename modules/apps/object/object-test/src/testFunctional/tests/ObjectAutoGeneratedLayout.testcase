@@ -1,0 +1,137 @@
+@component-name = "portal-object"
+definition {
+
+	property portal.release = "true";
+	property portal.upstream = "true";
+	property testray.main.component.name = "Object";
+
+	setUp {
+		TestCase.setUpPortalInstance();
+
+		User.firstLoginPG();
+	}
+
+	tearDown {
+		var testPortalInstance = PropsUtil.get("test.portal.instance");
+
+		if ("${testPortalInstance}" == "true") {
+			PortalInstances.tearDownCP();
+		}
+		else {
+			ObjectAdmin.deleteAllCustomObjectsViaAPI();
+		}
+	}
+
+	@description = "LPS-147658 - Verify it is possible to submit an empty value for a Date field and it will be correctly displayed on the Layout"
+	@priority = "5"
+	test CanDisplayEmptyDateValue {
+		property portal.acceptance = "true";
+
+		ObjectAdmin.addObjectViaAPI(
+			labelName = "Custom Object 147870",
+			objectName = "CustomObject147870",
+			pluralLabelName = "Custom Objects 147870");
+
+		ObjectAdmin.addObjectFieldViaAPI(
+			fieldBusinessType = "Date",
+			fieldLabelName = "Date",
+			fieldName = "customObjectField",
+			fieldType = "Date",
+			isRequired = "false",
+			objectName = "CustomObject147870");
+
+		ObjectAdmin.publishObjectViaAPI(objectName = "CustomObject147870");
+
+		ObjectAdmin.goToCustomObject(objectName = "CustomObject147870");
+
+		LexiconEntry.gotoAdd();
+
+		Button.clickSave();
+
+		WaitForSPARefresh();
+
+		ObjectAdmin.goToCustomObject(objectName = "CustomObject147870");
+
+		ObjectPortlet.viewEntryDetails(entry = "");
+
+		ObjectPortlet.assertEntryDetailsLabelPresent(entryLabel = "Date");
+
+		ObjectPortlet.viewEmptyLabelInDateEntry();
+	}
+
+	@description = "LPS-142659 - Verify it is possible to view a Clob entry and label on layout"
+	@priority = "4"
+	test CanViewClobEntryOnLayout {
+		ObjectAdmin.addObjectViaAPI(
+			labelName = "Custom Object",
+			objectName = "CustomObject",
+			pluralLabelName = "Custom Objects");
+
+		ObjectAdmin.addObjectFieldViaAPI(
+			fieldBusinessType = "LongText",
+			fieldLabelName = "Custom Field",
+			fieldName = "customObjectField",
+			fieldType = "Clob",
+			isRequired = "false",
+			objectName = "CustomObject");
+
+		ObjectAdmin.publishObjectViaAPI(objectName = "CustomObject");
+
+		ObjectAdmin.addObjectSingleFieldEntryViaAPI(
+			fieldName = "customObjectField",
+			objectName = "CustomObject",
+			value = "By building a vibrant business, making technology useful, and investing in communities, we make it possible for people to reach their full potential to serve others.");
+
+		ObjectAdmin.goToCustomObject(objectName = "CustomObject");
+
+		ObjectPortlet.viewClobEntryDetails(clobEntry = "By building a vibrant business, making technology useful, and investing in communities, we make it possible for people to reach their full potential to serve others.");
+
+		ObjectAdmin.assertClobTypeText(clobType = "By building a vibrant business, making technology useful, and investing in communities, we make it possible for people to reach their full potential to serve others.");
+	}
+
+	@description = "LPS-142659 - Verify if the Object Entry Title of a Clob type is displayed on the Relationship field when adding an entry"
+	@priority = "4"
+	test CanViewObjectEntryTitleClobOnRelationshipField {
+		ObjectAdmin.addObjectViaAPI(
+			labelName = "Custom Object",
+			objectName = "CustomObject",
+			pluralLabelName = "Custom Objects");
+
+		ObjectAdmin.addObjectFieldViaAPI(
+			fieldBusinessType = "LongText",
+			fieldLabelName = "Custom Field",
+			fieldName = "customObjectField",
+			fieldType = "Clob",
+			isRequired = "false",
+			objectName = "CustomObject");
+
+		ObjectAdmin.addObjectRelationshipViaAPI(
+			objectName_1 = "CustomObject",
+			objectName_2 = "CustomObject",
+			relationshipLabel = "Relationship",
+			relationshipName = "relationship",
+			relationshipType = "oneToMany");
+
+		ObjectAdmin.publishObjectViaAPI(objectName = "CustomObject");
+
+		ObjectAdmin.openObjectAdmin();
+
+		ObjectPortlet.selectCustomObject(label = "Custom Object");
+
+		CreateObject.selectTitleField(fieldLabel = "Custom Field");
+
+		Button.clickSave();
+
+		Navigator.openURL();
+
+		ObjectAdmin.addObjectSingleFieldEntryViaAPI(
+			fieldName = "customObjectField",
+			objectName = "CustomObject",
+			value = "Entry A");
+
+		ObjectAdmin.goToCustomObject(objectName = "CustomObject");
+
+		CreateObject.assertAddedEntryRelationshipIsDisplayed(entry = "Entry A");
+	}
+
+}

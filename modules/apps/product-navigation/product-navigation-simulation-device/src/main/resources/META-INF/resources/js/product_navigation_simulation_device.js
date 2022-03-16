@@ -15,6 +15,7 @@
 AUI.add(
 	'liferay-product-navigation-simulation-device',
 	(A) => {
+		// eslint-disable-next-line @liferay/aui/no-object
 		var AObject = A.Object;
 		var Lang = A.Lang;
 
@@ -75,6 +76,19 @@ AUI.add(
 			'</div>';
 
 		var WIN = A.config.win;
+
+		var RESIZABLE_DEVICE_CSS_CLASS = 'resizable-device';
+
+		var createIframeURL = () => {
+			const url = new URL(WIN.location.href);
+			const searchParams = new URLSearchParams(url.search);
+			if (searchParams.has('segmentsExperienceId')) {
+				searchParams.delete('segmentsExperienceId');
+			}
+			searchParams.append('p_l_mode', 'preview');
+
+			return `${url.origin}${url.pathname}?${searchParams.toString()}`;
+		};
 
 		var SimulationDevice = A.Component.create({
 			ATTRS: {
@@ -363,21 +377,25 @@ AUI.add(
 						Liferay.Util.openWindow(
 							{
 								cache: false,
-								dialog: A.merge(DIALOG_DEFAULTS, dialogConfig),
+								dialog: {
+									...DIALOG_DEFAULTS,
+									...dialogConfig,
+								},
 								dialogIframe: DIALOG_IFRAME_DEFAULTS,
 								id: instance._dialogId,
 								iframeId: 'simulationDeviceIframe',
 								title: Liferay.Language.get(
 									'simulation-preview'
 								),
-								uri: Liferay.Util.addParams(
-									'p_l_mode=preview',
-									WIN.location.href
-								),
+								uri: createIframeURL(),
 							},
 							(dialogWindow) => {
 								var dialogBoundingBox = dialogWindow.get(
 									STR_BOUNDING_BOX
+								);
+
+								dialogBoundingBox.removeClass(
+									RESIZABLE_DEVICE_CSS_CLASS
 								);
 
 								dialogWindow.align(
@@ -449,9 +467,18 @@ AUI.add(
 						var dialogBoundingBox = dialog.get(STR_BOUNDING_BOX);
 
 						dialogBoundingBox.toggleClass(STR_ROTATED, rotation);
+						dialogBoundingBox.removeClass(
+							RESIZABLE_DEVICE_CSS_CLASS
+						);
 
 						if (!device.preventTransition) {
 							dialog.sizeanim.set(STR_PREVENT_TRANSITION, false);
+						}
+
+						if (device.resizable && !device.skin) {
+							dialogBoundingBox.addClass(
+								RESIZABLE_DEVICE_CSS_CLASS
+							);
 						}
 
 						dialog.setAttrs(dialogAttrs);

@@ -47,7 +47,10 @@ const TranslationAdminContent = ({
 
 	const activeLanguageIds = useMemo(() => {
 		return initialAvailableLocales.filter((availableLocale) => {
-			const regExp = new RegExp(searchValue, 'i');
+			const regExp = new RegExp(
+				searchValue.replace(/[-[\]/{}()*+?.\\^$|]/g, '\\$&'),
+				'i'
+			);
 
 			return (
 				initialActiveLanguageIds.includes(availableLocale.id) &&
@@ -102,12 +105,17 @@ const TranslationAdminContent = ({
 								availableLocales.length > 0
 							}
 							hasLeftSymbols
+							menuElementAttrs={{
+								className: 'dropdown-menu-width-shrink',
+							}}
 							onActiveChange={setCreationMenuActive}
 							trigger={
 								<ClayButtonWithIcon
+									className="lfr-portal-tooltip"
 									disabled={availableLocales.length === 0}
 									small
 									symbol="plus"
+									title={Liferay.Language.get('add')}
 								/>
 							}
 						>
@@ -118,6 +126,7 @@ const TranslationAdminContent = ({
 											key={availableLocale.label}
 											onClick={() => {
 												onAddLocale(availableLocale.id);
+												setCreationMenuActive(false);
 											}}
 											symbolLeft={availableLocale.symbol}
 										>
@@ -196,6 +205,7 @@ const TranslationAdminContent = ({
 									<ClayTable.Cell>
 										{!isDefaultLocale && (
 											<ClayButtonWithIcon
+												className="lfr-portal-tooltip"
 												displayType="unstyled"
 												monospaced={false}
 												onClick={() =>
@@ -204,6 +214,9 @@ const TranslationAdminContent = ({
 													)
 												}
 												symbol="trash"
+												title={Liferay.Language.get(
+													'delete'
+												)}
 											/>
 										)}
 									</ClayTable.Cell>
@@ -219,6 +232,7 @@ const TranslationAdminContent = ({
 						<ClayButton displayType="secondary" onClick={onCancel}>
 							{Liferay.Language.get('cancel')}
 						</ClayButton>
+
 						<ClayButton displayType="primary" onClick={onDone}>
 							{Liferay.Language.get('done')}
 						</ClayButton>

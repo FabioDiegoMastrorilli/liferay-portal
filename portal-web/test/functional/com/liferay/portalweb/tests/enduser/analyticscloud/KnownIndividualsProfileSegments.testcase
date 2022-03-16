@@ -62,11 +62,9 @@ definition {
 	@description = "Feature ID: Legacy | Automation ID: LRAC-8992 | Test Summary: Clicking an associated segment navigates to segment profile"
 	@priority = "3"
 	test AssertIndividualOverviewAssociatedSegmentProfile {
-		var emailList = "user1@liferay.com,user2@liferay.com";
+		property portal.upstream = "quarantine";
 
-		task ("Get site assigned property name") {
-			var propertyName = ACDXPSettings.getAssignedPropertyName(siteName = "Site Name");
-		}
+		var emailList = "user1@liferay.com,user2@liferay.com";
 
 		task ("View the page as different users") {
 			ACUtils.navigateToSitePageWithUser(
@@ -80,7 +78,7 @@ definition {
 		task ("Switch to new property in AC") {
 			ACUtils.launchAC();
 
-			ACProperties.switchProperty(propertyName = "${propertyName}");
+			ACProperties.switchProperty(propertyName = "${assignedPropertyName}");
 		}
 
 		task ("Add 2 new Static Segments") {
@@ -89,7 +87,7 @@ definition {
 
 				ACSegments.createStaticSegment();
 
-				ACSegments.nameSegment(segmentName = "${segmentName}");
+				ACUtils.setItemName(itemName = "${segmentName}");
 
 				if ("${segmentName}" == "Static Segment Test1") {
 					ACSegments.addStaticMultiMember(tableMember = "user1 user1,user2 user2");
@@ -129,11 +127,11 @@ definition {
 	@description = "Feature ID: Legacy | Automation ID: LRAC-8993 | Test Summary: Selecting a Segment in Individuals"
 	@priority = "3"
 	test AssertIndividualsSegmentSelected {
-		var emailList = "user1@liferay.com,user2@liferay.com";
+		property portal.upstream = "quarantine";
 
-		task ("Get site assigned property name") {
-			var propertyName = ACDXPSettings.getAssignedPropertyName(siteName = "Site Name");
-		}
+		// AC Refactor ticket: LRAC-9707
+
+		var emailList = "user1@liferay.com,user2@liferay.com";
 
 		task ("View the page as different users") {
 			ACUtils.navigateToSitePageWithUser(
@@ -147,7 +145,7 @@ definition {
 		task ("Switch to new property in AC") {
 			ACUtils.launchAC();
 
-			ACProperties.switchProperty(propertyName = "${propertyName}");
+			ACProperties.switchProperty(propertyName = "${assignedPropertyName}");
 		}
 
 		task ("Add 2 new Static Segments") {
@@ -156,7 +154,7 @@ definition {
 
 				ACSegments.createStaticSegment();
 
-				ACSegments.nameSegment(segmentName = "${segmentName}");
+				ACUtils.setItemName(itemName = "${segmentName}");
 
 				if ("${segmentName}" == "Static Segment Test1") {
 					ACSegments.addStaticMultiMember(tableMember = "user1 user1,user2 user2");
@@ -196,11 +194,9 @@ definition {
 	@description = "Feature ID: Legacy | Automation ID: LRAC-8991 | Test Summary: Order an Individual's Associated Segments List"
 	@priority = "3"
 	test OrderIndividualsAssociatedSegments {
-		var emailList = "user1@liferay.com,user2@liferay.com,user3@liferay.com";
+		property portal.upstream = "quarantine";
 
-		task ("Get site assigned property name") {
-			var propertyName = ACDXPSettings.getAssignedPropertyName(siteName = "Site Name");
-		}
+		var emailList = "user1@liferay.com,user2@liferay.com,user3@liferay.com";
 
 		task ("Add one more new user") {
 			JSONUser.addUser(
@@ -226,7 +222,7 @@ definition {
 		task ("Switch to new property in AC") {
 			ACUtils.launchAC();
 
-			ACProperties.switchProperty(propertyName = "${propertyName}");
+			ACProperties.switchProperty(propertyName = "${assignedPropertyName}");
 		}
 
 		task ("Add 3 new Static Segments") {
@@ -235,7 +231,7 @@ definition {
 
 				ACSegments.createStaticSegment();
 
-				ACSegments.nameSegment(segmentName = "${segmentName}");
+				ACUtils.setItemName(itemName = "${segmentName}");
 
 				if ("${segmentName}" == "Static Segment Test1") {
 					ACSegments.addStaticMultiMember(tableMember = "user1 user1,user2 user2,user3 user3");
@@ -343,9 +339,7 @@ definition {
 	@description = "Feature ID: Legacy | Automation ID: LRAC-9003 | Test Summary: Individuals Segment list has pagination"
 	@priority = "3"
 	test PaginateIndividualsSegmentList {
-		task ("Get site assigned property name") {
-			var propertyName = ACDXPSettings.getAssignedPropertyName(siteName = "Site Name");
-		}
+		property portal.upstream = "quarantine";
 
 		task ("View the page as the new user") {
 			User.logoutAndLoginPG(
@@ -362,7 +356,7 @@ definition {
 		task ("Switch to new property in AC") {
 			ACUtils.launchAC();
 
-			ACProperties.switchProperty(propertyName = "${propertyName}");
+			ACProperties.switchProperty(propertyName = "${assignedPropertyName}");
 		}
 
 		task ("Add 6 new Static Segments") {
@@ -371,7 +365,7 @@ definition {
 
 				ACSegments.createStaticSegment();
 
-				ACSegments.nameSegment(segmentName = "${segmentName}");
+				ACUtils.setItemName(itemName = "${segmentName}");
 
 				ACSegments.addStaticMember(tableMember = "user1 user1");
 
@@ -435,11 +429,9 @@ definition {
 	@description = "Feature ID: Legacy | Automation ID: LRAC-8948 | Test Summary: Segments the individual Belongs To appear in the list"
 	@priority = "5"
 	test SegmentsIndividualBelongsToAppearInList {
-		var emailList = "user1@liferay.com,user2@liferay.com";
+		property portal.upstream = "quarantine";
 
-		task ("Get site assigned property name") {
-			var propertyName = ACDXPSettings.getAssignedPropertyName(siteName = "Site Name");
-		}
+		var emailList = "user1@liferay.com,user2@liferay.com";
 
 		task ("View the page as different users") {
 			ACUtils.navigateToSitePageWithUser(
@@ -453,7 +445,7 @@ definition {
 		task ("Switch to new property in AC") {
 			ACUtils.launchAC();
 
-			ACProperties.switchProperty(propertyName = "${propertyName}");
+			ACProperties.switchProperty(propertyName = "${assignedPropertyName}");
 		}
 
 		task ("Add 2 new Static Segments") {
@@ -462,7 +454,7 @@ definition {
 
 				ACSegments.createStaticSegment();
 
-				ACSegments.nameSegment(segmentName = "${segmentName}");
+				ACUtils.setItemName(itemName = "${segmentName}");
 
 				if ("${segmentName}" == "Static Segment Test1") {
 					ACSegments.addStaticMultiMember(tableMember = "user1 user1,user2 user2");

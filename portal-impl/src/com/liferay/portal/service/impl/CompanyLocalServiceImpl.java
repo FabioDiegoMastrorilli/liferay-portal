@@ -142,7 +142,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.TimeZone;
-import java.util.concurrent.Callable;
 
 import javax.portlet.PortletException;
 import javax.portlet.PortletPreferences;
@@ -280,15 +279,10 @@ public class CompanyLocalServiceImpl extends CompanyLocalServiceBaseImpl {
 			company = _checkCompany(company, mx);
 
 			TransactionCommitCallbackUtil.registerCallback(
-				new Callable<Void>() {
+				() -> {
+					safeCloseable.close();
 
-					@Override
-					public Void call() throws Exception {
-						safeCloseable.close();
-
-						return null;
-					}
-
+					return null;
 				});
 
 			return company;
@@ -414,7 +408,7 @@ public class CompanyLocalServiceImpl extends CompanyLocalServiceBaseImpl {
 		}
 		catch (PortalException portalException) {
 			if (_log.isDebugEnabled()) {
-				_log.debug(portalException, portalException);
+				_log.debug(portalException);
 			}
 
 			throw portalException;
@@ -1268,23 +1262,22 @@ public class CompanyLocalServiceImpl extends CompanyLocalServiceBaseImpl {
 
 		// Company
 
-		final Company company = companyPersistence.findByPrimaryKey(companyId);
+		Company company = companyPersistence.findByPrimaryKey(companyId);
 
-		if (DBPartitionUtil.removeDBPartition(companyId)) {
+		if (DBPartitionUtil.isPartitionEnabled()) {
 			_clearCompanyCache(companyId);
+			_clearVirtualHostCache(companyId);
 
-			Callable<Void> callable = new Callable<Void>() {
-
-				@Override
-				public Void call() throws Exception {
+			TransactionCommitCallbackUtil.registerCallback(
+				() -> {
 					PortalInstances.removeCompany(company.getCompanyId());
 
+					unregisterCompany(company);
+
 					return null;
-				}
+				});
 
-			};
-
-			TransactionCommitCallbackUtil.registerCallback(callable);
+			DBPartitionUtil.removeDBPartition(companyId);
 
 			return company;
 		}
@@ -1507,7 +1500,7 @@ public class CompanyLocalServiceImpl extends CompanyLocalServiceBaseImpl {
 			}
 			catch (UnknownHostException unknownHostException) {
 				if (_log.isDebugEnabled()) {
-					_log.debug(unknownHostException, unknownHostException);
+					_log.debug(unknownHostException);
 				}
 
 				throw new CompanyVirtualHostException(
@@ -1639,7 +1632,7 @@ public class CompanyLocalServiceImpl extends CompanyLocalServiceBaseImpl {
 		}
 		catch (CompanyVirtualHostException companyVirtualHostException) {
 			if (_log.isWarnEnabled()) {
-				_log.warn(companyVirtualHostException.getMessage());
+				_log.warn(companyVirtualHostException);
 			}
 
 			throw companyVirtualHostException;
@@ -2034,18 +2027,13 @@ public class CompanyLocalServiceImpl extends CompanyLocalServiceBaseImpl {
 
 			_portletLocalService.checkPortlets(company.getCompanyId());
 
-			final Company finalCompany = company;
+			Company finalCompany = company;
 
 			TransactionCommitCallbackUtil.registerCallback(
-				new Callable<Void>() {
+				() -> {
+					registerCompany(finalCompany);
 
-					@Override
-					public Void call() throws Exception {
-						registerCompany(finalCompany);
-
-						return null;
-					}
-
+					return null;
 				});
 		}
 		finally {
@@ -2058,23 +2046,37 @@ public class CompanyLocalServiceImpl extends CompanyLocalServiceBaseImpl {
 	}
 
 	private void _clearCompanyCache(long companyId) {
-		final Company company = companyPersistence.fetchByPrimaryKey(companyId);
+		Company company = companyPersistence.fetchByPrimaryKey(companyId);
 
 		if (company != null) {
 			TransactionCommitCallbackUtil.registerCallback(
-				new Callable<Void>() {
+				() -> {
+					EntityCacheUtil.removeResult(
+						company.getClass(), company.getPrimaryKeyObj());
 
-					@Override
-					public Void call() throws Exception {
-						EntityCacheUtil.removeResult(
-							company.getClass(), company.getPrimaryKeyObj());
-
-						return null;
-					}
-
+					return null;
 				});
 
 			companyPersistence.clearCache(company);
+		}
+	}
+
+	private void _clearVirtualHostCache(long companyId) {
+		Company company = companyPersistence.fetchByPrimaryKey(companyId);
+
+		if (company != null) {
+			VirtualHost virtualHost = _virtualHostPersistence.fetchByHostname(
+				company.getVirtualHostname());
+
+			TransactionCommitCallbackUtil.registerCallback(
+				() -> {
+					EntityCacheUtil.removeResult(
+						virtualHost.getClass(), virtualHost.getPrimaryKeyObj());
+
+					return null;
+				});
+
+			_virtualHostPersistence.clearCache(virtualHost);
 		}
 	}
 
@@ -2101,20 +2103,14 @@ public class CompanyLocalServiceImpl extends CompanyLocalServiceBaseImpl {
 
 		// Portal instance
 
-		Callable<Void> callable = new Callable<Void>() {
-
-			@Override
-			public Void call() throws Exception {
+		TransactionCommitCallbackUtil.registerCallback(
+			() -> {
 				PortalInstances.removeCompany(company.getCompanyId());
 
 				unregisterCompany(company);
 
 				return null;
-			}
-
-		};
-
-		TransactionCommitCallbackUtil.registerCallback(callable);
+			});
 	}
 
 	private void _updateGroupLanguageIds(

@@ -25,6 +25,7 @@ import com.liferay.item.selector.criteria.InfoItemItemSelectorReturnType;
 import com.liferay.item.selector.criteria.info.item.criterion.InfoItemItemSelectorCriterion;
 import com.liferay.journal.constants.JournalArticleConstants;
 import com.liferay.journal.constants.JournalFolderConstants;
+import com.liferay.journal.constants.JournalPortletKeys;
 import com.liferay.journal.model.JournalArticle;
 import com.liferay.journal.model.JournalFolder;
 import com.liferay.journal.service.JournalArticleLocalServiceUtil;
@@ -47,6 +48,8 @@ import com.liferay.portal.kernel.json.JSONUtil;
 import com.liferay.portal.kernel.language.LanguageUtil;
 import com.liferay.portal.kernel.model.Group;
 import com.liferay.portal.kernel.portlet.PortletURLUtil;
+import com.liferay.portal.kernel.portlet.SearchDisplayStyleUtil;
+import com.liferay.portal.kernel.portlet.SearchOrderByUtil;
 import com.liferay.portal.kernel.search.Document;
 import com.liferay.portal.kernel.search.Field;
 import com.liferay.portal.kernel.search.Hits;
@@ -136,8 +139,9 @@ public class JournalArticleItemSelectorViewDisplayContext {
 			return _displayStyle;
 		}
 
-		_displayStyle = ParamUtil.getString(
-			_httpServletRequest, "displayStyle", "descriptive");
+		_displayStyle = SearchDisplayStyleUtil.getDisplayStyle(
+			_httpServletRequest, JournalPortletKeys.JOURNAL,
+			"item-selector-display-style", "descriptive");
 
 		return _displayStyle;
 	}
@@ -303,28 +307,21 @@ public class JournalArticleItemSelectorViewDisplayContext {
 				new SearchContainer<>(
 					_portletRequest, getPortletURL(), null, null);
 
-			OrderByComparator<JournalArticle> orderByComparator =
-				JournalPortletUtil.getArticleOrderByComparator(
-					_getOrderByCol(), _getOrderByType());
-
 			articleSearchContainer.setOrderByCol(_getOrderByCol());
-			articleSearchContainer.setOrderByComparator(orderByComparator);
+			articleSearchContainer.setOrderByComparator(
+				JournalPortletUtil.getArticleOrderByComparator(
+					_getOrderByCol(), _getOrderByType()));
 			articleSearchContainer.setOrderByType(_getOrderByType());
-
-			int total = JournalArticleServiceUtil.getArticlesCountByStructureId(
-				_getGroupId(), getDDMStructureKey(),
-				WorkflowConstants.STATUS_APPROVED);
-
-			articleSearchContainer.setTotal(total);
-
-			List<JournalArticle> results =
-				JournalArticleServiceUtil.getArticlesByStructureId(
+			articleSearchContainer.setResultsAndTotal(
+				() -> JournalArticleServiceUtil.getArticlesByStructureId(
 					_getGroupId(), getDDMStructureKey(),
 					WorkflowConstants.STATUS_APPROVED,
 					articleSearchContainer.getStart(),
-					articleSearchContainer.getEnd(), orderByComparator);
-
-			articleSearchContainer.setResults(results);
+					articleSearchContainer.getEnd(),
+					articleSearchContainer.getOrderByComparator()),
+				JournalArticleServiceUtil.getArticlesCountByStructureId(
+					_getGroupId(), getDDMStructureKey(),
+					WorkflowConstants.STATUS_APPROVED));
 
 			_articleSearchContainer = articleSearchContainer;
 
@@ -354,7 +351,7 @@ public class JournalArticleItemSelectorViewDisplayContext {
 
 			boolean orderByAsc = false;
 
-			if (Objects.equals(_getOrderByCol(), "asc")) {
+			if (Objects.equals(_getOrderByType(), "asc")) {
 				orderByAsc = true;
 			}
 
@@ -387,8 +384,6 @@ public class JournalArticleItemSelectorViewDisplayContext {
 
 			Hits hits = indexer.search(searchContext);
 
-			articleAndFolderSearchContainer.setTotal(hits.getLength());
-
 			List<Object> results = new ArrayList<>();
 
 			Document[] documents = hits.getDocs();
@@ -399,11 +394,9 @@ public class JournalArticleItemSelectorViewDisplayContext {
 					document.get(Field.ENTRY_CLASS_PK));
 
 				if (className.equals(JournalArticle.class.getName())) {
-					JournalArticle article =
+					results.add(
 						JournalArticleLocalServiceUtil.fetchLatestArticle(
-							classPK, WorkflowConstants.STATUS_ANY, false);
-
-					results.add(article);
+							classPK, WorkflowConstants.STATUS_ANY, false));
 				}
 				else if (className.equals(JournalFolder.class.getName())) {
 					results.add(
@@ -411,46 +404,46 @@ public class JournalArticleItemSelectorViewDisplayContext {
 				}
 			}
 
-			articleAndFolderSearchContainer.setResults(results);
+			articleAndFolderSearchContainer.setResultsAndTotal(
+				() -> results, hits.getLength());
 		}
 		else {
-			int total = JournalFolderServiceUtil.getFoldersAndArticlesCount(
-				_getGroupId(), 0, _getFolderId(),
-				_infoItemItemSelectorCriterion.getStatus());
+			articleAndFolderSearchContainer.setResultsAndTotal(
+				() -> {
+					OrderByComparator<Object> folderOrderByComparator = null;
 
-			articleAndFolderSearchContainer.setTotal(total);
+					boolean orderByAsc = false;
 
-			OrderByComparator<Object> folderOrderByComparator = null;
+					if (Objects.equals(_getOrderByType(), "asc")) {
+						orderByAsc = true;
+					}
 
-			boolean orderByAsc = false;
+					if (Objects.equals(_getOrderByCol(), "id")) {
+						folderOrderByComparator =
+							new FolderArticleArticleIdComparator(orderByAsc);
+					}
+					else if (Objects.equals(
+								_getOrderByCol(), "modified-date")) {
 
-			if (Objects.equals(_getOrderByType(), "asc")) {
-				orderByAsc = true;
-			}
+						folderOrderByComparator =
+							new FolderArticleModifiedDateComparator(orderByAsc);
+					}
+					else if (Objects.equals(_getOrderByCol(), "title")) {
+						folderOrderByComparator =
+							new FolderArticleTitleComparator(orderByAsc);
+					}
 
-			if (Objects.equals(_getOrderByCol(), "id")) {
-				folderOrderByComparator = new FolderArticleArticleIdComparator(
-					orderByAsc);
-			}
-			else if (Objects.equals(_getOrderByCol(), "modified-date")) {
-				folderOrderByComparator =
-					new FolderArticleModifiedDateComparator(orderByAsc);
-			}
-			else if (Objects.equals(_getOrderByCol(), "title")) {
-				folderOrderByComparator = new FolderArticleTitleComparator(
-					orderByAsc);
-			}
-
-			List<Object> results =
-				JournalFolderServiceUtil.getFoldersAndArticles(
+					return JournalFolderServiceUtil.getFoldersAndArticles(
+						_getGroupId(), 0, _getFolderId(),
+						_infoItemItemSelectorCriterion.getStatus(),
+						_themeDisplay.getLocale(),
+						articleAndFolderSearchContainer.getStart(),
+						articleAndFolderSearchContainer.getEnd(),
+						folderOrderByComparator);
+				},
+				JournalFolderServiceUtil.getFoldersAndArticlesCount(
 					_getGroupId(), 0, _getFolderId(),
-					_infoItemItemSelectorCriterion.getStatus(),
-					_themeDisplay.getLocale(),
-					articleAndFolderSearchContainer.getStart(),
-					articleAndFolderSearchContainer.getEnd(),
-					folderOrderByComparator);
-
-			articleAndFolderSearchContainer.setResults(results);
+					_infoItemItemSelectorCriterion.getStatus()));
 		}
 
 		_articleSearchContainer = articleAndFolderSearchContainer;
@@ -554,9 +547,8 @@ public class JournalArticleItemSelectorViewDisplayContext {
 			return _folder;
 		}
 
-		long folderId = ParamUtil.getLong(_httpServletRequest, "folderId");
-
-		_folder = JournalFolderLocalServiceUtil.fetchFolder(folderId);
+		_folder = JournalFolderLocalServiceUtil.fetchFolder(
+			ParamUtil.getLong(_httpServletRequest, "folderId"));
 
 		return _folder;
 	}
@@ -608,7 +600,7 @@ public class JournalArticleItemSelectorViewDisplayContext {
 	}
 
 	private String _getOrderByCol() {
-		if (_orderByCol != null) {
+		if (Validator.isNotNull(_orderByCol)) {
 			return _orderByCol;
 		}
 
@@ -618,8 +610,9 @@ public class JournalArticleItemSelectorViewDisplayContext {
 			defaultOrderByCol = "relevance";
 		}
 
-		_orderByCol = ParamUtil.getString(
-			_httpServletRequest, "orderByCol", defaultOrderByCol);
+		_orderByCol = SearchOrderByUtil.getOrderByCol(
+			_httpServletRequest, JournalPortletKeys.JOURNAL,
+			"item-selector-order-by-col", defaultOrderByCol);
 
 		return _orderByCol;
 	}
@@ -633,8 +626,9 @@ public class JournalArticleItemSelectorViewDisplayContext {
 			return "desc";
 		}
 
-		_orderByType = ParamUtil.getString(
-			_httpServletRequest, "orderByType", "asc");
+		_orderByType = SearchOrderByUtil.getOrderByType(
+			_httpServletRequest, JournalPortletKeys.JOURNAL,
+			"item-selector-order-by-type", "asc");
 
 		return _orderByType;
 	}

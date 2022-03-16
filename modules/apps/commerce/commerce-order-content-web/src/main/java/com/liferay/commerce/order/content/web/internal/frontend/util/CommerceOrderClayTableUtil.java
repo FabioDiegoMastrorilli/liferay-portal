@@ -70,13 +70,11 @@ public class CommerceOrderClayTableUtil {
 
 		PortletDisplay portletDisplay = themeDisplay.getPortletDisplay();
 
-		HttpServletRequest originalHttpServletRequest =
-			PortalUtil.getOriginalServletRequest(httpServletRequest);
-
 		return PortletURLBuilder.create(
 			PortletURLFactoryUtil.create(
-				originalHttpServletRequest, portletDisplay.getId(),
-				themeDisplay.getPlid(), PortletRequest.RENDER_PHASE)
+				PortalUtil.getOriginalServletRequest(httpServletRequest),
+				portletDisplay.getId(), themeDisplay.getPlid(),
+				PortletRequest.RENDER_PHASE)
 		).setMVCRenderCommandName(
 			"/commerce_open_order_content/view_commerce_order_importer_type"
 		).setParameter(
@@ -101,13 +99,11 @@ public class CommerceOrderClayTableUtil {
 
 		PortletDisplay portletDisplay = themeDisplay.getPortletDisplay();
 
-		HttpServletRequest originalHttpServletRequest =
-			PortalUtil.getOriginalServletRequest(httpServletRequest);
-
 		return PortletURLBuilder.create(
 			PortletURLFactoryUtil.create(
-				originalHttpServletRequest, portletDisplay.getId(),
-				themeDisplay.getPlid(), PortletRequest.ACTION_PHASE)
+				PortalUtil.getOriginalServletRequest(httpServletRequest),
+				portletDisplay.getId(), themeDisplay.getPlid(),
+				PortletRequest.ACTION_PHASE)
 		).setActionName(
 			"/commerce_open_order_content/edit_commerce_order"
 		).setCMD(
@@ -130,13 +126,11 @@ public class CommerceOrderClayTableUtil {
 
 		PortletDisplay portletDisplay = themeDisplay.getPortletDisplay();
 
-		HttpServletRequest originalHttpServletRequest =
-			PortalUtil.getOriginalServletRequest(httpServletRequest);
-
 		return PortletURLBuilder.create(
 			PortletURLFactoryUtil.create(
-				originalHttpServletRequest, portletDisplay.getId(),
-				themeDisplay.getPlid(), PortletRequest.RENDER_PHASE)
+				PortalUtil.getOriginalServletRequest(httpServletRequest),
+				portletDisplay.getId(), themeDisplay.getPlid(),
+				PortletRequest.RENDER_PHASE)
 		).setMVCRenderCommandName(
 			"/commerce_open_order_content/view_commerce_order_importer_type"
 		).setParameter(
@@ -199,10 +193,13 @@ public class CommerceOrderClayTableUtil {
 
 			orders.add(
 				new Order(
+					commerceOrder.getExternalReferenceCode(),
 					commerceOrder.getCommerceOrderId(),
 					commerceOrder.getCommerceAccountName(),
 					dateFormat.format(orderDate), commerceOrder.getUserName(),
-					commerceOrderStatusLabel, workflowStatusLabel, amount));
+					commerceOrderStatusLabel,
+					commerceOrder.getPurchaseOrderNumber(), workflowStatusLabel,
+					amount));
 		}
 
 		return orders;
@@ -262,7 +259,7 @@ public class CommerceOrderClayTableUtil {
 			portletURL.setWindowState(LiferayWindowState.POP_UP);
 		}
 		catch (WindowStateException windowStateException) {
-			_log.error(windowStateException, windowStateException);
+			_log.error(windowStateException);
 		}
 
 		portletURL.setParameter("backURL", portletURL.toString());
@@ -279,13 +276,11 @@ public class CommerceOrderClayTableUtil {
 
 		PortletDisplay portletDisplay = themeDisplay.getPortletDisplay();
 
-		HttpServletRequest originalHttpServletRequest =
-			PortalUtil.getOriginalServletRequest(httpServletRequest);
-
 		return PortletURLBuilder.create(
 			PortletURLFactoryUtil.create(
-				originalHttpServletRequest, portletDisplay.getId(),
-				themeDisplay.getPlid(), PortletRequest.RENDER_PHASE)
+				PortalUtil.getOriginalServletRequest(httpServletRequest),
+				portletDisplay.getId(), themeDisplay.getPlid(),
+				PortletRequest.RENDER_PHASE)
 		).setMVCRenderCommandName(
 			"/commerce_open_order_content/view_commerce_order_importer_type"
 		).setParameter(

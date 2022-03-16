@@ -26,6 +26,7 @@ import {DisplayPagePreviewItemContextProvider} from '../contexts/DisplayPagePrev
 import {EditableProcessorContextProvider} from '../contexts/EditableProcessorContext';
 import {GlobalContextProvider} from '../contexts/GlobalContext';
 import {StoreContextProvider, useSelector} from '../contexts/StoreContext';
+import {StyleErrorsContextProvider} from '../contexts/StyleErrorsContext';
 import {WidgetsContextProvider} from '../contexts/WidgetsContext';
 import {reducer} from '../reducers/index';
 import selectLanguageId from '../selectors/selectLanguageId';
@@ -67,8 +68,11 @@ export default function App({state}) {
 	return (
 		<StoreContextProvider initialState={initialState} reducer={reducer}>
 			<BackURL />
+
 			<LanguageDirection />
+
 			<URLParser />
+
 			<ControlsProvider>
 				<CollectionActiveItemContextProvider>
 					<DragAndDropContextProvider>
@@ -88,16 +92,20 @@ export default function App({state}) {
 									) : null}
 
 									<DragPreview />
-									<Toolbar />
-									<ShortcutManager />
 
-									<GlobalContextProvider>
-										<LayoutViewport />
+									<StyleErrorsContextProvider>
+										<Toolbar />
 
-										<StyleBookContextProvider>
-											<Sidebar />
-										</StyleBookContextProvider>
-									</GlobalContextProvider>
+										<ShortcutManager />
+
+										<GlobalContextProvider>
+											<LayoutViewport />
+
+											<StyleBookContextProvider>
+												<Sidebar />
+											</StyleBookContextProvider>
+										</GlobalContextProvider>
+									</StyleErrorsContextProvider>
 								</WidgetsContextProvider>
 							</DisplayPagePreviewItemContextProvider>
 						</EditableProcessorContextProvider>
@@ -128,7 +136,10 @@ const BackURL = () => {
 
 	useEffect(() => {
 		if (backLinkElement && backLinkURL && segmentsExperienceId) {
-			backLinkURL.searchParams.set('p_s_e_id', segmentsExperienceId);
+			backLinkURL.searchParams.set(
+				'segmentsExperienceId',
+				segmentsExperienceId
+			);
 			backLinkElement.href = backLinkURL.toString();
 
 			const currentURL = new URL(window.location.href);

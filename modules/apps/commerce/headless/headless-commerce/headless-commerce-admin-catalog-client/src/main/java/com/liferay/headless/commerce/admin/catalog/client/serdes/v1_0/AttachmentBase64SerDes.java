@@ -61,7 +61,7 @@ public class AttachmentBase64SerDes {
 		sb.append("{");
 
 		DateFormat liferayToJSONDateFormat = new SimpleDateFormat(
-			"yyyy-MM-dd'T'HH:mm:ss'Z'");
+			"yyyy-MM-dd'T'HH:mm:ssXX");
 
 		if (attachmentBase64.getAttachment() != null) {
 			if (sb.length() > 1) {
@@ -73,6 +73,20 @@ public class AttachmentBase64SerDes {
 			sb.append("\"");
 
 			sb.append(_escape(attachmentBase64.getAttachment()));
+
+			sb.append("\"");
+		}
+
+		if (attachmentBase64.getContentType() != null) {
+			if (sb.length() > 1) {
+				sb.append(", ");
+			}
+
+			sb.append("\"contentType\": ");
+
+			sb.append("\"");
+
+			sb.append(_escape(attachmentBase64.getContentType()));
 
 			sb.append("\"");
 		}
@@ -240,7 +254,7 @@ public class AttachmentBase64SerDes {
 		Map<String, String> map = new TreeMap<>();
 
 		DateFormat liferayToJSONDateFormat = new SimpleDateFormat(
-			"yyyy-MM-dd'T'HH:mm:ss'Z'");
+			"yyyy-MM-dd'T'HH:mm:ssXX");
 
 		if (attachmentBase64.getAttachment() == null) {
 			map.put("attachment", null);
@@ -248,6 +262,15 @@ public class AttachmentBase64SerDes {
 		else {
 			map.put(
 				"attachment", String.valueOf(attachmentBase64.getAttachment()));
+		}
+
+		if (attachmentBase64.getContentType() == null) {
+			map.put("contentType", null);
+		}
+		else {
+			map.put(
+				"contentType",
+				String.valueOf(attachmentBase64.getContentType()));
 		}
 
 		if (attachmentBase64.getCustomFields() == null) {
@@ -363,6 +386,12 @@ public class AttachmentBase64SerDes {
 			if (Objects.equals(jsonParserFieldName, "attachment")) {
 				if (jsonParserFieldValue != null) {
 					attachmentBase64.setAttachment(
+						(String)jsonParserFieldValue);
+				}
+			}
+			else if (Objects.equals(jsonParserFieldName, "contentType")) {
+				if (jsonParserFieldValue != null) {
+					attachmentBase64.setContentType(
 						(String)jsonParserFieldValue);
 				}
 			}

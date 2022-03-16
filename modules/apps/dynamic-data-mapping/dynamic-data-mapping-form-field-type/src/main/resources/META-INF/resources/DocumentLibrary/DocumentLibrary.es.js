@@ -86,9 +86,7 @@ const DocumentLibrary = ({
 	id,
 	message,
 	name,
-	onBlur,
 	onClearButtonClicked,
-	onFocus,
 	onSelectButtonClicked,
 	placeholder,
 	readOnly,
@@ -121,9 +119,7 @@ const DocumentLibrary = ({
 							disabled={readOnly}
 							id={`${name}inputFile`}
 							lang={editingLanguageId}
-							onBlur={onBlur}
 							onClick={onSelectButtonClicked}
-							onFocus={onFocus}
 							value={transformedFileEntryTitle || ''}
 						/>
 					</ClayInput.GroupItem>
@@ -177,9 +173,7 @@ const GuestUploadFile = ({
 	id,
 	message,
 	name,
-	onBlur,
 	onClearButtonClicked,
-	onFocus,
 	onUploadSelectButtonClicked,
 	placeholder,
 	progress,
@@ -203,13 +197,12 @@ const GuestUploadFile = ({
 					<ClayInput
 						className="bg-light"
 						disabled={readOnly}
-						onBlur={onBlur}
 						onClick={onUploadSelectButtonClicked}
-						onFocus={onFocus}
 						type="text"
 						value={transformedFileEntryTitle || ''}
 					/>
 				</ClayInput.GroupItem>
+
 				<ClayInput.GroupItem append shrink>
 					<label
 						className={
@@ -223,6 +216,7 @@ const GuestUploadFile = ({
 					>
 						{Liferay.Language.get('select')}
 					</label>
+
 					<input
 						className="input-file"
 						disabled={readOnly}
@@ -231,6 +225,7 @@ const GuestUploadFile = ({
 						type="file"
 					/>
 				</ClayInput.GroupItem>
+
 				{transformedFileEntryTitle && (
 					<ClayInput.GroupItem shrink>
 						<ClayButton
@@ -373,8 +368,11 @@ const Main = ({
 		}
 	};
 
-	const handleSelectButtonClicked = ({portletNamespace}) => {
+	const handleSelectButtonClicked = ({portletNamespace}, event) => {
+		onFocus(event);
+
 		Liferay.Util.openSelectionModal({
+			onClose: () => onBlur(event),
 			onSelect: handleFieldChanged,
 			selectEventName: `${portletNamespace}selectDocumentLibrary`,
 			title: Liferay.Util.sub(
@@ -427,9 +425,13 @@ const Main = ({
 	};
 
 	const handleUploadSelectButtonClicked = (event) => {
+		onFocus(event);
+
 		const file = event.target.files[0];
 
 		if (isExceededUploadRequestSizeLimit(file.size)) {
+			onBlur(event);
+
 			return;
 		}
 
@@ -473,6 +475,9 @@ const Main = ({
 				disableSubmitButton(false);
 
 				setProgress(0);
+			})
+			.finally(() => {
+				onBlur(event);
 			});
 	};
 
@@ -503,6 +508,8 @@ const Main = ({
 					name={name}
 					onBlur={onBlur}
 					onClearButtonClicked={(event) => {
+						onFocus(event);
+
 						setCurrentValue(null);
 
 						onChange(event, '{}');
@@ -514,6 +521,8 @@ const Main = ({
 						if (guestUploadInput) {
 							guestUploadInput.value = '';
 						}
+
+						onBlur(event);
 					}}
 					onFocus={onFocus}
 					onUploadSelectButtonClicked={(event) =>
@@ -532,18 +541,19 @@ const Main = ({
 					id={id}
 					message={message}
 					name={name}
-					onBlur={onBlur}
 					onClearButtonClicked={(event) => {
 						setCurrentValue(null);
 
 						onChange(event, '{}');
 					}}
-					onFocus={onFocus}
-					onSelectButtonClicked={() =>
-						handleSelectButtonClicked({
-							itemSelectorURL,
-							portletNamespace,
-						})
+					onSelectButtonClicked={(event) =>
+						handleSelectButtonClicked(
+							{
+								itemSelectorURL,
+								portletNamespace,
+							},
+							event
+						)
 					}
 					placeholder={placeholder}
 					readOnly={hasCustomError ? true : readOnly}

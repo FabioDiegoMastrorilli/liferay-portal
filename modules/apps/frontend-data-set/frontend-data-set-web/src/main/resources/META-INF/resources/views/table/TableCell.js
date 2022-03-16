@@ -32,13 +32,13 @@ function InlineEditInputRenderer({
 	valuePath,
 	...otherProps
 }) {
-	const [InputRenderer, updateInputRenderer] = useState(() =>
+	const [InputRenderer, setInputRenderer] = useState(() =>
 		getInputRendererById(type)
 	);
 	const {itemsChanges, updateItem} = useContext(DataSetContext);
 
 	useEffect(() => {
-		updateInputRenderer(() => getInputRendererById(type));
+		setInputRenderer(() => getInputRendererById(type));
 	}, [type]);
 
 	let inputValue = value;
@@ -75,39 +75,48 @@ function TableCell({
 	valuePath,
 	view,
 }) {
-	let dataRenderer = DefaultRenderer;
-
-	const {inlineEditingSettings} = useContext(DataSetContext);
-
-	if (view.contentRenderer) {
-		dataRenderer = getDataRendererById(view.contentRenderer);
-	}
-
-	if (view.contentRendererModuleURL) {
-		dataRenderer = null;
-	}
-
-	const [currentView, updateCurrentView] = useState({
-		...view,
-		Component: dataRenderer,
-	});
+	const {customDataRenderers, inlineEditingSettings} = useContext(
+		DataSetContext
+	);
 
 	const [loading, setLoading] = useState(false);
 
-	useEffect(() => {
-		if (!loading && currentView.contentRendererModuleURL) {
-			setLoading(true);
-			getDataRendererByURL(currentView.contentRendererModuleURL).then(
-				(Component) => {
-					updateCurrentView({
-						...currentView,
-						Component,
-					});
-					setLoading(false);
-				}
-			);
+	const contentRenderer = view.contentRenderer;
+
+	let SyncDataRenderer = DefaultRenderer;
+
+	if (contentRenderer) {
+		if (customDataRenderers && customDataRenderers[contentRenderer]) {
+			SyncDataRenderer = customDataRenderers[contentRenderer];
 		}
-	}, [currentView, loading]);
+		else {
+			SyncDataRenderer = getDataRendererById(contentRenderer);
+		}
+	}
+
+	if (view.contentRendererModuleURL) {
+		SyncDataRenderer = null;
+	}
+
+	const [DataRenderer, setDataRenderer] = useState(() => SyncDataRenderer);
+
+	useEffect(() => {
+		if (!loading && view.contentRendererModuleURL && !DataRenderer) {
+			setLoading(true);
+
+			getDataRendererByURL(view.contentRendererModuleURL)
+				.then((Component) => {
+					setDataRenderer(() => Component);
+
+					setLoading(false);
+				})
+				.catch(() => {
+					setDataRenderer(() => null);
+
+					setLoading(false);
+				});
+		}
+	}, [view, loading, DataRenderer]);
 
 	if (
 		inlineEditSettings &&
@@ -131,8 +140,8 @@ function TableCell({
 
 	return (
 		<DndTableCell columnName={String(options.fieldName)}>
-			{currentView.Component && !loading ? (
-				<currentView.Component
+			{DataRenderer && !loading ? (
+				<DataRenderer
 					actions={actions}
 					itemData={itemData}
 					itemId={itemId}

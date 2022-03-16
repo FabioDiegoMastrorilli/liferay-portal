@@ -1,31 +1,10 @@
 {
 	"dependencies": {
-		"@clayui/autocomplete": "3.39.0",
-		"@clayui/button": "3.39.0",
-		"@clayui/data-provider": "3.39.0",
-		"@clayui/drop-down": "3.39.0",
-		"@clayui/form": "3.39.0",
-		"@clayui/icon": "3.39.0",
-		"@clayui/layout": "3.39.0",
-		"@clayui/modal": "3.39.0",
-		"@clayui/popover": "3.39.0",
-		"@clayui/shared": "3.39.0",
-		"@clayui/table": "3.39.0",
-		"@liferay/map-google-maps": "*",
-		"@liferay/map-openstreetmap": "*",
-		"axios": "0.21.1",
-		"classnames": "2.3.1",
-		"clay-icon": "2.22.4",
-		"frontend-editor-ckeditor-web": "*",
-		"frontend-js-web": "*",
+		"axios": "0.24.0",
 		"leaflet": "1.7.1",
-		"metal-component": "2.16.8",
-		"metal-drag-drop": "3.3.1",
-		"metal-soy": "2.16.9",
 		"moment": "^2.22.2",
 		"text-mask-addons": "^3.7.1",
-		"text-mask-core": "^5.1.2",
-		"vanilla-text-mask": "^5.0.1"
+		"text-mask-core": "^5.1.2"
 	},
 	"jest": {
 		"setupFiles": [
@@ -48,5 +27,5 @@
 		"format": "liferay-npm-scripts fix",
 		"test": "liferay-npm-scripts test"
 	},
-	"version": "6.0.55"
+	"version": "6.0.84"
 }

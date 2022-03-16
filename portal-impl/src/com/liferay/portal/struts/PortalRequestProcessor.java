@@ -469,7 +469,7 @@ public class PortalRequestProcessor {
 				}
 			}
 			catch (Exception exception) {
-				_log.error(exception, exception);
+				_log.error(exception);
 			}
 
 			String fullPathWithoutQueryString = fullPath;
@@ -514,7 +514,7 @@ public class PortalRequestProcessor {
 		}
 		catch (Exception exception) {
 			if (_log.isDebugEnabled()) {
-				_log.debug(exception, exception);
+				_log.debug(exception);
 			}
 		}
 
@@ -550,7 +550,13 @@ public class PortalRequestProcessor {
 							httpServletRequest.getParameterMap()));
 				}
 
-				httpSession.setAttribute(WebKeys.LAST_PATH, lastPath);
+				String lastPathPath = lastPath.getPath();
+
+				// Ignore files that end with .map. See LPS-141963.
+
+				if (!lastPathPath.endsWith(".map")) {
+					httpSession.setAttribute(WebKeys.LAST_PATH, lastPath);
+				}
 			}
 		}
 
@@ -655,7 +661,7 @@ public class PortalRequestProcessor {
 						}
 					}
 					catch (Exception exception) {
-						_log.error(exception, exception);
+						_log.error(exception);
 
 						return _PATH_PORTAL_UPDATE_PASSWORD;
 					}
@@ -718,7 +724,7 @@ public class PortalRequestProcessor {
 		}
 		catch (Exception exception) {
 			if (_log.isDebugEnabled()) {
-				_log.debug(exception, exception);
+				_log.debug(exception);
 			}
 		}
 
@@ -784,7 +790,7 @@ public class PortalRequestProcessor {
 			}
 			catch (Exception exception) {
 				if (_log.isDebugEnabled()) {
-					_log.debug(exception, exception);
+					_log.debug(exception);
 				}
 
 				SessionErrors.add(

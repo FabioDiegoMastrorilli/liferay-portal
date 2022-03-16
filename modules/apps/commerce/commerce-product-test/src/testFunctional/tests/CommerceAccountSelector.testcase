@@ -91,14 +91,14 @@ definition {
 		CommerceNavigator.gotoMiniumSidebarItem(menuItem = "Catalog");
 
 		AssertElementPresent(
-			key_FilterOption = "Commerce Account",
+			key_filterOption = "Commerce Account",
 			locator1 = "AppBuilder#CHOOSE_APP_SEARCH_FILTER_BY_OPTION");
 	}
 
 	@description = "COMMERCE-5924. As a buyer, I want the account I have currently selected to be highlighted in the account selector dropdown"
 	@priority = "3"
 	test AssertActiveAccountIsVisibleOnAccountSelectorDropdown {
-		property portal.acceptance = "false";
+		property portal.acceptance = "true";
 
 		// TODO Review
 
@@ -120,7 +120,7 @@ definition {
 	@description = "COMMERCE-5927. As a buyer, I want to be able to select an account from the list (which is not the selected one), and have the selected account change to the newly selected account"
 	@priority = "3"
 	test ChangeActiveAccountFromAccountsList {
-		property portal.acceptance = "false";
+		property portal.acceptance = "true";
 
 		// TODO Review
 
@@ -151,7 +151,7 @@ definition {
 			locator1 = "CommerceAccelerators#ACCOUNT_SELECTOR_ACCOUNT_LIST_ITEM");
 
 		AssertVisible(
-			key_FilterOption = "Commerce Account 2",
+			key_filterOption = "Commerce Account 2",
 			locator1 = "AppBuilder#CHOOSE_APP_SEARCH_FILTER_BY_OPTION");
 
 		Click.clickNoMouseOver(locator1 = "CommerceAccelerators#ACCOUNT_SELECTOR_DROPDOWN");
@@ -164,7 +164,7 @@ definition {
 	@description = "COMMERCE-5929. As a buyer, I want to be able to select an order from the list (which is not the selected one), and have the selected order change to the newly selected order"
 	@priority = "3"
 	test ChangeActiveOrderFromOrdersList {
-		property portal.acceptance = "false";
+		property portal.acceptance = "true";
 
 		// TODO Review
 
@@ -181,20 +181,20 @@ definition {
 		CommerceNavigator.gotoMiniumSidebarItem(menuItem = "Pending Orders");
 
 		Click(
-			key_FilterOption = "Add Order",
+			key_filterOption = "Add Order",
 			locator1 = "AppBuilder#CHOOSE_SEARCH_FILTER_BY_OPTION");
 
 		CommerceNavigator.gotoMiniumSidebarItem(menuItem = "Pending Orders");
 
 		Click(
-			key_FilterOption = "Add Order",
+			key_filterOption = "Add Order",
 			locator1 = "AppBuilder#CHOOSE_SEARCH_FILTER_BY_OPTION");
 
 		ApplicationsMenu.gotoSite(site = "Minium");
 
 		WaitForElementPresent(locator1 = "CommerceEntry#ACTIVE_ORDER_ID");
 
-		var getFirstId= selenium.getText(locator1 = "CommerceEntry#ACTIVE_ORDER_ID");
+		var getFirstId = selenium.getText("CommerceEntry#ACTIVE_ORDER_ID");
 
 		FrontStore.addInitializerProductToCart(
 			productName = "U-Joint",
@@ -204,19 +204,18 @@ definition {
 
 		WaitForElementPresent(locator1 = "CommerceEntry#ORDER_ID_FROM_ACCOUNT_SELECTOR");
 
-		var getSecondId= selenium.getText(
-			locator1 = "CommerceEntry#ORDER_ID_FROM_ACCOUNT_SELECTOR");
+		var getSecondId = selenium.getText("CommerceEntry#ORDER_ID_FROM_ACCOUNT_SELECTOR");
 
 		WaitForElementPresent(locator1 = "CommerceEntry#ORDER_ID_FROM_ACCOUNT_SELECTOR");
 
 		Click(locator1 = "CommerceEntry#ORDER_ID_FROM_ACCOUNT_SELECTOR");
 
 		AssertElementNotPresent(
-			key_FilterOption = "${getFirstId}",
+			key_filterOption = "${getFirstId}",
 			locator1 = "AppBuilder#CHOOSE_APP_SEARCH_FILTER_BY_OPTION");
 
 		AssertElementPresent(
-			key_FilterOption = "${getSecondId}",
+			key_filterOption = "${getSecondId}",
 			locator1 = "AppBuilder#CHOOSE_APP_SEARCH_FILTER_BY_OPTION");
 
 		Click(locator1 = "CommerceAccelerators#MINI_CART_BUTTON");
@@ -249,12 +248,12 @@ definition {
 
 		WaitForElementPresent(locator1 = "CommerceAccelerators#ACCOUNT_SELECTOR_ORDER_ID");
 
-		var getOrderId = selenium.getText(locator1 = "CommerceAccelerators#ACCOUNT_SELECTOR_ORDER_ID");
+		var getOrderId = selenium.getText("CommerceAccelerators#ACCOUNT_SELECTOR_ORDER_ID");
 
 		Button.click(button = "Create New Order");
 
 		AssertElementNotPresent(
-			key_FilterOption = "${getOrderId}",
+			key_filterOption = "${getOrderId}",
 			locator1 = "AppBuilder#CHOOSE_APP_SEARCH_FILTER_BY_OPTION");
 	}
 
@@ -418,11 +417,11 @@ definition {
 		Click.clickNoMouseOver(locator1 = "CommerceAccelerators#ACCOUNT_SELECTOR_DROPDOWN");
 
 		AssertElementPresent(
-			key_RowNumber = "1",
+			key_rowNumber = "1",
 			locator1 = "AppBuilder#VALIDATE_LIST_TITLE_NAME_AT_ROW");
 
 		AssertElementPresent(
-			key_RowNumber = "2",
+			key_rowNumber = "2",
 			locator1 = "AppBuilder#VALIDATE_LIST_TITLE_NAME_AT_ROW");
 	}
 

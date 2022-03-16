@@ -12,7 +12,7 @@
 <tbody>
 <tr>
 	<td>FS_PRODUCT_SKU</td>
-	<td>//p/span[(normalize-space(text())='SKU')]/following::span</td>
+	<td>//p/span[(normalize-space(text())='SKU')]/following::span[text()='${key_productSku}']</td>
 	<td></td>
 </tr>
 <tr>
@@ -47,22 +47,22 @@
 </tr>
 <tr>
 	<td>FS_PRODUCT_OPTIONS_SELECT</td>
-	<td>//div[contains (@class,'select-field-trigger')]//a</td>
+	<td>//div/label[text()='${key_optionName}']/..//div[contains (@class,'select-field-trigger')]//a</td>
 	<td></td>
 </tr>
 <tr>
 	<td>FS_PRODUCT_OPTION</td>
-	<td>//div[contains(@class,'dropdown-menu')]/ul//li/button[contains(.,'${key_optionValue}')]</td>
+	<td>//div[contains(@class,'dropdown-menu')]/ul//li/button[(normalize-space(text())='${key_optionValue}')]</td>
 	<td></td>
 </tr>
 <tr>
 	<td>FS_PRODUCT_IMAGE</td>
-	<td>//div[@class='product-gallery']//img[contains(@src, '${key_FSProductImage}')]</td>
+	<td>//div[@class='product-gallery']//img[contains(@src, '${key_fsProductImage}')]</td>
 	<td></td>
 </tr>
 <tr>
 	<td>MAX_QUANTITY_SELECTOR_PRODUCT_DETAILS</td>
-	<td>//div[@class="add-to-cart-wrapper align-items-center d-flex"]//input[contains(@max, '${key_value}')]</td>
+	<td>//div[contains(@class,"product-detail")]//div[contains(@class,"add-to-cart")]//input[contains(@max, '${key_value}')]</td>
 	<td></td>
 </tr>
 <tr>
@@ -91,6 +91,11 @@
 	<td></td>
 </tr>
 <tr>
+	<td>PRODUCT_DETAILS_IN_STOCK_QUANTITY</td>
+	<td>//span[(@data-qa-id='in-stock-quantity') and (contains(text(),'${key_inStockQuantity}'))]</td>
+	<td></td>
+</tr>
+<tr>
 	<td>MINI_COMPARE_ITEM_ACTIVE_N</td>
 	<td>//div[@class='mini-compare-item active'][${key_value}]//div[@class='mini-compare-thumbnail']</td>
 	<td></td>
@@ -116,8 +121,13 @@
 	<td></td>
 </tr>
 <tr>
+	<td>PRODUCT_CARD_CATALOG_IMAGE</td>
+	<td>//a[contains(@href,'${key_productName}')]//img[contains(@class,'card-picture')]</td>
+	<td></td>
+</tr>
+<tr>
 	<td>PRODUCT_CARD_IMAGE</td>
-	<td>//a[contains(@href,'${key_productName}')]//div[contains(@style,'image')]</td>
+	<td>//a[contains(@href,'${key_productName}')]//*[(contains(@style,'image')) or (contains(@class,'img'))]</td>
 	<td></td>
 </tr>
 </tbody>

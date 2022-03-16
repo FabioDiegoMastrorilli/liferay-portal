@@ -316,6 +316,7 @@ const Autocomplete = ({
 							{Liferay.Language.get('no-results-were-found')}
 						</ClayDropDown.Item>
 					)}
+
 					{filteredItems.map((label, index) => (
 						<ClayAutocomplete.Item
 							key={index}
@@ -405,7 +406,7 @@ const Main = ({
 				placeholder={placeholder}
 				shouldUpdateValue={shouldUpdateValue}
 				syncDelay={syncDelay}
-				value={value ?? predefinedValue}
+				value={value ? value : predefinedValue}
 			/>
 		</FieldBase>
 	);

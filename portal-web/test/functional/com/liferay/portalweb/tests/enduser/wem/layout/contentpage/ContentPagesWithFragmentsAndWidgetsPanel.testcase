@@ -35,15 +35,15 @@ definition {
 		}
 	}
 
-	@description = "This is a test for LPS-130964. Change display style in Fragments and Widgets panel."
+	@description = "This is a test for LPS-130964 and LPS-76741. Change display style in Fragments and Widgets panel."
 	@priority = "4"
 	test ChangeDisplayStyle {
 		task ("Navigate to the Pages admin in new site") {
-			SitePages.openPagesAdmin(siteURLKey = "test-site-name");
+			PagesAdmin.openPagesAdmin(siteURLKey = "test-site-name");
 		}
 
 		task ("Access to content page at edit mode") {
-			SitePages.gotoPageMenuItem(
+			PagesAdmin.gotoPageEllipsisMenuItem(
 				menuItem = "Edit",
 				pageName = "Test Content Page Name");
 
@@ -89,7 +89,7 @@ definition {
 		}
 
 		task ("Access to content page at edit mode again") {
-			SitePages.gotoPageMenuItem(
+			PagesAdmin.gotoPageEllipsisMenuItem(
 				menuItem = "Edit",
 				pageName = "Test Content Page Name");
 
@@ -102,6 +102,18 @@ definition {
 			AssertVisible(
 				key_switchTo = "list",
 				locator1 = "PageEditor#FRAGMENTS_AND_WIDGETS_DISPLAY_STYLE_BUTTON");
+		}
+
+		task ("Navigate Back to Site Pages") {
+			Navigator.gotoBack();
+		}
+
+		task ("Access to content page can be edited at view mode") {
+			PagesAdmin.gotoPageEllipsisMenuItem(
+				menuItem = "View",
+				pageName = "Test Content Page Name");
+
+			ContentPages.gotoPageEditor();
 		}
 	}
 
@@ -142,6 +154,7 @@ definition {
 				value1 = "Blogs");
 
 			DragOver(
+				key_indexItem = "1",
 				key_portletName = "Blogs",
 				locator1 = "PageEditor#FRAGMENTS_AND_WIDGETS_TAB_WIDGET",
 				locator2 = "PageEditor#FRAGMENT_DROP_TARGET");
@@ -211,10 +224,12 @@ definition {
 				value1 = "Blogs");
 
 			MouseOver(
+				key_indexItem = "1",
 				key_portletName = "Blogs",
 				locator1 = "PageEditor#FRAGMENTS_AND_WIDGETS_TAB_WIDGET");
 
 			AssertCssValue(
+				key_indexItem = "1",
 				key_portletName = "Blogs",
 				locator1 = "PageEditor#FRAGMENTS_AND_WIDGETS_TAB_WIDGET",
 				locator2 = "box-shadow",

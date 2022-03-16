@@ -16,7 +16,6 @@ package com.liferay.portal.kernel.theme;
 
 import com.liferay.admin.kernel.util.PortalMyAccountApplicationType;
 import com.liferay.exportimport.kernel.staging.StagingUtil;
-import com.liferay.mobile.device.rules.kernel.MDRRuleGroupInstance;
 import com.liferay.petra.lang.HashUtil;
 import com.liferay.petra.reflect.ReflectionUtil;
 import com.liferay.petra.string.StringBundler;
@@ -54,7 +53,6 @@ import com.liferay.portal.kernel.util.ListUtil;
 import com.liferay.portal.kernel.util.LocaleThreadLocal;
 import com.liferay.portal.kernel.util.Mergeable;
 import com.liferay.portal.kernel.util.PortalUtil;
-import com.liferay.portal.kernel.util.PortletKeys;
 import com.liferay.portal.kernel.util.PropsKeys;
 import com.liferay.portal.kernel.util.PropsUtil;
 import com.liferay.portal.kernel.util.TimeZoneThreadLocal;
@@ -163,7 +161,7 @@ public class ThemeDisplay
 				portalURL = PortalUtil.getPortalURL(getLayout(), this);
 			}
 			catch (Exception exception) {
-				_log.error(exception, exception);
+				_log.error(exception);
 			}
 
 			host = portalURL;
@@ -524,10 +522,6 @@ public class ThemeDisplay
 	 */
 	public Locale getLocale() {
 		return _locale;
-	}
-
-	public MDRRuleGroupInstance getMDRRuleGroupInstance() {
-		return _mdrRuleGroupInstance;
 	}
 
 	public String getPathApplet() {
@@ -1035,17 +1029,6 @@ public class ThemeDisplay
 		return _urlSignOut;
 	}
 
-	@JSON(include = false)
-	public PortletURL getURLUpdateManager() {
-		if (_urlUpdateManager == null) {
-			_urlUpdateManager = PortalUtil.getControlPanelPortletURL(
-				getRequest(), PortletKeys.MARKETPLACE_STORE,
-				PortletRequest.RENDER_PHASE);
-		}
-
-		return _urlUpdateManager;
-	}
-
 	/**
 	 * The user for which the current request is being handled. Note, that an
 	 * administrative user can impersonate another user.
@@ -1441,7 +1424,7 @@ public class ThemeDisplay
 				portalURL = PortalUtil.getPortalURL(getLayout(), this);
 			}
 			catch (Exception exception) {
-				_log.error(exception, exception);
+				_log.error(exception);
 			}
 
 			dynamicResourcesHost = portalURL;
@@ -1467,12 +1450,6 @@ public class ThemeDisplay
 
 		setPathThemeTemplates(
 			cdnBaseURL + themeStaticResourcePath + theme.getTemplatesPath());
-	}
-
-	public void setMDRRuleGroupInstance(
-		MDRRuleGroupInstance mdrRuleGroupInstance) {
-
-		_mdrRuleGroupInstance = mdrRuleGroupInstance;
 	}
 
 	public void setPathApplet(String pathApplet) {
@@ -1595,7 +1572,7 @@ public class ThemeDisplay
 				_refererGroup = GroupLocalServiceUtil.getGroup(_refererGroupId);
 			}
 			catch (Exception exception) {
-				_log.error(exception, exception);
+				_log.error(exception);
 			}
 		}
 	}
@@ -1620,7 +1597,7 @@ public class ThemeDisplay
 				_scopeGroup = GroupLocalServiceUtil.getGroup(_scopeGroupId);
 			}
 			catch (Exception exception) {
-				_log.error(exception, exception);
+				_log.error(exception);
 			}
 		}
 	}
@@ -1707,7 +1684,7 @@ public class ThemeDisplay
 				_siteGroup = GroupLocalServiceUtil.getGroup(_siteGroupId);
 			}
 			catch (Exception exception) {
-				_log.error(exception, exception);
+				_log.error(exception);
 			}
 		}
 	}
@@ -1920,7 +1897,6 @@ public class ThemeDisplay
 	private boolean _lifecycleRender;
 	private boolean _lifecycleResource;
 	private Locale _locale;
-	private MDRRuleGroupInstance _mdrRuleGroupInstance;
 	private String _pathApplet = StringPool.BLANK;
 	private String _pathCms = StringPool.BLANK;
 	private String _pathColorSchemeImages = StringPool.BLANK;
@@ -1996,7 +1972,6 @@ public class ThemeDisplay
 	private transient PortletURL _urlPublishToLive;
 	private String _urlSignIn = StringPool.BLANK;
 	private String _urlSignOut = StringPool.BLANK;
-	private transient PortletURL _urlUpdateManager;
 	private User _user;
 	private boolean _widget;
 

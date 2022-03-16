@@ -27,6 +27,43 @@
 			"title": "The ClassFieldReference Schema",
 			"type": "object"
 		},
+		"ClassFieldsReference": {
+			"additionalProperties": false,
+			"properties": {
+				"className": {
+					"title": "The className Schema",
+					"type": "string"
+				},
+				"fields": {
+					"items": {
+						"additionalProperties": false,
+						"properties": {
+							"fieldName": {
+								"title": "The fieldName Schema",
+								"type": "string"
+							},
+							"fieldValue": {
+								"title": "The fieldValue Schema",
+								"type": "string"
+							}
+						},
+						"required": [
+							"fieldName",
+							"fieldValue"
+						],
+						"type": "object"
+					},
+					"title": "The fields Schema",
+					"type": "array"
+				}
+			},
+			"required": [
+				"className",
+				"fields"
+			],
+			"title": "The ClassFieldsReference Schema",
+			"type": "object"
+		},
 		"ClassNameReference": {
 			"additionalProperties": false,
 			"properties": {
@@ -433,6 +470,9 @@
 									"$ref": "#/definitions/ClassFieldReference"
 								},
 								{
+									"$ref": "#/definitions/ClassFieldsReference"
+								},
+								{
 									"$ref": "#/definitions/ClassPKReference"
 								},
 								{
@@ -646,6 +686,10 @@
 						"paddingTop": {
 							"title": "The paddingTop Schema",
 							"type": "string"
+						},
+						"textAlign": {
+							"title": "The textAlign Schema",
+							"type": "string"
 						}
 					},
 					"title": "The fragmentViewportStyle Schema",
@@ -731,6 +775,14 @@
 					"title": "The collectionConfig Schema",
 					"type": "object"
 				},
+				"displayAllItems": {
+					"title": "The displayAllItems Schema",
+					"type": "boolean"
+				},
+				"displayAllPages": {
+					"title": "The displayAllPages Schema",
+					"type": "boolean"
+				},
 				"fragmentStyle": {
 					"$ref": "#/definitions/FragmentStyle"
 				},
@@ -764,14 +816,24 @@
 					"title": "The numberOfItemsPerPage Schema",
 					"type": "integer"
 				},
+				"numberOfPages": {
+					"minimum": 0,
+					"title": "The numberOfPages Schema",
+					"type": "integer"
+				},
 				"paginationType": {
 					"enum": [
 						"None",
+						"Numeric",
 						"Regular",
 						"Simple"
 					],
 					"title": "The paginationType Schema",
 					"type": "string"
+				},
+				"showAllItems": {
+					"title": "The showAllItems Schema",
+					"type": "boolean"
 				},
 				"templateKey": {
 					"title": "The templateKey Schema",
@@ -1344,6 +1406,20 @@
 								"FlexRow"
 							],
 							"title": "The contentDisplay Schema",
+							"type": "string"
+						},
+						"htmlTag": {
+							"enum": [
+								"Article",
+								"Aside",
+								"Div",
+								"Footer",
+								"Header",
+								"Main",
+								"Nav",
+								"Section"
+							],
+							"title": "The htmlTag Schema",
 							"type": "string"
 						},
 						"justify": {

@@ -19,7 +19,7 @@
  * @param {Object} object Original object
  * @return {Object}
  */
-export const renameKeys = (object, func) => {
+export function renameKeys(object, func) {
 	const newObj = {};
 
 	Object.keys(object).map((key) => {
@@ -27,7 +27,7 @@ export const renameKeys = (object, func) => {
 	});
 
 	return newObj;
-};
+}
 
 const SPLIT_REGEX = /({\d+})/g;
 
@@ -66,6 +66,45 @@ export function sub(langKey, args, join = true) {
 	}
 
 	return join ? keyArray.join('') : keyArray;
+}
+
+/**
+ * Returns localized information used to link to a resource, like Liferay Learn
+ * articles. The json object `learnMessages` contains the messages and urls.
+ *
+ * Example:
+ * getLocalizedLearnMessageObject("general", {
+ *	"general": {
+ *		"en_US": {
+ *			"message": "Tell me more",
+ *			"url": "https://learn.liferay.com/"
+ *		}
+ *	}
+ * })
+ * => {
+ *			"message": "Tell me more",
+ *			"url": "https://learn.liferay.com/"
+ *		}
+ *
+ * @param {string} resourceKey Identifies which resource to render
+ * @param {Object} learnMessages Contains the messages and urls
+ * @param {string} [locale=Liferay.ThemeDisplay.getLanguageId()]
+ * @param {string} [defaultLocale=Liferay.ThemeDisplay.getDefaultLanguageId()]
+ * @return {Object}
+ */
+export function getLocalizedLearnMessageObject(
+	resourceKey,
+	learnMessages = {},
+	locale = Liferay.ThemeDisplay.getLanguageId(),
+	defaultLocale = Liferay.ThemeDisplay.getDefaultLanguageId()
+) {
+	const keyObject = learnMessages[resourceKey] || {en_US: {}};
+
+	return (
+		keyObject[locale] ||
+		keyObject[defaultLocale] ||
+		keyObject[Object.keys(keyObject)[0]]
+	);
 }
 
 /**

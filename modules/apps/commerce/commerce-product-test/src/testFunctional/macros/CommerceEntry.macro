@@ -1,5 +1,47 @@
 definition {
 
+	@summary = "Add a new user that is part of an account(the creation of a new account, the membership and the user's role are optional)"
+	macro addAccountEntryUser {
+		Variables.assertDefined(parameterList = "${accountName},${userEmailAddress},${userFirstName},${userLastName},${userScreenName}");
+
+		if (("${createNewAccount}" == "true") && isSet(accountType)) {
+			JSONAccountEntry.addAccountEntry(
+				accountEntryName = "${accountName}",
+				accountEntryType = "${accountType}");
+		}
+
+		JSONAccountEntryUser.addAccountEntryUser(
+			accountEntryName = "${accountName}",
+			userEmailAddress = "${userEmailAddress}",
+			userFirstName = "${userFirstName}",
+			userLastName = "${userLastName}",
+			userScreenName = "${userScreenName}");
+
+		JSONUser.setFirstPassword(
+			agreeToTermsAndAnswerReminderQuery = "${agreeToTermsAndAnswerReminderQuery}",
+			requireReset = "${requireReset}",
+			userEmailAddress = "${userEmailAddress}");
+
+		if (isSet(userSiteMembership)) {
+			JSONUser.addUserToSite(
+				groupName = "${userSiteMembership}",
+				userEmailAddress = "${userEmailAddress}");
+		}
+
+		if (isSet(userRole)) {
+			ApplicationsMenu.gotoPortlet(
+				category = "Accounts",
+				panel = "Control Panel",
+				portlet = "Accounts");
+
+			LexiconEntry.gotoEntry(rowEntry = "${accountName}");
+
+			Accounts.addAssigneeToRoleViaUsersTab(
+				accountRoleTitle = "${userRole}",
+				accountUserName = "${userEmailAddress}");
+		}
+	}
+
 	macro addFullDescriptionViaCKEditor {
 		Type.typeCKEditor(
 			locator1 = "CKEditor#BODY_FIELD",
@@ -157,7 +199,7 @@ definition {
 				value1 = "${formatPattern}");
 		}
 
-		if (!(isSet(isPrimary)) || "${isPrimary}" == "true") {
+		if (!(isSet(isPrimary)) || ("${isPrimary}" == "true")) {
 			Check.checkToggleSwitch(locator1 = "CommerceEntry#PRIMARY_CHECKBOX");
 		}
 		else {
@@ -390,6 +432,8 @@ definition {
 
 		Click(locator1 = "Button#SUBMIT");
 
+		WaitForPageLoad();
+
 		AssertSelectedLabel(
 			key_fieldLabel = "Catalog",
 			locator1 = "Select#GENERIC_SELECT_FIELD",
@@ -419,7 +463,7 @@ definition {
 		Select(
 			key_fieldLabel = "Warehouse",
 			locator1 = "Select#GENERIC_SELECT_FIELD",
-			value1 = "${key_Warehouse}");
+			value1 = "${key_warehouse}");
 
 		Select(
 			key_fieldLabel = "Country",
@@ -490,7 +534,7 @@ definition {
 	macro addSKUsEntry {
 		Type(
 			locator1 = "CommerceEntry#SKU_FIELD",
-			value1 = "${productSKU}");
+			value1 = "${productSku}");
 
 		CommerceEntry.selectAssociatedOptionsValue(
 			noOption = "${noOption}",
@@ -535,6 +579,40 @@ definition {
 			value1 = "${keyDescription}");
 
 		Click(locator1 = "Button#BACK");
+	}
+
+	macro assertDefaultDisplayPage {
+		if (!(isSet(pageType))) {
+			AssertTextEquals(
+				locator1 = "CommerceEntry#DISPLAY_PAGE_ANY",
+				value1 = "${pageName}");
+		}
+
+		if ("${pageType}" == "Public") {
+			AssertTextEquals(
+				locator1 = "CommerceEntry#DISPLAY_PAGE_ANY",
+				value1 = "Public Pages > ${pageName}");
+		}
+
+		if ("${pageType}" == "Private") {
+			AssertTextEquals(
+				locator1 = "CommerceEntry#DISPLAY_PAGE_ANY",
+				value1 = "Private Pages > ${pageName}");
+		}
+	}
+
+	macro assertDisplayPageOverride {
+		AssertElementPresent(
+			key_entryName = "${entryName}",
+			key_layout = "${layout}",
+			locator1 = "CommerceEntry#OVERRIDE_DEFAULT_DISPLAY_PAGE");
+	}
+
+	macro assertNoDisplayPageOverride {
+		AssertElementNotPresent(
+			key_entryName = "${entryName}",
+			key_layout = "${layout}",
+			locator1 = "CommerceEntry#OVERRIDE_DEFAULT_DISPLAY_PAGE");
 	}
 
 	macro changePinColor {
@@ -656,20 +734,27 @@ definition {
 	}
 
 	macro deleteCommerceEntry {
+		WaitForElementPresent(locator1 = "CommerceEntry#PAGINATION_RESULTS");
+
 		var paginationResults = selenium.getText("CommerceEntry#PAGINATION_RESULTS");
-
 		var numberOfEntries = StringUtil.extractLast("${paginationResults}", " ");
+		var numberOfEntriesAfterDeletion = ${numberOfEntries} - 1;
 
-		var numberOfEntriesAfterDeletion = MathUtil.difference("${numberOfEntries}", "1");
-
-		ClickNoError(
-			key_value = "",
-			locator1 = "CommerceEntry#BODY_VERTICAL_ELLIPSIS");
+		if (!(isSet(entryName))) {
+			ClickNoError(
+				key_value = "",
+				locator1 = "CommerceEntry#BODY_VERTICAL_ELLIPSIS");
+		}
+		else {
+			ClickNoError(
+				key_value = "${entryName}",
+				locator1 = "CommerceEntry#BODY_VERTICAL_ELLIPSIS");
+		}
 
 		CommerceEntry.clickNoError(menuItem = "Delete");
 
 		if ("${numberOfEntriesAfterDeletion}" != "0") {
-			paginationResults = StringUtil.replace("${paginationResults}", "${numberOfEntries}", "${numberOfEntriesAfterDeletion}");
+			var paginationResults = StringUtil.replace("${paginationResults}", "${numberOfEntries}", "${numberOfEntriesAfterDeletion}");
 
 			AssertTextEquals(
 				locator1 = "CommerceEntry#PAGINATION_RESULTS",
@@ -831,7 +916,7 @@ definition {
 	}
 
 	macro selectAssociatedOptionsValue {
-		if (IsElementPresent(locator1 = "CommerceEntry#OPTION_VALUE", key_optionType = "radio", key_optionValue = "${optionValue}")) {
+		if (IsElementPresent(key_optionType = "radio", key_optionValue = "${optionValue}", locator1 = "CommerceEntry#OPTION_VALUE")) {
 			Click(
 				key_optionType = "radio",
 				key_optionValue = "${optionValue}",
@@ -956,7 +1041,6 @@ definition {
 	macro verifyCostumRadiusWithDefaultValue {
 		for (var value : list "Small:10,Medium:20,Large:30") {
 			var dimension = StringUtil.extractFirst("${value}", ":");
-
 			var number = StringUtil.extractLast("${value}", ":");
 
 			Click(
@@ -976,7 +1060,9 @@ definition {
 			locator1 = "TextInput#NAME",
 			value1 = "${accountName}");
 
-		var accountActualEmail = CommerceJSONAccountsAPI._getCommerceAccountEmail(accountName = "${accountName}", accountType = "${accountType}");
+		var accountActualEmail = CommerceJSONAccountsAPI._getCommerceAccountEmail(
+			accountName = "${accountName}",
+			accountType = "${accountType}");
 
 		TestUtils.assertEquals(
 			actual = "${accountActualEmail}",
@@ -987,11 +1073,11 @@ definition {
 			locator1 = "TextInput#TYPE",
 			value1 = "${accountType}");
 
-		if (isSet(accountVATNumber)) {
+		if (isSet(accountVatNumber)) {
 			AssertTextEquals(
 				key_fieldLabel = "VAT Number",
 				locator1 = "TextInput#GENERIC_TEXT_INPUT",
-				value1 = "${accountVATNumber}");
+				value1 = "${accountVatNumber}");
 		}
 
 		if (isSet(accountDefaultBilling)) {

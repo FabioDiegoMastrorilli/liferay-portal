@@ -27,6 +27,10 @@ public class BatchPlannerPolicyLocalServiceWrapper
 	implements BatchPlannerPolicyLocalService,
 			   ServiceWrapper<BatchPlannerPolicyLocalService> {
 
+	public BatchPlannerPolicyLocalServiceWrapper() {
+		this(null);
+	}
+
 	public BatchPlannerPolicyLocalServiceWrapper(
 		BatchPlannerPolicyLocalService batchPlannerPolicyLocalService) {
 
@@ -259,6 +263,14 @@ public class BatchPlannerPolicyLocalServiceWrapper
 
 		return _batchPlannerPolicyLocalService.fetchBatchPlannerPolicy(
 			batchPlannerPolicyId);
+	}
+
+	@Override
+	public com.liferay.batch.planner.model.BatchPlannerPolicy
+		fetchBatchPlannerPolicy(long batchPlannerPlanId, String name) {
+
+		return _batchPlannerPolicyLocalService.fetchBatchPlannerPolicy(
+			batchPlannerPlanId, name);
 	}
 
 	@Override

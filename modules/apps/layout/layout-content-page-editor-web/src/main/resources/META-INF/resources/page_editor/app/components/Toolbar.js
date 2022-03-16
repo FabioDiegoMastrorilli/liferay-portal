@@ -22,6 +22,7 @@ import React, {useEffect, useState} from 'react';
 import useLazy from '../../core/hooks/useLazy';
 import useLoad from '../../core/hooks/useLoad';
 import usePlugins from '../../core/hooks/usePlugins';
+import CreateLayoutPageTemplateEntryButton from '../../plugins/create-layout-page-template-entry-modal/components/CreateLayoutPageTemplateEntryButton';
 import * as Actions from '../actions/index';
 import {LAYOUT_TYPES} from '../config/constants/layoutTypes';
 import {SERVICE_NETWORK_STATUS_TYPES} from '../config/constants/serviceNetworkStatusTypes';
@@ -37,6 +38,7 @@ import EditModeSelector from './EditModeSelector';
 import ExperimentsLabel from './ExperimentsLabel';
 import NetworkStatusBar from './NetworkStatusBar';
 import PreviewModal from './PreviewModal';
+import PublishButton from './PublishButton';
 import Translation from './Translation';
 import UnsafeHTML from './UnsafeHTML';
 import ViewportSizeSelector from './ViewportSizeSelector';
@@ -68,7 +70,7 @@ function ToolbarBody({className}) {
 
 	const [openPreviewModal, setOpenPreviewModal] = useState(false);
 
-	const {observer} = useModal({
+	const {observer: observerPreviewModal} = useModal({
 		onClose: () => {
 			if (isMounted()) {
 				setOpenPreviewModal(false);
@@ -76,7 +78,7 @@ function ToolbarBody({className}) {
 		},
 	});
 
-	const loading = useRef(() => {
+	const loadingRef = useRef(() => {
 		Promise.all(
 			config.toolbarPlugins.map((toolbarPlugin) => {
 				const {pluginEntryPoint} = toolbarPlugin;
@@ -112,12 +114,12 @@ function ToolbarBody({className}) {
 		});
 	});
 
-	if (loading.current) {
+	if (loadingRef.current) {
 
 		// Do this once only.
 
-		loading.current();
-		loading.current = null;
+		loadingRef.current();
+		loadingRef.current = null;
 	}
 
 	const ToolbarSection = useLazy(
@@ -228,6 +230,7 @@ function ToolbarBody({className}) {
 						);
 					}
 				)}
+
 				<li className="nav-item">
 					<Translation
 						availableLanguages={config.availableLanguages}
@@ -238,6 +241,7 @@ function ToolbarBody({className}) {
 						segmentsExperienceId={segmentsExperienceId}
 					/>
 				</li>
+
 				{!config.singleSegmentsExperienceMode &&
 					segmentsExperimentStatus && (
 						<li className="nav-item pl-2">
@@ -263,31 +267,42 @@ function ToolbarBody({className}) {
 			</ul>
 
 			<ul className="end navbar-nav" onClick={deselectItem}>
-				<div className="nav-item">
+				<li className="nav-item">
 					<NetworkStatusBar {...network} />
-				</div>
+				</li>
 
-				<div className="nav-item">
+				<li className="nav-item">
 					<Undo onRedo={onRedo} onUndo={onUndo} />
-				</div>
+				</li>
 
 				<li className="nav-item">
 					<EditModeSelector />
 				</li>
 
 				<li className="nav-item">
-					<ClayButtonWithIcon
-						className="btn btn-secondary"
-						displayType="secondary"
-						onClick={() => setOpenPreviewModal(true)}
-						small
-						symbol="view"
-						title={Liferay.Language.get('preview')}
-						type="button"
-					>
-						{Liferay.Language.get('preview')}
-					</ClayButtonWithIcon>
+					<ul className="navbar-nav">
+						<li className="nav-item">
+							<ClayButtonWithIcon
+								className="btn btn-secondary"
+								displayType="secondary"
+								onClick={() => setOpenPreviewModal(true)}
+								small
+								symbol="view"
+								title={Liferay.Language.get('preview')}
+								type="button"
+							>
+								{Liferay.Language.get('preview')}
+							</ClayButtonWithIcon>
+						</li>
+
+						{config.layoutType === LAYOUT_TYPES.content && (
+							<li className="nav-item">
+								<CreateLayoutPageTemplateEntryButton />
+							</li>
+						)}
+					</ul>
 				</li>
+
 				{config.singleSegmentsExperienceMode && (
 					<li className="nav-item">
 						<form action={config.discardDraftURL} method="POST">
@@ -305,31 +320,18 @@ function ToolbarBody({className}) {
 				)}
 
 				<li className="nav-item">
-					<form
-						action={config.publishURL}
-						method="POST"
-						ref={formRef}
-					>
-						<input
-							name={`${config.portletNamespace}redirect`}
-							type="hidden"
-							value={config.redirectURL}
-						/>
-
-						<ClayButton
-							disabled={config.pending || !canPublish}
-							displayType="primary"
-							onClick={handleSubmit}
-							small
-							type="submit"
-						>
-							{publishButtonLabel}
-						</ClayButton>
-					</form>
+					<PublishButton
+						canPublish={canPublish}
+						formRef={formRef}
+						handleSubmit={handleSubmit}
+						label={publishButtonLabel}
+					/>
 				</li>
 			</ul>
 
-			{openPreviewModal && <PreviewModal observer={observer} />}
+			{openPreviewModal && (
+				<PreviewModal observer={observerPreviewModal} />
+			)}
 		</ClayLayout.ContainerFluid>
 	);
 }

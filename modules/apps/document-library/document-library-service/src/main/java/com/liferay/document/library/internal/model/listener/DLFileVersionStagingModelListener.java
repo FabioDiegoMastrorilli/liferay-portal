@@ -14,7 +14,7 @@
 
 package com.liferay.document.library.internal.model.listener;
 
-import com.liferay.document.library.internal.util.DLExportableRepositoryPublisherHelper;
+import com.liferay.document.library.internal.helper.DLExportableRepositoryPublisherHelper;
 import com.liferay.document.library.kernel.model.DLFileEntry;
 import com.liferay.document.library.kernel.model.DLFileVersion;
 import com.liferay.portal.kernel.exception.ModelListenerException;
@@ -52,7 +52,7 @@ public class DLFileVersionStagingModelListener
 			dlFileEntry = dlFileVersion.getFileEntry();
 		}
 		catch (PortalException portalException) {
-			_log.error(portalException, portalException);
+			_log.error(portalException);
 
 			return;
 		}
@@ -85,7 +85,7 @@ public class DLFileVersionStagingModelListener
 			dlFileEntry = dlFileVersion.getFileEntry();
 		}
 		catch (PortalException portalException) {
-			_log.error(portalException, portalException);
+			_log.error(portalException);
 
 			return;
 		}

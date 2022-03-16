@@ -426,29 +426,28 @@ definition {
 			value1 = "Asset Libraries");
 	}
 
+	// May need to update test after LPS-133688 is fixed
+
 	@description = "This ensures that a user can not create a repository with the same escape characters name as another repository."
 	@priority = "5"
 	@refactordone
-
-	// May need to update test after LPS-133688 is fixed
-
 	test CannotAddDuplicateWithEscapeCharacters {
 		DepotNavigator.openDepotAdmin();
 
 		Depot.addDepot(
 			depotDescription = "This is the description of a depot",
-			depotName = "&amp;");
+			depotName = "&");
 
 		DepotNavigator.openDepotAdmin();
 
 		Depot.addDepot(
-			depotName = "&amp;",
+			depotName = "&",
 			duplicate = "true");
 
 		DepotNavigator.openDepotAdmin();
 
 		AssertElementNotPresent(
-			key_card = "&amp;",
+			key_card = "&",
 			key_index = "2",
 			locator1 = "Card#CARD_PAGE_ITEM");
 	}
@@ -508,22 +507,11 @@ definition {
 			depotDescription = "This depot will duplicate a site name",
 			depotName = "Site Name");
 
-		ApplicationsMenu.gotoPortlet(
-			category = "Sites",
-			panel = "Control Panel",
-			portlet = "Sites");
+		Site.openSitesAdmin();
 
-		LexiconEntry.gotoAdd();
-
-		LexiconCard.clickCard(card = "Blank Site");
-
-		PortletEntry.inputName(name = "Site Name");
-
-		Button.clickSave();
-
-		AssertTextEquals(
-			locator1 = "Message#ERROR_FORM_FIELD_REQUIRED",
-			value1 = "Please enter a unique name.");
+		Site.viewCannotAdd(
+			siteName = "Site Name",
+			siteNameInvalid = "Duplicate");
 	}
 
 	@description = "This ensures that users cannot edit repository name same as another repository name."

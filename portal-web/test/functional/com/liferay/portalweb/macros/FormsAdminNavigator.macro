@@ -172,9 +172,7 @@ definition {
 	macro gotoPublishedForm {
 		FormsAdminNavigator.gotoPublishCopyURLLink();
 
-		var publishedFormPublicURL = Form.getPublishedFormPublicURL(
-			publishedFormPublicURL = "${publishedFormPublicURL}"
-		);
+		var publishedFormPublicURL = Form.getPublishedFormPublicURL(publishedFormPublicURL = "${publishedFormPublicURL}");
 
 		Navigator.openSpecificURL(url = "${publishedFormPublicURL}");
 	}
@@ -206,9 +204,9 @@ definition {
 	}
 
 	macro gotoViewEntries {
-		AssertElementPresent(locator1 = "Icon#BODY_VERTICAL_ELLIPSIS");
+		AssertElementPresent(locator1 = "Icon#VERTICAL_ELLIPSIS_BUTTON");
 
-		LexiconEntry.gotoEllipsisMenuItem(menuItem = "View Entries");
+		LexiconEntry.gotoVerticalEllipsisMenuItemNoError(menuItem = "View Entries");
 	}
 
 	macro openPublishURL {

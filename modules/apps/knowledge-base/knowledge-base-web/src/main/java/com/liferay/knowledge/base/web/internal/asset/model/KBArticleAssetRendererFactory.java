@@ -66,7 +66,7 @@ public class KBArticleAssetRendererFactory
 	public AssetEntry getAssetEntry(String className, long classPK)
 		throws PortalException {
 
-		KBArticle kbArticle = getKBArticle(
+		KBArticle kbArticle = _getKBArticle(
 			classPK, WorkflowConstants.STATUS_ANY);
 
 		return super.getAssetEntry(className, kbArticle.getClassPK());
@@ -79,11 +79,11 @@ public class KBArticleAssetRendererFactory
 		KBArticle kbArticle = null;
 
 		if (type == TYPE_LATEST_APPROVED) {
-			kbArticle = getKBArticle(
+			kbArticle = _getKBArticle(
 				classPK, WorkflowConstants.STATUS_APPROVED);
 		}
 		else {
-			kbArticle = getKBArticle(classPK, WorkflowConstants.STATUS_ANY);
+			kbArticle = _getKBArticle(classPK, WorkflowConstants.STATUS_ANY);
 		}
 
 		KBArticleAssetRenderer kbArticleAssetRenderer =
@@ -156,7 +156,14 @@ public class KBArticleAssetRendererFactory
 		_servletContext = servletContext;
 	}
 
-	protected KBArticle getKBArticle(long classPK, int status)
+	@Reference(unbind = "-")
+	protected void setKBArticleLocalService(
+		KBArticleLocalService kbArticleLocalService) {
+
+		_kbArticleLocalService = kbArticleLocalService;
+	}
+
+	private KBArticle _getKBArticle(long classPK, int status)
 		throws PortalException {
 
 		KBArticle kbArticle = null;
@@ -166,7 +173,7 @@ public class KBArticleAssetRendererFactory
 		}
 		catch (NoSuchArticleException noSuchArticleException) {
 			if (_log.isDebugEnabled()) {
-				_log.debug(noSuchArticleException, noSuchArticleException);
+				_log.debug(noSuchArticleException);
 			}
 
 			kbArticle = _kbArticleLocalService.getLatestKBArticle(
@@ -174,13 +181,6 @@ public class KBArticleAssetRendererFactory
 		}
 
 		return kbArticle;
-	}
-
-	@Reference(unbind = "-")
-	protected void setKBArticleLocalService(
-		KBArticleLocalService kbArticleLocalService) {
-
-		_kbArticleLocalService = kbArticleLocalService;
 	}
 
 	private static final Log _log = LogFactoryUtil.getLog(

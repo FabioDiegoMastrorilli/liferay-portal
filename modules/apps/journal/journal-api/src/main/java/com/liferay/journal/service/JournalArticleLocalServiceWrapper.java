@@ -30,6 +30,10 @@ public class JournalArticleLocalServiceWrapper
 	implements JournalArticleLocalService,
 			   ServiceWrapper<JournalArticleLocalService> {
 
+	public JournalArticleLocalServiceWrapper() {
+		this(null);
+	}
+
 	public JournalArticleLocalServiceWrapper(
 		JournalArticleLocalService journalArticleLocalService) {
 
@@ -1811,6 +1815,14 @@ public class JournalArticleLocalServiceWrapper
 		return _journalArticleLocalService.getArticlesByStructureId(
 			groupId, ddmStructureKey, locale, status, start, end,
 			orderByComparator);
+	}
+
+	@Override
+	public java.util.List<Long> getArticlesClassPKsWithDefaultDisplayPage(
+		long groupId, long classTypeId) {
+
+		return _journalArticleLocalService.
+			getArticlesClassPKsWithDefaultDisplayPage(groupId, classTypeId);
 	}
 
 	/**

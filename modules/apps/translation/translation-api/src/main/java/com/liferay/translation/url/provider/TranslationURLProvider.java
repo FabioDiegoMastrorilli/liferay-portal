@@ -31,8 +31,17 @@ public interface TranslationURLProvider {
 		long groupId, long classNameId, long classPK,
 		RequestBackedPortletURLFactory requestBackedPortletURLFactory);
 
+	public PortletURL getExportTranslationURL(
+		long groupId, long classNameId,
+		RequestBackedPortletURLFactory requestBackedPortletURLFactory);
+
 	public PortletURL getImportTranslationURL(
 			long groupId, long classNameId, long classPK,
+			RequestBackedPortletURLFactory requestBackedPortletURLFactory)
+		throws PortalException;
+
+	public PortletURL getImportTranslationURL(
+			long groupId, long classNameId,
 			RequestBackedPortletURLFactory requestBackedPortletURLFactory)
 		throws PortalException;
 

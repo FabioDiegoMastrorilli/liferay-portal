@@ -873,7 +873,7 @@ public class JournalArticleActionDropdownItemsProvider {
 		}
 		catch (Exception exception) {
 			if (_log.isDebugEnabled()) {
-				_log.debug(exception, exception);
+				_log.debug(exception);
 			}
 		}
 
@@ -982,7 +982,7 @@ public class JournalArticleActionDropdownItemsProvider {
 		return false;
 	}
 
-	private boolean _isShowViewContentURL() throws Exception {
+	private boolean _isShowViewContentURL() {
 		if ((_article == null) || !_article.hasApprovedVersion()) {
 			return false;
 		}

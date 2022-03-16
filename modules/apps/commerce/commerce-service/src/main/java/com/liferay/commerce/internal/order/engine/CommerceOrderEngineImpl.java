@@ -57,7 +57,9 @@ import com.liferay.commerce.service.CommerceShippingMethodLocalService;
 import com.liferay.commerce.subscription.CommerceSubscriptionEntryHelperUtil;
 import com.liferay.commerce.util.CommerceShippingHelper;
 import com.liferay.portal.kernel.exception.PortalException;
+import com.liferay.portal.kernel.json.JSONArray;
 import com.liferay.portal.kernel.json.JSONFactoryUtil;
+import com.liferay.portal.kernel.json.JSONObject;
 import com.liferay.portal.kernel.json.JSONUtil;
 import com.liferay.portal.kernel.messaging.DestinationNames;
 import com.liferay.portal.kernel.messaging.Message;
@@ -348,15 +350,10 @@ public class CommerceOrderEngineImpl implements CommerceOrderEngine {
 			commerceOrderId, commerceOrder.getCommerceAccountId());
 
 		TransactionCommitCallbackUtil.registerCallback(
-			new Callable<Void>() {
+			() -> {
+				_bookQuantities(commerceOrderId);
 
-				@Override
-				public Void call() throws Exception {
-					_bookQuantities(commerceOrderId);
-
-					return null;
-				}
-
+				return null;
 			});
 
 		commerceOrder = _commerceOrderLocalService.recalculatePrice(
@@ -428,6 +425,51 @@ public class CommerceOrderEngineImpl implements CommerceOrderEngine {
 		}
 	}
 
+	private JSONObject _getCommerceOrderJSONObject(CommerceOrder commerceOrder)
+		throws Exception {
+
+		DTOConverter<?, ?> commerceOrderDTOConverter =
+			_dtoConverterRegistry.getDTOConverter(
+				CommerceOrder.class.getName());
+
+		Object commerceOrderObject = commerceOrderDTOConverter.toDTO(
+			new DefaultDTOConverterContext(
+				_dtoConverterRegistry, commerceOrder.getCommerceOrderId(),
+				LocaleUtil.getSiteDefault(), null, null));
+
+		JSONObject commerceOrderJSONObject = JSONFactoryUtil.createJSONObject(
+			commerceOrderObject.toString());
+
+		JSONArray commerceOrderItemsJSONArray =
+			JSONFactoryUtil.createJSONArray();
+
+		DTOConverter<?, ?> commerceOrderItemDTOConverter =
+			_dtoConverterRegistry.getDTOConverter(
+				CommerceOrderItem.class.getName());
+
+		List<CommerceOrderItem> commerceOrderItems =
+			commerceOrder.getCommerceOrderItems();
+
+		for (CommerceOrderItem commerceOrderItem : commerceOrderItems) {
+			Object commerceOrderItemObject =
+				commerceOrderItemDTOConverter.toDTO(
+					new DefaultDTOConverterContext(
+						_dtoConverterRegistry,
+						commerceOrderItem.getCommerceOrderItemId(),
+						LocaleUtil.getSiteDefault(), null, null));
+
+			JSONObject commerceOrderItemJSONObject =
+				JSONFactoryUtil.createJSONObject(
+					commerceOrderItemObject.toString());
+
+			commerceOrderItemsJSONArray.put(commerceOrderItemJSONObject);
+		}
+
+		commerceOrderJSONObject.put("orderItems", commerceOrderItemsJSONArray);
+
+		return commerceOrderJSONObject;
+	}
+
 	private boolean _isGuestCheckoutEnabled(long groupId) throws Exception {
 		CommerceOrderCheckoutConfiguration commerceOrderCheckoutConfiguration =
 			_configurationProvider.getConfiguration(
@@ -462,20 +504,7 @@ public class CommerceOrderEngineImpl implements CommerceOrderEngine {
 				message.setPayload(
 					JSONUtil.put(
 						"commerceOrder",
-						() -> {
-							DTOConverter<?, ?> dtoConverter =
-								_dtoConverterRegistry.getDTOConverter(
-									CommerceOrder.class.getName());
-
-							Object object = dtoConverter.toDTO(
-								new DefaultDTOConverterContext(
-									_dtoConverterRegistry,
-									commerceOrder.getCommerceOrderId(),
-									LocaleUtil.getSiteDefault(), null, null));
-
-							return JSONFactoryUtil.createJSONObject(
-								object.toString());
-						}
+						_getCommerceOrderJSONObject(commerceOrder)
 					).put(
 						"commerceOrderId", commerceOrder.getCommerceOrderId()
 					).put(
@@ -498,6 +527,16 @@ public class CommerceOrderEngineImpl implements CommerceOrderEngine {
 
 		if (commerceOrderStatus == null) {
 			throw new CommerceOrderStatusException();
+		}
+
+		if ((commerceOrderStatus.getKey() ==
+				CommerceOrderConstants.ORDER_STATUS_CANCELLED) &&
+			commerceOrderStatus.isTransitionCriteriaMet(commerceOrder)) {
+
+			_sendOrderStatusMessage(
+				commerceOrder, commerceOrderStatus.getKey());
+
+			return commerceOrderStatus.doTransition(commerceOrder, userId);
 		}
 
 		CommerceOrderStatus currentCommerceOrderStatus =

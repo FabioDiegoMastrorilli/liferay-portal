@@ -222,6 +222,27 @@ public class ObjectDefinition implements Cloneable, Serializable {
 
 	protected ObjectField[] objectFields;
 
+	public ObjectLayout[] getObjectLayouts() {
+		return objectLayouts;
+	}
+
+	public void setObjectLayouts(ObjectLayout[] objectLayouts) {
+		this.objectLayouts = objectLayouts;
+	}
+
+	public void setObjectLayouts(
+		UnsafeSupplier<ObjectLayout[], Exception> objectLayoutsUnsafeSupplier) {
+
+		try {
+			objectLayouts = objectLayoutsUnsafeSupplier.get();
+		}
+		catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	protected ObjectLayout[] objectLayouts;
+
 	public ObjectRelationship[] getObjectRelationships() {
 		return objectRelationships;
 	}
@@ -245,6 +266,27 @@ public class ObjectDefinition implements Cloneable, Serializable {
 	}
 
 	protected ObjectRelationship[] objectRelationships;
+
+	public ObjectView[] getObjectViews() {
+		return objectViews;
+	}
+
+	public void setObjectViews(ObjectView[] objectViews) {
+		this.objectViews = objectViews;
+	}
+
+	public void setObjectViews(
+		UnsafeSupplier<ObjectView[], Exception> objectViewsUnsafeSupplier) {
+
+		try {
+			objectViews = objectViewsUnsafeSupplier.get();
+		}
+		catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	protected ObjectView[] objectViews;
 
 	public String getPanelAppOrder() {
 		return panelAppOrder;
@@ -310,6 +352,27 @@ public class ObjectDefinition implements Cloneable, Serializable {
 
 	protected Map<String, String> pluralLabel;
 
+	public Boolean getPortlet() {
+		return portlet;
+	}
+
+	public void setPortlet(Boolean portlet) {
+		this.portlet = portlet;
+	}
+
+	public void setPortlet(
+		UnsafeSupplier<Boolean, Exception> portletUnsafeSupplier) {
+
+		try {
+			portlet = portletUnsafeSupplier.get();
+		}
+		catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	protected Boolean portlet;
+
 	public String getScope() {
 		return scope;
 	}
@@ -372,6 +435,27 @@ public class ObjectDefinition implements Cloneable, Serializable {
 	}
 
 	protected Boolean system;
+
+	public Long getTitleObjectFieldId() {
+		return titleObjectFieldId;
+	}
+
+	public void setTitleObjectFieldId(Long titleObjectFieldId) {
+		this.titleObjectFieldId = titleObjectFieldId;
+	}
+
+	public void setTitleObjectFieldId(
+		UnsafeSupplier<Long, Exception> titleObjectFieldIdUnsafeSupplier) {
+
+		try {
+			titleObjectFieldId = titleObjectFieldIdUnsafeSupplier.get();
+		}
+		catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	protected Long titleObjectFieldId;
 
 	@Override
 	public ObjectDefinition clone() throws CloneNotSupportedException {

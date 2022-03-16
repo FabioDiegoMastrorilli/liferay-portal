@@ -41,11 +41,6 @@ public class TestClassGroupFactory {
 	public static AxisTestClassGroup newAxisTestClassGroup(
 		BatchTestClassGroup batchTestClassGroup, File testBaseDir) {
 
-		if (batchTestClassGroup instanceof CucumberBatchTestClassGroup) {
-			return new CucumberAxisTestClassGroup(
-				(CucumberBatchTestClassGroup)batchTestClassGroup);
-		}
-
 		if (batchTestClassGroup instanceof FunctionalBatchTestClassGroup) {
 			return new FunctionalAxisTestClassGroup(
 				(FunctionalBatchTestClassGroup)batchTestClassGroup,
@@ -109,19 +104,21 @@ public class TestClassGroupFactory {
 
 			PortalTestClassJob portalTestClassJob = (PortalTestClassJob)job;
 
-			if (batchName.contains("cucumber-")) {
-				batchTestClassGroup = new CucumberBatchTestClassGroup(
-					batchName, portalTestClassJob);
-			}
-			else if (batchName.startsWith("functional-") ||
-					 batchName.startsWith("modules-functional-") ||
-					 batchName.startsWith("subrepository-functional-")) {
+			if (batchName.startsWith("functional-") ||
+				batchName.startsWith("modules-functional-") ||
+				batchName.startsWith("subrepository-functional-")) {
 
 				batchTestClassGroup = new FunctionalBatchTestClassGroup(
 					batchName, portalTestClassJob);
 			}
-			else if (batchName.startsWith("integration-")) {
-				batchTestClassGroup = new IntegrationJUnitBatchTestClassGroup(
+			else if (batchName.startsWith("integration-") ||
+					 batchName.startsWith("junit-test-") ||
+					 batchName.startsWith(
+						 "modules-integration-project-templates-") ||
+					 batchName.startsWith("modules-unit-project-templates-") ||
+					 batchName.startsWith("unit-")) {
+
+				batchTestClassGroup = new JUnitBatchTestClassGroup(
 					batchName, portalTestClassJob);
 			}
 			else if (batchName.startsWith("js-test-") ||
@@ -134,14 +131,6 @@ public class TestClassGroupFactory {
 				batchTestClassGroup = new JSUnitModulesBatchTestClassGroup(
 					batchName, portalTestClassJob);
 			}
-			else if (batchName.startsWith("junit-test-") ||
-					 batchName.startsWith(
-						 "modules-integration-project-templates-") ||
-					 batchName.startsWith("modules-unit-project-templates-")) {
-
-				batchTestClassGroup = new JUnitBatchTestClassGroup(
-					batchName, portalTestClassJob);
-			}
 			else if (batchName.startsWith("modules-compile-")) {
 				batchTestClassGroup = new CompileModulesBatchTestClassGroup(
 					batchName, portalTestClassJob);
@@ -149,18 +138,13 @@ public class TestClassGroupFactory {
 			else if ((batchName.startsWith("modules-integration-") &&
 					  !batchName.startsWith(
 						  "modules-integration-project-templates-")) ||
-					 batchName.startsWith("subrepository-integration-")) {
-
-				batchTestClassGroup =
-					new ModulesIntegrationJUnitBatchTestClassGroup(
-						batchName, portalTestClassJob);
-			}
-			else if ((batchName.startsWith("modules-unit-") &&
+					 (batchName.startsWith("modules-unit-") &&
 					  !batchName.startsWith(
 						  "modules-unit-project-templates-")) ||
+					 batchName.startsWith("subrepository-integration-") ||
 					 batchName.startsWith("subrepository-unit-")) {
 
-				batchTestClassGroup = new ModulesUnitJUnitBatchTestClassGroup(
+				batchTestClassGroup = new ModulesJUnitBatchTestClassGroup(
 					batchName, portalTestClassJob);
 			}
 			else if (batchName.startsWith("modules-semantic-versioning-")) {
@@ -197,10 +181,6 @@ public class TestClassGroupFactory {
 			}
 			else if (batchName.startsWith("tck-")) {
 				batchTestClassGroup = new TCKJunitBatchTestClassGroup(
-					batchName, portalTestClassJob);
-			}
-			else if (batchName.startsWith("unit-")) {
-				batchTestClassGroup = new UnitJUnitBatchTestClassGroup(
 					batchName, portalTestClassJob);
 			}
 			else {
@@ -252,10 +232,15 @@ public class TestClassGroupFactory {
 
 			return new JUnitSegmentTestClassGroup(batchTestClassGroup);
 		}
-		else if (batchTestClassGroup instanceof
-					JSUnitModulesBatchTestClassGroup) {
+		else if (batchTestClassGroup instanceof ModulesBatchTestClassGroup) {
+			if (batchTestClassGroup instanceof
+					ServiceBuilderModulesBatchTestClassGroup) {
 
-			return new JSUnitModulesSegmentTestClassGroup(batchTestClassGroup);
+				return new ServiceBuilderModulesSegmentTestClassGroup(
+					batchTestClassGroup);
+			}
+
+			return new ModulesSegmentTestClassGroup(batchTestClassGroup);
 		}
 		else if (batchTestClassGroup instanceof PluginsBatchTestClassGroup) {
 			return new PluginsSegmentTestClassGroup(

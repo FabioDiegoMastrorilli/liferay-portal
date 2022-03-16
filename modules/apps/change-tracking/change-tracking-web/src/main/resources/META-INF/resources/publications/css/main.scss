@@ -41,6 +41,16 @@
 
 		.list-group-item {
 			word-wrap: break-word;
+
+			a {
+				cursor: pointer;
+			}
+
+			.btn-group.dropdown .dropdown-toggle {
+				border-bottom-left-radius: 0;
+				border-top-left-radius: 0;
+				margin-left: -1px;
+			}
 		}
 
 		.list-group-title {
@@ -325,6 +335,11 @@ table.publications-render-view {
 		.dropdown button {
 			font-size: 0.875rem;
 		}
+
+		.simple-toggle-switch {
+			margin-bottom: 0;
+			margin-right: 12px;
+		}
 	}
 
 	td.publications-render-view-content {
@@ -342,15 +357,6 @@ table.publications-render-view {
 }
 
 .publications-table {
-	.publication-description {
-		color: #6b6c7e;
-	}
-
-	.publication-name {
-		color: #272833;
-		font-weight: 600;
-	}
-
 	.change-row-button {
 		background-color: inherit;
 		border: none;
@@ -362,6 +368,19 @@ table.publications-render-view {
 			box-shadow: none;
 			outline: none;
 		}
+	}
+
+	.list-group-item a {
+		cursor: pointer;
+	}
+
+	.publication-description {
+		color: #6b6c7e;
+	}
+
+	.publication-name {
+		color: #272833;
+		font-weight: 600;
 	}
 }
 
@@ -378,6 +397,11 @@ table.publications-render-view {
 		padding-left: 0;
 	}
 
+	.btn.active {
+		background-color: rgba(39, 40, 51, 0.06);
+		color: #272833;
+	}
+
 	.publication-name {
 		color: #272833;
 		font-size: 18px;
@@ -392,8 +416,7 @@ table.publications-render-view {
 
 .publications-view-changes-wrapper {
 	.breadcrumb {
-		padding-bottom: 0;
-		padding-top: 0;
+		margin-bottom: 20px;
 	}
 
 	.management-bar {
@@ -410,9 +433,15 @@ table.publications-render-view {
 		flex-grow: 1;
 	}
 
-	.publications-changes-content {
-		margin-top: 20px;
+	.navbar-nav .nav-link {
+		cursor: pointer;
+	}
 
+	.navbar-nav .nav-link.disabled {
+		cursor: not-allowed;
+	}
+
+	.publications-changes-content {
 		.panel-body {
 			margin-top: 1rem;
 			padding-bottom: 0;
@@ -512,5 +541,9 @@ table.publications-render-view {
 
 	.sidenav-content {
 		padding-top: 20px;
+	}
+
+	table td.publications-header-td {
+		padding: 0;
 	}
 }

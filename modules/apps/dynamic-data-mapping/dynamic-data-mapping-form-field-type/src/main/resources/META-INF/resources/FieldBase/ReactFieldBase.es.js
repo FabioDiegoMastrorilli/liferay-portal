@@ -12,22 +12,22 @@
  * details.
  */
 
-import './FieldBase.scss';
-
 import ClayButton from '@clayui/button';
 import ClayIcon from '@clayui/icon';
 import ClayLabel from '@clayui/label';
 import ClayPopover from '@clayui/popover';
 import classNames from 'classnames';
 import {
+	EVENT_TYPES as CORE_EVENT_TYPES,
 	Layout,
 	getRepeatedIndex,
 	useForm,
 	useFormState,
 } from 'data-engine-js-components-web';
-import {EVENT_TYPES as CORE_EVENT_TYPES} from 'data-engine-js-components-web/js/core/actions/eventTypes.es';
 import moment from 'moment/min/moment-with-locales';
 import React, {useMemo, useState} from 'react';
+
+import './FieldBase.scss';
 
 const convertInputValue = (fieldType, locale, value) => {
 	if (fieldType === 'date') {
@@ -71,10 +71,8 @@ const getDefaultRows = (nestedFields) => {
 	});
 };
 
-const getFieldDetails = (props) => {
+const getFieldDetails = ({errorMessage, hasError, required, text, tip}) => {
 	let fieldDetails = '';
-
-	const {errorMessage, hasError, required, text, tip} = props;
 
 	if (tip) {
 		fieldDetails += Liferay.Util.escape(tip) + '<br>';
@@ -161,7 +159,7 @@ const Popover = ({tooltip}) => {
 	);
 };
 
-function FieldBase({
+export function FieldBase({
 	accessible = true,
 	children,
 	displayErrors,
@@ -322,6 +320,7 @@ function FieldBase({
 									/>
 								)}
 							</legend>
+
 							{children}
 						</fieldset>
 					) : (
@@ -389,7 +388,6 @@ function FieldBase({
 
 			{!hideEditedFlag && (
 				<input
-					key={inputEditedName}
 					name={inputEditedName}
 					type="hidden"
 					value={localizedValue[editingLanguageId] !== undefined}
@@ -424,5 +422,3 @@ function FieldBase({
 		</div>
 	);
 }
-
-export {FieldBase};

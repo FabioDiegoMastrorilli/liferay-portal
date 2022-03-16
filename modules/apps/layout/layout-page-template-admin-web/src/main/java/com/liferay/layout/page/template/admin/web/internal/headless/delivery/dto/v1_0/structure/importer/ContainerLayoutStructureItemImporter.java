@@ -19,6 +19,7 @@ import com.liferay.headless.delivery.dto.v1_0.PageElement;
 import com.liferay.layout.page.template.util.AlignConverter;
 import com.liferay.layout.page.template.util.BorderRadiusConverter;
 import com.liferay.layout.page.template.util.ContentDisplayConverter;
+import com.liferay.layout.page.template.util.HtmlTagConverter;
 import com.liferay.layout.page.template.util.JustifyConverter;
 import com.liferay.layout.page.template.util.MarginConverter;
 import com.liferay.layout.page.template.util.PaddingConverter;
@@ -99,7 +100,8 @@ public class ContainerLayoutStructureItemImporter
 					jsonObject.put("url", getLocalizedValue(urlMap));
 
 					processMapping(
-						jsonObject, (Map<String, Object>)urlMap.get("mapping"));
+						jsonObject, layoutStructureItemImporterContext,
+						(Map<String, Object>)urlMap.get("mapping"));
 				}
 
 				stylesJSONObject.put("backgroundImage", jsonObject);
@@ -141,6 +143,14 @@ public class ContainerLayoutStructureItemImporter
 					containerStyledLayoutStructureItem.setContentDisplay(
 						ContentDisplayConverter.convertToInternalValue(
 							contentDisplay));
+				}
+
+				String htmlTag = String.valueOf(
+					containerLayout.getOrDefault("htmlTag", StringPool.BLANK));
+
+				if (Validator.isNotNull(htmlTag)) {
+					containerStyledLayoutStructureItem.setHtmlTag(
+						HtmlTagConverter.convertToInternalValue(htmlTag));
 				}
 
 				String justify = String.valueOf(
@@ -279,7 +289,7 @@ public class ContainerLayoutStructureItemImporter
 					}
 
 					processMapping(
-						jsonObject,
+						jsonObject, layoutStructureItemImporterContext,
 						(Map<String, Object>)hrefMap.get("mapping"));
 				}
 
@@ -308,7 +318,9 @@ public class ContainerLayoutStructureItemImporter
 
 			if (fragmentStyleMap != null) {
 				JSONObject jsonObject = JSONUtil.put(
-					"styles", toStylesJSONObject(fragmentStyleMap));
+					"styles",
+					toStylesJSONObject(
+						layoutStructureItemImporterContext, fragmentStyleMap));
 
 				containerStyledLayoutStructureItem.updateItemConfig(jsonObject);
 			}

@@ -28,6 +28,8 @@ import Select from '../Select/Select.es';
 import Text from '../Text/Text.es';
 import {limitValue} from '../util/numericalOperations';
 
+import type {FieldChangeEventHandler, Locale, LocalizedValue} from '../types';
+
 type DecimalSymbol = ',' | '.';
 type ThousandsSeparator = DecimalSymbol | ' ' | "'" | 'none';
 
@@ -50,14 +52,15 @@ interface IProps {
 	decimalSymbols: ISelectProps<DecimalSymbol>[];
 	defaultLanguageId: Locale;
 	editingLanguageId: Locale;
+	ffDecimalPlacesSettingsEnabled: boolean;
+	onBlur: FocusEventHandler<HTMLInputElement>;
+	onChange: FieldChangeEventHandler;
+	onFocus: FocusEventHandler<HTMLInputElement>;
 	readOnly: boolean;
 	thousandsSeparator?: ThousandsSeparator[];
 	thousandsSeparators: ISelectProps<ThousandsSeparator>[];
 	value: INumericInputMaskValue;
 	visible: boolean;
-	onBlur: FocusEventHandler<HTMLInputElement>;
-	onChange: FieldChangeEventHandler;
-	onFocus: FocusEventHandler<HTMLInputElement>;
 }
 
 export interface ISymbols {
@@ -110,10 +113,12 @@ const NumericInputMask: React.FC<IProps> = ({
 			return {
 				...item,
 				disabled: item.reference === decimalSymbol?.[0],
-				label: item.label?.[editingLanguageId] ?? item.label,
+				label:
+					item.label?.[Liferay.ThemeDisplay.getLanguageId()] ??
+					item.label,
 			};
 		});
-	}, [decimalSymbol, editingLanguageId, thousandsSeparatorsProp]);
+	}, [decimalSymbol, thousandsSeparatorsProp]);
 
 	useEffect(() => {
 		const newValue =
@@ -187,6 +192,7 @@ const NumericInputMask: React.FC<IProps> = ({
 						visible={visible}
 					/>
 				</div>
+
 				<div className="pl-2 w-50">
 					<Select
 						label={Liferay.Language.get('decimal-separator')}
@@ -220,6 +226,7 @@ const NumericInputMask: React.FC<IProps> = ({
 						<label htmlFor="decimal_places ">
 							{Liferay.Language.get('decimal-places')}
 						</label>
+
 						<ClayInput
 							className="ddm-field-text"
 							disabled={readOnly}
@@ -268,6 +275,7 @@ const NumericInputMask: React.FC<IProps> = ({
 			)}
 			<Text
 				label={Liferay.Language.get('prefix-or-suffix')}
+				locale={editingLanguageId}
 				maxLength={10}
 				name="append"
 				onBlur={onBlur}
@@ -290,6 +298,7 @@ const NumericInputMask: React.FC<IProps> = ({
 			/>
 			{append !== '' && (
 				<Radio
+					editingLanguageId={editingLanguageId}
 					inline={false}
 					name="appendType"
 					onBlur={onBlur}

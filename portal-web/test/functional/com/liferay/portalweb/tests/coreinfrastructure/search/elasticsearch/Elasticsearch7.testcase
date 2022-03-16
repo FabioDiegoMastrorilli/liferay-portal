@@ -23,7 +23,7 @@ definition {
 
 			DMDocument.tearDownCP();
 
-			Page.tearDownCP();
+			PagesAdmin.tearDownCP();
 		}
 	}
 
@@ -57,7 +57,9 @@ definition {
 		Portlet.addPG(portletName = "Asset Publisher");
 
 		var companyId = JSONCompany.getCompanyId();
+
 		var port = Elasticsearch.getServerPort();
+
 		var portalHostname = PropsUtil.get("portal.hostname");
 
 		var curl = '''
@@ -125,6 +127,7 @@ definition {
 			locator1 = "SearchResults#ASSET_ENTRY_TABLE_TITLE_SPECIFIC");
 	}
 
+	@priority = "5"
 	test AssertSearchAdmin {
 		property test.name.skip.portal.instance = "Elasticsearch7#AssertSearchAdmin";
 
@@ -134,6 +137,7 @@ definition {
 			portlet = "Search");
 
 		var clientVersion = Elasticsearch.getClientVersion();
+
 		var serverVersion = Elasticsearch.getServerVersion();
 
 		SearchAdministration.assertEngineVendorAndVersions(
@@ -153,6 +157,7 @@ definition {
 			value1 = "liferay-0");
 
 		var companyId = JSONCompany.getCompanyId();
+
 		var liferayIndexName = "liferay-${companyId}";
 
 		Click(
@@ -227,6 +232,7 @@ definition {
 			value1 = "_explanation");
 	}
 
+	@priority = "5"
 	test AssertSidecarAutoInstall {
 		property delete.sidecar.bundle = "true";
 		property embedded.elasticsearch.only = "true";
@@ -248,6 +254,7 @@ definition {
 			searchAssetType = "Web Content Article");
 	}
 
+	@priority = "4"
 	test AssertSidecarDoesNotCluster {
 		property app.server.bundles.size = "1";
 		property cluster.enabled = "true";
@@ -292,12 +299,12 @@ definition {
 			value1 = "1");
 
 		AssertTextEquals.assertPartialText(
-			key_connectionID = "__SIDECAR__",
+			key_connectionId = "__SIDECAR__",
 			locator1 = "SearchAdmin#NODE_COUNT",
 			value1 = "NODES (1)");
 
 		AssertElementPresent(
-			key_connectionID = "__SIDECAR__",
+			key_connectionId = "__SIDECAR__",
 			key_nodeName = "liferay",
 			locator1 = "SearchAdmin#NODE_NAME");
 
@@ -327,12 +334,12 @@ definition {
 			value1 = "1");
 
 		AssertTextEquals.assertPartialText(
-			key_connectionID = "__SIDECAR__",
+			key_connectionId = "__SIDECAR__",
 			locator1 = "SearchAdmin#NODE_COUNT",
 			value1 = "NODES (1)");
 
 		AssertElementPresent(
-			key_connectionID = "__SIDECAR__",
+			key_connectionId = "__SIDECAR__",
 			key_nodeName = "liferay",
 			locator1 = "SearchAdmin#NODE_NAME");
 
@@ -361,7 +368,7 @@ definition {
 		Navigator.openURL();
 
 		ProductMenu.gotoPortlet(
-			category = "Content &amp; Data",
+			category = "Content & Data",
 			portlet = "Message Boards");
 
 		MessageboardsThread.addCP(
@@ -371,7 +378,7 @@ definition {
 		Navigator.openURL();
 
 		ProductMenu.gotoPortlet(
-			category = "Content &amp; Data",
+			category = "Content & Data",
 			portlet = "Documents and Media");
 
 		DMDocument.addCP(
@@ -404,6 +411,7 @@ definition {
 			searchAssetType = "Message Boards Message");
 	}
 
+	@priority = "5"
 	test MultipleConnectionsSmokeTest {
 		property elasticsearch.multiple.connections = "true";
 		property portal.upstream = "quarantine";
@@ -416,12 +424,12 @@ definition {
 			value1 = "2");
 
 		AssertTextEquals.assertPartialText(
-			key_connectionID = "__REMOTE__",
+			key_connectionId = "__REMOTE__",
 			locator1 = "SearchAdmin#CLUSTER_NAME",
 			value1 = "LiferayElasticsearchCluster");
 
 		AssertTextEquals.assertPartialText(
-			key_connectionID = "connection2",
+			key_connectionId = "connection2",
 			locator1 = "SearchAdmin#CLUSTER_NAME",
 			value1 = "LiferayElasticsearchClusterTwo");
 
@@ -518,6 +526,7 @@ definition {
 		Elasticsearch.viewClusterStatus(clusterStatus = "&quot;cluster_name&quot; : &quot;LiferayElasticsearchCluster1&quot;");
 	}
 
+	@priority = "5"
 	test SearchWithNonLiferayIndex {
 		property embedded.elasticsearch.only = "true";
 		property test.name.skip.portal.instance = "Elasticsearch7#SearchWithNonLiferayIndex";
@@ -572,6 +581,7 @@ definition {
 			value1 = "1 results for bicycle");
 	}
 
+	@priority = "4"
 	test SwitchSidecarToRemote {
 		property embedded.elasticsearch.only = "true";
 		property test.name.skip.portal.instance = "Elasticsearch7#SwitchSidecarToRemote";
@@ -581,16 +591,25 @@ definition {
 			groupName = "Guest",
 			title = "WC WebContent Title");
 
+		var baseURL = PropsUtil.get("portal.url");
+
+		ServerAdministration.openServerAdmin();
+
+		ServerAdministration.addCategoryLogLevels(
+			categoryLevel = "INFO",
+			categoryName = "com.liferay.portal.search.elasticsearch7.internal.connection");
+
 		AntCommand(
 			locator1 = "build-test-elasticsearch7.xml",
 			value1 = "start-elasticsearch");
 
 		WaitForConsoleTextPresent(value1 = "Stopping sidecar Elasticsearch");
 
+		WaitForConsoleTextPresent(value1 = "Returning connection with ID: __REMOTE__");
+
 		// LRCI-2401
 
 		//Navigator.openSpecificURL(url = "http://localhost:9201");
-
 		//AssertTextNotPresent(value1 = "cluster_name");
 
 		Navigator.openURL();
@@ -598,6 +617,7 @@ definition {
 		SearchAdministration.openSearchAdmin();
 
 		var clientVersion = Elasticsearch.getClientVersion();
+
 		var serverVersion = Elasticsearch.getServerVersion();
 
 		SearchAdministration.assertEngineVendorAndVersions(
@@ -684,7 +704,7 @@ definition {
 		SearchAdministration.openSearchAdmin();
 
 		AssertTextEquals.assertPartialText(
-			key_connectionID = "__SIDECAR__",
+			key_connectionId = "__SIDECAR__",
 			locator1 = "SearchAdmin#CLUSTER_NAME",
 			value1 = "LiferayElasticsearchCluster1");
 

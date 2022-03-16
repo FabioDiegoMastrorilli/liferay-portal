@@ -34,7 +34,12 @@
 <!-- SETTINGS NAVIGATION -->
 <tr>
 	<td>SETTINGS_NAVIGATION</td>
-	<td>//*[contains(@class, 'btn-link') and contains(@href,'${key_SettingsNavigation}')]</td>
+	<td>//*[contains(@class, 'btn-link') and contains(@href,'${key_settingsNavigation}')]</td>
+	<td></td>
+</tr>
+<tr>
+	<td>DEFINITIONS_OPTIONS</td>
+	<td>//a[contains(@href,'${key_definitionsOptions}')]</td>
 	<td></td>
 </tr>
 <!-- SETTINGS TOOLBAR -->
@@ -66,22 +71,22 @@
 </tr>
 <tr>
 	<td>KEYWORD_CHECKBOX</td>
-	<td>//h4[text()='${key_KeywordName}']/parent::td/preceding-sibling::td//input</td>
+	<td>//h4[text()='${key_keywordName}']/parent::td/preceding-sibling::td//input</td>
 	<td></td>
 </tr>
 <tr>
 	<td>KEYWORD_NAME_BY_INDEX</td>
-	<td>//tr[${key_index}]//*[contains(@class,'table-title') and (text()='${key_KeywordName}')]</td>
+	<td>//tr[${key_index}]//*[contains(@class,'table-title') and (text()='${key_keywordName}')]</td>
 	<td></td>
 </tr>
 <tr>
 	<td>KEYWORD_DELETE_ICON</td>
-	<td>//h4[text()='${key_KeywordName}']/parent::td/following-sibling::td[contains(@class,'row-inline-actions')]/span/button</td>
+	<td>//h4[text()='${key_keywordName}']/parent::td/following-sibling::td[contains(@class,'row-inline-actions')]/span/button</td>
 	<td></td>
 </tr>
 <tr>
 	<td>KEYWORD_NAME</td>
-	<td>//*[contains(@class,'table-title') and (text()='${key_KeywordName}')]</td>
+	<td>//*[contains(@class,'table-title') and (text()='${key_keywordName}')]</td>
 	<td></td>
 </tr>
 <tr>
@@ -103,6 +108,26 @@
 <tr>
 	<td>TOKEN_INPUT_FIELD</td>
 	<td>//input</td>
+	<td></td>
+</tr>
+<tr>
+	<td>COPY_TOKEN_BUTTON</td>
+	<td>//button[@aria-label='Click to Copy']</td>
+	<td></td>
+</tr>
+<tr>
+	<td>FIX_PACK_DROPDOWN</td>
+	<td>//select[contains(@class,'form-control')]//option[text()='${key_version}']</td>
+	<td></td>
+</tr>
+<tr>
+	<td>MODAL_SCREEN</td>
+	<td>//div[contains(@class,'onboarding-base-screen-root')]</td>
+	<td></td>
+</tr>
+<tr>
+	<td>CLOSE_ONBOARDING_MODAL</td>
+	<td>//button[contains(@class,'close')]</td>
 	<td></td>
 </tr>
 <tr>
@@ -134,7 +159,7 @@
 </tr>
 <tr>
 	<td>DATA_SOURCE_STATUS</td>
-	<td>//div[contains(@class,'data-source-status-root')]//span[text()='${key_dataSourceStatus}']</td>
+	<td>//*[contains(text(),'${key_sectionStatus}')]/../..//*[text()='${key_dataSourceStatus}']</td>
 	<td></td>
 </tr>
 <tr>
@@ -261,7 +286,7 @@
 </tr>
 <tr>
 	<td>PROPERTIES_DEFAULT_SECONDARY_DESCRIPTION</td>
-	<td>//span[contains(@class,'secondary-info') and contains(text(),'Create a new property to get started')]</td>
+	<td>//*[contains(text(),'${key_messageValue}')]</td>
 	<td></td>
 </tr>
 <tr>
@@ -384,6 +409,12 @@
 <tr>
 	<td>VIEW_STATUS_PENDING</td>
 	<td>//span[text()='Pending']</td>
+	<td></td>
+</tr>
+<!-- CONFIGURE CSV -->
+<tr>
+	<td>DATA_SOURCE_FIELD_NAME</td>
+	<td>xpath=(//button[contains(@class,'show-caret') and contains(.,'${key_fieldName}')])[${key_index}]</td>
 	<td></td>
 </tr>
 </tbody>

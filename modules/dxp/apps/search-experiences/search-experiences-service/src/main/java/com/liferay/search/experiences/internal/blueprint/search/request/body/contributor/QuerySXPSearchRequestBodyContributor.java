@@ -25,9 +25,10 @@ import com.liferay.portal.search.rescore.Rescore.ScoreMode;
 import com.liferay.portal.search.rescore.RescoreBuilder;
 import com.liferay.portal.search.rescore.RescoreBuilderFactory;
 import com.liferay.portal.search.searcher.SearchRequestBuilder;
+import com.liferay.search.experiences.blueprint.exception.InvalidQueryEntryException;
 import com.liferay.search.experiences.internal.blueprint.condition.SXPConditionEvaluator;
-import com.liferay.search.experiences.internal.blueprint.exception.InvalidQueryEntryException;
 import com.liferay.search.experiences.internal.blueprint.parameter.SXPParameterData;
+import com.liferay.search.experiences.internal.blueprint.property.PropertyValidator;
 import com.liferay.search.experiences.internal.blueprint.query.QueryConverter;
 import com.liferay.search.experiences.rest.dto.v1_0.Clause;
 import com.liferay.search.experiences.rest.dto.v1_0.Condition;
@@ -35,7 +36,6 @@ import com.liferay.search.experiences.rest.dto.v1_0.Configuration;
 import com.liferay.search.experiences.rest.dto.v1_0.QueryConfiguration;
 import com.liferay.search.experiences.rest.dto.v1_0.QueryEntry;
 import com.liferay.search.experiences.rest.dto.v1_0.Rescore;
-import com.liferay.search.experiences.rest.dto.v1_0.SXPBlueprint;
 
 import java.beans.ExceptionListener;
 
@@ -60,10 +60,8 @@ public class QuerySXPSearchRequestBodyContributor
 
 	@Override
 	public void contribute(
-		SearchRequestBuilder searchRequestBuilder, SXPBlueprint sxpBlueprint,
+		Configuration configuration, SearchRequestBuilder searchRequestBuilder,
 		SXPParameterData sxpParameterData) {
-
-		Configuration configuration = sxpBlueprint.getConfiguration();
 
 		QueryConfiguration queryConfiguration =
 			configuration.getQueryConfiguration();
@@ -97,16 +95,25 @@ public class QuerySXPSearchRequestBodyContributor
 	}
 
 	private boolean _evaluate(
-		Condition condition, SXPParameterData sxpParameterData) {
+		Condition condition, RuntimeException runtimeException,
+		SXPParameterData sxpParameterData) {
 
 		if (condition == null) {
 			return true;
 		}
 
-		SXPConditionEvaluator sxpConditionEvaluator = new SXPConditionEvaluator(
-			sxpParameterData);
+		try {
+			SXPConditionEvaluator sxpConditionEvaluator =
+				new SXPConditionEvaluator(sxpParameterData);
 
-		return sxpConditionEvaluator.evaluate(condition);
+			return sxpConditionEvaluator.evaluate(
+				PropertyValidator.validate(condition));
+		}
+		catch (Exception exception) {
+			runtimeException.addSuppressed(exception);
+
+			throw runtimeException;
+		}
 	}
 
 	private <X, Y> void _process(
@@ -151,14 +158,19 @@ public class QuerySXPSearchRequestBodyContributor
 		SearchRequestBuilder searchRequestBuilder,
 		SXPParameterData sxpParameterData) {
 
-		if (!GetterUtil.getBoolean(queryEntry.getEnabled(), true) ||
-			!_evaluate(queryEntry.getCondition(), sxpParameterData)) {
-
+		if (!GetterUtil.getBoolean(queryEntry.getEnabled(), true)) {
 			return;
 		}
 
 		InvalidQueryEntryException invalidQueryEntryException =
 			InvalidQueryEntryException.at(index);
+
+		if (!_evaluate(
+				queryEntry.getCondition(), invalidQueryEntryException,
+				sxpParameterData)) {
+
+			return;
+		}
 
 		ExceptionListener exceptionListener =
 			invalidQueryEntryException::addSuppressed;

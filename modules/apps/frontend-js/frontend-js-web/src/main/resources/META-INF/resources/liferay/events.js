@@ -26,10 +26,11 @@
 		(id, fn) => {
 			var element = A.config.doc.getElementById(id);
 
-			if (!element || element.id != id) {
+			if (!element || element.id !== id) {
 				return;
 			}
 
+			// eslint-disable-next-line @liferay/aui/no-one
 			var guid = A.one(element).addClass('lfr-delegate-click').guid();
 
 			CLICK_EVENTS[guid] = fn;
@@ -69,6 +70,7 @@
 
 				Liferay.fire('submitForm', {
 					action,
+					// eslint-disable-next-line @liferay/aui/no-one
 					form: A.one(form),
 					singleSubmit,
 					validate: validate !== false,

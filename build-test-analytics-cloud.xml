@@ -24,12 +24,6 @@
 
 			<replaceregexp
 				file="${analytics.cloud.docker.test.yaml}"
-				match="image: liferay\/com-liferay-osb-faro\:latest"
-				replace="image: ${analytics.cloud.faro.image.name}"
-			/>
-
-			<replaceregexp
-				file="${analytics.cloud.docker.test.yaml}"
 				match="\&quot;8080:8080\&quot;"
 				replace="&quot;${analytics.cloud.faro.dxp.port}:8080&quot;"
 			/>
@@ -188,18 +182,19 @@ networks:
 	</macrodef>
 
 	<macrodef name="pull-docker-image-dependencies">
+		<attribute default="" name="analytics.cloud.image.names.excludes" />
 		<attribute name="analytics.cloud.repository.dir" />
 
 		<sequential>
+			<local name="analytics.cloud.image.names.excludes" />
+
+			<property name="analytics.cloud.image.names.excludes" value="@{analytics.cloud.image.names.excludes}" />
+
 			<beanshell>
 				<![CDATA[
 					import com.liferay.jenkins.results.parser.JenkinsResultsParserUtil;
 
 					String excludedImageNames = project.getProperty("analytics.cloud.image.names.excludes");
-
-					if (excludedImageNames == null) {
-						excludedImageNames = "";
-					}
 
 					JenkinsResultsParserUtil.pullDockerImageDependencies(new File("@{analytics.cloud.repository.dir}"), excludedImageNames.split(","));
 				]]>
@@ -223,12 +218,6 @@ networks:
 
 			<replaceregexp
 				file="${analytics.cloud.faro.dir}/build-ext.gradle"
-				match="def dockerImageId = \&quot;([^\&quot;]+)\&quot;"
-				replace="def dockerImageId = \&quot;${analytics.cloud.faro.image.name}\&quot;"
-			/>
-
-			<replaceregexp
-				file="${analytics.cloud.faro.dir}/build-ext.gradle"
 				match="network \&quot;([^\&quot;]+)\&quot;"
 				replace="network \&quot;${analytics.cloud.project.name}_default\&quot;"
 			/>
@@ -246,7 +235,10 @@ OSB_FARO_FRONTEND_URL=${analytics.cloud.faro.frontend.url}</echo>
 			<if>
 				<equals arg1="${analytics.cloud.asah.build}" arg2="true" />
 				<then>
-					<pull-docker-image-dependencies analytics.cloud.repository.dir="${analytics.cloud.asah.dir}" />
+					<pull-docker-image-dependencies
+						analytics.cloud.image.names.excludes="${analytics.cloud.asah.image.names.excludes}"
+						analytics.cloud.repository.dir="${analytics.cloud.asah.dir}"
+					/>
 
 					<execute dir="${analytics.cloud.asah.dir}">
 						./gradlew jar -Dliferay.ci=true
@@ -261,14 +253,32 @@ OSB_FARO_FRONTEND_URL=${analytics.cloud.faro.frontend.url}</echo>
 			<if>
 				<equals arg1="${analytics.cloud.faro.build}" arg2="true" />
 				<then>
-					<pull-docker-image-dependencies analytics.cloud.repository.dir="${analytics.cloud.faro.dir}" />
+					<pull-docker-image-dependencies
+						analytics.cloud.image.names.excludes="${analytics.cloud.faro.image.names.excludes}"
+						analytics.cloud.repository.dir="${analytics.cloud.faro.dir}"
+					/>
 
 					<local name="portal.gradlew" />
 
 					<property location="${project.dir}/gradlew" name="portal.gradlew" />
 
+					<loadfile
+						property="analytics.cloud.docker.test.yaml.content"
+						srcfile="${analytics.cloud.docker.test.yaml}"
+					/>
+
+					<propertyregex
+						input="${analytics.cloud.docker.test.yaml.content}"
+						override="true"
+						property="analytics.cloud.faro.tag.name"
+						regexp="[\S\s]*image: (liferay\/com-liferay-osb-faro\:[^\s]+)[\S\s]*"
+						replace="\1"
+					/>
+
 					<execute dir="${analytics.cloud.faro.dir}">
 						${portal.gradlew} createDocker -Pcom.liferay.osb.faro.environment.name=local -Dliferay.ci=true
+
+						docker tag ${analytics.cloud.faro.image.name} ${analytics.cloud.faro.tag.name}
 
 						docker rm ${analytics.cloud.faro.container.name}
 					</execute>

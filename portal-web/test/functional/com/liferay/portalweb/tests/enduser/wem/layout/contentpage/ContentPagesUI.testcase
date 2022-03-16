@@ -39,9 +39,6 @@ definition {
 	@priority = "4"
 	@uitest
 	test FindColorSamplesViaScrollBar {
-		property osgi.module.configuration.file.names = "com.liferay.layout.content.page.editor.web.internal.configuration.FFLayoutContentPageEditorConfiguration.config";
-		property osgi.module.configurations = "tokenOptimizationEnabled=&quot;true&quot;";
-
 		task ("Add a Button fragment to a content page") {
 			ContentPagesNavigator.openEditContentPage(
 				pageName = "Test Page Name",
@@ -73,12 +70,55 @@ definition {
 		}
 	}
 
+	@description = "This is a test for LPS-136412. View collapse style changes in fragment configuration."
+	@priority = "5"
+	test ViewCollapseStyleInFragmentConfiguration {
+		task ("Add a dropdown fragment to a content page") {
+			ContentPagesNavigator.openEditContentPage(
+				pageName = "Test Page Name",
+				siteName = "Test Site Name");
+
+			PageEditor.addFragment(
+				collectionName = "Basic Components",
+				fragmentName = "Dropdown");
+		}
+
+		task ("Go to configuration") {
+			PageEditor.gotoConfiguration(fragmentName = "Dropdown");
+		}
+
+		task ("Assert the styles are collapsible and are listed in groups") {
+			Panel.collapsePanel(panel = "Dropdown Options");
+
+			Panel.collapsePanel(panel = "Frame");
+
+			AssertElementNotPresent(locator1 = "//div[contains(@class,'fieldset')]");
+
+			Panel.expandPanel(panel = "Dropdown Options");
+
+			Panel.expandPanel(panel = "Frame");
+		}
+
+		task ("Go to Styles and assert the styles are collapsible and are listed in groups") {
+			Navigator.gotoNavTab(navTab = "Styles");
+
+			for (var key_panel : list "Margin,Padding,Text,Background,Borders,Effects") {
+				Panel.collapsePanel(panel = "${key_panel}");
+			}
+
+			AssertElementNotPresent(locator1 = "//div[contains(@class,'fieldset')]");
+
+			for (var key_panel : list "Margin,Padding,Text,Background,Borders,Effects") {
+				Panel.expandPanel(panel = "${key_panel}");
+			}
+		}
+	}
+
 	@description = "This is a test for LPS-140266. The color samples are sorted by the token definition doc order and sections."
 	@priority = "5"
 	@uitest
 	test ViewOrderOfColorSamplesInColorPicker {
-		property osgi.module.configuration.file.names = "com.liferay.layout.content.page.editor.web.internal.configuration.FFLayoutContentPageEditorConfiguration.config";
-		property osgi.module.configurations = "tokenOptimizationEnabled=&quot;true&quot;";
+		property portal.acceptance = "true";
 
 		task ("Add a Button fragment to a content page") {
 			ContentPagesNavigator.openEditContentPage(
@@ -172,9 +212,9 @@ definition {
 		}
 
 		task ("Assert the actions order for content pages") {
-			SitePages.openPagesAdmin(siteURLKey = "test-site-name");
+			PagesAdmin.openPagesAdmin(siteURLKey = "test-site-name");
 
-			SitePages.clickPageMenu(pageName = "Test Page Name");
+			PagesAdmin.openPageEllipsisMenu(pageName = "Test Page Name");
 
 			MenuItem.viewOrder(menuItemList = "Edit,Translate,View,-,Preview Draft,Discard Draft,Orphan Widgets,-,Copy Page,Export for Translation,Import Translation,-,Configure,Permissions,-,Delete");
 		}

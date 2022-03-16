@@ -16,7 +16,6 @@ package com.liferay.commerce.discount.model.impl;
 
 import com.liferay.commerce.discount.model.CommerceDiscountCommerceAccountGroupRel;
 import com.liferay.commerce.discount.model.CommerceDiscountCommerceAccountGroupRelModel;
-import com.liferay.commerce.discount.model.CommerceDiscountCommerceAccountGroupRelSoap;
 import com.liferay.expando.kernel.model.ExpandoBridge;
 import com.liferay.expando.kernel.util.ExpandoBridgeFactoryUtil;
 import com.liferay.petra.string.StringBundler;
@@ -42,12 +41,10 @@ import java.lang.reflect.InvocationHandler;
 import java.sql.Blob;
 import java.sql.Types;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.BiConsumer;
@@ -77,6 +74,7 @@ public class CommerceDiscountCommerceAccountGroupRelModelImpl
 	public static final String TABLE_NAME = "CDiscountCAccountGroupRel";
 
 	public static final Object[][] TABLE_COLUMNS = {
+		{"mvccVersion", Types.BIGINT},
 		{"CDiscountCAccountGroupRelId", Types.BIGINT},
 		{"companyId", Types.BIGINT}, {"userId", Types.BIGINT},
 		{"userName", Types.VARCHAR}, {"createDate", Types.TIMESTAMP},
@@ -88,6 +86,7 @@ public class CommerceDiscountCommerceAccountGroupRelModelImpl
 		new HashMap<String, Integer>();
 
 	static {
+		TABLE_COLUMNS_MAP.put("mvccVersion", Types.BIGINT);
 		TABLE_COLUMNS_MAP.put("CDiscountCAccountGroupRelId", Types.BIGINT);
 		TABLE_COLUMNS_MAP.put("companyId", Types.BIGINT);
 		TABLE_COLUMNS_MAP.put("userId", Types.BIGINT);
@@ -99,7 +98,7 @@ public class CommerceDiscountCommerceAccountGroupRelModelImpl
 	}
 
 	public static final String TABLE_SQL_CREATE =
-		"create table CDiscountCAccountGroupRel (CDiscountCAccountGroupRelId LONG not null primary key,companyId LONG,userId LONG,userName VARCHAR(75) null,createDate DATE null,modifiedDate DATE null,commerceDiscountId LONG,commerceAccountGroupId LONG)";
+		"create table CDiscountCAccountGroupRel (mvccVersion LONG default 0 not null,CDiscountCAccountGroupRelId LONG not null primary key,companyId LONG,userId LONG,userName VARCHAR(75) null,createDate DATE null,modifiedDate DATE null,commerceDiscountId LONG,commerceAccountGroupId LONG)";
 
 	public static final String TABLE_SQL_DROP =
 		"drop table CDiscountCAccountGroupRel";
@@ -152,65 +151,6 @@ public class CommerceDiscountCommerceAccountGroupRelModelImpl
 	 */
 	@Deprecated
 	public static final long CREATEDATE_COLUMN_BITMASK = 4L;
-
-	/**
-	 * Converts the soap model instance into a normal model instance.
-	 *
-	 * @param soapModel the soap model instance to convert
-	 * @return the normal model instance
-	 * @deprecated As of Athanasius (7.3.x), with no direct replacement
-	 */
-	@Deprecated
-	public static CommerceDiscountCommerceAccountGroupRel toModel(
-		CommerceDiscountCommerceAccountGroupRelSoap soapModel) {
-
-		if (soapModel == null) {
-			return null;
-		}
-
-		CommerceDiscountCommerceAccountGroupRel model =
-			new CommerceDiscountCommerceAccountGroupRelImpl();
-
-		model.setCommerceDiscountCommerceAccountGroupRelId(
-			soapModel.getCommerceDiscountCommerceAccountGroupRelId());
-		model.setCompanyId(soapModel.getCompanyId());
-		model.setUserId(soapModel.getUserId());
-		model.setUserName(soapModel.getUserName());
-		model.setCreateDate(soapModel.getCreateDate());
-		model.setModifiedDate(soapModel.getModifiedDate());
-		model.setCommerceDiscountId(soapModel.getCommerceDiscountId());
-		model.setCommerceAccountGroupId(soapModel.getCommerceAccountGroupId());
-
-		return model;
-	}
-
-	/**
-	 * Converts the soap model instances into normal model instances.
-	 *
-	 * @param soapModels the soap model instances to convert
-	 * @return the normal model instances
-	 * @deprecated As of Athanasius (7.3.x), with no direct replacement
-	 */
-	@Deprecated
-	public static List<CommerceDiscountCommerceAccountGroupRel> toModels(
-		CommerceDiscountCommerceAccountGroupRelSoap[] soapModels) {
-
-		if (soapModels == null) {
-			return null;
-		}
-
-		List<CommerceDiscountCommerceAccountGroupRel> models =
-			new ArrayList<CommerceDiscountCommerceAccountGroupRel>(
-				soapModels.length);
-
-		for (CommerceDiscountCommerceAccountGroupRelSoap soapModel :
-				soapModels) {
-
-			models.add(toModel(soapModel));
-		}
-
-		return models;
-	}
 
 	public static final long LOCK_EXPIRATION_TIME = GetterUtil.getLong(
 		com.liferay.commerce.discount.service.util.ServiceProps.get(
@@ -358,6 +298,13 @@ public class CommerceDiscountCommerceAccountGroupRelModelImpl
 					 BiConsumer<CommerceDiscountCommerceAccountGroupRel, ?>>();
 
 		attributeGetterFunctions.put(
+			"mvccVersion",
+			CommerceDiscountCommerceAccountGroupRel::getMvccVersion);
+		attributeSetterBiConsumers.put(
+			"mvccVersion",
+			(BiConsumer<CommerceDiscountCommerceAccountGroupRel, Long>)
+				CommerceDiscountCommerceAccountGroupRel::setMvccVersion);
+		attributeGetterFunctions.put(
 			"commerceDiscountCommerceAccountGroupRelId",
 			CommerceDiscountCommerceAccountGroupRel::
 				getCommerceDiscountCommerceAccountGroupRelId);
@@ -418,6 +365,21 @@ public class CommerceDiscountCommerceAccountGroupRelModelImpl
 			attributeGetterFunctions);
 		_attributeSetterBiConsumers = Collections.unmodifiableMap(
 			(Map)attributeSetterBiConsumers);
+	}
+
+	@JSON
+	@Override
+	public long getMvccVersion() {
+		return _mvccVersion;
+	}
+
+	@Override
+	public void setMvccVersion(long mvccVersion) {
+		if (_columnOriginalValues == Collections.EMPTY_MAP) {
+			_setColumnOriginalValues();
+		}
+
+		_mvccVersion = mvccVersion;
 	}
 
 	@JSON
@@ -650,6 +612,8 @@ public class CommerceDiscountCommerceAccountGroupRelModelImpl
 			commerceDiscountCommerceAccountGroupRelImpl =
 				new CommerceDiscountCommerceAccountGroupRelImpl();
 
+		commerceDiscountCommerceAccountGroupRelImpl.setMvccVersion(
+			getMvccVersion());
 		commerceDiscountCommerceAccountGroupRelImpl.
 			setCommerceDiscountCommerceAccountGroupRelId(
 				getCommerceDiscountCommerceAccountGroupRelId());
@@ -677,6 +641,8 @@ public class CommerceDiscountCommerceAccountGroupRelModelImpl
 			commerceDiscountCommerceAccountGroupRelImpl =
 				new CommerceDiscountCommerceAccountGroupRelImpl();
 
+		commerceDiscountCommerceAccountGroupRelImpl.setMvccVersion(
+			this.<Long>getColumnOriginalValue("mvccVersion"));
 		commerceDiscountCommerceAccountGroupRelImpl.
 			setCommerceDiscountCommerceAccountGroupRelId(
 				this.<Long>getColumnOriginalValue(
@@ -781,6 +747,9 @@ public class CommerceDiscountCommerceAccountGroupRelModelImpl
 		CommerceDiscountCommerceAccountGroupRelCacheModel
 			commerceDiscountCommerceAccountGroupRelCacheModel =
 				new CommerceDiscountCommerceAccountGroupRelCacheModel();
+
+		commerceDiscountCommerceAccountGroupRelCacheModel.mvccVersion =
+			getMvccVersion();
 
 		commerceDiscountCommerceAccountGroupRelCacheModel.
 			commerceDiscountCommerceAccountGroupRelId =
@@ -928,6 +897,7 @@ public class CommerceDiscountCommerceAccountGroupRelModelImpl
 
 	}
 
+	private long _mvccVersion;
 	private long _commerceDiscountCommerceAccountGroupRelId;
 	private long _companyId;
 	private long _userId;
@@ -967,6 +937,7 @@ public class CommerceDiscountCommerceAccountGroupRelModelImpl
 	private void _setColumnOriginalValues() {
 		_columnOriginalValues = new HashMap<String, Object>();
 
+		_columnOriginalValues.put("mvccVersion", _mvccVersion);
 		_columnOriginalValues.put(
 			"CDiscountCAccountGroupRelId",
 			_commerceDiscountCommerceAccountGroupRelId);
@@ -1003,21 +974,23 @@ public class CommerceDiscountCommerceAccountGroupRelModelImpl
 	static {
 		Map<String, Long> columnBitmasks = new HashMap<>();
 
-		columnBitmasks.put("CDiscountCAccountGroupRelId", 1L);
+		columnBitmasks.put("mvccVersion", 1L);
 
-		columnBitmasks.put("companyId", 2L);
+		columnBitmasks.put("CDiscountCAccountGroupRelId", 2L);
 
-		columnBitmasks.put("userId", 4L);
+		columnBitmasks.put("companyId", 4L);
 
-		columnBitmasks.put("userName", 8L);
+		columnBitmasks.put("userId", 8L);
 
-		columnBitmasks.put("createDate", 16L);
+		columnBitmasks.put("userName", 16L);
 
-		columnBitmasks.put("modifiedDate", 32L);
+		columnBitmasks.put("createDate", 32L);
 
-		columnBitmasks.put("commerceDiscountId", 64L);
+		columnBitmasks.put("modifiedDate", 64L);
 
-		columnBitmasks.put("commerceAccountGroupId", 128L);
+		columnBitmasks.put("commerceDiscountId", 128L);
+
+		columnBitmasks.put("commerceAccountGroupId", 256L);
 
 		_columnBitmasks = Collections.unmodifiableMap(columnBitmasks);
 	}

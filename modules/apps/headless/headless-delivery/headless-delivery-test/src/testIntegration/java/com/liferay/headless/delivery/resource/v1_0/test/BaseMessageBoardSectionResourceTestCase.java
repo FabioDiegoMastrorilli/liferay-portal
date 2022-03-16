@@ -22,6 +22,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.util.ISO8601DateFormat;
 
+import com.liferay.headless.delivery.client.dto.v1_0.Field;
 import com.liferay.headless.delivery.client.dto.v1_0.MessageBoardSection;
 import com.liferay.headless.delivery.client.http.HttpInvoker;
 import com.liferay.headless.delivery.client.pagination.Page;
@@ -424,10 +425,10 @@ public abstract class BaseMessageBoardSectionResourceTestCase {
 	}
 
 	@Test
-	public void testPutMessageBoardSectionPermission() throws Exception {
+	public void testPutMessageBoardSectionPermissionsPage() throws Exception {
 		@SuppressWarnings("PMD.UnusedLocalVariable")
 		MessageBoardSection messageBoardSection =
-			testPutMessageBoardSectionPermission_addMessageBoardSection();
+			testPutMessageBoardSectionPermissionsPage_addMessageBoardSection();
 
 		@SuppressWarnings("PMD.UnusedLocalVariable")
 		com.liferay.portal.kernel.model.Role role = RoleTestUtil.addRole(
@@ -436,7 +437,7 @@ public abstract class BaseMessageBoardSectionResourceTestCase {
 		assertHttpResponseStatusCode(
 			200,
 			messageBoardSectionResource.
-				putMessageBoardSectionPermissionHttpResponse(
+				putMessageBoardSectionPermissionsPageHttpResponse(
 					messageBoardSection.getId(),
 					new Permission[] {
 						new Permission() {
@@ -450,7 +451,7 @@ public abstract class BaseMessageBoardSectionResourceTestCase {
 		assertHttpResponseStatusCode(
 			404,
 			messageBoardSectionResource.
-				putMessageBoardSectionPermissionHttpResponse(
+				putMessageBoardSectionPermissionsPageHttpResponse(
 					0L,
 					new Permission[] {
 						new Permission() {
@@ -463,7 +464,7 @@ public abstract class BaseMessageBoardSectionResourceTestCase {
 	}
 
 	protected MessageBoardSection
-			testPutMessageBoardSectionPermission_addMessageBoardSection()
+			testPutMessageBoardSectionPermissionsPage_addMessageBoardSection()
 		throws Exception {
 
 		return messageBoardSectionResource.postSiteMessageBoardSection(
@@ -623,6 +624,44 @@ public abstract class BaseMessageBoardSectionResourceTestCase {
 	}
 
 	@Test
+	public void testGetMessageBoardSectionMessageBoardSectionsPageWithFilterDoubleEquals()
+		throws Exception {
+
+		List<EntityField> entityFields = getEntityFields(
+			EntityField.Type.DOUBLE);
+
+		if (entityFields.isEmpty()) {
+			return;
+		}
+
+		Long parentMessageBoardSectionId =
+			testGetMessageBoardSectionMessageBoardSectionsPage_getParentMessageBoardSectionId();
+
+		MessageBoardSection messageBoardSection1 =
+			testGetMessageBoardSectionMessageBoardSectionsPage_addMessageBoardSection(
+				parentMessageBoardSectionId, randomMessageBoardSection());
+
+		@SuppressWarnings("PMD.UnusedLocalVariable")
+		MessageBoardSection messageBoardSection2 =
+			testGetMessageBoardSectionMessageBoardSectionsPage_addMessageBoardSection(
+				parentMessageBoardSectionId, randomMessageBoardSection());
+
+		for (EntityField entityField : entityFields) {
+			Page<MessageBoardSection> page =
+				messageBoardSectionResource.
+					getMessageBoardSectionMessageBoardSectionsPage(
+						parentMessageBoardSectionId, null, null,
+						getFilterString(
+							entityField, "eq", messageBoardSection1),
+						Pagination.of(1, 2), null);
+
+			assertEquals(
+				Collections.singletonList(messageBoardSection1),
+				(List<MessageBoardSection>)page.getItems());
+		}
+	}
+
+	@Test
 	public void testGetMessageBoardSectionMessageBoardSectionsPageWithFilterStringEquals()
 		throws Exception {
 
@@ -728,6 +767,20 @@ public abstract class BaseMessageBoardSectionResourceTestCase {
 				BeanUtils.setProperty(
 					messageBoardSection1, entityField.getName(),
 					DateUtils.addMinutes(new Date(), -2));
+			});
+	}
+
+	@Test
+	public void testGetMessageBoardSectionMessageBoardSectionsPageWithSortDouble()
+		throws Exception {
+
+		testGetMessageBoardSectionMessageBoardSectionsPageWithSort(
+			EntityField.Type.DOUBLE,
+			(entityField, messageBoardSection1, messageBoardSection2) -> {
+				BeanUtils.setProperty(
+					messageBoardSection1, entityField.getName(), 0.1);
+				BeanUtils.setProperty(
+					messageBoardSection2, entityField.getName(), 0.5);
 			});
 	}
 
@@ -993,6 +1046,41 @@ public abstract class BaseMessageBoardSectionResourceTestCase {
 	}
 
 	@Test
+	public void testGetSiteMessageBoardSectionsPageWithFilterDoubleEquals()
+		throws Exception {
+
+		List<EntityField> entityFields = getEntityFields(
+			EntityField.Type.DOUBLE);
+
+		if (entityFields.isEmpty()) {
+			return;
+		}
+
+		Long siteId = testGetSiteMessageBoardSectionsPage_getSiteId();
+
+		MessageBoardSection messageBoardSection1 =
+			testGetSiteMessageBoardSectionsPage_addMessageBoardSection(
+				siteId, randomMessageBoardSection());
+
+		@SuppressWarnings("PMD.UnusedLocalVariable")
+		MessageBoardSection messageBoardSection2 =
+			testGetSiteMessageBoardSectionsPage_addMessageBoardSection(
+				siteId, randomMessageBoardSection());
+
+		for (EntityField entityField : entityFields) {
+			Page<MessageBoardSection> page =
+				messageBoardSectionResource.getSiteMessageBoardSectionsPage(
+					siteId, null, null, null,
+					getFilterString(entityField, "eq", messageBoardSection1),
+					Pagination.of(1, 2), null);
+
+			assertEquals(
+				Collections.singletonList(messageBoardSection1),
+				(List<MessageBoardSection>)page.getItems());
+		}
+	}
+
+	@Test
 	public void testGetSiteMessageBoardSectionsPageWithFilterStringEquals()
 		throws Exception {
 
@@ -1088,6 +1176,20 @@ public abstract class BaseMessageBoardSectionResourceTestCase {
 				BeanUtils.setProperty(
 					messageBoardSection1, entityField.getName(),
 					DateUtils.addMinutes(new Date(), -2));
+			});
+	}
+
+	@Test
+	public void testGetSiteMessageBoardSectionsPageWithSortDouble()
+		throws Exception {
+
+		testGetSiteMessageBoardSectionsPageWithSort(
+			EntityField.Type.DOUBLE,
+			(entityField, messageBoardSection1, messageBoardSection2) -> {
+				BeanUtils.setProperty(
+					messageBoardSection1, entityField.getName(), 0.1);
+				BeanUtils.setProperty(
+					messageBoardSection2, entityField.getName(), 0.5);
 			});
 	}
 
@@ -1332,10 +1434,12 @@ public abstract class BaseMessageBoardSectionResourceTestCase {
 	}
 
 	@Test
-	public void testPutSiteMessageBoardSectionPermission() throws Exception {
+	public void testPutSiteMessageBoardSectionPermissionsPage()
+		throws Exception {
+
 		@SuppressWarnings("PMD.UnusedLocalVariable")
 		MessageBoardSection messageBoardSection =
-			testPutSiteMessageBoardSectionPermission_addMessageBoardSection();
+			testPutSiteMessageBoardSectionPermissionsPage_addMessageBoardSection();
 
 		@SuppressWarnings("PMD.UnusedLocalVariable")
 		com.liferay.portal.kernel.model.Role role = RoleTestUtil.addRole(
@@ -1344,7 +1448,7 @@ public abstract class BaseMessageBoardSectionResourceTestCase {
 		assertHttpResponseStatusCode(
 			200,
 			messageBoardSectionResource.
-				putSiteMessageBoardSectionPermissionHttpResponse(
+				putSiteMessageBoardSectionPermissionsPageHttpResponse(
 					messageBoardSection.getSiteId(),
 					new Permission[] {
 						new Permission() {
@@ -1358,7 +1462,7 @@ public abstract class BaseMessageBoardSectionResourceTestCase {
 		assertHttpResponseStatusCode(
 			404,
 			messageBoardSectionResource.
-				putSiteMessageBoardSectionPermissionHttpResponse(
+				putSiteMessageBoardSectionPermissionsPageHttpResponse(
 					messageBoardSection.getSiteId(),
 					new Permission[] {
 						new Permission() {
@@ -1371,7 +1475,7 @@ public abstract class BaseMessageBoardSectionResourceTestCase {
 	}
 
 	protected MessageBoardSection
-			testPutSiteMessageBoardSectionPermission_addMessageBoardSection()
+			testPutSiteMessageBoardSectionPermissionsPage_addMessageBoardSection()
 		throws Exception {
 
 		return messageBoardSectionResource.postSiteMessageBoardSection(
@@ -2138,13 +2242,19 @@ public abstract class BaseMessageBoardSectionResourceTestCase {
 		}
 
 		if (entityFieldName.equals("numberOfMessageBoardSections")) {
-			throw new IllegalArgumentException(
-				"Invalid entity field " + entityFieldName);
+			sb.append(
+				String.valueOf(
+					messageBoardSection.getNumberOfMessageBoardSections()));
+
+			return sb.toString();
 		}
 
 		if (entityFieldName.equals("numberOfMessageBoardThreads")) {
-			throw new IllegalArgumentException(
-				"Invalid entity field " + entityFieldName);
+			sb.append(
+				String.valueOf(
+					messageBoardSection.getNumberOfMessageBoardThreads()));
+
+			return sb.toString();
 		}
 
 		if (entityFieldName.equals("parentMessageBoardSectionId")) {

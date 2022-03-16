@@ -46,7 +46,7 @@ import com.liferay.portal.kernel.search.Sort;
 import com.liferay.portal.kernel.service.ServiceContext;
 import com.liferay.portal.kernel.systemevent.SystemEvent;
 import com.liferay.portal.kernel.transaction.TransactionCommitCallbackUtil;
-import com.liferay.portal.kernel.util.FriendlyURLNormalizerUtil;
+import com.liferay.portal.kernel.util.FriendlyURLNormalizer;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.HashMapBuilder;
 import com.liferay.portal.kernel.util.LinkedHashMapBuilder;
@@ -61,7 +61,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.concurrent.Callable;
 
 /**
  * @author Andrea Di Giorgi
@@ -80,7 +79,7 @@ public class CPSpecificationOptionLocalServiceImpl
 
 		User user = userLocalService.getUser(userId);
 
-		key = FriendlyURLNormalizerUtil.normalize(key);
+		key = _friendlyURLNormalizer.normalize(key);
 
 		validate(0, user.getCompanyId(), titleMap, key);
 
@@ -222,7 +221,7 @@ public class CPSpecificationOptionLocalServiceImpl
 			cpSpecificationOptionPersistence.findByPrimaryKey(
 				cpSpecificationOptionId);
 
-		key = FriendlyURLNormalizerUtil.normalize(key);
+		key = _friendlyURLNormalizer.normalize(key);
 
 		validate(
 			cpSpecificationOption.getCPSpecificationOptionId(),
@@ -335,15 +334,10 @@ public class CPSpecificationOptionLocalServiceImpl
 		long companyId, long cpSpecificationOptionId) {
 
 		TransactionCommitCallbackUtil.registerCallback(
-			new Callable<Void>() {
+			() -> {
+				_reindexCPDefinitions(companyId, cpSpecificationOptionId);
 
-				@Override
-				public Void call() throws Exception {
-					_reindexCPDefinitions(companyId, cpSpecificationOptionId);
-
-					return null;
-				}
-
+				return null;
 			});
 	}
 
@@ -454,5 +448,8 @@ public class CPSpecificationOptionLocalServiceImpl
 
 	@ServiceReference(type = ExpandoRowLocalService.class)
 	private ExpandoRowLocalService _expandoRowLocalService;
+
+	@ServiceReference(type = FriendlyURLNormalizer.class)
+	private FriendlyURLNormalizer _friendlyURLNormalizer;
 
 }

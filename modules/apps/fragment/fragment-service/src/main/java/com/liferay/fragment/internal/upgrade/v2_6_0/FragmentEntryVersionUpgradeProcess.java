@@ -14,7 +14,6 @@
 
 package com.liferay.fragment.internal.upgrade.v2_6_0;
 
-import com.liferay.fragment.internal.upgrade.v2_6_0.util.FragmentEntryVersionTable;
 import com.liferay.fragment.model.FragmentEntryVersion;
 import com.liferay.petra.string.StringBundler;
 import com.liferay.portal.kernel.upgrade.UpgradeProcess;
@@ -29,14 +28,12 @@ public class FragmentEntryVersionUpgradeProcess extends UpgradeProcess {
 
 	@Override
 	protected void doUpgrade() throws Exception {
-		runSQL(FragmentEntryVersionTable.TABLE_SQL_CREATE);
+		_insertIntoFragmentEntryVersion();
 
-		insertIntoFragmentEntryVersion();
-
-		upgradeFragmentEntryVersionCounter();
+		_upgradeFragmentEntryVersionCounter();
 	}
 
-	protected void insertIntoFragmentEntryVersion() throws Exception {
+	private void _insertIntoFragmentEntryVersion() throws Exception {
 		try (Statement s = connection.createStatement()) {
 			s.execute(
 				StringBundler.concat(
@@ -59,7 +56,7 @@ public class FragmentEntryVersionUpgradeProcess extends UpgradeProcess {
 		}
 	}
 
-	protected void upgradeFragmentEntryVersionCounter() throws Exception {
+	private void _upgradeFragmentEntryVersionCounter() throws Exception {
 		runSQL(
 			StringBundler.concat(
 				"insert into Counter (name, currentId) select '",

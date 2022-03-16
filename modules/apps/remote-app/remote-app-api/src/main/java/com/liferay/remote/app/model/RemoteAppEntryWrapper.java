@@ -45,6 +45,7 @@ public class RemoteAppEntryWrapper
 
 		attributes.put("mvccVersion", getMvccVersion());
 		attributes.put("uuid", getUuid());
+		attributes.put("externalReferenceCode", getExternalReferenceCode());
 		attributes.put("remoteAppEntryId", getRemoteAppEntryId());
 		attributes.put("companyId", getCompanyId());
 		attributes.put("userId", getUserId());
@@ -55,13 +56,20 @@ public class RemoteAppEntryWrapper
 		attributes.put(
 			"customElementHTMLElementName", getCustomElementHTMLElementName());
 		attributes.put("customElementURLs", getCustomElementURLs());
+		attributes.put("customElementUseESM", isCustomElementUseESM());
+		attributes.put("description", getDescription());
 		attributes.put("friendlyURLMapping", getFriendlyURLMapping());
 		attributes.put("iFrameURL", getIFrameURL());
 		attributes.put("instanceable", isInstanceable());
 		attributes.put("name", getName());
 		attributes.put("portletCategoryName", getPortletCategoryName());
 		attributes.put("properties", getProperties());
+		attributes.put("sourceCodeURL", getSourceCodeURL());
 		attributes.put("type", getType());
+		attributes.put("status", getStatus());
+		attributes.put("statusByUserId", getStatusByUserId());
+		attributes.put("statusByUserName", getStatusByUserName());
+		attributes.put("statusDate", getStatusDate());
 
 		return attributes;
 	}
@@ -78,6 +86,13 @@ public class RemoteAppEntryWrapper
 
 		if (uuid != null) {
 			setUuid(uuid);
+		}
+
+		String externalReferenceCode = (String)attributes.get(
+			"externalReferenceCode");
+
+		if (externalReferenceCode != null) {
+			setExternalReferenceCode(externalReferenceCode);
 		}
 
 		Long remoteAppEntryId = (Long)attributes.get("remoteAppEntryId");
@@ -136,6 +151,19 @@ public class RemoteAppEntryWrapper
 			setCustomElementURLs(customElementURLs);
 		}
 
+		Boolean customElementUseESM = (Boolean)attributes.get(
+			"customElementUseESM");
+
+		if (customElementUseESM != null) {
+			setCustomElementUseESM(customElementUseESM);
+		}
+
+		String description = (String)attributes.get("description");
+
+		if (description != null) {
+			setDescription(description);
+		}
+
 		String friendlyURLMapping = (String)attributes.get(
 			"friendlyURLMapping");
 
@@ -174,10 +202,40 @@ public class RemoteAppEntryWrapper
 			setProperties(properties);
 		}
 
+		String sourceCodeURL = (String)attributes.get("sourceCodeURL");
+
+		if (sourceCodeURL != null) {
+			setSourceCodeURL(sourceCodeURL);
+		}
+
 		String type = (String)attributes.get("type");
 
 		if (type != null) {
 			setType(type);
+		}
+
+		Integer status = (Integer)attributes.get("status");
+
+		if (status != null) {
+			setStatus(status);
+		}
+
+		Long statusByUserId = (Long)attributes.get("statusByUserId");
+
+		if (statusByUserId != null) {
+			setStatusByUserId(statusByUserId);
+		}
+
+		String statusByUserName = (String)attributes.get("statusByUserName");
+
+		if (statusByUserName != null) {
+			setStatusByUserName(statusByUserName);
+		}
+
+		Date statusDate = (Date)attributes.get("statusDate");
+
+		if (statusDate != null) {
+			setStatusDate(statusDate);
 		}
 	}
 
@@ -261,9 +319,39 @@ public class RemoteAppEntryWrapper
 		return model.getCustomElementURLs();
 	}
 
+	/**
+	 * Returns the custom element use esm of this remote app entry.
+	 *
+	 * @return the custom element use esm of this remote app entry
+	 */
+	@Override
+	public boolean getCustomElementUseESM() {
+		return model.getCustomElementUseESM();
+	}
+
 	@Override
 	public String getDefaultLanguageId() {
 		return model.getDefaultLanguageId();
+	}
+
+	/**
+	 * Returns the description of this remote app entry.
+	 *
+	 * @return the description of this remote app entry
+	 */
+	@Override
+	public String getDescription() {
+		return model.getDescription();
+	}
+
+	/**
+	 * Returns the external reference code of this remote app entry.
+	 *
+	 * @return the external reference code of this remote app entry
+	 */
+	@Override
+	public String getExternalReferenceCode() {
+		return model.getExternalReferenceCode();
 	}
 
 	/**
@@ -443,6 +531,66 @@ public class RemoteAppEntryWrapper
 	}
 
 	/**
+	 * Returns the source code url of this remote app entry.
+	 *
+	 * @return the source code url of this remote app entry
+	 */
+	@Override
+	public String getSourceCodeURL() {
+		return model.getSourceCodeURL();
+	}
+
+	/**
+	 * Returns the status of this remote app entry.
+	 *
+	 * @return the status of this remote app entry
+	 */
+	@Override
+	public int getStatus() {
+		return model.getStatus();
+	}
+
+	/**
+	 * Returns the status by user ID of this remote app entry.
+	 *
+	 * @return the status by user ID of this remote app entry
+	 */
+	@Override
+	public long getStatusByUserId() {
+		return model.getStatusByUserId();
+	}
+
+	/**
+	 * Returns the status by user name of this remote app entry.
+	 *
+	 * @return the status by user name of this remote app entry
+	 */
+	@Override
+	public String getStatusByUserName() {
+		return model.getStatusByUserName();
+	}
+
+	/**
+	 * Returns the status by user uuid of this remote app entry.
+	 *
+	 * @return the status by user uuid of this remote app entry
+	 */
+	@Override
+	public String getStatusByUserUuid() {
+		return model.getStatusByUserUuid();
+	}
+
+	/**
+	 * Returns the status date of this remote app entry.
+	 *
+	 * @return the status date of this remote app entry
+	 */
+	@Override
+	public Date getStatusDate() {
+		return model.getStatusDate();
+	}
+
+	/**
 	 * Returns the type of this remote app entry.
 	 *
 	 * @return the type of this remote app entry
@@ -493,6 +641,76 @@ public class RemoteAppEntryWrapper
 	}
 
 	/**
+	 * Returns <code>true</code> if this remote app entry is approved.
+	 *
+	 * @return <code>true</code> if this remote app entry is approved; <code>false</code> otherwise
+	 */
+	@Override
+	public boolean isApproved() {
+		return model.isApproved();
+	}
+
+	/**
+	 * Returns <code>true</code> if this remote app entry is custom element use esm.
+	 *
+	 * @return <code>true</code> if this remote app entry is custom element use esm; <code>false</code> otherwise
+	 */
+	@Override
+	public boolean isCustomElementUseESM() {
+		return model.isCustomElementUseESM();
+	}
+
+	/**
+	 * Returns <code>true</code> if this remote app entry is denied.
+	 *
+	 * @return <code>true</code> if this remote app entry is denied; <code>false</code> otherwise
+	 */
+	@Override
+	public boolean isDenied() {
+		return model.isDenied();
+	}
+
+	/**
+	 * Returns <code>true</code> if this remote app entry is a draft.
+	 *
+	 * @return <code>true</code> if this remote app entry is a draft; <code>false</code> otherwise
+	 */
+	@Override
+	public boolean isDraft() {
+		return model.isDraft();
+	}
+
+	/**
+	 * Returns <code>true</code> if this remote app entry is expired.
+	 *
+	 * @return <code>true</code> if this remote app entry is expired; <code>false</code> otherwise
+	 */
+	@Override
+	public boolean isExpired() {
+		return model.isExpired();
+	}
+
+	/**
+	 * Returns <code>true</code> if this remote app entry is inactive.
+	 *
+	 * @return <code>true</code> if this remote app entry is inactive; <code>false</code> otherwise
+	 */
+	@Override
+	public boolean isInactive() {
+		return model.isInactive();
+	}
+
+	/**
+	 * Returns <code>true</code> if this remote app entry is incomplete.
+	 *
+	 * @return <code>true</code> if this remote app entry is incomplete; <code>false</code> otherwise
+	 */
+	@Override
+	public boolean isIncomplete() {
+		return model.isIncomplete();
+	}
+
+	/**
 	 * Returns <code>true</code> if this remote app entry is instanceable.
 	 *
 	 * @return <code>true</code> if this remote app entry is instanceable; <code>false</code> otherwise
@@ -500,6 +718,26 @@ public class RemoteAppEntryWrapper
 	@Override
 	public boolean isInstanceable() {
 		return model.isInstanceable();
+	}
+
+	/**
+	 * Returns <code>true</code> if this remote app entry is pending.
+	 *
+	 * @return <code>true</code> if this remote app entry is pending; <code>false</code> otherwise
+	 */
+	@Override
+	public boolean isPending() {
+		return model.isPending();
+	}
+
+	/**
+	 * Returns <code>true</code> if this remote app entry is scheduled.
+	 *
+	 * @return <code>true</code> if this remote app entry is scheduled; <code>false</code> otherwise
+	 */
+	@Override
+	public boolean isScheduled() {
+		return model.isScheduled();
 	}
 
 	@Override
@@ -582,6 +820,36 @@ public class RemoteAppEntryWrapper
 	@Override
 	public void setCustomElementURLs(String customElementURLs) {
 		model.setCustomElementURLs(customElementURLs);
+	}
+
+	/**
+	 * Sets whether this remote app entry is custom element use esm.
+	 *
+	 * @param customElementUseESM the custom element use esm of this remote app entry
+	 */
+	@Override
+	public void setCustomElementUseESM(boolean customElementUseESM) {
+		model.setCustomElementUseESM(customElementUseESM);
+	}
+
+	/**
+	 * Sets the description of this remote app entry.
+	 *
+	 * @param description the description of this remote app entry
+	 */
+	@Override
+	public void setDescription(String description) {
+		model.setDescription(description);
+	}
+
+	/**
+	 * Sets the external reference code of this remote app entry.
+	 *
+	 * @param externalReferenceCode the external reference code of this remote app entry
+	 */
+	@Override
+	public void setExternalReferenceCode(String externalReferenceCode) {
+		model.setExternalReferenceCode(externalReferenceCode);
 	}
 
 	/**
@@ -745,6 +1013,66 @@ public class RemoteAppEntryWrapper
 	@Override
 	public void setRemoteAppEntryId(long remoteAppEntryId) {
 		model.setRemoteAppEntryId(remoteAppEntryId);
+	}
+
+	/**
+	 * Sets the source code url of this remote app entry.
+	 *
+	 * @param sourceCodeURL the source code url of this remote app entry
+	 */
+	@Override
+	public void setSourceCodeURL(String sourceCodeURL) {
+		model.setSourceCodeURL(sourceCodeURL);
+	}
+
+	/**
+	 * Sets the status of this remote app entry.
+	 *
+	 * @param status the status of this remote app entry
+	 */
+	@Override
+	public void setStatus(int status) {
+		model.setStatus(status);
+	}
+
+	/**
+	 * Sets the status by user ID of this remote app entry.
+	 *
+	 * @param statusByUserId the status by user ID of this remote app entry
+	 */
+	@Override
+	public void setStatusByUserId(long statusByUserId) {
+		model.setStatusByUserId(statusByUserId);
+	}
+
+	/**
+	 * Sets the status by user name of this remote app entry.
+	 *
+	 * @param statusByUserName the status by user name of this remote app entry
+	 */
+	@Override
+	public void setStatusByUserName(String statusByUserName) {
+		model.setStatusByUserName(statusByUserName);
+	}
+
+	/**
+	 * Sets the status by user uuid of this remote app entry.
+	 *
+	 * @param statusByUserUuid the status by user uuid of this remote app entry
+	 */
+	@Override
+	public void setStatusByUserUuid(String statusByUserUuid) {
+		model.setStatusByUserUuid(statusByUserUuid);
+	}
+
+	/**
+	 * Sets the status date of this remote app entry.
+	 *
+	 * @param statusDate the status date of this remote app entry
+	 */
+	@Override
+	public void setStatusDate(Date statusDate) {
+		model.setStatusDate(statusDate);
 	}
 
 	/**

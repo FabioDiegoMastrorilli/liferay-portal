@@ -36,6 +36,7 @@ CSDiagramType csDiagramType = csDiagramSettingDisplayContext.getCSDiagramType(ty
 	<aui:input name="<%= Constants.CMD %>" type="hidden" value="updateCSDiagramSetting" />
 	<aui:input name="redirect" type="hidden" value="<%= currentURL %>" />
 	<aui:input name="cpDefinitionId" type="hidden" value="<%= cpDefinition.getCPDefinitionId() %>" />
+	<aui:input name="publish" type="hidden" value="<%= true %>" />
 	<aui:input name="radius" type="hidden" value="<%= (csDiagramSetting != null) ? csDiagramSetting.getRadius() : csDiagramSettingDisplayContext.getRadius() %>" />
 
 	<liferay-ui:error exception="<%= NoSuchCPAttachmentFileEntryException.class %>" message="please-select-an-existing-file" />
@@ -84,7 +85,7 @@ CSDiagramType csDiagramType = csDiagramSettingDisplayContext.getCSDiagramType(ty
 						draggableImage="vertical"
 						fileEntryId='<%= BeanParamUtil.getLong(fileEntry, request, "fileEntryId") %>'
 						itemSelectorEventName="addFileEntry"
-						itemSelectorURL="<%= csDiagramSettingDisplayContext.getImageItemSelectorUrl() %>"
+						itemSelectorURL="<%= csDiagramSettingDisplayContext.getImageItemSelectorURL() %>"
 						maxFileSize="<%= csDiagramSettingDisplayContext.getImageMaxSize() %>"
 						paramName="fileEntry"
 						uploadURL="<%= uploadCSDiagramSettingImageActionURL %>"
@@ -93,62 +94,40 @@ CSDiagramType csDiagramType = csDiagramSettingDisplayContext.getCSDiagramType(ty
 				</div>
 			</commerce-ui:panel>
 		</div>
+	</div>
 
-		<div class="col-lg-8 d-flex flex-column">
-			<commerce-ui:panel
-				bodyClasses="p-0"
-				elementClasses="flex-fill"
-				title='<%= LanguageUtil.get(resourceBundle, "diagram-mapping") %>'
-			>
+	<%
+	if (csDiagramSetting != null) {
+		csDiagramType.render(csDiagramSetting, request, PipingServletResponseFactory.createPipingServletResponse(pageContext));
+	}
+	else {
+	%>
 
-				<%
-				if (csDiagramSetting != null) {
-					csDiagramType.render(csDiagramSetting, request, PipingServletResponseFactory.createPipingServletResponse(pageContext));
-				}
-				else {
-				%>
-
+		<div class="row">
+			<div class="col-lg-8 d-flex flex-column">
+				<commerce-ui:panel
+					bodyClasses="p-0"
+					elementClasses="flex-fill"
+					title='<%= LanguageUtil.get(resourceBundle, "diagram-mapping") %>'
+				>
 					<div class="p-3 text-center">
 						<liferay-ui:message key="please-upload-a-file" />
 					</div>
-
-				<%
-				}
-				%>
-
-			</commerce-ui:panel>
+				</commerce-ui:panel>
+			</div>
 		</div>
 
-		<div class="col-lg-4">
-			<commerce-ui:panel
-				bodyClasses="p-0"
-				elementClasses="flex-fill"
-				title='<%= LanguageUtil.get(resourceBundle, "mapped-products") %>'
-			>
-				<react:component
-					module="js/DiagramTable/DiagramTable"
-					props='<%=
-						HashMapBuilder.<String, Object>put(
-							"isAdmin", true
-						).put(
-							"productId", cpDefinition.getCProductId()
-						).build()
-					%>'
-				/>
-			</commerce-ui:panel>
-		</div>
-	</div>
+	<%
+	}
+	%>
+
 </aui:form>
 
 <liferay-frontend:component
 	context='<%=
 		HashMapBuilder.<String, Object>put(
-			"currentURL", currentURL
-		).put(
 			"diagramId", (csDiagramSetting != null) ? csDiagramSetting.getCSDiagramSettingId() : 0
-		).put(
-			"selectType", liferayPortletResponse.getNamespace() + "selectType"
 		).build()
 	%>'
-	module="js/edit_cp_definition_diagram_setting"
+	module="js/edit_cs_diagram_setting"
 />

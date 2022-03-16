@@ -126,7 +126,7 @@ definition {
 
 			for (var i : list "3,2,1") {
 				ContentPages.viewFragmentText(
-					assetType = "web-content",
+					assetType = "journal",
 					fragmentName = "Content Display",
 					position = "${n}",
 					text = "Web Content Content ${i}");
@@ -162,7 +162,7 @@ definition {
 
 			for (var i : list "3,2,1") {
 				ContentPages.viewFragmentText(
-					assetType = "web-content",
+					assetType = "journal",
 					fragmentName = "Content Display",
 					position = "${n}",
 					text = "Web Content Content ${i}");
@@ -201,7 +201,7 @@ definition {
 
 			for (var i : list "3,2,1") {
 				ContentPages.viewFragmentText(
-					assetType = "web-content",
+					assetType = "journal",
 					fragmentName = "Content Display",
 					position = "${n}",
 					text = "Web Content Content ${i}");
@@ -233,7 +233,7 @@ definition {
 		}
 
 		task ("Add the first collection page based on dynamic collection") {
-			SitePages.openPagesAdmin(siteURLKey = "test-site-name-staging");
+			PagesAdmin.openPagesAdmin(siteURLKey = "test-site-name-staging");
 
 			ContentPages.addPublicCollectionPage(
 				collectionName = "Dynamic Collection",
@@ -271,7 +271,7 @@ definition {
 		}
 
 		task ("Add the second collection page based on Most Viewed Assets collection provider") {
-			SitePages.openPagesAdmin(siteURLKey = "test-site-name-staging");
+			PagesAdmin.openPagesAdmin(siteURLKey = "test-site-name-staging");
 
 			ContentPages.addPublicCollectionPage(
 				collectionName = "Most Viewed Assets",
@@ -439,7 +439,7 @@ definition {
 
 			for (var i : list "3,2,1") {
 				ContentPages.viewFragmentText(
-					assetType = "web-content",
+					assetType = "journal",
 					fragmentName = "Content Display",
 					position = "${n}",
 					text = "Web Content Content ${i}");
@@ -468,7 +468,7 @@ definition {
 
 			for (var i : list "3,2,1") {
 				ContentPages.viewFragmentText(
-					assetType = "web-content",
+					assetType = "journal",
 					fragmentName = "Content Display",
 					position = "${n}",
 					text = "Web Content Content ${i}");
@@ -492,7 +492,7 @@ definition {
 
 			for (var i : list "3,2,1") {
 				ContentPages.viewFragmentText(
-					assetType = "web-content",
+					assetType = "journal",
 					fragmentName = "Content Display",
 					position = "${n}",
 					text = "Web Content Content ${i}");

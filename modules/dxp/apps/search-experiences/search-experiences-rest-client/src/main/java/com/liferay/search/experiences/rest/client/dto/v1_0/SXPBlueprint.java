@@ -19,6 +19,7 @@ import com.liferay.search.experiences.rest.client.serdes.v1_0.SXPBlueprintSerDes
 
 import java.io.Serializable;
 
+import java.util.Date;
 import java.util.Map;
 import java.util.Objects;
 
@@ -34,6 +35,28 @@ public class SXPBlueprint implements Cloneable, Serializable {
 	public static SXPBlueprint toDTO(String json) {
 		return SXPBlueprintSerDes.toDTO(json);
 	}
+
+	public Map<String, Map<String, String>> getActions() {
+		return actions;
+	}
+
+	public void setActions(Map<String, Map<String, String>> actions) {
+		this.actions = actions;
+	}
+
+	public void setActions(
+		UnsafeSupplier<Map<String, Map<String, String>>, Exception>
+			actionsUnsafeSupplier) {
+
+		try {
+			actions = actionsUnsafeSupplier.get();
+		}
+		catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	protected Map<String, Map<String, String>> actions;
 
 	public Configuration getConfiguration() {
 		return configuration;
@@ -55,6 +78,27 @@ public class SXPBlueprint implements Cloneable, Serializable {
 	}
 
 	protected Configuration configuration;
+
+	public Date getCreateDate() {
+		return createDate;
+	}
+
+	public void setCreateDate(Date createDate) {
+		this.createDate = createDate;
+	}
+
+	public void setCreateDate(
+		UnsafeSupplier<Date, Exception> createDateUnsafeSupplier) {
+
+		try {
+			createDate = createDateUnsafeSupplier.get();
+		}
+		catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	protected Date createDate;
 
 	public String getDescription() {
 		return description;
@@ -99,27 +143,27 @@ public class SXPBlueprint implements Cloneable, Serializable {
 
 	protected Map<String, String> description_i18n;
 
-	public ElementDefinition[] getElementDefinitions() {
-		return elementDefinitions;
+	public ElementInstance[] getElementInstances() {
+		return elementInstances;
 	}
 
-	public void setElementDefinitions(ElementDefinition[] elementDefinitions) {
-		this.elementDefinitions = elementDefinitions;
+	public void setElementInstances(ElementInstance[] elementInstances) {
+		this.elementInstances = elementInstances;
 	}
 
-	public void setElementDefinitions(
-		UnsafeSupplier<ElementDefinition[], Exception>
-			elementDefinitionsUnsafeSupplier) {
+	public void setElementInstances(
+		UnsafeSupplier<ElementInstance[], Exception>
+			elementInstancesUnsafeSupplier) {
 
 		try {
-			elementDefinitions = elementDefinitionsUnsafeSupplier.get();
+			elementInstances = elementInstancesUnsafeSupplier.get();
 		}
 		catch (Exception e) {
 			throw new RuntimeException(e);
 		}
 	}
 
-	protected ElementDefinition[] elementDefinitions;
+	protected ElementInstance[] elementInstances;
 
 	public Long getId() {
 		return id;
@@ -139,6 +183,48 @@ public class SXPBlueprint implements Cloneable, Serializable {
 	}
 
 	protected Long id;
+
+	public Date getModifiedDate() {
+		return modifiedDate;
+	}
+
+	public void setModifiedDate(Date modifiedDate) {
+		this.modifiedDate = modifiedDate;
+	}
+
+	public void setModifiedDate(
+		UnsafeSupplier<Date, Exception> modifiedDateUnsafeSupplier) {
+
+		try {
+			modifiedDate = modifiedDateUnsafeSupplier.get();
+		}
+		catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	protected Date modifiedDate;
+
+	public String getSchemaVersion() {
+		return schemaVersion;
+	}
+
+	public void setSchemaVersion(String schemaVersion) {
+		this.schemaVersion = schemaVersion;
+	}
+
+	public void setSchemaVersion(
+		UnsafeSupplier<String, Exception> schemaVersionUnsafeSupplier) {
+
+		try {
+			schemaVersion = schemaVersionUnsafeSupplier.get();
+		}
+		catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	protected String schemaVersion;
 
 	public String getTitle() {
 		return title;
@@ -182,6 +268,27 @@ public class SXPBlueprint implements Cloneable, Serializable {
 	}
 
 	protected Map<String, String> title_i18n;
+
+	public String getUserName() {
+		return userName;
+	}
+
+	public void setUserName(String userName) {
+		this.userName = userName;
+	}
+
+	public void setUserName(
+		UnsafeSupplier<String, Exception> userNameUnsafeSupplier) {
+
+		try {
+			userName = userNameUnsafeSupplier.get();
+		}
+		catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	protected String userName;
 
 	@Override
 	public SXPBlueprint clone() throws CloneNotSupportedException {

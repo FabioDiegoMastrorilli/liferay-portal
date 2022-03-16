@@ -6,15 +6,16 @@ definition {
 		var flag = "1";
 
 		for (var current : list "${date}") {
-			valueNumber = StringUtil.extractFirst("${current}","-");
-			timeUnit = StringUtil.extractLast("${current}","-");
+			var valueNumber = StringUtil.extractFirst("${current}", "-");
+			var timeUnit = StringUtil.extractLast("${current}", "-");
 
 			if ("${flag}" == "1") {
 				AssertElementPresent(
 					key_number = "${valueNumber}",
 					key_unit = "${timeUnit}",
 					locator1 = "ACSites#ACTIVITIES_CARD_SESSION_DURATION_FIRST_VALUE");
-				flag = MathUtil.difference("${flag}","1");
+
+				var flag = ${flag} - 1;
 			}
 			else {
 				AssertElementPresent(
@@ -61,8 +62,8 @@ definition {
 	}
 
 	macro viewVisitedTopPages {
-		var key_index = StringUtil.extractFirst("${current}","-");
-		var value = StringUtil.extractLast("${current}","-");
+		var key_index = StringUtil.extractFirst("${current}", "-");
+		var value = StringUtil.extractLast("${current}", "-");
 
 		AssertTextEquals(
 			locator1 = "ACSites#VISITED_TOP_PAGES_CARD",
@@ -84,20 +85,33 @@ definition {
 
 		Click.mouseDownMouseUp(locator1 = "ACIndividualsDashboard#ACTIVE_INDIVIDUAL_CHART");
 
-		while (IsElementNotPresent(locator1 = "ACSites#TOOLTIP_UNIQUE_VISITORS", key_value = "${valueVisitors}", key_visitors = "${visitorsType}") && (maxIterations = "50")) {
-			TestUtils.hardRefresh();
+		var list1 = ListUtil.newListFromString("${visitorsTypeList}");
+		var list2 = ListUtil.newListFromString("${valueVisitorsList}");
+		var size = ListUtil.size("${list1}");
+		var i = "0";
 
-			ACTimeFilter.clickTimeFilterButton();
+		while ("${i}" != "${size}") {
+			var visitorsType = ListUtil.get("${list1}", "${i}");
+			var valueVisitors = ListUtil.get("${list2}", "${i}");
 
-			ACTimeFilter.setLast24Hours();
+			while (IsElementNotPresent(key_value = "${valueVisitors}", key_visitors = "${visitorsType}", locator1 = "ACSites#TOOLTIP_UNIQUE_VISITORS") && (maxIterations = "50")) {
+				TestUtils.hardRefresh();
 
-			Click.mouseDownMouseUp(locator1 = "ACIndividualsDashboard#ACTIVE_INDIVIDUAL_CHART");
+				ACTimeFilter.clickTimeFilterButton();
+
+				ACTimeFilter.setLast24Hours();
+
+				Click.mouseDownMouseUp(locator1 = "ACIndividualsDashboard#ACTIVE_INDIVIDUAL_CHART");
+			}
+
+			AssertElementPresent(
+				key_value = "${valueVisitors}",
+				key_visitors = "${visitorsType}",
+				locator1 = "ACSites#TOOLTIP_UNIQUE_VISITORS");
+
+			var i = ${i} + 1;
+			var i = StringUtil.valueOf("${i}");
 		}
-
-		AssertElementPresent(
-			key_value = "${valueVisitors}",
-			key_visitors = "${visitorsType}",
-			locator1 = "ACSites#TOOLTIP_UNIQUE_VISITORS");
 	}
 
 }

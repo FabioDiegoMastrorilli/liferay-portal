@@ -241,6 +241,10 @@ definition {
 	@description = "Feature ID: Legacy | Automation ID: LRAC-8320 | Test Summary: Property field is displayed in empty state when no property is available"
 	@priority = "4"
 	test PropertyFieldWhenNoProperty {
+		task ("Connect the DXP to AC") {
+			ACDXPSettings.connectDXPtoAnalyticsCloud();
+		}
+
 		task ("AC launch and delete all properties") {
 			ACUtils.launchAC();
 
@@ -248,7 +252,7 @@ definition {
 		}
 
 		task ("Asset that no longer properties exists") {
-			AssertElementPresent(locator1 = "ACSettings#NO_PROPERTIES_FOUND");
+			ACProperties.assertNoProperties();
 		}
 
 		task ("Asset that there are no more properties on the sites page") {
@@ -344,6 +348,7 @@ definition {
 
 			ACSettings.goToProperties();
 		}
+
 		task ("Create property 1, check if it was created and add an admin user") {
 			ACProperties.addNewProperty(propertyName = "Property Name 1");
 
@@ -351,6 +356,7 @@ definition {
 
 			ACProperties.addUserProperty(emailAddress = "bryan.cheung@faro.io");
 		}
+
 		task ("Go back to the properties menu, create property 2, check if it was created and add an admin user") {
 			ACSettings.goToProperties();
 
@@ -360,6 +366,7 @@ definition {
 
 			ACProperties.addUserProperty(emailAddress = "corbin.murakami@faro.io");
 		}
+
 		task ("Go back to the properties menu, create property 3, check if it was created and select all users as admin") {
 			ACSettings.goToProperties();
 
@@ -369,6 +376,7 @@ definition {
 
 			ACSettings.goToProperties();
 		}
+
 		task ("Log in as the user corbin.murakami@faro.io and go to the properties menu") {
 			ACWorkspace.signOut();
 
@@ -382,6 +390,7 @@ definition {
 
 			ACSettings.goToProperties();
 		}
+
 		task ("Checks if only property 2 and property 3 are present") {
 			ACProperties.assertPropertyNotPresent(propertyName = "Property Name 1");
 

@@ -134,8 +134,8 @@ public class InfoCollectionProviderItemsDisplayContext {
 		InfoPage infoPage = infoCollectionProvider.getCollectionInfoPage(
 			collectionQuery);
 
-		searchContainer.setResults(infoPage.getPageItems());
-		searchContainer.setTotal(infoPage.getTotalCount());
+		searchContainer.setResultsAndTotal(
+			infoPage::getPageItems, infoPage.getTotalCount());
 
 		return searchContainer;
 	}
@@ -221,7 +221,7 @@ public class InfoCollectionProviderItemsDisplayContext {
 		}
 		catch (PortletException portletException) {
 			if (_log.isDebugEnabled()) {
-				_log.debug(portletException, portletException);
+				_log.debug(portletException);
 			}
 
 			return PortletURLBuilder.createRenderURL(

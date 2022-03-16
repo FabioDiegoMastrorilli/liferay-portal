@@ -34,6 +34,9 @@ import javax.servlet.http.HttpServletResponse;
  */
 public class CookieKeys {
 
+	public static final String COMMERCE_CONTINUE_AS_GUEST =
+		"COMMERCE_CONTINUE_AS_GUEST";
+
 	public static final String COMPANY_ID = "COMPANY_ID";
 
 	public static final String COOKIE_SUPPORT = "COOKIE_SUPPORT";
@@ -54,8 +57,6 @@ public class CookieKeys {
 
 	public static final String REMOTE_PREFERENCE_PREFIX = "REMOTE_PREFERENCE_";
 
-	public static final String SCREEN_NAME = "SCREEN_NAME";
-
 	public static final String USER_UUID = "USER_UUID";
 
 	public static void addCookie(
@@ -64,7 +65,7 @@ public class CookieKeys {
 
 		addCookie(
 			httpServletRequest, httpServletResponse, cookie,
-			httpServletRequest.isSecure());
+			PortalUtil.isSecure(httpServletRequest));
 	}
 
 	public static void addCookie(
@@ -187,7 +188,7 @@ public class CookieKeys {
 		}
 		catch (Exception exception) {
 			if (_log.isWarnEnabled()) {
-				_log.warn(exception.getMessage());
+				_log.warn(exception);
 			}
 
 			return value;
@@ -261,7 +262,7 @@ public class CookieKeys {
 
 	public static boolean isEncodedCookie(String name) {
 		if (name.equals(ID) || name.equals(LOGIN) || name.equals(PASSWORD) ||
-			name.equals(SCREEN_NAME) || name.equals(USER_UUID)) {
+			name.equals(USER_UUID)) {
 
 			return true;
 		}

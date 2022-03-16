@@ -32,7 +32,6 @@ definition {
 		property portal.release = "false";
 
 		// TODO Review
-
 		// TODO Fix Commerce tests that are skipping portal instances - COMMERCE-6586; COMMERCE-6588
 
 		CommerceAccelerators.initializeNewSiteViaAccelerator(siteName = "Minium");
@@ -162,6 +161,16 @@ definition {
 		AssertElementPresent(
 			key_entryName = "Fixed Tax Rate",
 			locator1 = "CommerceEntry#CHANNELS_GENERAL_ACTIVE_STATUS");
+	}
+
+	@description = "[Please Update]"
+	@ignore = "Test Stub"
+	@priority = "4"
+	test AddANewDefaultPaymentMethod {
+		property portal.acceptance = "false";
+
+		// TODO COMMERCE-8534 AddANewDefaultPaymentMethod pending implementation
+
 	}
 
 	@description = "This is a test for COMMERCE-6116. AddShippingOptionFedEx"
@@ -347,7 +356,7 @@ definition {
 			key_region = "Roma",
 			key_shippingOption = "Standard",
 			key_subtotal = "1",
-			key_Warehouse = "Italy",
+			key_warehouse = "Italy",
 			key_weightFrom = "1",
 			key_weightTo = "1",
 			key_zip = "0100");
@@ -543,6 +552,56 @@ definition {
 			locator1 = "CommerceEntry#ENTRY_NAME_BODY_VERTICAL_ELLIPSIS");
 	}
 
+	@description = "[Please Update]"
+	@ignore = "Test Stub"
+	@priority = "4"
+	test CompleteCheckoutWhereDefaultPaymentMethodIsDisabledIntoChannel {
+		property portal.acceptance = "false";
+
+		// TODO COMMERCE-8539 CompleteCheckoutWhereDefaultPaymentMethodIsDisabledIntoChannel pending implementation
+
+	}
+
+	@description = "[Please Update]"
+	@ignore = "Test Stub"
+	@priority = "4"
+	test CompleteCheckoutWhereDefaultPaymentMethodIsNotPresentIntoOrderType {
+		property portal.acceptance = "false";
+
+		// TODO COMMERCE-8536 CompleteCheckoutWhereDefaultPaymentMethodIsNotPresentIntoOrderType pending implementation
+
+	}
+
+	@description = "[Please Update]"
+	@ignore = "Test Stub"
+	@priority = "4"
+	test CompleteCheckoutWhereDefaultPaymentMethodIsPresentIntoOrderType {
+		property portal.acceptance = "false";
+
+		// TODO COMMERCE-8537 CompleteCheckoutWhereDefaultPaymentMethodIsPresentIntoOrderType pending implementation
+
+	}
+
+	@description = "[Please Update]"
+	@ignore = "Test Stub"
+	@priority = "4"
+	test CompleteCheckoutWhereDefaultPaymentMethodIsPresentIntoOrderTypeButDisabledIntoChannel {
+		property portal.acceptance = "false";
+
+		// TODO COMMERCE-8538 CompleteCheckoutWhereDefaultPaymentMethodIsPresentIntoOrderTypeButDisabledIntoChannel pending implementation
+
+	}
+
+	@description = "[Please Update]"
+	@ignore = "Test Stub"
+	@priority = "4"
+	test CompleteCheckoutWithDefaultPaymentMethod {
+		property portal.acceptance = "false";
+
+		// TODO COMMERCE-8535 CompleteCheckoutWithDefaultPaymentMethod pending implementation
+
+	}
+
 	@description = "This is a test for COMMERCE-6195. CreateCategoryDisplayPage"
 	@ignore = "true"
 	@priority = "3"
@@ -554,7 +613,7 @@ definition {
 	}
 
 	test CreateNewChannel {
-		property portal.acceptance = "true";
+		property portal.acceptance = "false";
 
 		CommerceNavigator.gotoPortlet(
 			category = "Store Management",
@@ -585,7 +644,7 @@ definition {
 	@description = "This is a test for COMMERCE-6102. CreateNewChannelCompileAll"
 	@priority = "3"
 	test CreateNewChannelCompileAll {
-		property portal.acceptance = "false";
+		property portal.acceptance = "true";
 
 		// TODO Review
 
@@ -797,6 +856,16 @@ definition {
 			locator1 = "CommerceEntry#TABLE_LIST_TITLE");
 	}
 
+	@description = "[Please Update]"
+	@ignore = "Test Stub"
+	@priority = "4"
+	test DeactivatePaymentMethodLinkedToAnAccount {
+		property portal.acceptance = "false";
+
+		// TODO COMMERCE-8545 DeactivatePaymentMethodLinkedToAnAccount pending implementation
+
+	}
+
 	@description = "This is a test for COMMERCE-6109. EditAuthorizePaymentMethod"
 	@priority = "3"
 	test EditAuthorizePaymentMethod {
@@ -985,7 +1054,7 @@ definition {
 
 		AssertElementPresent(
 			key_productName = "Brake System",
-			key_Value = "Catalog",
+			key_value = "Catalog",
 			locator1 = "CommerceEntry#VALUE_PRODUCT_RELATIONS");
 	}
 
@@ -1435,7 +1504,7 @@ definition {
 	@description = "This is a test for COMMERCE-6270. RemoveNotificationQueue"
 	@priority = "3"
 	test RemoveNotificationQueue {
-		property portal.acceptance = "Intern Test";
+		property portal.acceptance = "true";
 
 		// TODO Review
 
@@ -1583,6 +1652,16 @@ definition {
 			locator1 = "CommerceEntry#TABLE_LIST_TITLE");
 	}
 
+	@description = "[Please Update]"
+	@ignore = "Test Stub"
+	@priority = "4"
+	test RemoveOfflinePaymentLinkedAsDefaultPaymentMethod {
+		property portal.acceptance = "false";
+
+		// TODO COMMERCE-8542 RemoveOfflinePaymentLinkedAsDefaultPaymentMethod pending implementation
+
+	}
+
 	@description = "This is a test for COMMERCE-6196. RemoveProductDisplayPage"
 	@priority = "3"
 	test RemoveProductDisplayPage {
@@ -1657,7 +1736,6 @@ definition {
 		property portal.acceptance = "false";
 
 		// TODO Review
-
 		// TODO Fix Commerce tests that are skipping portal instances - COMMERCE-6586
 
 		CommerceAccelerators.initializeNewSiteViaAccelerator(siteName = "Minium");
@@ -1865,7 +1943,7 @@ definition {
 			key_region = "Roma",
 			key_shippingOption = "Standard",
 			key_subtotal = "1",
-			key_Warehouse = "Italy",
+			key_warehouse = "Italy",
 			key_weightFrom = "1",
 			key_weightTo = "1",
 			key_zip = "0100");
@@ -1881,6 +1959,7 @@ definition {
 		Click(
 			key_text = "Standard",
 			locator1 = "Icon#ANY_VERTICAL_ELLIPSIS");
+
 		MenuItem.clickNoError(menuItem = "Delete");
 
 		Alert.viewSuccessMessage();
@@ -1927,10 +2006,10 @@ definition {
 		SelectFrame(locator1 = "IFrame#MODAL_BODY");
 
 		for (var current : list "Tax Category-Normal Product,Amount-20,Country-Italy,Region-Roma,Zip-0100") {
-			var fieldLabel = StringUtil.extractFirst("${current}","-");
-			var value = StringUtil.extractLast("${current}","-");
+			var fieldLabel = StringUtil.extractFirst("${current}", "-");
+			var value = StringUtil.extractLast("${current}", "-");
 
-			if ("${fieldLabel}" == "Tax Category" || "${fieldLabel}" == "Country" || "${fieldLabel}" == "Region") {
+			if (("${fieldLabel}" == "Tax Category") || ("${fieldLabel}" == "Country") || ("${fieldLabel}" == "Region")) {
 				Select(
 					key_fieldLabel = "${fieldLabel}",
 					locator1 = "Select#GENERIC_SELECT_FIELD",
@@ -2177,6 +2256,16 @@ definition {
 			key_name = "Test",
 			key_order = "1",
 			locator1 = "CommerceEntry#ASSERT_NOTIFICATION_QUEUE");
+	}
+
+	@description = "[Please Update]"
+	@ignore = "Test Stub"
+	@priority = "4"
+	test VerifyPriorityColumnForShippingOption {
+		property portal.acceptance = "false";
+
+		// TODO COMMERCE-8663 VerifyPriorityColumnForShippingOption pending implementation
+
 	}
 
 }

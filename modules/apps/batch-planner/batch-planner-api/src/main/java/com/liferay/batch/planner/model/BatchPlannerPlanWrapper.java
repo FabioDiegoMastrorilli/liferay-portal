@@ -165,6 +165,11 @@ public class BatchPlannerPlanWrapper
 		return model.fetchBatchPlannerLog();
 	}
 
+	@Override
+	public BatchPlannerPolicy fetchBatchPlannerPolicy(String name) {
+		return model.fetchBatchPlannerPolicy(name);
+	}
+
 	/**
 	 * Returns the active of this batch planner plan.
 	 *
@@ -175,6 +180,18 @@ public class BatchPlannerPlanWrapper
 		return model.getActive();
 	}
 
+	@Override
+	public BatchPlannerLog getBatchPlannerLog()
+		throws com.liferay.portal.kernel.exception.PortalException {
+
+		return model.getBatchPlannerLog();
+	}
+
+	@Override
+	public java.util.List<BatchPlannerMapping> getBatchPlannerMappings() {
+		return model.getBatchPlannerMappings();
+	}
+
 	/**
 	 * Returns the batch planner plan ID of this batch planner plan.
 	 *
@@ -183,6 +200,18 @@ public class BatchPlannerPlanWrapper
 	@Override
 	public long getBatchPlannerPlanId() {
 		return model.getBatchPlannerPlanId();
+	}
+
+	@Override
+	public java.util.List<BatchPlannerPolicy> getBatchPlannerPolicies() {
+		return model.getBatchPlannerPolicies();
+	}
+
+	@Override
+	public BatchPlannerPolicy getBatchPlannerPolicy(String name)
+		throws com.liferay.portal.kernel.exception.PortalException {
+
+		return model.getBatchPlannerPolicy(name);
 	}
 
 	/**

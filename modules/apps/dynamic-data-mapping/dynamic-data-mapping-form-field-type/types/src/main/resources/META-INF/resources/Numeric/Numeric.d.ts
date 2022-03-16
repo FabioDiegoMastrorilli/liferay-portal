@@ -15,6 +15,7 @@
 import React, {FocusEventHandler} from 'react';
 import {ISymbols} from '../NumericInputMask/NumericInputMask';
 import './Numeric.scss';
+import type {FieldChangeEventHandler, Locale, LocalizedValue} from '../types';
 declare const Numeric: React.FC<IProps>;
 export {Numeric};
 declare const _default: any;
@@ -28,6 +29,7 @@ interface IProps {
 	id: string;
 	inputMask?: boolean;
 	inputMaskFormat?: string;
+	localizedSymbols?: LocalizedValue<ISymbols>;
 	localizedValue?: LocalizedValue<string>;
 	name: string;
 	onBlur: FocusEventHandler<HTMLInputElement>;
@@ -36,6 +38,7 @@ interface IProps {
 	placeholder?: string;
 	predefinedValue?: string;
 	readOnly: boolean;
+	settingsContext?: any;
 	symbols: ISymbols;
 	value?: string;
 }

@@ -27,6 +27,10 @@ public class BatchPlannerMappingLocalServiceWrapper
 	implements BatchPlannerMappingLocalService,
 			   ServiceWrapper<BatchPlannerMappingLocalService> {
 
+	public BatchPlannerMappingLocalServiceWrapper() {
+		this(null);
+	}
+
 	public BatchPlannerMappingLocalServiceWrapper(
 		BatchPlannerMappingLocalService batchPlannerMappingLocalService) {
 
@@ -141,6 +145,12 @@ public class BatchPlannerMappingLocalServiceWrapper
 
 		return _batchPlannerMappingLocalService.deleteBatchPlannerMapping(
 			batchPlannerPlanId, externalFieldName, internalFieldName);
+	}
+
+	@Override
+	public void deleteBatchPlannerMappings(long batchPlannerPlanId) {
+		_batchPlannerMappingLocalService.deleteBatchPlannerMappings(
+			batchPlannerPlanId);
 	}
 
 	/**

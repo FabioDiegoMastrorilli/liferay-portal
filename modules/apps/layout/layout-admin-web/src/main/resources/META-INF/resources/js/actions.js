@@ -17,7 +17,9 @@ import {openModal} from 'frontend-js-web';
 const ACTIONS = {
 	copyLayout: ({copyLayoutURL}, portletNamespace) => {
 		openModal({
+			height: '60vh',
 			id: `${portletNamespace}addLayoutDialog`,
+			size: 'md',
 			title: Liferay.Language.get('copy-page'),
 			url: copyLayoutURL,
 		});
@@ -37,6 +39,10 @@ const ACTIONS = {
 		if (confirm(discardDraftMessage)) {
 			Liferay.Util.navigate(discardDraftURL);
 		}
+	},
+
+	exportTranslation: ({exportTranslationURL}) => {
+		Liferay.Util.navigate(exportTranslationURL);
 	},
 
 	permissionLayout: ({permissionLayoutURL}) => {

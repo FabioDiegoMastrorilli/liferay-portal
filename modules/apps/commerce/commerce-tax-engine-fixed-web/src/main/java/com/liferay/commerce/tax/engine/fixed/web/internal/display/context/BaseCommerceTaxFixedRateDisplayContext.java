@@ -23,7 +23,7 @@ import com.liferay.commerce.product.model.CommerceChannel;
 import com.liferay.commerce.product.service.CPTaxCategoryService;
 import com.liferay.commerce.product.service.CommerceChannelLocalService;
 import com.liferay.commerce.product.util.comparator.CPTaxCategoryCreateDateComparator;
-import com.liferay.commerce.tax.engine.fixed.web.internal.display.context.util.CommerceTaxFixedRateRequestHelper;
+import com.liferay.commerce.tax.engine.fixed.web.internal.display.context.helper.CommerceTaxFixedRateRequestHelper;
 import com.liferay.commerce.tax.model.CommerceTaxMethod;
 import com.liferay.commerce.tax.service.CommerceTaxMethodService;
 import com.liferay.petra.portlet.url.builder.PortletURLBuilder;
@@ -220,7 +220,7 @@ public class BaseCommerceTaxFixedRateDisplayContext {
 			}
 		).setParameter(
 			"screenNavigationCategoryKey",
-			getSelectedScreenNavigationCategoryKey()
+			_getSelectedScreenNavigationCategoryKey()
 		).buildPortletURL();
 	}
 
@@ -239,12 +239,6 @@ public class BaseCommerceTaxFixedRateDisplayContext {
 			commerceChannel, ActionKeys.UPDATE);
 	}
 
-	protected String getSelectedScreenNavigationCategoryKey() {
-		return ParamUtil.getString(
-			commerceTaxFixedRateRequestHelper.getRequest(),
-			"screenNavigationCategoryKey", getScreenNavigationCategoryKey());
-	}
-
 	protected final CommerceChannelLocalService commerceChannelLocalService;
 	protected final CommerceCurrencyLocalService commerceCurrencyLocalService;
 	protected final CommerceTaxFixedRateRequestHelper
@@ -254,6 +248,12 @@ public class BaseCommerceTaxFixedRateDisplayContext {
 	protected final ModelResourcePermission<CommerceChannel>
 		modelResourcePermission;
 	protected final PercentageFormatter percentageFormatter;
+
+	private String _getSelectedScreenNavigationCategoryKey() {
+		return ParamUtil.getString(
+			commerceTaxFixedRateRequestHelper.getRequest(),
+			"screenNavigationCategoryKey", getScreenNavigationCategoryKey());
+	}
 
 	private CommerceTaxMethod _commerceTaxMethod;
 

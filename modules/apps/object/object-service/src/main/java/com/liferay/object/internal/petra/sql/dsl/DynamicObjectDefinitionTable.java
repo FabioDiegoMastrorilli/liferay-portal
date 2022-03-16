@@ -28,6 +28,7 @@ import com.liferay.portal.kernel.util.HashMapBuilder;
 import java.math.BigDecimal;
 
 import java.sql.Blob;
+import java.sql.Clob;
 import java.sql.Types;
 
 import java.util.ArrayList;
@@ -93,8 +94,8 @@ public class DynamicObjectDefinitionTable
 		for (ObjectField objectField : objectFields) {
 			createColumn(
 				objectField.getDBColumnName(),
-				_javaClasses.get(objectField.getType()),
-				_sqlTypes.get(objectField.getType()), Column.FLAG_DEFAULT);
+				_javaClasses.get(objectField.getDBType()),
+				_sqlTypes.get(objectField.getDBType()), Column.FLAG_DEFAULT);
 		}
 
 		List<Expression<?>> selectExpressions = new ArrayList<>();
@@ -123,8 +124,8 @@ public class DynamicObjectDefinitionTable
 			sb.append(", ");
 			sb.append(objectField.getDBColumnName());
 			sb.append(" ");
-			sb.append(_getDataType(objectField.getType()));
-			sb.append(_getSQLColumnNull(objectField.getType()));
+			sb.append(_getDataType(objectField.getDBType()));
+			sb.append(_getSQLColumnNull(objectField.getDBType()));
 		}
 
 		sb.append(")");
@@ -191,6 +192,8 @@ public class DynamicObjectDefinitionTable
 	).put(
 		"Boolean", "BOOLEAN"
 	).put(
+		"Clob", "TEXT"
+	).put(
 		"Date", "DATE"
 	).put(
 		"Double", "DOUBLE"
@@ -209,6 +212,8 @@ public class DynamicObjectDefinitionTable
 		).put(
 			"Boolean", Boolean.class
 		).put(
+			"Clob", Clob.class
+		).put(
 			"Date", Date.class
 		).put(
 			"Double", Double.class
@@ -225,6 +230,8 @@ public class DynamicObjectDefinitionTable
 		"Blob", Types.BLOB
 	).put(
 		"Boolean", Types.BOOLEAN
+	).put(
+		"Clob", Types.CLOB
 	).put(
 		"Date", Types.DATE
 	).put(

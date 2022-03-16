@@ -97,7 +97,17 @@ public class MiniCartTag extends IncludeTag {
 				}
 			}
 			else {
-				_orderDetailURL = StringPool.BLANK;
+				PortletURL commerceCartPortletURL =
+					_commerceOrderHttpHelper.getCommerceCartPortletURL(
+						httpServletRequest, null);
+
+				if (commerceCartPortletURL != null) {
+					_orderDetailURL = String.valueOf(commerceCartPortletURL);
+				}
+				else {
+					_orderDetailURL = StringPool.BLANK;
+				}
+
 				_orderId = 0;
 			}
 
@@ -116,7 +126,7 @@ public class MiniCartTag extends IncludeTag {
 			}
 		}
 		catch (PortalException portalException) {
-			_log.error(portalException, portalException);
+			_log.error(portalException);
 
 			_checkoutURL = StringPool.BLANK;
 			_itemsQuantity = 0;
@@ -269,7 +279,7 @@ public class MiniCartTag extends IncludeTag {
 			return commercePriceConfiguration.displayDiscountLevels();
 		}
 		catch (ConfigurationException configurationException) {
-			_log.error(configurationException, configurationException);
+			_log.error(configurationException);
 
 			return false;
 		}

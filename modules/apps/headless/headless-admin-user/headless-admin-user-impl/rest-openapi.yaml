@@ -35,7 +35,6 @@ components:
                     # @review
                     description:
                         The optional external key of this account.
-                    readOnly: true
                     type: string
                 id:
                     format: int64
@@ -269,6 +268,11 @@ components:
                         The most recent time any of the organization's fields changed.
                     format: date-time
                     readOnly: true
+                    type: string
+                externalReferenceCode:
+                    # @review
+                    description:
+                        The optional external key of this organization.
                     type: string
                 id:
                     description:
@@ -888,6 +892,11 @@ components:
                         $ref: "#/components/schemas/OrganizationBrief"
                     readOnly: true
                     type: array
+                password:
+                    description:
+                        The user's password.
+                    type: string
+                    writeOnly: true
                 profileURL:
                     description:
                         A relative URL to the user's profile.
@@ -963,6 +972,32 @@ components:
                             type: array
                     type: object
             type: object
+        UserGroup:
+            properties:
+                actions:
+                    additionalProperties:
+                        additionalProperties:
+                            type: string
+                        type: object
+                    readOnly: true
+                    type: object
+                description:
+                    type: string
+                externalReferenceCode:
+                    type: string
+                id:
+                    format: int64
+                    readOnly: true
+                    type: integer
+                name:
+                    type: string
+                usersCount:
+                    format: int32
+                    readOnly: true
+                    type: integer
+            required:
+                - name
+            type: object
         WebUrl:
             description:
                 Represents a URL to an external site. This is modeled internally as a `WebSite`.
@@ -988,7 +1023,7 @@ components:
 info:
     description:
         "A Java client JAR is available for use with the group ID 'com.liferay', artifact ID
-        'com.liferay.headless.admin.user.client', and version '4.0.10'."
+        'com.liferay.headless.admin.user.client', and version '4.0.24'."
     license:
         name: "Apache 2.0"
         url: "http://www.apache.org/licenses/LICENSE-2.0.html"
@@ -2298,6 +2333,104 @@ paths:
                     description:
                         "Organizations successfully created"
             tags: ["Organization"]
+    "/organizations/by-external-reference-code/{externalReferenceCode}":
+        delete:
+            # @review
+            description:
+                Deletes an organization.
+            parameters:
+                - in: path
+                  name: externalReferenceCode
+                  required: true
+                  schema:
+                      type: string
+            responses:
+                204:
+                    content:
+                        application/json: {}
+                        application/xml: {}
+            tags: ["Organization"]
+        get:
+            parameters:
+                - in: path
+                  name: externalReferenceCode
+                  required: true
+                  schema:
+                      type: string
+            responses:
+                200:
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/Organization"
+                        application/xml:
+                            schema:
+                                $ref: "#/components/schemas/Organization"
+            tags: ["Organization"]
+        patch:
+            # @review
+            description:
+                Updates the organization with information sent in the request body. Only the provided fields are
+                updated.
+            parameters:
+                - in: path
+                  name: externalReferenceCode
+                  required: true
+                  schema:
+                      type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: "#/components/schemas/Organization"
+                    application/xml:
+                        schema:
+                            $ref: "#/components/schemas/Organization"
+            responses:
+                200:
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/Organization"
+                        application/xml:
+                            schema:
+                                $ref: "#/components/schemas/Organization"
+                    # @review
+                    description:
+                        "Organization successfully updated"
+            tags: ["Organization"]
+        put:
+            # @review
+            description:
+                Replaces the organization with information sent in the request body. Any missing fields are deleted
+                unless they are required.
+            parameters:
+                - in: path
+                  name: externalReferenceCode
+                  required: true
+                  schema:
+                      type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: "#/components/schemas/Organization"
+                    application/xml:
+                        schema:
+                            $ref: "#/components/schemas/Organization"
+            responses:
+                200:
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/Organization"
+                        application/xml:
+                            schema:
+                                $ref: "#/components/schemas/Organization"
+                    # @review
+                    description:
+                        "Organization successfully replaced"
+            tags: ["Organization"]
     "/organizations/move-accounts/{sourceOrganizationId}/{targetOrganizationId}":
         patch:
             operationId: patchOrganizationMoveAccounts
@@ -3547,6 +3680,7 @@ paths:
                         application/xml:
                             schema:
                                 $ref: "#/components/schemas/UserAccount"
+            tags: ["UserAccount"]
     "/user-accounts/by-external-reference-code/{externalReferenceCode}":
         delete:
             operationId: deleteUserAccountByExternalReferenceCode
@@ -3605,6 +3739,7 @@ paths:
                         application/xml:
                             schema:
                                 $ref: "#/components/schemas/UserAccount"
+            tags: ["UserAccount"]
     "/user-accounts/{userAccountId}":
         delete:
             # @review
@@ -3677,6 +3812,7 @@ paths:
                                 $ref: "#/components/schemas/UserAccount"
                     description:
                         "UserAccount successfully updated"
+            tags: ["UserAccount"]
         put:
             # @review
             description:
@@ -3709,6 +3845,7 @@ paths:
                                 $ref: "#/components/schemas/UserAccount"
                     description:
                         "UserAccount successfully updated"
+            tags: ["UserAccount"]
     "/user-accounts/{userAccountId}/email-addresses":
         get:
             description:
@@ -3813,6 +3950,297 @@ paths:
                                     $ref: "#/components/schemas/WebUrl"
                                 type: array
             tags: ["WebUrl"]
+    "/user-groups":
+        get:
+            operationId: getUserGroupsPage
+            parameters:
+                - in: query
+                  name: filter
+                  schema:
+                      type: string
+                - in: query
+                  name: page
+                  schema:
+                      type: integer
+                - in: query
+                  name: pageSize
+                  schema:
+                      type: integer
+                - in: query
+                  name: search
+                  schema:
+                      type: string
+                - in: query
+                  name: sort
+                  schema:
+                      type: string
+            responses:
+                200:
+                    content:
+                        application/json:
+                            schema:
+                                items:
+                                    $ref: "#/components/schemas/UserGroup"
+                                type: array
+                        application/xml:
+                            schema:
+                                items:
+                                    $ref: "#/components/schemas/UserGroup"
+                                type: array
+            tags: ["UserGroup"]
+        post:
+            operationId: postUserGroup
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: "#/components/schemas/UserGroup"
+                    application/xml:
+                        schema:
+                            $ref: "#/components/schemas/UserGroup"
+            responses:
+                201:
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/UserGroup"
+                        application/xml:
+                            schema:
+                                $ref: "#/components/schemas/UserGroup"
+            tags: ["UserGroup"]
+    "/user-groups/by-external-reference-code/{externalReferenceCode}":
+        delete:
+            operationId: deleteUserGroupByExternalReferenceCode
+            parameters:
+                - in: path
+                  name: externalReferenceCode
+                  required: true
+                  schema:
+                      type: string
+            responses:
+                204:
+                    content:
+                        application/json: {}
+                        application/xml: {}
+            tags: ["UserGroup"]
+        get:
+            operationId: getUserGroupByExternalReferenceCode
+            parameters:
+                - in: path
+                  name: externalReferenceCode
+                  required: true
+                  schema:
+                      type: string
+            responses:
+                200:
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/UserGroup"
+                        application/xml:
+                            schema:
+                                $ref: "#/components/schemas/UserGroup"
+            tags: ["UserGroup"]
+        patch:
+            operationId: patchUserGroupByExternalReferenceCode
+            parameters:
+                - in: path
+                  name: externalReferenceCode
+                  required: true
+                  schema:
+                      type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: "#/components/schemas/UserGroup"
+                    application/xml:
+                        schema:
+                            $ref: "#/components/schemas/UserGroup"
+            responses:
+                200:
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/UserGroup"
+                        application/xml:
+                            schema:
+                                $ref: "#/components/schemas/UserGroup"
+            tags: ["UserGroup"]
+        put:
+            operationId: putUserGroupByExternalReferenceCode
+            parameters:
+                - in: path
+                  name: externalReferenceCode
+                  required: true
+                  schema:
+                      type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: "#/components/schemas/UserGroup"
+                    application/xml:
+                        schema:
+                            $ref: "#/components/schemas/UserGroup"
+            responses:
+                200:
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/UserGroup"
+                        application/xml:
+                            schema:
+                                $ref: "#/components/schemas/UserGroup"
+            tags: ["UserGroup"]
+    "/user-groups/{userGroupId}":
+        delete:
+            operationId: deleteUserGroup
+            parameters:
+                - in: path
+                  name: userGroupId
+                  required: true
+                  schema:
+                      format: int64
+                      type: integer
+            responses:
+                204:
+                    content:
+                        application/json: {}
+                        application/xml: {}
+            tags: ["UserGroup"]
+        get:
+            operationId: getUserGroup
+            parameters:
+                - in: path
+                  name: userGroupId
+                  required: true
+                  schema:
+                      format: int64
+                      type: integer
+            responses:
+                200:
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/UserGroup"
+                        application/xml:
+                            schema:
+                                $ref: "#/components/schemas/UserGroup"
+            tags: ["UserGroup"]
+        patch:
+            operationId: patchUserGroup
+            parameters:
+                - in: path
+                  name: userGroupId
+                  required: true
+                  schema:
+                      format: int64
+                      type: integer
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: "#/components/schemas/UserGroup"
+                    application/xml:
+                        schema:
+                            $ref: "#/components/schemas/UserGroup"
+            responses:
+                200:
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/UserGroup"
+                        application/xml:
+                            schema:
+                                $ref: "#/components/schemas/UserGroup"
+            tags: ["UserGroup"]
+        put:
+            operationId: putUserGroup
+            parameters:
+                - in: path
+                  name: userGroupId
+                  required: true
+                  schema:
+                      format: int64
+                      type: integer
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: "#/components/schemas/UserGroup"
+                    application/xml:
+                        schema:
+                            $ref: "#/components/schemas/UserGroup"
+            responses:
+                200:
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/UserGroup"
+                        application/xml:
+                            schema:
+                                $ref: "#/components/schemas/UserGroup"
+            tags: ["UserGroup"]
+    "/user-groups/{userGroupId}/user-group-users":
+        delete:
+            operationId: deleteUserGroupUsers
+            parameters:
+                - in: path
+                  name: userGroupId
+                  required: true
+                  schema:
+                      format: int64
+                      type: integer
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            items:
+                                format: int64
+                                type: integer
+                            type: array
+                    application/xml:
+                        schema:
+                            items:
+                                format: int64
+                                type: integer
+                            type: array
+            responses:
+                204:
+                    content:
+                        application/json: {}
+                        application/xml: {}
+            tags: ["UserGroup"]
+        post:
+            operationId: postUserGroupUsers
+            parameters:
+                - in: path
+                  name: userGroupId
+                  required: true
+                  schema:
+                      format: int64
+                      type: integer
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            items:
+                                format: int64
+                                type: integer
+                            type: array
+                    application/xml:
+                        schema:
+                            items:
+                                format: int64
+                                type: integer
+                            type: array
+            responses:
+                204:
+                    content:
+                        application/json: {}
+                        application/xml: {}
+            tags: ["UserGroup"]
     "/web-urls/{webUrlId}":
         get:
             description:

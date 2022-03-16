@@ -399,67 +399,21 @@ public class GitWorkingDirectory {
 	}
 
 	public LocalGitBranch createLocalGitBranch(
-		String localGitBranchName, boolean force, String startPoint) {
+		final String localGitBranchName, final boolean force,
+		final String startPoint) {
 
-		String currentBranchName = getCurrentBranchName();
+		Retryable<LocalGitBranch> createLocalGitBranchRetryable =
+			new Retryable<LocalGitBranch>(true, 3, 0, true) {
 
-		List<String> commands = new ArrayList<>();
+				@Override
+				public LocalGitBranch execute() {
+					return _createLocalGitBranch(
+						localGitBranchName, force, startPoint);
+				}
 
-		if ((currentBranchName == null) ||
-			currentBranchName.equals(localGitBranchName)) {
+			};
 
-			String tempBranchName =
-				"temp-" + JenkinsResultsParserUtil.getCurrentTimeMillis();
-
-			RemoteGitBranch upstreamRemoteGitBranch =
-				getUpstreamRemoteGitBranch();
-
-			String upstreamGitBranchSHA = upstreamRemoteGitBranch.getSHA();
-
-			if (!localSHAExists(upstreamGitBranchSHA)) {
-				fetch(upstreamRemoteGitBranch);
-			}
-
-			commands.add(
-				JenkinsResultsParserUtil.combine(
-					"git branch -f ", tempBranchName, " ",
-					upstreamGitBranchSHA));
-
-			commands.add(
-				JenkinsResultsParserUtil.combine(
-					"git checkout -f ", tempBranchName));
-		}
-
-		StringBuilder sb = new StringBuilder();
-
-		sb.append("git branch ");
-
-		if (force) {
-			sb.append("-f ");
-		}
-
-		sb.append(localGitBranchName);
-
-		if (startPoint != null) {
-			sb.append(" ");
-			sb.append(startPoint);
-		}
-
-		commands.add(sb.toString());
-
-		GitUtil.ExecutionResult executionResult = executeBashCommands(
-			GitUtil.RETRIES_SIZE_MAX, GitUtil.MILLIS_RETRY_DELAY,
-			GitUtil.MILLIS_TIMEOUT, commands.toArray(new String[0]));
-
-		if (executionResult.getExitValue() != 0) {
-			throw new RuntimeException(
-				JenkinsResultsParserUtil.combine(
-					"Unable to create local branch ", localGitBranchName,
-					" at ", startPoint, "\n",
-					executionResult.getStandardError()));
-		}
-
-		return getLocalGitBranch(localGitBranchName, true);
+		return createLocalGitBranchRetryable.executeWithRetries();
 	}
 
 	public String createPullRequest(
@@ -1342,6 +1296,33 @@ public class GitWorkingDirectory {
 		return executionResult.getStandardOut();
 	}
 
+	public String getMergeBaseCommitSHA(LocalGitBranch... localGitBranches) {
+		if (localGitBranches.length < 2) {
+			throw new IllegalArgumentException(
+				"Unable to perform merge-base with less than two branches");
+		}
+
+		StringBuilder sb = new StringBuilder("git merge-base");
+
+		for (LocalGitBranch localGitBranch : localGitBranches) {
+			sb.append(" ");
+			sb.append(localGitBranch.getName());
+		}
+
+		GitUtil.ExecutionResult executionResult = executeBashCommands(
+			GitUtil.RETRIES_SIZE_MAX, GitUtil.MILLIS_RETRY_DELAY,
+			GitUtil.MILLIS_TIMEOUT, sb.toString());
+
+		if (executionResult.getExitValue() != 0) {
+			throw new RuntimeException(
+				JenkinsResultsParserUtil.combine(
+					"Unable to get merge base commit SHA\n",
+					executionResult.getStandardError()));
+		}
+
+		return executionResult.getStandardOut();
+	}
+
 	public List<File> getModifiedDirsList(
 		boolean checkUnstagedFiles, List<PathMatcher> excludesPathMatchers,
 		List<PathMatcher> includesPathMatchers) {
@@ -1387,7 +1368,7 @@ public class GitWorkingDirectory {
 		sb.append("git diff --diff-filter=ADMR --name-only ");
 
 		sb.append(
-			_getMergeBaseCommitSHA(
+			getMergeBaseCommitSHA(
 				currentLocalGitBranch,
 				getLocalGitBranch(getUpstreamBranchName(), true)));
 
@@ -1420,7 +1401,13 @@ public class GitWorkingDirectory {
 			String gitDiffOutput = executionResult.getStandardOut();
 
 			for (String line : gitDiffOutput.split("\n")) {
-				modifiedFiles.add(new File(_workingDirectory, line));
+				File modifiedFile = new File(_workingDirectory, line);
+
+				if (!modifiedFile.exists()) {
+					continue;
+				}
+
+				modifiedFiles.add(modifiedFile);
 			}
 
 			_modifiedFilesMap.put(gitDiffCommandString, modifiedFiles);
@@ -2407,6 +2394,70 @@ public class GitWorkingDirectory {
 		}
 	}
 
+	private LocalGitBranch _createLocalGitBranch(
+		String localGitBranchName, boolean force, String startPoint) {
+
+		String currentBranchName = getCurrentBranchName();
+
+		List<String> commands = new ArrayList<>();
+
+		if ((currentBranchName == null) ||
+			currentBranchName.equals(localGitBranchName)) {
+
+			String tempBranchName =
+				"temp-" + JenkinsResultsParserUtil.getCurrentTimeMillis();
+
+			RemoteGitBranch upstreamRemoteGitBranch =
+				getUpstreamRemoteGitBranch();
+
+			String upstreamGitBranchSHA = upstreamRemoteGitBranch.getSHA();
+
+			if (!localSHAExists(upstreamGitBranchSHA)) {
+				fetch(upstreamRemoteGitBranch);
+			}
+
+			commands.add(
+				JenkinsResultsParserUtil.combine(
+					"git branch -f ", tempBranchName, " ",
+					upstreamGitBranchSHA));
+
+			commands.add(
+				JenkinsResultsParserUtil.combine(
+					"git checkout -f ", tempBranchName));
+		}
+
+		StringBuilder sb = new StringBuilder();
+
+		sb.append("git branch ");
+
+		if (force) {
+			sb.append("-f ");
+		}
+
+		sb.append(localGitBranchName);
+
+		if (startPoint != null) {
+			sb.append(" ");
+			sb.append(startPoint);
+		}
+
+		commands.add(sb.toString());
+
+		GitUtil.ExecutionResult executionResult = executeBashCommands(
+			GitUtil.RETRIES_SIZE_MAX, GitUtil.MILLIS_RETRY_DELAY,
+			GitUtil.MILLIS_TIMEOUT, commands.toArray(new String[0]));
+
+		if (executionResult.getExitValue() != 0) {
+			throw new RuntimeException(
+				JenkinsResultsParserUtil.combine(
+					"Unable to create local branch ", localGitBranchName,
+					" at ", startPoint, "\n",
+					executionResult.getStandardError()));
+		}
+
+		return getLocalGitBranch(localGitBranchName, true);
+	}
+
 	private boolean _deleteLocalGitBranches(String... branchNames) {
 		if (branchNames.length > _BRANCHES_DELETE_BATCH_SIZE) {
 			throw new IllegalArgumentException(
@@ -2537,33 +2588,6 @@ public class GitWorkingDirectory {
 		return sb.toString();
 	}
 
-	private String _getMergeBaseCommitSHA(LocalGitBranch... localGitBranches) {
-		if (localGitBranches.length < 2) {
-			throw new IllegalArgumentException(
-				"Unable to perform merge-base with less than two branches");
-		}
-
-		StringBuilder sb = new StringBuilder("git merge-base");
-
-		for (LocalGitBranch localGitBranch : localGitBranches) {
-			sb.append(" ");
-			sb.append(localGitBranch.getName());
-		}
-
-		GitUtil.ExecutionResult executionResult = executeBashCommands(
-			GitUtil.RETRIES_SIZE_MAX, GitUtil.MILLIS_RETRY_DELAY,
-			GitUtil.MILLIS_TIMEOUT, sb.toString());
-
-		if (executionResult.getExitValue() != 0) {
-			throw new RuntimeException(
-				JenkinsResultsParserUtil.combine(
-					"Unable to get merge base commit SHA\n",
-					executionResult.getStandardError()));
-		}
-
-		return executionResult.getStandardOut();
-	}
-
 	private String _getRemoteGitBranchesSHAReport(
 		String remoteGitBranchName, String remoteURL) {
 
@@ -2666,7 +2690,7 @@ public class GitWorkingDirectory {
 	private static final Pattern _gitDirectoryPathPattern = Pattern.compile(
 		"gitdir\\: (.*)\\s*");
 	private static final Pattern _gitLogEntityPattern = Pattern.compile(
-		"(?<sha>[0-9a-f]{40}) (?<commitTime>\\d+) (?<email>[^\\s]+) " +
+		"(?<sha>[0-9a-f]{40}) (?<commitTime>\\d+) (?<email>[^\\s]*) " +
 			"(?<message>.*)");
 	private static final Map<String, List<File>> _modifiedFilesMap =
 		new HashMap<>();

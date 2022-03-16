@@ -44,19 +44,42 @@ definition {
 
 			Button.click(button = "Cancel");
 		}
-
 		else {
-			WaitForElementNotPresent(
-				key_text = "Save",
-				locator1 = "Button#ANY_DISABLED");
+			WaitForElementPresent(locator1 = "Button#SAVE");
 
 			Button.clickSave();
 		}
 	}
 
+	macro createWorkspace {
+		ACUtils.clickAnyButton(button = "Start Free Trial");
+
+		Type(
+			locator1 = "ACUtils#NAME_FIELD",
+			value1 = "${workspaceName}");
+
+		for (var email : list "${emailList}") {
+			Type(
+				locator1 = "ACWorkspace#INVITE_USERS_INPUT",
+				value1 = "${email}");
+
+			KeyPress(
+				locator1 = "ACWorkspace#INVITE_USERS_INPUT",
+				value1 = "\ENTER");
+		}
+
+		Click.clickAtNotVisible(locator1 = "ACDXPSettings#AC_GENERIC_CHECKBOX");
+
+		Button.clickSubmitButton();
+
+		WaitForElementPresent(
+			key_textValue = "Welcome to Analytics Cloud",
+			locator1 = "ACUtils#GENERIC_TEXT");
+	}
+
 	macro openWorkspace {
 		if (isSet(workspaceName)) {
-			var key_WorkspaceName = "${workspaceName}";
+			var key_workspaceName = "${workspaceName}";
 
 			Click(locator1 = "ACWorkspace#WORKSPACE_NAME");
 		}
@@ -64,6 +87,8 @@ definition {
 		if (!(isSet(workspaceName))) {
 			Click(locator1 = "ACWorkspace#FARO_DEMO_WORKSPACE");
 		}
+
+		ACUtils.dismissOnboardingModal();
 	}
 
 	macro signOut {

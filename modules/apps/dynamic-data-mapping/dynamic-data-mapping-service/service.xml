@@ -801,6 +801,7 @@
 		<exception>DataProviderInstanceName</exception>
 		<exception>DataProviderInstanceURL</exception>
 		<exception>DuplicateDataProviderInstanceInputParameterName</exception>
+		<exception>FormInstanceExpired</exception>
 		<exception>FormInstanceName</exception>
 		<exception>FormInstanceNotPublished</exception>
 		<exception>FormInstanceRecordExporter</exception>
@@ -808,6 +809,7 @@
 		<exception>FormInstanceSettingsRedirectURL</exception>
 		<exception>FormInstanceSettingsStorageType</exception>
 		<exception>FormInstanceStructureId</exception>
+		<exception>FormInstanceSubmissionLimit</exception>
 		<exception>InvalidParentStructure</exception>
 		<exception>InvalidStructureVersion</exception>
 		<exception>InvalidTemplateVersion</exception>

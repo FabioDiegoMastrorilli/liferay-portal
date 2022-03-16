@@ -16,7 +16,6 @@ package com.liferay.commerce.price.list.model.impl;
 
 import com.liferay.commerce.price.list.model.CommercePriceListDiscountRel;
 import com.liferay.commerce.price.list.model.CommercePriceListDiscountRelModel;
-import com.liferay.commerce.price.list.model.CommercePriceListDiscountRelSoap;
 import com.liferay.expando.kernel.model.ExpandoBridge;
 import com.liferay.expando.kernel.util.ExpandoBridgeFactoryUtil;
 import com.liferay.exportimport.kernel.lar.StagedModelType;
@@ -43,12 +42,10 @@ import java.lang.reflect.InvocationHandler;
 import java.sql.Blob;
 import java.sql.Types;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.BiConsumer;
@@ -78,7 +75,7 @@ public class CommercePriceListDiscountRelModelImpl
 	public static final String TABLE_NAME = "CommercePriceListDiscountRel";
 
 	public static final Object[][] TABLE_COLUMNS = {
-		{"uuid_", Types.VARCHAR},
+		{"mvccVersion", Types.BIGINT}, {"uuid_", Types.VARCHAR},
 		{"commercePriceListDiscountRelId", Types.BIGINT},
 		{"companyId", Types.BIGINT}, {"userId", Types.BIGINT},
 		{"userName", Types.VARCHAR}, {"createDate", Types.TIMESTAMP},
@@ -91,6 +88,7 @@ public class CommercePriceListDiscountRelModelImpl
 		new HashMap<String, Integer>();
 
 	static {
+		TABLE_COLUMNS_MAP.put("mvccVersion", Types.BIGINT);
 		TABLE_COLUMNS_MAP.put("uuid_", Types.VARCHAR);
 		TABLE_COLUMNS_MAP.put("commercePriceListDiscountRelId", Types.BIGINT);
 		TABLE_COLUMNS_MAP.put("companyId", Types.BIGINT);
@@ -105,7 +103,7 @@ public class CommercePriceListDiscountRelModelImpl
 	}
 
 	public static final String TABLE_SQL_CREATE =
-		"create table CommercePriceListDiscountRel (uuid_ VARCHAR(75) null,commercePriceListDiscountRelId LONG not null primary key,companyId LONG,userId LONG,userName VARCHAR(75) null,createDate DATE null,modifiedDate DATE null,commerceDiscountId LONG,commercePriceListId LONG,order_ INTEGER,lastPublishDate DATE null)";
+		"create table CommercePriceListDiscountRel (mvccVersion LONG default 0 not null,uuid_ VARCHAR(75) null,commercePriceListDiscountRelId LONG not null primary key,companyId LONG,userId LONG,userName VARCHAR(75) null,createDate DATE null,modifiedDate DATE null,commerceDiscountId LONG,commercePriceListId LONG,order_ INTEGER,lastPublishDate DATE null)";
 
 	public static final String TABLE_SQL_DROP =
 		"drop table CommercePriceListDiscountRel";
@@ -170,65 +168,6 @@ public class CommercePriceListDiscountRelModelImpl
 	 */
 	@Deprecated
 	public static final long ORDER_COLUMN_BITMASK = 16L;
-
-	/**
-	 * Converts the soap model instance into a normal model instance.
-	 *
-	 * @param soapModel the soap model instance to convert
-	 * @return the normal model instance
-	 * @deprecated As of Athanasius (7.3.x), with no direct replacement
-	 */
-	@Deprecated
-	public static CommercePriceListDiscountRel toModel(
-		CommercePriceListDiscountRelSoap soapModel) {
-
-		if (soapModel == null) {
-			return null;
-		}
-
-		CommercePriceListDiscountRel model =
-			new CommercePriceListDiscountRelImpl();
-
-		model.setUuid(soapModel.getUuid());
-		model.setCommercePriceListDiscountRelId(
-			soapModel.getCommercePriceListDiscountRelId());
-		model.setCompanyId(soapModel.getCompanyId());
-		model.setUserId(soapModel.getUserId());
-		model.setUserName(soapModel.getUserName());
-		model.setCreateDate(soapModel.getCreateDate());
-		model.setModifiedDate(soapModel.getModifiedDate());
-		model.setCommerceDiscountId(soapModel.getCommerceDiscountId());
-		model.setCommercePriceListId(soapModel.getCommercePriceListId());
-		model.setOrder(soapModel.getOrder());
-		model.setLastPublishDate(soapModel.getLastPublishDate());
-
-		return model;
-	}
-
-	/**
-	 * Converts the soap model instances into normal model instances.
-	 *
-	 * @param soapModels the soap model instances to convert
-	 * @return the normal model instances
-	 * @deprecated As of Athanasius (7.3.x), with no direct replacement
-	 */
-	@Deprecated
-	public static List<CommercePriceListDiscountRel> toModels(
-		CommercePriceListDiscountRelSoap[] soapModels) {
-
-		if (soapModels == null) {
-			return null;
-		}
-
-		List<CommercePriceListDiscountRel> models =
-			new ArrayList<CommercePriceListDiscountRel>(soapModels.length);
-
-		for (CommercePriceListDiscountRelSoap soapModel : soapModels) {
-			models.add(toModel(soapModel));
-		}
-
-		return models;
-	}
 
 	public static final long LOCK_EXPIRATION_TIME = GetterUtil.getLong(
 		com.liferay.commerce.price.list.service.util.ServiceProps.get(
@@ -367,6 +306,12 @@ public class CommercePriceListDiscountRelModelImpl
 					<String, BiConsumer<CommercePriceListDiscountRel, ?>>();
 
 		attributeGetterFunctions.put(
+			"mvccVersion", CommercePriceListDiscountRel::getMvccVersion);
+		attributeSetterBiConsumers.put(
+			"mvccVersion",
+			(BiConsumer<CommercePriceListDiscountRel, Long>)
+				CommercePriceListDiscountRel::setMvccVersion);
+		attributeGetterFunctions.put(
 			"uuid", CommercePriceListDiscountRel::getUuid);
 		attributeSetterBiConsumers.put(
 			"uuid",
@@ -442,6 +387,21 @@ public class CommercePriceListDiscountRelModelImpl
 			attributeGetterFunctions);
 		_attributeSetterBiConsumers = Collections.unmodifiableMap(
 			(Map)attributeSetterBiConsumers);
+	}
+
+	@JSON
+	@Override
+	public long getMvccVersion() {
+		return _mvccVersion;
+	}
+
+	@Override
+	public void setMvccVersion(long mvccVersion) {
+		if (_columnOriginalValues == Collections.EMPTY_MAP) {
+			_setColumnOriginalValues();
+		}
+
+		_mvccVersion = mvccVersion;
 	}
 
 	@JSON
@@ -747,6 +707,7 @@ public class CommercePriceListDiscountRelModelImpl
 		CommercePriceListDiscountRelImpl commercePriceListDiscountRelImpl =
 			new CommercePriceListDiscountRelImpl();
 
+		commercePriceListDiscountRelImpl.setMvccVersion(getMvccVersion());
 		commercePriceListDiscountRelImpl.setUuid(getUuid());
 		commercePriceListDiscountRelImpl.setCommercePriceListDiscountRelId(
 			getCommercePriceListDiscountRelId());
@@ -773,6 +734,8 @@ public class CommercePriceListDiscountRelModelImpl
 		CommercePriceListDiscountRelImpl commercePriceListDiscountRelImpl =
 			new CommercePriceListDiscountRelImpl();
 
+		commercePriceListDiscountRelImpl.setMvccVersion(
+			this.<Long>getColumnOriginalValue("mvccVersion"));
 		commercePriceListDiscountRelImpl.setUuid(
 			this.<String>getColumnOriginalValue("uuid_"));
 		commercePriceListDiscountRelImpl.setCommercePriceListDiscountRelId(
@@ -883,6 +846,8 @@ public class CommercePriceListDiscountRelModelImpl
 		CommercePriceListDiscountRelCacheModel
 			commercePriceListDiscountRelCacheModel =
 				new CommercePriceListDiscountRelCacheModel();
+
+		commercePriceListDiscountRelCacheModel.mvccVersion = getMvccVersion();
 
 		commercePriceListDiscountRelCacheModel.uuid = getUuid();
 
@@ -1042,6 +1007,7 @@ public class CommercePriceListDiscountRelModelImpl
 
 	}
 
+	private long _mvccVersion;
 	private String _uuid;
 	private long _commercePriceListDiscountRelId;
 	private long _companyId;
@@ -1084,6 +1050,7 @@ public class CommercePriceListDiscountRelModelImpl
 	private void _setColumnOriginalValues() {
 		_columnOriginalValues = new HashMap<String, Object>();
 
+		_columnOriginalValues.put("mvccVersion", _mvccVersion);
 		_columnOriginalValues.put("uuid_", _uuid);
 		_columnOriginalValues.put(
 			"commercePriceListDiscountRelId", _commercePriceListDiscountRelId);
@@ -1120,27 +1087,29 @@ public class CommercePriceListDiscountRelModelImpl
 	static {
 		Map<String, Long> columnBitmasks = new HashMap<>();
 
-		columnBitmasks.put("uuid_", 1L);
+		columnBitmasks.put("mvccVersion", 1L);
 
-		columnBitmasks.put("commercePriceListDiscountRelId", 2L);
+		columnBitmasks.put("uuid_", 2L);
 
-		columnBitmasks.put("companyId", 4L);
+		columnBitmasks.put("commercePriceListDiscountRelId", 4L);
 
-		columnBitmasks.put("userId", 8L);
+		columnBitmasks.put("companyId", 8L);
 
-		columnBitmasks.put("userName", 16L);
+		columnBitmasks.put("userId", 16L);
 
-		columnBitmasks.put("createDate", 32L);
+		columnBitmasks.put("userName", 32L);
 
-		columnBitmasks.put("modifiedDate", 64L);
+		columnBitmasks.put("createDate", 64L);
 
-		columnBitmasks.put("commerceDiscountId", 128L);
+		columnBitmasks.put("modifiedDate", 128L);
 
-		columnBitmasks.put("commercePriceListId", 256L);
+		columnBitmasks.put("commerceDiscountId", 256L);
 
-		columnBitmasks.put("order_", 512L);
+		columnBitmasks.put("commercePriceListId", 512L);
 
-		columnBitmasks.put("lastPublishDate", 1024L);
+		columnBitmasks.put("order_", 1024L);
+
+		columnBitmasks.put("lastPublishDate", 2048L);
 
 		_columnBitmasks = Collections.unmodifiableMap(columnBitmasks);
 	}

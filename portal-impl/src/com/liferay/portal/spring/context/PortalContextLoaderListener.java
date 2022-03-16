@@ -18,7 +18,6 @@ import com.liferay.petra.executor.PortalExecutorManager;
 import com.liferay.petra.lang.ClassLoaderPool;
 import com.liferay.petra.log4j.Log4JUtil;
 import com.liferay.petra.reflect.ReflectionUtil;
-import com.liferay.petra.string.CharPool;
 import com.liferay.petra.string.StringBundler;
 import com.liferay.petra.string.StringPool;
 import com.liferay.portal.bean.BeanLocatorImpl;
@@ -48,10 +47,7 @@ import com.liferay.portal.kernel.util.ClearTimerThreadUtil;
 import com.liferay.portal.kernel.util.JavaConstants;
 import com.liferay.portal.kernel.util.PortalClassLoaderUtil;
 import com.liferay.portal.kernel.util.PortalLifecycleUtil;
-import com.liferay.portal.kernel.util.PropsKeys;
-import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.SystemProperties;
-import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.module.framework.ModuleFrameworkUtil;
 import com.liferay.portal.spring.aop.DynamicProxyCreator;
 import com.liferay.portal.spring.compat.CompatBeanDefinitionRegistryPostProcessor;
@@ -89,8 +85,6 @@ import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
 
 import javax.sql.DataSource;
-
-import org.apache.tika.config.ServiceLoader;
 
 import org.springframework.beans.CachedIntrospectionResults;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
@@ -133,21 +127,21 @@ public class PortalContextLoaderListener extends ContextLoaderListener {
 			DirectServletRegistryUtil.clearServlets();
 		}
 		catch (Exception exception) {
-			_log.error(exception, exception);
+			_log.error(exception);
 		}
 
 		try {
 			HotDeployUtil.reset();
 		}
 		catch (Exception exception) {
-			_log.error(exception, exception);
+			_log.error(exception);
 		}
 
 		try {
 			PortalLifecycleUtil.reset();
 		}
 		catch (Exception exception) {
-			_log.error(exception, exception);
+			_log.error(exception);
 		}
 
 		closeDataSource("counterDataSource");
@@ -163,7 +157,7 @@ public class PortalContextLoaderListener extends ContextLoaderListener {
 				PropsValues.MODULE_FRAMEWORK_STOP_WAIT_TIMEOUT);
 		}
 		catch (Exception exception) {
-			_log.error(exception, exception);
+			_log.error(exception);
 		}
 
 		ModuleFrameworkUtil.unregisterContext(_arrayApplicationContext);
@@ -177,14 +171,14 @@ public class PortalContextLoaderListener extends ContextLoaderListener {
 			ClearThreadLocalUtil.clearThreadLocal();
 		}
 		catch (Exception exception) {
-			_log.error(exception, exception);
+			_log.error(exception);
 		}
 
 		try {
 			ClearTimerThreadUtil.clearTimerThread();
 		}
 		catch (Exception exception) {
-			_log.error(exception, exception);
+			_log.error(exception);
 		}
 
 		Log4JUtil.shutdownLog4J();
@@ -202,16 +196,6 @@ public class PortalContextLoaderListener extends ContextLoaderListener {
 		FieldInterceptionHelperUtil.initialize();
 
 		ServletContext servletContext = servletContextEvent.getServletContext();
-
-		String portalLibDir = servletContext.getRealPath("/WEB-INF/lib");
-
-		portalLibDir = StringUtil.replace(
-			portalLibDir, CharPool.BACK_SLASH, CharPool.FORWARD_SLASH);
-
-		if (Validator.isNotNull(portalLibDir)) {
-			SystemProperties.set(
-				PropsKeys.LIFERAY_LIB_PORTAL_DIR, portalLibDir);
-		}
 
 		PortalClassPathUtil.initializeClassPaths(servletContext);
 
@@ -276,8 +260,6 @@ public class PortalContextLoaderListener extends ContextLoaderListener {
 
 		serviceLatch.openOn(
 			() -> _serviceWrapperRegistry = new ServiceWrapperRegistry());
-
-		ServiceLoader.setContextClassLoader(portalClassLoader);
 
 		FutureTask<Void> springInitTask = null;
 
@@ -377,7 +359,7 @@ public class PortalContextLoaderListener extends ContextLoaderListener {
 			filteredPropertyDescriptorsCache.clear();
 		}
 		catch (Exception exception) {
-			_log.error(exception, exception);
+			_log.error(exception);
 		}
 	}
 
@@ -398,7 +380,7 @@ public class PortalContextLoaderListener extends ContextLoaderListener {
 				closeable.close();
 			}
 			catch (IOException ioException) {
-				_log.error(ioException, ioException);
+				_log.error(ioException);
 			}
 		}
 	}

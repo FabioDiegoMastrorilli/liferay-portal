@@ -32,11 +32,12 @@ import com.liferay.portal.kernel.security.membershippolicy.MembershipPolicyExcep
 import com.liferay.portal.kernel.security.permission.ActionKeys;
 import com.liferay.portal.kernel.security.permission.PermissionChecker;
 import com.liferay.portal.kernel.security.permission.PermissionCheckerFactoryUtil;
-import com.liferay.portal.kernel.service.RoleService;
+import com.liferay.portal.kernel.service.RoleLocalService;
 import com.liferay.portal.kernel.service.ServiceContext;
 import com.liferay.portal.kernel.service.ServiceContextFactory;
+import com.liferay.portal.kernel.service.UserLocalService;
 import com.liferay.portal.kernel.service.UserService;
-import com.liferay.portal.kernel.service.permission.OrganizationPermissionUtil;
+import com.liferay.portal.kernel.service.permission.OrganizationPermission;
 import com.liferay.portal.kernel.service.permission.PortletPermissionUtil;
 import com.liferay.portal.kernel.servlet.SessionErrors;
 import com.liferay.portal.kernel.util.ArrayUtil;
@@ -218,7 +219,7 @@ public class UpdateUserRolesMVCActionCommand extends BaseMVCActionCommand {
 			}
 
 			if ((organizationId > 0) &&
-				!OrganizationPermissionUtil.contains(
+				!_organizationPermission.contains(
 					permissionChecker, organizationId, ActionKeys.VIEW)) {
 
 				PortletURL portletURL = _portal.getControlPanelPortletURL(
@@ -243,10 +244,10 @@ public class UpdateUserRolesMVCActionCommand extends BaseMVCActionCommand {
 		// this check in UserServiceImpl is useless because UsersAdmin readds
 		// the role.
 
-		Role administratorRole = _roleService.getRole(
+		Role administratorRole = _roleLocalService.getRole(
 			user.getCompanyId(), RoleConstants.ADMINISTRATOR);
 
-		long[] administratorUserIds = _userService.getRoleUserIds(
+		long[] administratorUserIds = _userLocalService.getRoleUserIds(
 			administratorRole.getRoleId());
 
 		if ((administratorUserIds.length == 1) &&
@@ -261,10 +262,16 @@ public class UpdateUserRolesMVCActionCommand extends BaseMVCActionCommand {
 	private Http _http;
 
 	@Reference
+	private OrganizationPermission _organizationPermission;
+
+	@Reference
 	private Portal _portal;
 
 	@Reference
-	private RoleService _roleService;
+	private RoleLocalService _roleLocalService;
+
+	@Reference
+	private UserLocalService _userLocalService;
 
 	@Reference
 	private UsersAdmin _usersAdmin;

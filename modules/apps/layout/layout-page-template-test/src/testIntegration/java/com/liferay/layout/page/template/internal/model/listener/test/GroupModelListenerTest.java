@@ -174,8 +174,8 @@ public class GroupModelListenerTest {
 				TestPropsValues.getUserId(), groupId,
 				fragmentCollection.getFragmentCollectionId(), null,
 				RandomTestUtil.randomString(), StringPool.BLANK,
-				RandomTestUtil.randomString(), StringPool.BLANK,
-				StringPool.BLANK, 0, FragmentConstants.TYPE_SECTION,
+				RandomTestUtil.randomString(), StringPool.BLANK, false,
+				StringPool.BLANK, null, 0, FragmentConstants.TYPE_SECTION,
 				WorkflowConstants.STATUS_APPROVED, serviceContext);
 
 		return _fragmentEntryLinkLocalService.addFragmentEntryLink(
@@ -212,7 +212,7 @@ public class GroupModelListenerTest {
 		return _layoutPageTemplateEntryLocalService.addLayoutPageTemplateEntry(
 			TestPropsValues.getUserId(), groupId,
 			layoutPageTemplateCollectionId, RandomTestUtil.randomString(),
-			LayoutPageTemplateEntryTypeConstants.TYPE_BASIC,
+			LayoutPageTemplateEntryTypeConstants.TYPE_BASIC, 0,
 			WorkflowConstants.STATUS_DRAFT, serviceContext);
 	}
 

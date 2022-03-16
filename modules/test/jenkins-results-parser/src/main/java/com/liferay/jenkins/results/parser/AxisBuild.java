@@ -69,14 +69,9 @@ public class AxisBuild extends BaseBuild {
 	}
 
 	@Override
-	public String getAppServer() {
-		Build parentBuild = getParentBuild();
-
-		return parentBuild.getAppServer();
-	}
-
-	@Override
 	public String getArchivePath() {
+		String archiveName = getArchiveName();
+
 		if (archiveName == null) {
 			System.out.println(
 				"Build URL " + getBuildURL() + " has a null archive name");
@@ -144,13 +139,6 @@ public class AxisBuild extends BaseBuild {
 		BatchBuild parentBatchBuild = getParentBatchBuild();
 
 		return parentBatchBuild.getBatchName();
-	}
-
-	@Override
-	public String getBrowser() {
-		Build parentBuild = getParentBuild();
-
-		return parentBuild.getBrowser();
 	}
 
 	public String getBuildDescriptionTestrayReports() {
@@ -268,13 +256,6 @@ public class AxisBuild extends BaseBuild {
 	}
 
 	@Override
-	public String getDatabase() {
-		Build parentBuild = getParentBuild();
-
-		return parentBuild.getDatabase();
-	}
-
-	@Override
 	public String getDisplayName() {
 		return JenkinsResultsParserUtil.combine(
 			getAxisVariable(), " #", String.valueOf(getBuildNumber()));
@@ -348,20 +329,6 @@ public class AxisBuild extends BaseBuild {
 		invokedTime = parentBuild.getStartTime();
 
 		return invokedTime;
-	}
-
-	@Override
-	public String getJDK() {
-		Build parentBuild = getParentBuild();
-
-		return parentBuild.getJDK();
-	}
-
-	@Override
-	public String getOperatingSystem() {
-		Build parentBuild = getParentBuild();
-
-		return parentBuild.getOperatingSystem();
 	}
 
 	public BatchBuild getParentBatchBuild() {
@@ -607,9 +574,9 @@ public class AxisBuild extends BaseBuild {
 
 	protected static final Pattern archiveBuildURLPattern = Pattern.compile(
 		JenkinsResultsParserUtil.combine(
-			"(", Pattern.quote("${dependencies.url}"), "|",
-			Pattern.quote(JenkinsResultsParserUtil.URL_DEPENDENCIES_FILE), "|",
-			Pattern.quote(JenkinsResultsParserUtil.URL_DEPENDENCIES_HTTP),
+			"(", Pattern.quote(Build.DEPENDENCIES_URL_TOKEN), "|",
+			Pattern.quote(JenkinsResultsParserUtil.urlDependenciesFile), "|",
+			Pattern.quote(JenkinsResultsParserUtil.urlDependenciesHttp),
 			")/*(?<archiveName>.*)/(?<master>[^/]+)/+(?<jobName>[^/]+)/",
 			"(?<axisVariable>" + AxisBuild._AXIS_VARIABLE_REGEX + ")/",
 			"(?<buildNumber>\\d+)/?"));

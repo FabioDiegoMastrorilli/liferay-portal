@@ -35,7 +35,7 @@ definition {
 		}
 	}
 
-	@description = "This is a test for LPS-98241 and LPS-128667. The user could configure the Button fragment in page editor."
+	@description = "This is a test for LPS-98241 and LPS-128667 and LPS-106776. The user could configure the Button fragment in page editor."
 	@priority = "4"
 	test ConfigureBasicComponentButton {
 		task ("Add a widget page") {
@@ -68,13 +68,13 @@ definition {
 		task ("Configure the Button fragment") {
 			PageEditor.gotoConfiguration(fragmentName = "Button");
 
-			PageEditor.configureFragment(type = "Link");
+			PageEditor.configureFragment(
+				size = "Large",
+				type = "Link");
 
 			PageEditor.gotoStyle(fragmentName = "Button");
 
-			PageEditor.configureFragment(
-				alignment = "Center",
-				size = "Large");
+			PageEditor.configureFragment(alignment = "Center");
 		}
 
 		task ("View the Button styles") {
@@ -106,7 +106,7 @@ definition {
 		task ("View selected page is linked to Button fragment") {
 			AssertVisible(
 				key_append = "/parent::div[contains(@class,'component-button')]",
-				key_URL = "/web/test-site-name/test-widget-page-name",
+				key_url = "/web/test-site-name/test-widget-page-name",
 				locator1 = "Fragment#FRAGMENT_LINK");
 		}
 
@@ -127,7 +127,7 @@ definition {
 		task ("View selected page is linked to Button fragment") {
 			AssertVisible(
 				key_append = "/parent::div[contains(@class,'component-button')]",
-				key_URL = "/web/test-site-name/test-content-page-name",
+				key_url = "/web/test-site-name/test-content-page-name",
 				locator1 = "Fragment#FRAGMENT_LINK");
 		}
 
@@ -147,7 +147,7 @@ definition {
 		task ("View the default link is shown in Button fragment") {
 			AssertVisible(
 				key_append = "/parent::div[contains(@class,'component-button')]",
-				key_URL = "#",
+				key_url = "#",
 				locator1 = "Fragment#FRAGMENT_LINK");
 		}
 
@@ -187,13 +187,16 @@ definition {
 		}
 
 		task ("Configure the Card fragment") {
+			PageEditor.gotoConfiguration(fragmentName = "Card");
+
+			PageEditor.configureFragment(imageSize = "Fit");
+
 			PageEditor.gotoStyle(fragmentName = "Card");
 
 			PageEditor.configureFragment(
 				alignment = "Center",
 				borderRadius = "Border Radius Small",
 				boxShadow = "Box Shadow Large",
-				imageSize = "Fit",
 				marginBottom = "5");
 		}
 
@@ -316,11 +319,14 @@ definition {
 		}
 
 		task ("Configure the Image") {
+			PageEditor.gotoConfiguration(fragmentName = "Image");
+
+			PageEditor.configureFragment(imageSize = "Original Size");
+
 			PageEditor.gotoStyle(fragmentName = "Image");
 
 			PageEditor.configureFragment(
 				alignment = "Center",
-				imageSize = "Original Size",
 				marginBottom = "2");
 		}
 
@@ -456,10 +462,10 @@ definition {
 		}
 
 		task ("View the Default is shown in Text Color field") {
-			AssertTextEquals(
-				key_text = "Text Color",
-				locator1 = "TextInput#ANY",
-				value1 = "Default");
+			AssertVisible(
+				key_fieldLabel = "Text Color",
+				key_text = "Default",
+				locator1 = "Button#ANY_WITH_LABEL");
 		}
 
 		task ("Remove the Paragraph") {
@@ -548,7 +554,7 @@ definition {
 		}
 
 		task ("Configure the Spacer") {
-			PageEditor.gotoStyle(fragmentName = "Spacer");
+			PageEditor.gotoConfiguration(fragmentName = "Spacer");
 
 			PageEditor.configureFragment(height = "4");
 		}

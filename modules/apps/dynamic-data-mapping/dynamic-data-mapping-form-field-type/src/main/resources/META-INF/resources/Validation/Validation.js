@@ -50,8 +50,12 @@ const Validation = ({
 	validation,
 	validations,
 	visible,
+	...otherProps
 }) => {
 	const {focusedField} = useFormState();
+
+	/* TODO: Remove the focusedField variable when the fieldName is properly delivered by the validator prop */
+	const parentFieldName = validation?.fieldName ?? focusedField?.fieldName;
 
 	const [
 		{enableValidation, errorMessage, parameter, selectedValidation},
@@ -59,7 +63,7 @@ const Validation = ({
 	] = useReducer(
 		reducer({
 			editingLanguageId,
-			fieldName: validation?.fieldName ?? focusedField?.fieldName,
+			fieldName: parentFieldName,
 			onChange,
 		}),
 		{
@@ -110,6 +114,7 @@ const Validation = ({
 
 			{enableValidation && (
 				<ValidationComponent
+					{...otherProps}
 					dataType={dataType}
 					dispatch={dispatch}
 					errorMessage={errorMessage}
@@ -118,6 +123,7 @@ const Validation = ({
 					name={name}
 					onBlur={onBlur}
 					parameter={parameter}
+					parentFieldName={parentFieldName}
 					readOnly={readOnly}
 					selectedValidation={selectedValidation}
 					transformSelectedValidation={transformSelectedValidation}
@@ -141,6 +147,7 @@ const ValidationWrapper = ({
 	validation,
 	value,
 	visible,
+	...otherProps
 }) => {
 	const {validations} = useFormState();
 	const data = transformData({
@@ -154,6 +161,7 @@ const ValidationWrapper = ({
 
 	return (
 		<Validation
+			{...otherProps}
 			{...data}
 			defaultLanguageId={defaultLanguageId}
 			editingLanguageId={editingLanguageId}
@@ -163,7 +171,6 @@ const ValidationWrapper = ({
 			onChange={(value) => onChange({target: {value}})}
 			readOnly={readOnly}
 			validation={validation}
-			value={value}
 			visible={visible}
 		/>
 	);

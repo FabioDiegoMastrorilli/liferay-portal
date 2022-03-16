@@ -84,12 +84,7 @@ definition {
 		// AC Refactor ticket: LRAC-9168
 
 		var usernameList = "ac";
-
 		var pageNameList = "sports,technology,science";
-
-		task ("Get site assigned property name") {
-			var propertyName = ACDXPSettings.getAssignedPropertyName(siteName = "Site Name");
-		}
 
 		task ("View new pages in site as new user") {
 			User.logoutAndLoginPG(
@@ -108,7 +103,7 @@ definition {
 
 			ACUtils.launchAC();
 
-			ACProperties.switchProperty(propertyName = "${propertyName}");
+			ACProperties.switchProperty(propertyName = "${assignedPropertyName}");
 		}
 
 		task ("Add a new static segment") {
@@ -118,7 +113,7 @@ definition {
 		}
 
 		task ("Type the segment name") {
-			ACSegments.nameSegment(segmentName = "Static Segment Test");
+			ACUtils.setItemName(itemName = "Static Segment Test");
 		}
 
 		task ("Add the new user as member") {
@@ -152,7 +147,6 @@ definition {
 		// AC Refactor ticket: LRAC-9169
 
 		var nameList = "ac ac,ac2 ac2,ac3 ac3";
-
 		var newUser = "ac2,ac3";
 
 		task ("Add 2 more new users") {
@@ -172,10 +166,6 @@ definition {
 
 		task ("Sync the Contact Data") {
 			ACDXPSettings.syncNewContactData();
-		}
-
-		task ("Get site assigned property name") {
-			var propertyName = ACDXPSettings.getAssignedPropertyName(siteName = "Site Name");
 		}
 
 		task ("View new pages in site as different users") {
@@ -200,7 +190,7 @@ definition {
 
 			ACUtils.launchAC();
 
-			ACProperties.switchProperty(propertyName = "${propertyName}");
+			ACProperties.switchProperty(propertyName = "${assignedPropertyName}");
 		}
 
 		task ("Add a new static segment") {
@@ -210,7 +200,7 @@ definition {
 		}
 
 		task ("Type the segment name") {
-			ACSegments.nameSegment(segmentName = "Static Segment Test");
+			ACUtils.setItemName(itemName = "Static Segment Test");
 		}
 
 		task ("Add the new user as member") {
@@ -254,7 +244,6 @@ definition {
 		// AC Refactor ticket: LRAC-9167
 
 		var nameList = "ac ac,ac2 ac2";
-
 		var emailList = "ac@liferay.com,ac2@liferay.com";
 
 		task ("Add a new users") {
@@ -272,10 +261,6 @@ definition {
 
 		task ("Sync the Contact Data") {
 			ACDXPSettings.syncNewContactData();
-		}
-
-		task ("Get site assigned property name") {
-			var propertyName = ACDXPSettings.getAssignedPropertyName(siteName = "Site Name");
 		}
 
 		task ("View new pages in site as new user") {
@@ -300,7 +285,7 @@ definition {
 
 			ACUtils.launchAC();
 
-			ACProperties.switchProperty(propertyName = "${propertyName}");
+			ACProperties.switchProperty(propertyName = "${assignedPropertyName}");
 		}
 
 		task ("Add a new static segment") {
@@ -310,7 +295,7 @@ definition {
 		}
 
 		task ("Type the segment name") {
-			ACSegments.nameSegment(segmentName = "Static Segment Test");
+			ACUtils.setItemName(itemName = "Static Segment Test");
 		}
 
 		task ("Add the new user as member") {

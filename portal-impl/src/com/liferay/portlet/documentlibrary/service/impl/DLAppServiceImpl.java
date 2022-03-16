@@ -85,7 +85,6 @@ import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
-import java.util.concurrent.Callable;
 
 /**
  * Provides the remote service for accessing, adding, checking in/out, deleting,
@@ -382,8 +381,8 @@ public class DLAppServiceImpl extends DLAppServiceBaseImpl {
 
 		return repository.addFileEntry(
 			externalReferenceCode, getUserId(), folderId, sourceFileName,
-			mimeType, title, description, changeLog, file, expirationDate,
-			reviewDate, serviceContext);
+			mimeType, title, title, description, changeLog, file,
+			expirationDate, reviewDate, serviceContext);
 	}
 
 	/**
@@ -469,7 +468,7 @@ public class DLAppServiceImpl extends DLAppServiceBaseImpl {
 
 		return repository.addFileEntry(
 			externalReferenceCode, getUserId(), folderId, sourceFileName,
-			mimeType, title, description, changeLog, inputStream, size,
+			mimeType, title, title, description, changeLog, inputStream, size,
 			expirationDate, reviewDate, serviceContext);
 	}
 
@@ -1365,6 +1364,7 @@ public class DLAppServiceImpl extends DLAppServiceBaseImpl {
 	 * @return the file entry with the external reference code
 	 * @throws PortalException if a portal exception occurred
 	 */
+	@Override
 	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
 	public FileEntry getFileEntryByExternalReferenceCode(
 			long groupId, String externalReferenceCode)
@@ -2925,7 +2925,7 @@ public class DLAppServiceImpl extends DLAppServiceBaseImpl {
 			fileEntryId);
 
 		FileEntry fileEntry = repository.updateFileEntry(
-			getUserId(), fileEntryId, sourceFileName, mimeType, title,
+			getUserId(), fileEntryId, sourceFileName, mimeType, title, title,
 			description, changeLog, dlVersionNumberIncrease, file,
 			expirationDate, reviewDate, serviceContext);
 
@@ -3072,7 +3072,7 @@ public class DLAppServiceImpl extends DLAppServiceBaseImpl {
 			fileEntryId);
 
 		FileEntry fileEntry = repository.updateFileEntry(
-			getUserId(), fileEntryId, sourceFileName, mimeType, title,
+			getUserId(), fileEntryId, sourceFileName, mimeType, title, title,
 			description, changeLog, dlVersionNumberIncrease, inputStream, size,
 			expirationDate, reviewDate, serviceContext);
 
@@ -3157,7 +3157,7 @@ public class DLAppServiceImpl extends DLAppServiceBaseImpl {
 			fileEntryId);
 
 		repository.updateFileEntry(
-			getUserId(), fileEntryId, sourceFileName, mimeType, title,
+			getUserId(), fileEntryId, sourceFileName, mimeType, title, title,
 			description, changeLog, dlVersionNumberIncrease, file,
 			expirationDate, reviewDate, serviceContext);
 
@@ -3208,7 +3208,7 @@ public class DLAppServiceImpl extends DLAppServiceBaseImpl {
 			fileEntryId);
 
 		repository.updateFileEntry(
-			getUserId(), fileEntryId, sourceFileName, mimeType, title,
+			getUserId(), fileEntryId, sourceFileName, mimeType, title, title,
 			description, changeLog, dlVersionNumberIncrease, inputStream, size,
 			expirationDate, reviewDate, serviceContext);
 
@@ -3382,8 +3382,8 @@ public class DLAppServiceImpl extends DLAppServiceBaseImpl {
 		FileEntry destinationFileEntry = toRepository.addFileEntry(
 			null, getUserId(), newFolderId, sourceFileName,
 			latestFileVersion.getMimeType(), latestFileVersion.getTitle(),
-			latestFileVersion.getDescription(), StringPool.BLANK,
-			latestFileVersion.getContentStream(false),
+			latestFileVersion.getTitle(), latestFileVersion.getDescription(),
+			StringPool.BLANK, latestFileVersion.getContentStream(false),
 			latestFileVersion.getSize(), latestFileVersion.getExpirationDate(),
 			latestFileVersion.getReviewDate(), serviceContext);
 
@@ -3398,8 +3398,8 @@ public class DLAppServiceImpl extends DLAppServiceBaseImpl {
 				destinationFileEntry = toRepository.updateFileEntry(
 					getUserId(), destinationFileEntry.getFileEntryId(),
 					sourceFileName, fileVersion.getMimeType(),
-					fileVersion.getTitle(), fileVersion.getDescription(),
-					StringPool.BLANK,
+					fileVersion.getTitle(), fileVersion.getTitle(),
+					fileVersion.getDescription(), StringPool.BLANK,
 					DLVersionNumberIncrease.fromMajorVersion(
 						DLAppUtil.isMajorVersion(
 							previousFileVersion, fileVersion)),
@@ -3463,7 +3463,7 @@ public class DLAppServiceImpl extends DLAppServiceBaseImpl {
 		throws PortalException {
 
 		Queue<Folder[]> folders = new LinkedList<>();
-		final List<FileEntry> fileEntries = new ArrayList<>();
+		List<FileEntry> fileEntries = new ArrayList<>();
 
 		Folder curSrcFolder = srcFolder;
 		Folder curDestFolder = destFolder;
@@ -3483,7 +3483,7 @@ public class DLAppServiceImpl extends DLAppServiceBaseImpl {
 					fileEntries.add(fileEntry);
 				}
 				catch (Exception exception) {
-					_log.error(exception, exception);
+					_log.error(exception);
 				}
 			}
 
@@ -3514,17 +3514,12 @@ public class DLAppServiceImpl extends DLAppServiceBaseImpl {
 		}
 
 		TransactionCommitCallbackUtil.registerCallback(
-			new Callable<Void>() {
-
-				@Override
-				public Void call() throws Exception {
-					for (FileEntry fileEntry : fileEntries) {
-						DLProcessorRegistryUtil.trigger(fileEntry, null);
-					}
-
-					return null;
+			() -> {
+				for (FileEntry fileEntry : fileEntries) {
+					DLProcessorRegistryUtil.trigger(fileEntry, null);
 				}
 
+				return null;
 			});
 	}
 
@@ -3607,7 +3602,7 @@ public class DLAppServiceImpl extends DLAppServiceBaseImpl {
 		}
 		catch (NoSuchFileEntryException noSuchFileEntryException) {
 			if (_log.isDebugEnabled()) {
-				_log.debug(noSuchFileEntryException, noSuchFileEntryException);
+				_log.debug(noSuchFileEntryException);
 			}
 
 			return null;

@@ -88,7 +88,7 @@ definition {
 
 		task ("View the inline content of imported fragment composition") {
 			AssertTextEquals(
-				key_elementHeader = "//div[contains(@class,'page-editor__topper') and contains(.,'Heading')]//*[contains(@data-lfr-editable-id,'element-text')]",
+				key_elementHeader = "//div[@aria-label='Heading']//*[contains(@data-lfr-editable-id,'element-text')]",
 				key_position = "1",
 				locator1 = "PageEditor#CONTAINER_CONTAINER_NESTED_ELEMENT",
 				value1 = "Modify Text");
@@ -233,7 +233,7 @@ definition {
 
 		task ("View the fragment composition is rendered well") {
 			AssertElementPresent(
-				key_elementHeader = "/div[contains(.,'Fragment Name')]//li[contains(@class,'title')]",
+				key_elementHeader = "//div[@aria-label='Fragment Name']",
 				key_position = "1",
 				locator1 = "PageEditor#CONTAINER_CONTAINER_NESTED_ELEMENT");
 		}
@@ -463,18 +463,18 @@ definition {
 
 			AssertElementPresent(
 				key_columnNumber = "1",
-				key_elementHeader = "//div[contains(@class,'page-editor__topper')][1]/div[contains(.,'Heading')]//li[contains(@class,'title')]",
+				key_elementHeader = "//div[@aria-label='Heading']",
 				key_position = "1",
 				locator1 = "PageEditor#GRID_COLUMN_NESTED_ELEMENT");
 
 			AssertElementPresent(
 				key_columnNumber = "1",
-				key_elementHeader = "//div[contains(@class,'page-editor__topper')][2]/div[contains(.,'Heading')]//li[contains(@class,'title')]",
+				key_elementHeader = "//div[@aria-label='Heading'][2]",
 				key_position = "1",
 				locator1 = "PageEditor#GRID_COLUMN_NESTED_ELEMENT");
 
 			AssertElementPresent(
-				key_elementHeader = "/div[contains(@class,'page-editor__topper')][2]/div[contains(.,'Heading')]//li[contains(@class,'title')]",
+				key_elementHeader = "//div[@aria-label='Grid']/following-sibling::div[@aria-label='Heading']",
 				key_position = "1",
 				locator1 = "PageEditor#CONTAINER_CONTAINER_NESTED_ELEMENT");
 		}
@@ -520,18 +520,18 @@ definition {
 		task ("View the fragment composition is rendered well") {
 			AssertElementPresent(
 				key_columnNumber = "1",
-				key_elementHeader = "//div[contains(@class,'page-editor__topper')][1]/div[contains(.,'Heading')]//li[contains(@class,'title')]",
+				key_elementHeader = "//div[@aria-label='Heading']",
 				key_position = "1",
 				locator1 = "PageEditor#GRID_COLUMN_NESTED_ELEMENT");
 
 			AssertElementPresent(
 				key_columnNumber = "1",
-				key_elementHeader = "//div[contains(@class,'page-editor__topper')][2]/div[contains(.,'Heading')]//li[contains(@class,'title')]",
+				key_elementHeader = "//div[@aria-label='Heading'][2]",
 				key_position = "1",
 				locator1 = "PageEditor#GRID_COLUMN_NESTED_ELEMENT");
 
 			AssertElementPresent(
-				key_elementHeader = "/div[contains(@class,'page-editor__topper')][2]/div[contains(.,'Heading')]//li[contains(@class,'title')]",
+				key_elementHeader = "//div[@aria-label='Grid']/following-sibling::div[@aria-label='Heading']",
 				key_position = "1",
 				locator1 = "PageEditor#CONTAINER_CONTAINER_NESTED_ELEMENT");
 		}
@@ -836,7 +836,7 @@ definition {
 		task ("View selected page is linked to Card fragment") {
 			AssertVisible(
 				key_append = "[normalize-space(text())='Go Somewhere']",
-				key_URL = "/web/test-site-name/test-widget-page-name",
+				key_url = "/web/test-site-name/test-widget-page-name",
 				locator1 = "Fragment#FRAGMENT_LINK");
 		}
 
@@ -881,7 +881,7 @@ definition {
 
 			AssertVisible(
 				key_append = "[normalize-space(text())='Go Somewhere']",
-				key_URL = "/web/test-site-name/test-widget-page-name",
+				key_url = "/web/test-site-name/test-widget-page-name",
 				locator1 = "Fragment#FRAGMENT_LINK");
 
 			PortletEntry.publish();
@@ -894,7 +894,7 @@ definition {
 
 			Click(
 				key_append = "[normalize-space(text())='Go Somewhere']",
-				key_URL = "/web/test-site-name/test-widget-page-name",
+				key_url = "/web/test-site-name/test-widget-page-name",
 				locator1 = "Fragment#FRAGMENT_LINK");
 		}
 
@@ -1357,6 +1357,7 @@ definition {
 
 		task ("Add a new fragment in each collection") {
 			var htmlSnippet = FragmentsAPI.getFragmentFileContent(fileName = "checkbox_configuration.html");
+
 			var jsonSnippet = FragmentsAPI.getFragmentFileContent(fileName = "checkbox_configuration.json");
 
 			JSONFragment.addSection(
@@ -1368,6 +1369,7 @@ definition {
 				name = "Checkbox Fragment Example");
 
 			var htmlSnippet = FragmentsAPI.getFragmentFileContent(fileName = "colorPalette_configuration.html");
+
 			var jsonSnippet = FragmentsAPI.getFragmentFileContent(fileName = "colorPalette_configuration.json");
 
 			JSONFragment.addSection(
@@ -1379,6 +1381,7 @@ definition {
 				name = "ColorPalette Fragment Example");
 
 			var htmlSnippet = FragmentsAPI.getFragmentFileContent(fileName = "text_configuration.html");
+
 			var jsonSnippet = FragmentsAPI.getFragmentFileContent(fileName = "placeholder_configuration.json");
 
 			JSONFragment.addSection(
@@ -1452,7 +1455,7 @@ definition {
 			PageEditor.gotoConfiguration(fragmentName = "Fragment Name");
 
 			AssertElementPresent(
-				key_elementHeader = "/div[contains(@class,'page-editor__topper')][1]/div[contains(.,'Fragment Name')]//li[contains(@class,'title')]",
+				key_elementHeader = "//div[@aria-label='Fragment Name']",
 				key_position = "1",
 				locator1 = "PageEditor#CONTAINER_CONTAINER_NESTED_ELEMENT");
 
@@ -1487,9 +1490,7 @@ definition {
 		task ("Import a fragment collection") {
 			FragmentsAdminNavigator.gotoImportCollection();
 
-			UploadFileWithCustomPath.uploadArchiveFile(
-				fileName = "fragment-collection.zip",
-				filePath = "enduser/wem/fragment");
+			UploadDependencyFile.uploadArchiveFile(fileName = "fragment-collection.zip");
 
 			SelectFrameTop();
 

@@ -14,35 +14,51 @@
 
 package com.liferay.object.rest.internal.dto.v1_0.converter;
 
+import com.liferay.document.library.kernel.model.DLFileEntry;
+import com.liferay.document.library.kernel.service.DLFileEntryLocalService;
 import com.liferay.list.type.model.ListTypeEntry;
 import com.liferay.list.type.service.ListTypeEntryLocalService;
+import com.liferay.object.constants.ObjectFieldConstants;
+import com.liferay.object.constants.ObjectRelationshipConstants;
 import com.liferay.object.model.ObjectDefinition;
 import com.liferay.object.model.ObjectField;
+import com.liferay.object.model.ObjectRelationship;
+import com.liferay.object.rest.dto.v1_0.ListEntry;
 import com.liferay.object.rest.dto.v1_0.ObjectEntry;
 import com.liferay.object.rest.dto.v1_0.Status;
 import com.liferay.object.rest.internal.dto.v1_0.util.CreatorUtil;
 import com.liferay.object.scope.ObjectScopeProvider;
 import com.liferay.object.scope.ObjectScopeProviderRegistry;
 import com.liferay.object.service.ObjectDefinitionLocalService;
+import com.liferay.object.service.ObjectEntryLocalService;
 import com.liferay.object.service.ObjectFieldLocalService;
+import com.liferay.object.service.ObjectRelationshipLocalService;
+import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.language.LanguageUtil;
 import com.liferay.portal.kernel.model.Group;
 import com.liferay.portal.kernel.service.GroupLocalService;
 import com.liferay.portal.kernel.service.UserLocalService;
-import com.liferay.portal.kernel.util.HashMapBuilder;
+import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.Portal;
+import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.workflow.WorkflowConstants;
 import com.liferay.portal.language.LanguageResources;
+import com.liferay.portal.util.PropsValues;
 import com.liferay.portal.vulcan.dto.converter.DTOConverter;
 import com.liferay.portal.vulcan.dto.converter.DTOConverterContext;
+import com.liferay.portal.vulcan.dto.converter.DefaultDTOConverterContext;
 import com.liferay.portal.vulcan.util.LocalizedMapUtil;
 
 import java.io.Serializable;
 
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+
+import javax.ws.rs.core.MultivaluedMap;
+import javax.ws.rs.core.UriInfo;
 
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
@@ -68,38 +84,44 @@ public class ObjectEntryDTOConverter
 			com.liferay.object.model.ObjectEntry objectEntry)
 		throws Exception {
 
-		ObjectDefinition objectDefinition = _getObjectDefinition(
-			dtoConverterContext, objectEntry);
+		Optional<UriInfo> uriInfoOptional =
+			dtoConverterContext.getUriInfoOptional();
 
-		return new ObjectEntry() {
-			{
-				actions = dtoConverterContext.getActions();
-				creator = CreatorUtil.toCreator(
-					_portal, dtoConverterContext.getUriInfoOptional(),
-					_userLocalService.fetchUser(objectEntry.getUserId()));
-				dateCreated = objectEntry.getCreateDate();
-				dateModified = objectEntry.getModifiedDate();
-				externalReferenceCode = objectEntry.getExternalReferenceCode();
-				id = objectEntry.getObjectEntryId();
-				properties = _toProperties(
-					dtoConverterContext.isAcceptAllLanguages(),
-					dtoConverterContext.getLocale(), objectDefinition,
-					objectEntry);
-				scopeKey = _getScopeKey(objectDefinition, objectEntry);
-				status = new Status() {
-					{
-						code = objectEntry.getStatus();
-						label = WorkflowConstants.getStatusLabel(
-							objectEntry.getStatus());
-						label_i18n = LanguageUtil.get(
-							LanguageResources.getResourceBundle(
-								dtoConverterContext.getLocale()),
-							WorkflowConstants.getStatusLabel(
-								objectEntry.getStatus()));
-					}
-				};
-			}
-		};
+		UriInfo uriInfo = uriInfoOptional.orElse(null);
+
+		if (uriInfo == null) {
+			return _toDTO(
+				dtoConverterContext,
+				Math.min(1, PropsValues.OBJECT_NESTED_FIELDS_MAX_QUERY_DEPTH),
+				objectEntry);
+		}
+
+		MultivaluedMap<String, String> queryParameters =
+			uriInfo.getQueryParameters();
+
+		return _toDTO(
+			dtoConverterContext,
+			Math.min(
+				GetterUtil.getInteger(
+					queryParameters.getFirst("nestedFieldsDepth"), 1),
+				PropsValues.OBJECT_NESTED_FIELDS_MAX_QUERY_DEPTH),
+			objectEntry);
+	}
+
+	private DTOConverterContext _getDTOConverterContext(
+		DTOConverterContext dtoConverterContext, long objectEntryId) {
+
+		Optional<UriInfo> uriInfoOptional =
+			dtoConverterContext.getUriInfoOptional();
+
+		UriInfo uriInfo = uriInfoOptional.orElse(null);
+
+		return new DefaultDTOConverterContext(
+			dtoConverterContext.isAcceptAllLanguages(), null,
+			dtoConverterContext.getDTOConverterRegistry(),
+			dtoConverterContext.getHttpServletRequest(), objectEntryId,
+			dtoConverterContext.getLocale(), uriInfo,
+			dtoConverterContext.getUser());
 	}
 
 	private ObjectDefinition _getObjectDefinition(
@@ -142,10 +164,49 @@ public class ObjectEntryDTOConverter
 		return null;
 	}
 
+	private ObjectEntry _toDTO(
+			DTOConverterContext dtoConverterContext, int nestedFieldsDepth,
+			com.liferay.object.model.ObjectEntry objectEntry)
+		throws Exception {
+
+		ObjectDefinition objectDefinition = _getObjectDefinition(
+			dtoConverterContext, objectEntry);
+
+		return new ObjectEntry() {
+			{
+				actions = dtoConverterContext.getActions();
+				creator = CreatorUtil.toCreator(
+					_portal, dtoConverterContext.getUriInfoOptional(),
+					_userLocalService.fetchUser(objectEntry.getUserId()));
+				dateCreated = objectEntry.getCreateDate();
+				dateModified = objectEntry.getModifiedDate();
+				externalReferenceCode = objectEntry.getExternalReferenceCode();
+				id = objectEntry.getObjectEntryId();
+				properties = _toProperties(
+					dtoConverterContext, nestedFieldsDepth, objectDefinition,
+					objectEntry);
+				scopeKey = _getScopeKey(objectDefinition, objectEntry);
+				status = new Status() {
+					{
+						code = objectEntry.getStatus();
+						label = WorkflowConstants.getStatusLabel(
+							objectEntry.getStatus());
+						label_i18n = LanguageUtil.get(
+							LanguageResources.getResourceBundle(
+								dtoConverterContext.getLocale()),
+							WorkflowConstants.getStatusLabel(
+								objectEntry.getStatus()));
+					}
+				};
+			}
+		};
+	}
+
 	private Map<String, Object> _toProperties(
-		boolean acceptAllLanguages, Locale locale,
-		ObjectDefinition objectDefinition,
-		com.liferay.object.model.ObjectEntry objectEntry) {
+			DTOConverterContext dtoConverterContext, int nestedFieldsDepth,
+			ObjectDefinition objectDefinition,
+			com.liferay.object.model.ObjectEntry objectEntry)
+		throws Exception {
 
 		Map<String, Object> map = new HashMap<>();
 
@@ -158,7 +219,9 @@ public class ObjectEntryDTOConverter
 		for (ObjectField objectField : objectFields) {
 			long listTypeDefinitionId = objectField.getListTypeDefinitionId();
 
-			Serializable serializable = values.get(objectField.getName());
+			String objectFieldName = objectField.getName();
+
+			Serializable serializable = values.get(objectFieldName);
 
 			if (listTypeDefinitionId != 0) {
 				ListTypeEntry listTypeEntry =
@@ -170,19 +233,88 @@ public class ObjectEntryDTOConverter
 				}
 
 				map.put(
-					objectField.getName(),
-					HashMapBuilder.<String, Object>put(
-						"key", listTypeEntry.getKey()
-					).put(
-						"name", listTypeEntry.getName(locale)
-					).put(
-						"name_i18n",
-						LocalizedMapUtil.getI18nMap(
-							acceptAllLanguages, listTypeEntry.getNameMap())
-					).build());
+					objectFieldName,
+					new ListEntry() {
+						{
+							key = listTypeEntry.getKey();
+							name = listTypeEntry.getName(
+								dtoConverterContext.getLocale());
+							name_i18n = LocalizedMapUtil.getI18nMap(
+								dtoConverterContext.isAcceptAllLanguages(),
+								listTypeEntry.getNameMap());
+						}
+					});
+			}
+			else if (Objects.equals(
+						objectField.getBusinessType(),
+						ObjectFieldConstants.BUSINESS_TYPE_ATTACHMENT)) {
+
+				DLFileEntry dlFileEntry =
+					_dlFileEntryLocalService.fetchDLFileEntry(
+						GetterUtil.getLong(serializable));
+
+				if (dlFileEntry == null) {
+					continue;
+				}
+
+				map.put(objectFieldName, dlFileEntry.getFileName());
+			}
+			else if ((nestedFieldsDepth > 0) &&
+					 Objects.equals(
+						 objectField.getRelationshipType(),
+						 ObjectRelationshipConstants.TYPE_ONE_TO_MANY)) {
+
+				long objectEntryId = 0;
+
+				if (serializable != null) {
+					objectEntryId = (long)serializable;
+
+					Optional<UriInfo> uriInfoOptional =
+						dtoConverterContext.getUriInfoOptional();
+
+					int underlineLastIndex = objectFieldName.lastIndexOf(
+						StringPool.UNDERLINE);
+
+					ObjectRelationship objectRelationship =
+						_objectRelationshipLocalService.
+							fetchObjectRelationshipByObjectFieldId2(
+								objectField.getObjectFieldId());
+
+					ObjectDefinition objectDefinition1 =
+						_objectDefinitionLocalService.getObjectDefinition(
+							objectRelationship.getObjectDefinitionId1());
+
+					if (!objectDefinition1.isSystem() && (objectEntryId != 0) &&
+						uriInfoOptional.map(
+							UriInfo::getQueryParameters
+						).map(
+							queryParameters -> queryParameters.getFirst(
+								"nestedFields")
+						).map(
+							nestedFields -> nestedFields.contains(
+								StringUtil.replaceLast(
+									objectFieldName.substring(
+										underlineLastIndex + 1),
+									"Id", ""))
+						).orElse(
+							false
+						)) {
+
+						map.put(
+							StringUtil.replaceLast(objectFieldName, "Id", ""),
+							_toDTO(
+								_getDTOConverterContext(
+									dtoConverterContext, objectEntryId),
+								nestedFieldsDepth - 1,
+								_objectEntryLocalService.getObjectEntry(
+									objectEntryId)));
+					}
+				}
+
+				map.put(objectFieldName, objectEntryId);
 			}
 			else {
-				map.put(objectField.getName(), serializable);
+				map.put(objectFieldName, serializable);
 			}
 		}
 
@@ -190,6 +322,9 @@ public class ObjectEntryDTOConverter
 
 		return map;
 	}
+
+	@Reference
+	private DLFileEntryLocalService _dlFileEntryLocalService;
 
 	@Reference
 	private GroupLocalService _groupLocalService;
@@ -201,7 +336,13 @@ public class ObjectEntryDTOConverter
 	private ObjectDefinitionLocalService _objectDefinitionLocalService;
 
 	@Reference
+	private ObjectEntryLocalService _objectEntryLocalService;
+
+	@Reference
 	private ObjectFieldLocalService _objectFieldLocalService;
+
+	@Reference
+	private ObjectRelationshipLocalService _objectRelationshipLocalService;
 
 	@Reference
 	private ObjectScopeProviderRegistry _objectScopeProviderRegistry;

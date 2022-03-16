@@ -14,27 +14,18 @@
 
 package com.liferay.batch.planner.web.internal.portlet.action;
 
-import com.liferay.batch.planner.batch.engine.broker.BatchEngineBroker;
 import com.liferay.batch.planner.constants.BatchPlannerPortletKeys;
-import com.liferay.batch.planner.model.BatchPlannerMapping;
 import com.liferay.batch.planner.model.BatchPlannerPlan;
-import com.liferay.batch.planner.service.BatchPlannerMappingService;
-import com.liferay.batch.planner.service.BatchPlannerPlanService;
-import com.liferay.batch.planner.service.BatchPlannerPolicyService;
-import com.liferay.batch.planner.service.persistence.BatchPlannerMappingUtil;
-import com.liferay.petra.string.StringPool;
+import com.liferay.batch.planner.web.internal.helper.BatchPlannerPlanHelper;
+import com.liferay.portal.kernel.json.JSONUtil;
+import com.liferay.portal.kernel.portlet.JSONPortletResponseUtil;
 import com.liferay.portal.kernel.portlet.bridges.mvc.BaseTransactionalMVCActionCommand;
 import com.liferay.portal.kernel.portlet.bridges.mvc.MVCActionCommand;
 import com.liferay.portal.kernel.util.Constants;
 import com.liferay.portal.kernel.util.ParamUtil;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
 import javax.portlet.ActionRequest;
 import javax.portlet.ActionResponse;
-import javax.portlet.PortletRequest;
 
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
@@ -53,45 +44,6 @@ import org.osgi.service.component.annotations.Reference;
 public class EditExportBatchPlannerPlanMVCActionCommand
 	extends BaseTransactionalMVCActionCommand {
 
-	public BatchPlannerPlan addBatchPlannerPlan(PortletRequest portletRequest)
-		throws Exception {
-
-		String externalType = ParamUtil.getString(
-			portletRequest, "externalType");
-		String internalClassName = ParamUtil.getString(
-			portletRequest, "internalClassName");
-		String name = ParamUtil.getString(portletRequest, "name");
-		String taskItemDelegateName = ParamUtil.getString(
-			portletRequest, "taskItemDelegateName");
-		boolean template = ParamUtil.getBoolean(portletRequest, "template");
-
-		BatchPlannerPlan batchPlannerPlan =
-			_batchPlannerPlanService.addBatchPlannerPlan(
-				true, externalType, StringPool.SLASH, internalClassName, name,
-				taskItemDelegateName, template);
-
-		_batchPlannerPolicyService.addBatchPlannerPolicy(
-			batchPlannerPlan.getBatchPlannerPlanId(), "containsHeaders",
-			_getCheckboxValue(portletRequest, "containsHeaders"));
-
-		_batchPlannerPolicyService.addBatchPlannerPolicy(
-			batchPlannerPlan.getBatchPlannerPlanId(), "saveExport",
-			_getCheckboxValue(portletRequest, "saveExport"));
-
-		List<BatchPlannerMapping> batchPlannerMappings =
-			_getBatchPlannerMappings(portletRequest);
-
-		for (BatchPlannerMapping batchPlannerMapping : batchPlannerMappings) {
-			_batchPlannerMappingService.addBatchPlannerMapping(
-				batchPlannerPlan.getBatchPlannerPlanId(),
-				batchPlannerMapping.getExternalFieldName(), "String",
-				batchPlannerMapping.getInternalFieldName(), "String",
-				StringPool.BLANK);
-		}
-
-		return batchPlannerPlan;
-	}
-
 	@Override
 	protected void doTransactionalCommand(
 			ActionRequest actionRequest, ActionResponse actionResponse)
@@ -99,63 +51,42 @@ public class EditExportBatchPlannerPlanMVCActionCommand
 
 		String cmd = ParamUtil.getString(actionRequest, Constants.CMD);
 
-		if (cmd.equals(Constants.EXPORT)) {
-			BatchPlannerPlan batchPlannerPlan = addBatchPlannerPlan(
-				actionRequest);
-
-			if (!batchPlannerPlan.isTemplate()) {
-				_batchEngineBroker.submit(
-					batchPlannerPlan.getBatchPlannerPlanId());
-			}
+		if (cmd.equals(Constants.ADD)) {
+			_addBatchPlannerPlan(actionRequest, actionResponse);
+		}
+		else if (cmd.equals(Constants.UPDATE)) {
+			_batchPlannerPlanHelper.updateExportBatchPlannerPlan(actionRequest);
 		}
 	}
 
-	private List<BatchPlannerMapping> _getBatchPlannerMappings(
-		PortletRequest portletRequest) {
+	private void _addBatchPlannerPlan(
+			ActionRequest actionRequest, ActionResponse actionResponse)
+		throws Exception {
 
-		String[] fieldNames = portletRequest.getParameterValues("fieldName");
+		try {
+			BatchPlannerPlan batchPlannerPlan =
+				_batchPlannerPlanHelper.addExportBatchPlannerPlan(
+					actionRequest);
 
-		if (fieldNames == null) {
-			return Collections.emptyList();
+			JSONPortletResponseUtil.writeJSON(
+				actionRequest, actionResponse,
+				JSONUtil.put(
+					"batchPlannerPlanId",
+					batchPlannerPlan.getBatchPlannerPlanId()
+				).put(
+					"name", batchPlannerPlan.getName()
+				).put(
+					"success", Boolean.TRUE
+				));
 		}
-
-		List<BatchPlannerMapping> batchPlannerMappings = new ArrayList<>();
-
-		for (String fieldName : fieldNames) {
-			BatchPlannerMapping batchPlannerMapping =
-				BatchPlannerMappingUtil.create(0);
-
-			batchPlannerMapping.setExternalFieldName(fieldName);
-			batchPlannerMapping.setInternalFieldName(fieldName);
-
-			batchPlannerMappings.add(batchPlannerMapping);
+		catch (Exception exception) {
+			JSONPortletResponseUtil.writeJSON(
+				actionRequest, actionResponse,
+				JSONUtil.put("error", exception.getMessage()));
 		}
-
-		return batchPlannerMappings;
-	}
-
-	private String _getCheckboxValue(
-		PortletRequest portletRequest, String name) {
-
-		String value = portletRequest.getParameter(name);
-
-		if (value == null) {
-			return Boolean.FALSE.toString();
-		}
-
-		return Boolean.TRUE.toString();
 	}
 
 	@Reference
-	private BatchEngineBroker _batchEngineBroker;
-
-	@Reference
-	private BatchPlannerMappingService _batchPlannerMappingService;
-
-	@Reference
-	private BatchPlannerPlanService _batchPlannerPlanService;
-
-	@Reference
-	private BatchPlannerPolicyService _batchPlannerPolicyService;
+	private BatchPlannerPlanHelper _batchPlannerPlanHelper;
 
 }

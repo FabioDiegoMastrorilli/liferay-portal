@@ -20,6 +20,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import com.liferay.petra.function.UnsafeSupplier;
 import com.liferay.petra.string.StringBundler;
+import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.vulcan.graphql.annotation.GraphQLField;
 import com.liferay.portal.vulcan.graphql.annotation.GraphQLName;
 import com.liferay.portal.vulcan.util.ObjectMapperUtil;
@@ -86,6 +87,35 @@ public class ElementDefinition implements Serializable {
 	protected String category;
 
 	@Schema
+	@Valid
+	public Configuration getConfiguration() {
+		return configuration;
+	}
+
+	public void setConfiguration(Configuration configuration) {
+		this.configuration = configuration;
+	}
+
+	@JsonIgnore
+	public void setConfiguration(
+		UnsafeSupplier<Configuration, Exception> configurationUnsafeSupplier) {
+
+		try {
+			configuration = configurationUnsafeSupplier.get();
+		}
+		catch (RuntimeException re) {
+			throw re;
+		}
+		catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	@GraphQLField
+	@JsonProperty(access = JsonProperty.Access.READ_WRITE)
+	protected Configuration configuration;
+
+	@Schema
 	public String getIcon() {
 		return icon;
 	}
@@ -110,35 +140,6 @@ public class ElementDefinition implements Serializable {
 	@GraphQLField
 	@JsonProperty(access = JsonProperty.Access.READ_WRITE)
 	protected String icon;
-
-	@Schema
-	@Valid
-	public SXPBlueprint getSxpBlueprint() {
-		return sxpBlueprint;
-	}
-
-	public void setSxpBlueprint(SXPBlueprint sxpBlueprint) {
-		this.sxpBlueprint = sxpBlueprint;
-	}
-
-	@JsonIgnore
-	public void setSxpBlueprint(
-		UnsafeSupplier<SXPBlueprint, Exception> sxpBlueprintUnsafeSupplier) {
-
-		try {
-			sxpBlueprint = sxpBlueprintUnsafeSupplier.get();
-		}
-		catch (RuntimeException re) {
-			throw re;
-		}
-		catch (Exception e) {
-			throw new RuntimeException(e);
-		}
-	}
-
-	@GraphQLField
-	@JsonProperty(access = JsonProperty.Access.READ_WRITE)
-	protected SXPBlueprint sxpBlueprint;
 
 	@Schema
 	@Valid
@@ -211,6 +212,16 @@ public class ElementDefinition implements Serializable {
 			sb.append("\"");
 		}
 
+		if (configuration != null) {
+			if (sb.length() > 1) {
+				sb.append(", ");
+			}
+
+			sb.append("\"configuration\": ");
+
+			sb.append(String.valueOf(configuration));
+		}
+
 		if (icon != null) {
 			if (sb.length() > 1) {
 				sb.append(", ");
@@ -223,16 +234,6 @@ public class ElementDefinition implements Serializable {
 			sb.append(_escape(icon));
 
 			sb.append("\"");
-		}
-
-		if (sxpBlueprint != null) {
-			if (sb.length() > 1) {
-				sb.append(", ");
-			}
-
-			sb.append("\"sxpBlueprint\": ");
-
-			sb.append(String.valueOf(sxpBlueprint));
 		}
 
 		if (uiConfiguration != null) {
@@ -258,9 +259,9 @@ public class ElementDefinition implements Serializable {
 	public String xClassName;
 
 	private static String _escape(Object object) {
-		String string = String.valueOf(object);
-
-		return string.replaceAll("\"", "\\\\\"");
+		return StringUtil.replace(
+			String.valueOf(object), _JSON_ESCAPE_STRINGS[0],
+			_JSON_ESCAPE_STRINGS[1]);
 	}
 
 	private static boolean _isArray(Object value) {
@@ -286,7 +287,7 @@ public class ElementDefinition implements Serializable {
 			Map.Entry<String, ?> entry = iterator.next();
 
 			sb.append("\"");
-			sb.append(entry.getKey());
+			sb.append(_escape(entry.getKey()));
 			sb.append("\": ");
 
 			Object value = entry.getValue();
@@ -318,7 +319,7 @@ public class ElementDefinition implements Serializable {
 			}
 			else if (value instanceof String) {
 				sb.append("\"");
-				sb.append(value);
+				sb.append(_escape(value));
 				sb.append("\"");
 			}
 			else {
@@ -334,5 +335,10 @@ public class ElementDefinition implements Serializable {
 
 		return sb.toString();
 	}
+
+	private static final String[][] _JSON_ESCAPE_STRINGS = {
+		{"\\", "\"", "\b", "\f", "\n", "\r", "\t"},
+		{"\\\\", "\\\"", "\\b", "\\f", "\\n", "\\r", "\\t"}
+	};
 
 }

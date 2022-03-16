@@ -21,14 +21,15 @@ import React, {useContext, useEffect, useState} from 'react';
 import {StyleBookContext} from './StyleBookContext';
 import {config} from './config';
 import {LAYOUT_TYPES} from './constants/layoutTypes';
+import {itemSelectorValueFromFragmentCollection} from './item_selector_value/itemSelectorValueFromFragmentCollection';
+import {itemSelectorValueFromLayout} from './item_selector_value/itemSelectorValueFromLayout';
 import openItemSelector from './openItemSelector';
 
-const DISPLAY_PAGE_PP_ID =
-	'com_liferay_layout_content_page_editor_web_internal_portlet_ContentPageEditorPortlet';
-const DISPLAY_PAGE_RESOURCE_ID = '/layout_content_page_editor/get_page_preview';
-const DISPLAY_PAGE_LIFECYCLE = 2;
-
 const LAYOUT_TYPES_OPTIONS = [
+	{
+		label: Liferay.Language.get('fragments'),
+		type: LAYOUT_TYPES.fragmentCollection,
+	},
 	{
 		label: Liferay.Language.get('masters'),
 		type: LAYOUT_TYPES.master,
@@ -48,22 +49,18 @@ const LAYOUT_TYPES_OPTIONS = [
 ];
 
 export default function PreviewSelector() {
-	const {previewLayout} = useContext(StyleBookContext);
-
-	const previewLayoutType = config.previewOptions.find((type) =>
-		type.data.recentLayouts.find((layout) => layout === previewLayout)
-	)?.type;
-
-	const [layoutType, setLayoutType] = useState(previewLayoutType);
+	const {previewLayoutType, setPreviewLayoutType} = useContext(
+		StyleBookContext
+	);
 
 	return (
 		<>
 			<LayoutTypeSelector
-				layoutType={layoutType}
-				setLayoutType={setLayoutType}
+				layoutType={previewLayoutType}
+				setLayoutType={setPreviewLayoutType}
 			/>
 
-			<LayoutSelector layoutType={layoutType} />
+			<LayoutSelector layoutType={previewLayoutType} />
 		</>
 	);
 }
@@ -166,15 +163,16 @@ export function LayoutSelector({layoutType}) {
 	const handleMoreButtonClick = () => {
 		openItemSelector({
 			callback: (item) => {
-				const data = JSON.parse(item.value);
+				const value = JSON.parse(item.value);
 
-				const layout = {
-					name: data.name,
-					private: data.private,
-					url: urlWithPreviewParameter(data.url, layoutType),
-				};
-
-				selectPreviewLayout(layout);
+				if (layoutType === LAYOUT_TYPES.fragmentCollection) {
+					selectPreviewLayout(
+						itemSelectorValueFromFragmentCollection(value)
+					);
+				}
+				else {
+					selectPreviewLayout(itemSelectorValueFromLayout(value));
+				}
 			},
 			itemSelectorURL,
 		});
@@ -213,6 +211,7 @@ export function LayoutSelector({layoutType}) {
 							}}
 						>
 							{layout.name}
+
 							{layout.private && (
 								<ClayIcon
 									className="ml-3"
@@ -222,6 +221,7 @@ export function LayoutSelector({layoutType}) {
 						</ClayDropDown.Item>
 					))}
 				</ClayDropDown.Group>
+
 				{totalLayouts > recentLayouts.length && (
 					<>
 						<ClayDropDown.Caption>
@@ -281,20 +281,4 @@ function getNextRecentLayouts(recentLayouts, selectedLayout) {
 	];
 
 	return nextRecentLayouts;
-}
-
-function urlWithPreviewParameter(url, layoutType) {
-	const nextURL = new URL(url);
-
-	nextURL.searchParams.set('p_l_mode', 'preview');
-	nextURL.searchParams.set('styleBookEntryPreview', true);
-
-	if (layoutType === LAYOUT_TYPES.displayPageTemplate) {
-		nextURL.searchParams.set('p_p_id', DISPLAY_PAGE_PP_ID);
-		nextURL.searchParams.set('p_p_lifecycle', DISPLAY_PAGE_LIFECYCLE);
-		nextURL.searchParams.set('p_p_resource_id', DISPLAY_PAGE_RESOURCE_ID);
-		nextURL.searchParams.set('doAsUserId', config.defaultUserId);
-	}
-
-	return nextURL.href;
 }

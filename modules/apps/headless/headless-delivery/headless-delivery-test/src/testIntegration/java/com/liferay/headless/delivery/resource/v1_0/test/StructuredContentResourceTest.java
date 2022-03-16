@@ -44,17 +44,15 @@ import com.liferay.journal.test.util.JournalTestUtil;
 import com.liferay.layout.page.template.constants.LayoutPageTemplateEntryTypeConstants;
 import com.liferay.layout.page.template.model.LayoutPageTemplateEntry;
 import com.liferay.layout.page.template.service.LayoutPageTemplateEntryLocalService;
+import com.liferay.layout.test.util.LayoutTestUtil;
 import com.liferay.petra.string.StringBundler;
-import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.model.Group;
 import com.liferay.portal.kernel.model.Layout;
-import com.liferay.portal.kernel.model.LayoutConstants;
 import com.liferay.portal.kernel.model.ResourceConstants;
 import com.liferay.portal.kernel.model.Role;
 import com.liferay.portal.kernel.model.User;
 import com.liferay.portal.kernel.model.role.RoleConstants;
 import com.liferay.portal.kernel.security.permission.ActionKeys;
-import com.liferay.portal.kernel.service.LayoutLocalServiceUtil;
 import com.liferay.portal.kernel.service.RoleLocalService;
 import com.liferay.portal.kernel.service.UserGroupRoleLocalServiceUtil;
 import com.liferay.portal.kernel.service.UserLocalService;
@@ -143,13 +141,7 @@ public class StructuredContentResourceTest
 		_journalFolder = JournalTestUtil.addFolder(
 			testGroup.getGroupId(), RandomTestUtil.randomString());
 
-		_layout = LayoutLocalServiceUtil.addLayout(
-			TestPropsValues.getUserId(), testGroup.getGroupId(), false,
-			LayoutConstants.DEFAULT_PARENT_LAYOUT_ID,
-			RandomTestUtil.randomString(), RandomTestUtil.randomString(),
-			StringPool.BLANK, LayoutConstants.TYPE_CONTENT, false,
-			StringPool.BLANK,
-			ServiceContextTestUtil.getServiceContext(testGroup.getGroupId()));
+		_layout = LayoutTestUtil.addTypeContentLayout(testGroup);
 	}
 
 	@Override
@@ -402,7 +394,7 @@ public class StructuredContentResourceTest
 
 	@Override
 	@Test
-	public void testGetStructuredContentRenderedContentTemplate()
+	public void testGetStructuredContentRenderedContentContentTemplate()
 		throws Exception {
 
 		StructuredContent structuredContent =
@@ -416,7 +408,7 @@ public class StructuredContentResourceTest
 		Assert.assertEquals(
 			"<div>" + contentFieldValue.getData() + "</div>",
 			structuredContentResource.
-				getStructuredContentRenderedContentTemplate(
+				getStructuredContentRenderedContentContentTemplate(
 					structuredContent.getId(), _ddmTemplate.getTemplateKey()));
 	}
 
@@ -476,7 +468,9 @@ public class StructuredContentResourceTest
 
 	@Override
 	protected String[] getAdditionalAssertFieldNames() {
-		return new String[] {"contentStructureId", "description", "title"};
+		return new String[] {
+			"contentStructureId", "description", "priority", "title"
+		};
 	}
 
 	@Override
@@ -588,7 +582,7 @@ public class StructuredContentResourceTest
 
 	@Override
 	protected StructuredContent
-			testPutAssetLibraryStructuredContentPermission_addStructuredContent()
+			testPutAssetLibraryStructuredContentPermissionsPage_addStructuredContent()
 		throws Exception {
 
 		StructuredContent structuredContent = randomStructuredContent();
@@ -621,7 +615,7 @@ public class StructuredContentResourceTest
 			ddmStructure.getGroupId(), ddmStructure.getStructureId(),
 			PortalUtil.getClassNameId(JournalArticle.class),
 			TemplateConstants.LANG_TYPE_VM,
-			_read("test-structured-content-template.xsl"), LocaleUtil.US);
+			_read("test-structured-content-template.vm"), LocaleUtil.US);
 	}
 
 	private DDMForm _deserialize(String content) {

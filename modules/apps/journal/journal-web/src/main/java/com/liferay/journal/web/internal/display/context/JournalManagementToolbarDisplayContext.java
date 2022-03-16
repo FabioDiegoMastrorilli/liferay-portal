@@ -25,9 +25,11 @@ import com.liferay.frontend.taglib.clay.servlet.taglib.util.LabelItem;
 import com.liferay.frontend.taglib.clay.servlet.taglib.util.LabelItemListBuilder;
 import com.liferay.journal.constants.JournalFolderConstants;
 import com.liferay.journal.constants.JournalPortletKeys;
-import com.liferay.journal.model.JournalFolder;
+import com.liferay.journal.model.JournalArticle;
+import com.liferay.journal.web.internal.configuration.FFBulkTranslationConfiguration;
 import com.liferay.journal.web.internal.configuration.JournalWebConfiguration;
 import com.liferay.journal.web.internal.security.permission.resource.JournalFolderPermission;
+import com.liferay.journal.web.internal.util.JournalUtil;
 import com.liferay.petra.function.UnsafeConsumer;
 import com.liferay.petra.portlet.url.builder.PortletURLBuilder;
 import com.liferay.petra.string.StringPool;
@@ -41,8 +43,8 @@ import com.liferay.portal.kernel.portlet.LiferayPortletRequest;
 import com.liferay.portal.kernel.portlet.LiferayPortletResponse;
 import com.liferay.portal.kernel.portlet.LiferayWindowState;
 import com.liferay.portal.kernel.portlet.PortletURLUtil;
+import com.liferay.portal.kernel.portlet.RequestBackedPortletURLFactoryUtil;
 import com.liferay.portal.kernel.security.permission.ActionKeys;
-import com.liferay.portal.kernel.service.WorkflowDefinitionLinkLocalServiceUtil;
 import com.liferay.portal.kernel.theme.ThemeDisplay;
 import com.liferay.portal.kernel.util.ArrayUtil;
 import com.liferay.portal.kernel.util.HashMapBuilder;
@@ -53,6 +55,7 @@ import com.liferay.portal.kernel.util.WebKeys;
 import com.liferay.portal.kernel.workflow.WorkflowConstants;
 import com.liferay.staging.StagingGroupHelper;
 import com.liferay.staging.StagingGroupHelperUtil;
+import com.liferay.translation.url.provider.TranslationURLProvider;
 import com.liferay.trash.TrashHelper;
 
 import java.util.ArrayList;
@@ -85,11 +88,17 @@ public class JournalManagementToolbarDisplayContext
 		_journalDisplayContext = journalDisplayContext;
 		_trashHelper = trashHelper;
 
+		_ffBulkTranslationConfiguration =
+			(FFBulkTranslationConfiguration)httpServletRequest.getAttribute(
+				FFBulkTranslationConfiguration.class.getName());
 		_journalWebConfiguration =
 			(JournalWebConfiguration)httpServletRequest.getAttribute(
 				JournalWebConfiguration.class.getName());
 		_themeDisplay = (ThemeDisplay)httpServletRequest.getAttribute(
 			WebKeys.THEME_DISPLAY);
+		_translationURLProvider =
+			(TranslationURLProvider)httpServletRequest.getAttribute(
+				TranslationURLProvider.class.getName());
 	}
 
 	@Override
@@ -117,6 +126,17 @@ public class JournalManagementToolbarDisplayContext
 							dropdownItem.setIcon("move-folder");
 							dropdownItem.setLabel(
 								LanguageUtil.get(httpServletRequest, "move"));
+							dropdownItem.setQuickAction(true);
+						}
+					).add(
+						_ffBulkTranslationConfiguration::bulkTranslationEnabled,
+						dropdownItem -> {
+							dropdownItem.putData("action", "exportTranslation");
+							dropdownItem.setIcon("import-export");
+							dropdownItem.setLabel(
+								LanguageUtil.get(
+									httpServletRequest,
+									"export-for-translations"));
 							dropdownItem.setQuickAction(true);
 						}
 					).build());
@@ -165,6 +185,17 @@ public class JournalManagementToolbarDisplayContext
 				"folderId", _journalDisplayContext.getFolderId()
 			).setParameter(
 				"groupId", _themeDisplay.getScopeGroupId()
+			).buildString()
+		).put(
+			"exportTranslationURL",
+			() -> PortletURLBuilder.create(
+				_translationURLProvider.getExportTranslationURL(
+					_themeDisplay.getScopeGroupId(),
+					PortalUtil.getClassNameId(JournalArticle.class.getName()),
+					RequestBackedPortletURLFactoryUtil.create(
+						liferayPortletRequest))
+			).setRedirect(
+				_themeDisplay.getURLCurrent()
 			).buildString()
 		).put(
 			"moveArticlesAndFoldersURL",
@@ -341,6 +372,8 @@ public class JournalManagementToolbarDisplayContext
 							currentURLObj, liferayPortletResponse)
 					).setNavigation(
 						(String)null
+					).setParameter(
+						"ddmStructureKey", (String)null
 					).buildString());
 
 				labelItem.setCloseable(true);
@@ -353,7 +386,7 @@ public class JournalManagementToolbarDisplayContext
 						ddmStructureName);
 			}
 		).add(
-			() -> status != _journalDisplayContext.getDefaultStatus(),
+			() -> status != WorkflowConstants.STATUS_ANY,
 			labelItem -> {
 				labelItem.putData(
 					"removeLabelURL",
@@ -361,7 +394,7 @@ public class JournalManagementToolbarDisplayContext
 						PortletURLUtil.clone(
 							currentURLObj, liferayPortletResponse)
 					).setParameter(
-						"status", (String)null
+						"status", WorkflowConstants.STATUS_ANY
 					).buildString());
 
 				labelItem.setCloseable(true);
@@ -605,21 +638,14 @@ public class JournalManagementToolbarDisplayContext
 		statuses.add(WorkflowConstants.STATUS_ANY);
 		statuses.add(WorkflowConstants.STATUS_DRAFT);
 
-		int workflowDefinitionLinksCount =
-			WorkflowDefinitionLinkLocalServiceUtil.
-				getWorkflowDefinitionLinksCount(
-					_themeDisplay.getCompanyId(),
-					_themeDisplay.getScopeGroupId(),
-					JournalFolder.class.getName());
-
-		if (workflowDefinitionLinksCount > 0) {
+		if (JournalUtil.hasWorkflowDefinitionsLinks(_themeDisplay)) {
 			statuses.add(WorkflowConstants.STATUS_PENDING);
 			statuses.add(WorkflowConstants.STATUS_DENIED);
 		}
 
-		statuses.add(WorkflowConstants.STATUS_SCHEDULED);
 		statuses.add(WorkflowConstants.STATUS_APPROVED);
 		statuses.add(WorkflowConstants.STATUS_EXPIRED);
+		statuses.add(WorkflowConstants.STATUS_SCHEDULED);
 
 		return statuses;
 	}
@@ -632,6 +658,9 @@ public class JournalManagementToolbarDisplayContext
 		}
 		else if (status == WorkflowConstants.STATUS_EXPIRED) {
 			label = "with-expired-versions";
+		}
+		else if (status == WorkflowConstants.STATUS_SCHEDULED) {
+			label = "with-scheduled-versions";
 		}
 		else {
 			label = WorkflowConstants.getStatusLabel(status);
@@ -681,7 +710,7 @@ public class JournalManagementToolbarDisplayContext
 
 			// LPS-52675
 
-			_log.error(portalException, portalException);
+			_log.error(portalException);
 		}
 
 		return false;
@@ -690,9 +719,12 @@ public class JournalManagementToolbarDisplayContext
 	private static final Log _log = LogFactoryUtil.getLog(
 		JournalManagementToolbarDisplayContext.class);
 
+	private final FFBulkTranslationConfiguration
+		_ffBulkTranslationConfiguration;
 	private final JournalDisplayContext _journalDisplayContext;
 	private final JournalWebConfiguration _journalWebConfiguration;
 	private final ThemeDisplay _themeDisplay;
+	private final TranslationURLProvider _translationURLProvider;
 	private final TrashHelper _trashHelper;
 
 }

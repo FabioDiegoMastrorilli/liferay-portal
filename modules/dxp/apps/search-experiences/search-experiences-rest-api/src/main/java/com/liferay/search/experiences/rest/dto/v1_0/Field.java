@@ -20,6 +20,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import com.liferay.petra.function.UnsafeSupplier;
 import com.liferay.petra.string.StringBundler;
+import com.liferay.portal.kernel.json.JSONFactoryUtil;
+import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.vulcan.graphql.annotation.GraphQLField;
 import com.liferay.portal.vulcan.graphql.annotation.GraphQLName;
 import com.liferay.portal.vulcan.util.ObjectMapperUtil;
@@ -58,20 +60,21 @@ public class Field implements Serializable {
 	}
 
 	@Schema
-	public Boolean getBoost() {
-		return boost;
+	@Valid
+	public Object getDefaultValue() {
+		return defaultValue;
 	}
 
-	public void setBoost(Boolean boost) {
-		this.boost = boost;
+	public void setDefaultValue(Object defaultValue) {
+		this.defaultValue = defaultValue;
 	}
 
 	@JsonIgnore
-	public void setBoost(
-		UnsafeSupplier<Boolean, Exception> boostUnsafeSupplier) {
+	public void setDefaultValue(
+		UnsafeSupplier<Object, Exception> defaultValueUnsafeSupplier) {
 
 		try {
-			boost = boostUnsafeSupplier.get();
+			defaultValue = defaultValueUnsafeSupplier.get();
 		}
 		catch (RuntimeException re) {
 			throw re;
@@ -83,7 +86,36 @@ public class Field implements Serializable {
 
 	@GraphQLField
 	@JsonProperty(access = JsonProperty.Access.READ_WRITE)
-	protected Boolean boost;
+	protected Object defaultValue;
+
+	@Schema
+	@Valid
+	public FieldMapping[] getFieldMappings() {
+		return fieldMappings;
+	}
+
+	public void setFieldMappings(FieldMapping[] fieldMappings) {
+		this.fieldMappings = fieldMappings;
+	}
+
+	@JsonIgnore
+	public void setFieldMappings(
+		UnsafeSupplier<FieldMapping[], Exception> fieldMappingsUnsafeSupplier) {
+
+		try {
+			fieldMappings = fieldMappingsUnsafeSupplier.get();
+		}
+		catch (RuntimeException re) {
+			throw re;
+		}
+		catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	@GraphQLField
+	@JsonProperty(access = JsonProperty.Access.READ_WRITE)
+	protected FieldMapping[] fieldMappings;
 
 	@Schema
 	public String getHelpText() {
@@ -168,20 +200,18 @@ public class Field implements Serializable {
 	protected String name;
 
 	@Schema
-	public Boolean getNullable() {
-		return nullable;
+	public String getType() {
+		return type;
 	}
 
-	public void setNullable(Boolean nullable) {
-		this.nullable = nullable;
+	public void setType(String type) {
+		this.type = type;
 	}
 
 	@JsonIgnore
-	public void setNullable(
-		UnsafeSupplier<Boolean, Exception> nullableUnsafeSupplier) {
-
+	public void setType(UnsafeSupplier<String, Exception> typeUnsafeSupplier) {
 		try {
-			nullable = nullableUnsafeSupplier.get();
+			type = typeUnsafeSupplier.get();
 		}
 		catch (RuntimeException re) {
 			throw re;
@@ -193,24 +223,24 @@ public class Field implements Serializable {
 
 	@GraphQLField
 	@JsonProperty(access = JsonProperty.Access.READ_WRITE)
-	protected Boolean nullable;
+	protected String type;
 
 	@Schema
 	@Valid
-	public Option[] getOptions() {
-		return options;
+	public TypeOptions getTypeOptions() {
+		return typeOptions;
 	}
 
-	public void setOptions(Option[] options) {
-		this.options = options;
+	public void setTypeOptions(TypeOptions typeOptions) {
+		this.typeOptions = typeOptions;
 	}
 
 	@JsonIgnore
-	public void setOptions(
-		UnsafeSupplier<Option[], Exception> optionsUnsafeSupplier) {
+	public void setTypeOptions(
+		UnsafeSupplier<TypeOptions, Exception> typeOptionsUnsafeSupplier) {
 
 		try {
-			options = optionsUnsafeSupplier.get();
+			typeOptions = typeOptionsUnsafeSupplier.get();
 		}
 		catch (RuntimeException re) {
 			throw re;
@@ -222,147 +252,7 @@ public class Field implements Serializable {
 
 	@GraphQLField
 	@JsonProperty(access = JsonProperty.Access.READ_WRITE)
-	protected Option[] options;
-
-	@Schema
-	public Boolean getRequired() {
-		return required;
-	}
-
-	public void setRequired(Boolean required) {
-		this.required = required;
-	}
-
-	@JsonIgnore
-	public void setRequired(
-		UnsafeSupplier<Boolean, Exception> requiredUnsafeSupplier) {
-
-		try {
-			required = requiredUnsafeSupplier.get();
-		}
-		catch (RuntimeException re) {
-			throw re;
-		}
-		catch (Exception e) {
-			throw new RuntimeException(e);
-		}
-	}
-
-	@GraphQLField
-	@JsonProperty(access = JsonProperty.Access.READ_WRITE)
-	protected Boolean required;
-
-	@Schema
-	public String getUiType() {
-		return uiType;
-	}
-
-	public void setUiType(String uiType) {
-		this.uiType = uiType;
-	}
-
-	@JsonIgnore
-	public void setUiType(
-		UnsafeSupplier<String, Exception> uiTypeUnsafeSupplier) {
-
-		try {
-			uiType = uiTypeUnsafeSupplier.get();
-		}
-		catch (RuntimeException re) {
-			throw re;
-		}
-		catch (Exception e) {
-			throw new RuntimeException(e);
-		}
-	}
-
-	@GraphQLField
-	@JsonProperty(access = JsonProperty.Access.READ_WRITE)
-	protected String uiType;
-
-	@Schema
-	public String getUnit() {
-		return unit;
-	}
-
-	public void setUnit(String unit) {
-		this.unit = unit;
-	}
-
-	@JsonIgnore
-	public void setUnit(UnsafeSupplier<String, Exception> unitUnsafeSupplier) {
-		try {
-			unit = unitUnsafeSupplier.get();
-		}
-		catch (RuntimeException re) {
-			throw re;
-		}
-		catch (Exception e) {
-			throw new RuntimeException(e);
-		}
-	}
-
-	@GraphQLField
-	@JsonProperty(access = JsonProperty.Access.READ_WRITE)
-	protected String unit;
-
-	@Schema
-	public String getUnitSuffix() {
-		return unitSuffix;
-	}
-
-	public void setUnitSuffix(String unitSuffix) {
-		this.unitSuffix = unitSuffix;
-	}
-
-	@JsonIgnore
-	public void setUnitSuffix(
-		UnsafeSupplier<String, Exception> unitSuffixUnsafeSupplier) {
-
-		try {
-			unitSuffix = unitSuffixUnsafeSupplier.get();
-		}
-		catch (RuntimeException re) {
-			throw re;
-		}
-		catch (Exception e) {
-			throw new RuntimeException(e);
-		}
-	}
-
-	@GraphQLField
-	@JsonProperty(access = JsonProperty.Access.READ_WRITE)
-	protected String unitSuffix;
-
-	@Schema
-	@Valid
-	public ValueDefinition getValueDefinition() {
-		return valueDefinition;
-	}
-
-	public void setValueDefinition(ValueDefinition valueDefinition) {
-		this.valueDefinition = valueDefinition;
-	}
-
-	@JsonIgnore
-	public void setValueDefinition(
-		UnsafeSupplier<ValueDefinition, Exception>
-			valueDefinitionUnsafeSupplier) {
-
-		try {
-			valueDefinition = valueDefinitionUnsafeSupplier.get();
-		}
-		catch (RuntimeException re) {
-			throw re;
-		}
-		catch (Exception e) {
-			throw new RuntimeException(e);
-		}
-	}
-
-	@GraphQLField
-	@JsonProperty(access = JsonProperty.Access.READ_WRITE)
-	protected ValueDefinition valueDefinition;
+	protected TypeOptions typeOptions;
 
 	@Override
 	public boolean equals(Object object) {
@@ -391,14 +281,45 @@ public class Field implements Serializable {
 
 		sb.append("{");
 
-		if (boost != null) {
+		if (defaultValue != null) {
 			if (sb.length() > 1) {
 				sb.append(", ");
 			}
 
-			sb.append("\"boost\": ");
+			sb.append("\"defaultValue\": ");
 
-			sb.append(boost);
+			if (defaultValue instanceof Map) {
+				sb.append(
+					JSONFactoryUtil.createJSONObject((Map<?, ?>)defaultValue));
+			}
+			else if (defaultValue instanceof String) {
+				sb.append("\"");
+				sb.append(_escape((String)defaultValue));
+				sb.append("\"");
+			}
+			else {
+				sb.append(defaultValue);
+			}
+		}
+
+		if (fieldMappings != null) {
+			if (sb.length() > 1) {
+				sb.append(", ");
+			}
+
+			sb.append("\"fieldMappings\": ");
+
+			sb.append("[");
+
+			for (int i = 0; i < fieldMappings.length; i++) {
+				sb.append(String.valueOf(fieldMappings[i]));
+
+				if ((i + 1) < fieldMappings.length) {
+					sb.append(", ");
+				}
+			}
+
+			sb.append("]");
 		}
 
 		if (helpText != null) {
@@ -443,96 +364,28 @@ public class Field implements Serializable {
 			sb.append("\"");
 		}
 
-		if (nullable != null) {
+		if (type != null) {
 			if (sb.length() > 1) {
 				sb.append(", ");
 			}
 
-			sb.append("\"nullable\": ");
-
-			sb.append(nullable);
-		}
-
-		if (options != null) {
-			if (sb.length() > 1) {
-				sb.append(", ");
-			}
-
-			sb.append("\"options\": ");
-
-			sb.append("[");
-
-			for (int i = 0; i < options.length; i++) {
-				sb.append(String.valueOf(options[i]));
-
-				if ((i + 1) < options.length) {
-					sb.append(", ");
-				}
-			}
-
-			sb.append("]");
-		}
-
-		if (required != null) {
-			if (sb.length() > 1) {
-				sb.append(", ");
-			}
-
-			sb.append("\"required\": ");
-
-			sb.append(required);
-		}
-
-		if (uiType != null) {
-			if (sb.length() > 1) {
-				sb.append(", ");
-			}
-
-			sb.append("\"uiType\": ");
+			sb.append("\"type\": ");
 
 			sb.append("\"");
 
-			sb.append(_escape(uiType));
+			sb.append(_escape(type));
 
 			sb.append("\"");
 		}
 
-		if (unit != null) {
+		if (typeOptions != null) {
 			if (sb.length() > 1) {
 				sb.append(", ");
 			}
 
-			sb.append("\"unit\": ");
+			sb.append("\"typeOptions\": ");
 
-			sb.append("\"");
-
-			sb.append(_escape(unit));
-
-			sb.append("\"");
-		}
-
-		if (unitSuffix != null) {
-			if (sb.length() > 1) {
-				sb.append(", ");
-			}
-
-			sb.append("\"unitSuffix\": ");
-
-			sb.append("\"");
-
-			sb.append(_escape(unitSuffix));
-
-			sb.append("\"");
-		}
-
-		if (valueDefinition != null) {
-			if (sb.length() > 1) {
-				sb.append(", ");
-			}
-
-			sb.append("\"valueDefinition\": ");
-
-			sb.append(String.valueOf(valueDefinition));
+			sb.append(String.valueOf(typeOptions));
 		}
 
 		sb.append("}");
@@ -548,9 +401,9 @@ public class Field implements Serializable {
 	public String xClassName;
 
 	private static String _escape(Object object) {
-		String string = String.valueOf(object);
-
-		return string.replaceAll("\"", "\\\\\"");
+		return StringUtil.replace(
+			String.valueOf(object), _JSON_ESCAPE_STRINGS[0],
+			_JSON_ESCAPE_STRINGS[1]);
 	}
 
 	private static boolean _isArray(Object value) {
@@ -576,7 +429,7 @@ public class Field implements Serializable {
 			Map.Entry<String, ?> entry = iterator.next();
 
 			sb.append("\"");
-			sb.append(entry.getKey());
+			sb.append(_escape(entry.getKey()));
 			sb.append("\": ");
 
 			Object value = entry.getValue();
@@ -608,7 +461,7 @@ public class Field implements Serializable {
 			}
 			else if (value instanceof String) {
 				sb.append("\"");
-				sb.append(value);
+				sb.append(_escape(value));
 				sb.append("\"");
 			}
 			else {
@@ -624,5 +477,10 @@ public class Field implements Serializable {
 
 		return sb.toString();
 	}
+
+	private static final String[][] _JSON_ESCAPE_STRINGS = {
+		{"\\", "\"", "\b", "\f", "\n", "\r", "\t"},
+		{"\\\\", "\\\"", "\\b", "\\f", "\\n", "\\r", "\\t"}
+	};
 
 }

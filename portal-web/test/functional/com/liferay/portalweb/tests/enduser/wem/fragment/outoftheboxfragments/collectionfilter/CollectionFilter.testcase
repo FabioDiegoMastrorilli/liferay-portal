@@ -282,17 +282,17 @@ definition {
 					vocabularyName = "Size");
 			}
 
-			var 90inchId = JSONCategory.addCategory(
+			var inch90Id = JSONCategory.addCategory(
 				groupName = "Test Site Name",
 				title = "9 inch",
 				vocabularyName = "Size");
 
-			var 95inchId = JSONCategory.addCategory(
+			var inch95Id = JSONCategory.addCategory(
 				groupName = "Test Site Name",
 				title = "9.5 inch",
 				vocabularyName = "Size");
 
-			var 100inchId = JSONCategory.addCategory(
+			var inch100Id = JSONCategory.addCategory(
 				groupName = "Test Site Name",
 				title = "10 inch",
 				vocabularyName = "Size");
@@ -324,7 +324,7 @@ definition {
 
 		task ("Add the first web content with 10 inch and United States") {
 			JSONWebcontent.addWebContent(
-				assetCategoryIds = "${100inchId},${usId}",
+				assetCategoryIds = "${inch100Id},${usId}",
 				content = "Air Force 1",
 				groupName = "Test Site Name",
 				title = "Air Force 1");
@@ -332,7 +332,7 @@ definition {
 
 		task ("Add the second web content with 9.5 inch and China") {
 			JSONWebcontent.addWebContent(
-				assetCategoryIds = "${95inchId},${cnId}",
+				assetCategoryIds = "${inch95Id},${cnId}",
 				content = "Air Jordan 1",
 				groupName = "Test Site Name",
 				title = "Air Jordan 1");
@@ -340,7 +340,7 @@ definition {
 
 		task ("Add the third web content with 9 inch and United States") {
 			JSONWebcontent.addWebContent(
-				assetCategoryIds = "${90inchId},${usId}",
+				assetCategoryIds = "${inch90Id},${usId}",
 				content = "Air Max 1",
 				groupName = "Test Site Name",
 				title = "Air Max 1");
@@ -348,7 +348,7 @@ definition {
 
 		task ("Add the fourth web content with 10 inch and Spain") {
 			JSONWebcontent.addWebContent(
-				assetCategoryIds = "${100inchId},${esId}",
+				assetCategoryIds = "${inch100Id},${esId}",
 				content = "LeBron VIII",
 				groupName = "Test Site Name",
 				title = "LeBron VIII");
@@ -374,7 +374,7 @@ definition {
 		}
 
 		task ("Add a collection page based on manual collection") {
-			SitePages.openPagesAdmin(siteURLKey = "test-site-name");
+			PagesAdmin.openPagesAdmin(siteURLKey = "test-site-name");
 
 			ContentPages.addPublicCollectionPage(
 				collectionName = "Manual Collection",
@@ -1177,7 +1177,7 @@ definition {
 		}
 
 		task ("Add a collection page based on dynamic collection") {
-			SitePages.openPagesAdmin(siteURLKey = "test-site-name");
+			PagesAdmin.openPagesAdmin(siteURLKey = "test-site-name");
 
 			ContentPages.addPublicCollectionPage(
 				collectionName = "Dynamic Collection",
@@ -1230,7 +1230,7 @@ definition {
 
 			AssertTextEquals.assertPartialText(
 				key_columnNumber = "1",
-				key_elementHeader = "//div[contains(@class,'page-editor__topper__bar') and contains(.,'Collection Filter')]//following-sibling::div[contains(@class,'page-editor__topper__content')]",
+				key_elementHeader = "//div[@aria-label='Collection Filter']//div[contains(@class,'page-editor__topper__content')]",
 				key_position = "1",
 				locator1 = "PageEditor#GRID_COLUMN_NESTED_ELEMENT",
 				value1 = "Vocabulary A");
@@ -1247,7 +1247,7 @@ definition {
 
 			AssertTextEquals.assertPartialText(
 				key_columnNumber = "2",
-				key_elementHeader = "//div[contains(@class,'page-editor__topper__bar') and contains(.,'Collection Filter')]//following-sibling::div[contains(@class,'page-editor__topper__content')]",
+				key_elementHeader = "//div[@aria-label='Collection Filter']//div[contains(@class,'page-editor__topper__content')]",
 				key_position = "1",
 				locator1 = "PageEditor#GRID_COLUMN_NESTED_ELEMENT",
 				value1 = "Vocabulary B");
@@ -1489,7 +1489,7 @@ definition {
 		}
 
 		task ("Add a collection page based on dynamic collection") {
-			SitePages.openPagesAdmin(siteURLKey = "test-site-name");
+			PagesAdmin.openPagesAdmin(siteURLKey = "test-site-name");
 
 			ContentPages.addPublicCollectionPage(
 				collectionName = "Dynamic Collection",
@@ -1815,7 +1815,7 @@ definition {
 		}
 
 		task ("Add a collection page based on dynamic collection") {
-			SitePages.openPagesAdmin(siteURLKey = "test-site-name");
+			PagesAdmin.openPagesAdmin(siteURLKey = "test-site-name");
 
 			ContentPages.addPublicCollectionPage(
 				collectionName = "Dynamic Collection",
@@ -2068,7 +2068,7 @@ definition {
 		}
 
 		task ("Add a collection page based on manual collection") {
-			SitePages.openPagesAdmin(siteURLKey = "test-site-name");
+			PagesAdmin.openPagesAdmin(siteURLKey = "test-site-name");
 
 			ContentPages.addPublicCollectionPage(
 				collectionName = "Manual Collection",
@@ -2121,7 +2121,7 @@ definition {
 
 			AssertTextEquals.assertPartialText(
 				key_columnNumber = "1",
-				key_elementHeader = "//div[contains(@class,'page-editor__topper__bar') and contains(.,'Collection Filter')]//following-sibling::div[contains(@class,'page-editor__topper__content')]",
+				key_elementHeader = "//div[@aria-label='Collection Filter']//div[contains(@class,'page-editor__topper__content')]",
 				key_position = "1",
 				locator1 = "PageEditor#GRID_COLUMN_NESTED_ELEMENT",
 				value1 = "Vocabulary A");
@@ -2138,7 +2138,7 @@ definition {
 
 			AssertTextEquals.assertPartialText(
 				key_columnNumber = "2",
-				key_elementHeader = "//div[contains(@class,'page-editor__topper__bar') and contains(.,'Collection Filter')]//following-sibling::div[contains(@class,'page-editor__topper__content')]",
+				key_elementHeader = "//div[@aria-label='Collection Filter']//div[contains(@class,'page-editor__topper__content')]",
 				key_position = "1",
 				locator1 = "PageEditor#GRID_COLUMN_NESTED_ELEMENT",
 				value1 = "Vocabulary B");
@@ -2394,7 +2394,7 @@ definition {
 		}
 
 		task ("Add a collection page based on manual collection") {
-			SitePages.openPagesAdmin(siteURLKey = "test-site-name");
+			PagesAdmin.openPagesAdmin(siteURLKey = "test-site-name");
 
 			ContentPages.addPublicCollectionPage(
 				collectionName = "Manual Collection",
@@ -2722,7 +2722,7 @@ definition {
 		}
 
 		task ("Add a collection page based on manual collection") {
-			SitePages.openPagesAdmin(siteURLKey = "test-site-name");
+			PagesAdmin.openPagesAdmin(siteURLKey = "test-site-name");
 
 			ContentPages.addPublicCollectionPage(
 				collectionName = "Manual Collection",
@@ -2968,7 +2968,7 @@ definition {
 		}
 
 		task ("Add a collection page based on manual collection") {
-			SitePages.openPagesAdmin(siteURLKey = "test-site-name");
+			PagesAdmin.openPagesAdmin(siteURLKey = "test-site-name");
 
 			ContentPages.addPublicCollectionPage(
 				collectionName = "Manual Collection",
@@ -3461,7 +3461,7 @@ definition {
 		}
 
 		task ("Add a collection page based on dynamic collection") {
-			SitePages.openPagesAdmin(siteURLKey = "test-site-name");
+			PagesAdmin.openPagesAdmin(siteURLKey = "test-site-name");
 
 			ContentPages.addPublicCollectionPage(
 				collectionName = "Dynamic Collection",
@@ -3527,7 +3527,7 @@ definition {
 
 			AssertTextEquals.assertPartialText(
 				key_columnNumber = "1",
-				key_elementHeader = "//div[contains(@class,'page-editor__topper__bar') and contains(.,'Collection Filter')]//following-sibling::div[contains(@class,'page-editor__topper__content')]",
+				key_elementHeader = "//div[@aria-label='Collection Filter']//div[contains(@class,'page-editor__topper__content')]",
 				key_position = "1",
 				locator1 = "PageEditor#GRID_COLUMN_NESTED_ELEMENT",
 				value1 = "Size");
@@ -3561,7 +3561,7 @@ definition {
 
 			AssertTextEquals.assertPartialText(
 				key_columnNumber = "2",
-				key_elementHeader = "//div[contains(@class,'page-editor__topper__bar') and contains(.,'Collection Filter')]//following-sibling::div[contains(@class,'page-editor__topper__content')]",
+				key_elementHeader = "//div[@aria-label='Collection Filter']//div[contains(@class,'page-editor__topper__content')]",
 				key_position = "1",
 				locator1 = "PageEditor#GRID_COLUMN_NESTED_ELEMENT",
 				value1 = "Pure Color");

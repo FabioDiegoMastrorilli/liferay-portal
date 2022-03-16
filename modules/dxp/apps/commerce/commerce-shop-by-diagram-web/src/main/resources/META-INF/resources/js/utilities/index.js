@@ -9,7 +9,12 @@
  * distribution rights of the Software.
  */
 
+import {isProductPurchasable} from 'commerce-frontend-js/utilities/index';
+import {getProductMinQuantity} from 'commerce-frontend-js/utilities/quantities';
+
 import {DIAGRAM_LABELS_MAX_LENGTH, DRAG_AND_DROP_THRESHOLD} from './constants';
+
+export const TOOLTIP_DISTANCE_FROM_TARGET = 10;
 
 export function calculateTooltipStyleFromTarget(target) {
 	const {
@@ -23,18 +28,13 @@ export function calculateTooltipStyleFromTarget(target) {
 	const targetRight = window.innerWidth - targetLeft - targetWidth;
 	const style = {};
 
-	if (targetTop + targetHeight / 2 < window.innerHeight / 2) {
-		style.top = distanceFromTop + targetHeight;
-	}
-	else {
-		style.top = distanceFromTop + targetHeight - 150;
-	}
+	style.top = distanceFromTop + targetHeight / 2;
 
 	if (targetLeft + targetWidth / 2 < window.innerWidth / 2) {
-		style.left = targetLeft + targetWidth + 10;
+		style.left = targetLeft + targetWidth + TOOLTIP_DISTANCE_FROM_TARGET;
 	}
 	else {
-		style.right = targetRight + targetWidth + 10;
+		style.right = targetRight + targetWidth + TOOLTIP_DISTANCE_FROM_TARGET;
 	}
 
 	return style;
@@ -110,4 +110,69 @@ export function formatLabel(label) {
 	}
 
 	return label;
+}
+
+export function formatMappedProductForTable(mappedProducts, isAdmin) {
+	return mappedProducts.map((mappedProduct) => {
+		const firstAvailableProduct =
+			mappedProduct.firstAvailableReplacementMappedProduct ||
+			mappedProduct;
+
+		return {
+			...firstAvailableProduct,
+			initialQuantity:
+				isAdmin || firstAvailableProduct.type !== 'sku'
+					? 0
+					: getProductMinQuantity(
+							firstAvailableProduct.productConfiguration
+					  ),
+			selectable:
+				isAdmin || firstAvailableProduct.type !== 'sku'
+					? false
+					: isProductPurchasable(
+							firstAvailableProduct.availability,
+							firstAvailableProduct.productConfiguration,
+							firstAvailableProduct.purchasable
+					  ),
+		};
+	});
+}
+
+export function formatProductOptions(skuOptions, productOptions) {
+	const optionsData = Object.entries(skuOptions);
+
+	return optionsData.reduce((formattedOptions, optionData) => {
+		const [optionId, optionValueId] = optionData;
+
+		const option = productOptions.find(
+			(productOption) => String(productOption.id) === String(optionId)
+		);
+
+		const optionValue =
+			option &&
+			option.productOptionValues.find(
+				(productOptionValue) =>
+					String(productOptionValue.id) === String(optionValueId)
+			);
+
+		return [
+			...formattedOptions,
+			{key: option.key, value: [optionValue.key]},
+		];
+	}, []);
+}
+
+export function getProductURL(productBaseURL, productURLs) {
+	const productShortLink =
+		productURLs[Liferay.ThemeDisplay.getLanguageId()] ||
+		productURLs[Liferay.ThemeDisplay.getDefaultLanguageId()];
+
+	return productBaseURL + productShortLink;
+}
+
+export function getProductName(product) {
+	return (
+		product.productName[Liferay.ThemeDisplay.getLanguageId()] ||
+		product.productName[Liferay.ThemeDisplay.getDefaultLanguageId()]
+	);
 }

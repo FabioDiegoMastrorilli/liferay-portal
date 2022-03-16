@@ -16,7 +16,6 @@ package com.liferay.commerce.discount.model.impl;
 
 import com.liferay.commerce.discount.model.CommerceDiscount;
 import com.liferay.commerce.discount.model.CommerceDiscountModel;
-import com.liferay.commerce.discount.model.CommerceDiscountSoap;
 import com.liferay.expando.kernel.model.ExpandoBridge;
 import com.liferay.expando.kernel.util.ExpandoBridgeFactoryUtil;
 import com.liferay.exportimport.kernel.lar.StagedModelType;
@@ -47,12 +46,10 @@ import java.math.BigDecimal;
 import java.sql.Blob;
 import java.sql.Types;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.BiConsumer;
@@ -81,7 +78,8 @@ public class CommerceDiscountModelImpl
 	public static final String TABLE_NAME = "CommerceDiscount";
 
 	public static final Object[][] TABLE_COLUMNS = {
-		{"uuid_", Types.VARCHAR}, {"externalReferenceCode", Types.VARCHAR},
+		{"mvccVersion", Types.BIGINT}, {"uuid_", Types.VARCHAR},
+		{"externalReferenceCode", Types.VARCHAR},
 		{"commerceDiscountId", Types.BIGINT}, {"companyId", Types.BIGINT},
 		{"userId", Types.BIGINT}, {"userName", Types.VARCHAR},
 		{"createDate", Types.TIMESTAMP}, {"modifiedDate", Types.TIMESTAMP},
@@ -105,6 +103,7 @@ public class CommerceDiscountModelImpl
 		new HashMap<String, Integer>();
 
 	static {
+		TABLE_COLUMNS_MAP.put("mvccVersion", Types.BIGINT);
 		TABLE_COLUMNS_MAP.put("uuid_", Types.VARCHAR);
 		TABLE_COLUMNS_MAP.put("externalReferenceCode", Types.VARCHAR);
 		TABLE_COLUMNS_MAP.put("commerceDiscountId", Types.BIGINT);
@@ -140,7 +139,7 @@ public class CommerceDiscountModelImpl
 	}
 
 	public static final String TABLE_SQL_CREATE =
-		"create table CommerceDiscount (uuid_ VARCHAR(75) null,externalReferenceCode VARCHAR(75) null,commerceDiscountId LONG not null primary key,companyId LONG,userId LONG,userName VARCHAR(75) null,createDate DATE null,modifiedDate DATE null,title VARCHAR(75) null,target VARCHAR(75) null,useCouponCode BOOLEAN,couponCode VARCHAR(75) null,usePercentage BOOLEAN,maximumDiscountAmount DECIMAL(30, 16) null,levelType VARCHAR(75) null,level1 DECIMAL(30, 16) null,level2 DECIMAL(30, 16) null,level3 DECIMAL(30, 16) null,level4 DECIMAL(30, 16) null,limitationType VARCHAR(75) null,limitationTimes INTEGER,limitationTimesPerAccount INTEGER,numberOfUse INTEGER,rulesConjunction BOOLEAN,active_ BOOLEAN,displayDate DATE null,expirationDate DATE null,lastPublishDate DATE null,status INTEGER,statusByUserId LONG,statusByUserName VARCHAR(75) null,statusDate DATE null)";
+		"create table CommerceDiscount (mvccVersion LONG default 0 not null,uuid_ VARCHAR(75) null,externalReferenceCode VARCHAR(75) null,commerceDiscountId LONG not null primary key,companyId LONG,userId LONG,userName VARCHAR(75) null,createDate DATE null,modifiedDate DATE null,title VARCHAR(75) null,target VARCHAR(75) null,useCouponCode BOOLEAN,couponCode VARCHAR(75) null,usePercentage BOOLEAN,maximumDiscountAmount DECIMAL(30, 16) null,levelType VARCHAR(75) null,level1 DECIMAL(30, 16) null,level2 DECIMAL(30, 16) null,level3 DECIMAL(30, 16) null,level4 DECIMAL(30, 16) null,limitationType VARCHAR(75) null,limitationTimes INTEGER,limitationTimesPerAccount INTEGER,numberOfUse INTEGER,rulesConjunction BOOLEAN,active_ BOOLEAN,displayDate DATE null,expirationDate DATE null,lastPublishDate DATE null,status INTEGER,statusByUserId LONG,statusByUserName VARCHAR(75) null,statusDate DATE null)";
 
 	public static final String TABLE_SQL_DROP = "drop table CommerceDiscount";
 
@@ -228,83 +227,6 @@ public class CommerceDiscountModelImpl
 	 */
 	@Deprecated
 	public static final long CREATEDATE_COLUMN_BITMASK = 256L;
-
-	/**
-	 * Converts the soap model instance into a normal model instance.
-	 *
-	 * @param soapModel the soap model instance to convert
-	 * @return the normal model instance
-	 * @deprecated As of Athanasius (7.3.x), with no direct replacement
-	 */
-	@Deprecated
-	public static CommerceDiscount toModel(CommerceDiscountSoap soapModel) {
-		if (soapModel == null) {
-			return null;
-		}
-
-		CommerceDiscount model = new CommerceDiscountImpl();
-
-		model.setUuid(soapModel.getUuid());
-		model.setExternalReferenceCode(soapModel.getExternalReferenceCode());
-		model.setCommerceDiscountId(soapModel.getCommerceDiscountId());
-		model.setCompanyId(soapModel.getCompanyId());
-		model.setUserId(soapModel.getUserId());
-		model.setUserName(soapModel.getUserName());
-		model.setCreateDate(soapModel.getCreateDate());
-		model.setModifiedDate(soapModel.getModifiedDate());
-		model.setTitle(soapModel.getTitle());
-		model.setTarget(soapModel.getTarget());
-		model.setUseCouponCode(soapModel.isUseCouponCode());
-		model.setCouponCode(soapModel.getCouponCode());
-		model.setUsePercentage(soapModel.isUsePercentage());
-		model.setMaximumDiscountAmount(soapModel.getMaximumDiscountAmount());
-		model.setLevel(soapModel.getLevel());
-		model.setLevel1(soapModel.getLevel1());
-		model.setLevel2(soapModel.getLevel2());
-		model.setLevel3(soapModel.getLevel3());
-		model.setLevel4(soapModel.getLevel4());
-		model.setLimitationType(soapModel.getLimitationType());
-		model.setLimitationTimes(soapModel.getLimitationTimes());
-		model.setLimitationTimesPerAccount(
-			soapModel.getLimitationTimesPerAccount());
-		model.setNumberOfUse(soapModel.getNumberOfUse());
-		model.setRulesConjunction(soapModel.isRulesConjunction());
-		model.setActive(soapModel.isActive());
-		model.setDisplayDate(soapModel.getDisplayDate());
-		model.setExpirationDate(soapModel.getExpirationDate());
-		model.setLastPublishDate(soapModel.getLastPublishDate());
-		model.setStatus(soapModel.getStatus());
-		model.setStatusByUserId(soapModel.getStatusByUserId());
-		model.setStatusByUserName(soapModel.getStatusByUserName());
-		model.setStatusDate(soapModel.getStatusDate());
-
-		return model;
-	}
-
-	/**
-	 * Converts the soap model instances into normal model instances.
-	 *
-	 * @param soapModels the soap model instances to convert
-	 * @return the normal model instances
-	 * @deprecated As of Athanasius (7.3.x), with no direct replacement
-	 */
-	@Deprecated
-	public static List<CommerceDiscount> toModels(
-		CommerceDiscountSoap[] soapModels) {
-
-		if (soapModels == null) {
-			return null;
-		}
-
-		List<CommerceDiscount> models = new ArrayList<CommerceDiscount>(
-			soapModels.length);
-
-		for (CommerceDiscountSoap soapModel : soapModels) {
-			models.add(toModel(soapModel));
-		}
-
-		return models;
-	}
 
 	public static final long LOCK_EXPIRATION_TIME = GetterUtil.getLong(
 		com.liferay.commerce.discount.service.util.ServiceProps.get(
@@ -436,6 +358,12 @@ public class CommerceDiscountModelImpl
 			attributeSetterBiConsumers =
 				new LinkedHashMap<String, BiConsumer<CommerceDiscount, ?>>();
 
+		attributeGetterFunctions.put(
+			"mvccVersion", CommerceDiscount::getMvccVersion);
+		attributeSetterBiConsumers.put(
+			"mvccVersion",
+			(BiConsumer<CommerceDiscount, Long>)
+				CommerceDiscount::setMvccVersion);
 		attributeGetterFunctions.put("uuid", CommerceDiscount::getUuid);
 		attributeSetterBiConsumers.put(
 			"uuid",
@@ -616,6 +544,21 @@ public class CommerceDiscountModelImpl
 			attributeGetterFunctions);
 		_attributeSetterBiConsumers = Collections.unmodifiableMap(
 			(Map)attributeSetterBiConsumers);
+	}
+
+	@JSON
+	@Override
+	public long getMvccVersion() {
+		return _mvccVersion;
+	}
+
+	@Override
+	public void setMvccVersion(long mvccVersion) {
+		if (_columnOriginalValues == Collections.EMPTY_MAP) {
+			_setColumnOriginalValues();
+		}
+
+		_mvccVersion = mvccVersion;
 	}
 
 	@JSON
@@ -1422,6 +1365,7 @@ public class CommerceDiscountModelImpl
 	public Object clone() {
 		CommerceDiscountImpl commerceDiscountImpl = new CommerceDiscountImpl();
 
+		commerceDiscountImpl.setMvccVersion(getMvccVersion());
 		commerceDiscountImpl.setUuid(getUuid());
 		commerceDiscountImpl.setExternalReferenceCode(
 			getExternalReferenceCode());
@@ -1467,6 +1411,8 @@ public class CommerceDiscountModelImpl
 	public CommerceDiscount cloneWithOriginalValues() {
 		CommerceDiscountImpl commerceDiscountImpl = new CommerceDiscountImpl();
 
+		commerceDiscountImpl.setMvccVersion(
+			this.<Long>getColumnOriginalValue("mvccVersion"));
 		commerceDiscountImpl.setUuid(
 			this.<String>getColumnOriginalValue("uuid_"));
 		commerceDiscountImpl.setExternalReferenceCode(
@@ -1609,6 +1555,8 @@ public class CommerceDiscountModelImpl
 	public CacheModel<CommerceDiscount> toCacheModel() {
 		CommerceDiscountCacheModel commerceDiscountCacheModel =
 			new CommerceDiscountCacheModel();
+
+		commerceDiscountCacheModel.mvccVersion = getMvccVersion();
 
 		commerceDiscountCacheModel.uuid = getUuid();
 
@@ -1869,6 +1817,7 @@ public class CommerceDiscountModelImpl
 
 	}
 
+	private long _mvccVersion;
 	private String _uuid;
 	private String _externalReferenceCode;
 	private long _commerceDiscountId;
@@ -1932,6 +1881,7 @@ public class CommerceDiscountModelImpl
 	private void _setColumnOriginalValues() {
 		_columnOriginalValues = new HashMap<String, Object>();
 
+		_columnOriginalValues.put("mvccVersion", _mvccVersion);
 		_columnOriginalValues.put("uuid_", _uuid);
 		_columnOriginalValues.put(
 			"externalReferenceCode", _externalReferenceCode);
@@ -1992,69 +1942,71 @@ public class CommerceDiscountModelImpl
 	static {
 		Map<String, Long> columnBitmasks = new HashMap<>();
 
-		columnBitmasks.put("uuid_", 1L);
+		columnBitmasks.put("mvccVersion", 1L);
 
-		columnBitmasks.put("externalReferenceCode", 2L);
+		columnBitmasks.put("uuid_", 2L);
 
-		columnBitmasks.put("commerceDiscountId", 4L);
+		columnBitmasks.put("externalReferenceCode", 4L);
 
-		columnBitmasks.put("companyId", 8L);
+		columnBitmasks.put("commerceDiscountId", 8L);
 
-		columnBitmasks.put("userId", 16L);
+		columnBitmasks.put("companyId", 16L);
 
-		columnBitmasks.put("userName", 32L);
+		columnBitmasks.put("userId", 32L);
 
-		columnBitmasks.put("createDate", 64L);
+		columnBitmasks.put("userName", 64L);
 
-		columnBitmasks.put("modifiedDate", 128L);
+		columnBitmasks.put("createDate", 128L);
 
-		columnBitmasks.put("title", 256L);
+		columnBitmasks.put("modifiedDate", 256L);
 
-		columnBitmasks.put("target", 512L);
+		columnBitmasks.put("title", 512L);
 
-		columnBitmasks.put("useCouponCode", 1024L);
+		columnBitmasks.put("target", 1024L);
 
-		columnBitmasks.put("couponCode", 2048L);
+		columnBitmasks.put("useCouponCode", 2048L);
 
-		columnBitmasks.put("usePercentage", 4096L);
+		columnBitmasks.put("couponCode", 4096L);
 
-		columnBitmasks.put("maximumDiscountAmount", 8192L);
+		columnBitmasks.put("usePercentage", 8192L);
 
-		columnBitmasks.put("levelType", 16384L);
+		columnBitmasks.put("maximumDiscountAmount", 16384L);
 
-		columnBitmasks.put("level1", 32768L);
+		columnBitmasks.put("levelType", 32768L);
 
-		columnBitmasks.put("level2", 65536L);
+		columnBitmasks.put("level1", 65536L);
 
-		columnBitmasks.put("level3", 131072L);
+		columnBitmasks.put("level2", 131072L);
 
-		columnBitmasks.put("level4", 262144L);
+		columnBitmasks.put("level3", 262144L);
 
-		columnBitmasks.put("limitationType", 524288L);
+		columnBitmasks.put("level4", 524288L);
 
-		columnBitmasks.put("limitationTimes", 1048576L);
+		columnBitmasks.put("limitationType", 1048576L);
 
-		columnBitmasks.put("limitationTimesPerAccount", 2097152L);
+		columnBitmasks.put("limitationTimes", 2097152L);
 
-		columnBitmasks.put("numberOfUse", 4194304L);
+		columnBitmasks.put("limitationTimesPerAccount", 4194304L);
 
-		columnBitmasks.put("rulesConjunction", 8388608L);
+		columnBitmasks.put("numberOfUse", 8388608L);
 
-		columnBitmasks.put("active_", 16777216L);
+		columnBitmasks.put("rulesConjunction", 16777216L);
 
-		columnBitmasks.put("displayDate", 33554432L);
+		columnBitmasks.put("active_", 33554432L);
 
-		columnBitmasks.put("expirationDate", 67108864L);
+		columnBitmasks.put("displayDate", 67108864L);
 
-		columnBitmasks.put("lastPublishDate", 134217728L);
+		columnBitmasks.put("expirationDate", 134217728L);
 
-		columnBitmasks.put("status", 268435456L);
+		columnBitmasks.put("lastPublishDate", 268435456L);
 
-		columnBitmasks.put("statusByUserId", 536870912L);
+		columnBitmasks.put("status", 536870912L);
 
-		columnBitmasks.put("statusByUserName", 1073741824L);
+		columnBitmasks.put("statusByUserId", 1073741824L);
 
-		columnBitmasks.put("statusDate", 2147483648L);
+		columnBitmasks.put("statusByUserName", 2147483648L);
+
+		columnBitmasks.put("statusDate", 4294967296L);
 
 		_columnBitmasks = Collections.unmodifiableMap(columnBitmasks);
 	}

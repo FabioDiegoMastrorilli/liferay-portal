@@ -15,11 +15,9 @@ definition {
 			var accountEntryDescription = "Account Entry Description";
 		}
 
-		var accountEntryStatus = JSONAccountEntrySetter.setStatus(
-			accountEntryStatus = "${accountEntryStatus}");
+		var accountEntryStatus = JSONAccountEntrySetter.setStatus(accountEntryStatus = "${accountEntryStatus}");
 
-		var accountEntryType = JSONAccountEntrySetter.setType(
-			accountEntryType = "${accountEntryType}");
+		var accountEntryType = JSONAccountEntrySetter.setType(accountEntryType = "${accountEntryType}");
 
 		JSONAccountEntryAPI._addAccountEntry(
 			accountEntryDescription = "${accountEntryDescription}",
@@ -28,6 +26,12 @@ definition {
 			accountEntryType = "${accountEntryType}",
 			creatorEmailAddress = "${creatorEmailAddress}",
 			creatorPassword = "${creatorPassword}");
+
+		if (isSet(externalReferenceCode)) {
+			JSONAccountEntryAPI._setAccountExternalReferenceCode(
+				accountEntryName = "${accountEntryName}",
+				externalReferenceCode = "${externalReferenceCode}");
+		}
 	}
 
 }

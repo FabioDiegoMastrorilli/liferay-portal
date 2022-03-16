@@ -19,6 +19,7 @@ import com.liferay.petra.function.UnsafeSupplier;
 import com.liferay.petra.string.StringBundler;
 import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.log.Log;
+import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.util.ArrayUtil;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.StringUtil;
@@ -205,6 +206,10 @@ public class JSONUtil {
 			return true;
 		}
 		catch (JSONException jsonException) {
+			if (_log.isDebugEnabled()) {
+				_log.debug(jsonException);
+			}
+
 			return false;
 		}
 	}
@@ -1177,6 +1182,16 @@ public class JSONUtil {
 		return values;
 	}
 
+	public static Map<String, String> toStringMap(JSONObject jsonObject) {
+		Map<String, String> values = new HashMap<>();
+
+		for (String key : jsonObject.keySet()) {
+			values.put(key, jsonObject.getString(key));
+		}
+
+		return values;
+	}
+
 	public static Set<String> toStringSet(JSONArray jsonArray) {
 		if (jsonArray == null) {
 			return new HashSet<>();
@@ -1325,5 +1340,7 @@ public class JSONUtil {
 
 		return sb.toString();
 	}
+
+	private static final Log _log = LogFactoryUtil.getLog(JSONUtil.class);
 
 }

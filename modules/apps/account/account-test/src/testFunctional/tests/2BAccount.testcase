@@ -28,17 +28,18 @@ definition {
 			accountEntryName = "Account Name",
 			accountEntryType = "Business");
 
-		Accounts.openAccountsAdmin();
-
-		LexiconEntry.gotoEntry(rowEntry = "Account Name");
-
-		Accounts.addNewUserToBusinessAccount(
-			accountName = "Account Name",
-			assigneeName = "userfn",
+		JSONAccountEntryUser.addAccountEntryUser(
+			accountEntryName = "Account Name",
 			userEmailAddress = "userea@liferay.com",
 			userFirstName = "userfn",
 			userLastName = "userln",
 			userScreenName = "usersn");
+
+		Accounts.openAccountsAdmin();
+
+		LexiconEntry.gotoEntry(rowEntry = "Account Name");
+
+		Accounts.gotoAssigneeTab(assigneeTab = "Users");
 
 		Accounts.addAssigneeToRoleViaRolesTab(
 			accountRoleTitle = "Account Administrator",
@@ -71,6 +72,8 @@ definition {
 	@description = "This test adds the Add Account Entry permission to Account Admin and assert user can add an account."
 	@priority = "5"
 	test AccountAdminCanAddAccount {
+		property portal.acceptance = "true";
+
 		User.logoutAndLoginPG(
 			userLoginEmailAddress = "test@liferay.com",
 			userLoginFullName = "Test Test");
@@ -101,7 +104,9 @@ definition {
 			portletName = "Account Management",
 			searchTerm = "Account Name");
 
-		LexiconEntry.gotoEllipsisMenuItem(menuItem = "Edit");
+		Accounts.goToEntryMenuItem(
+			menuItem = "Edit",
+			rowEntry = "Account Name");
 
 		Accounts.gotoAssigneeTab(assigneeTab = "Addresses");
 
@@ -132,13 +137,10 @@ definition {
 	@description = "This test asserts that an Account Admin can add a new user to an account"
 	@priority = "5"
 	test AccountAdminCanAddNewUserToAccount {
-		Navigator.gotoPage(pageName = "2B Account Page");
+		property portal.acceptance = "true";
 
-		LexiconEntry.gotoEntry(rowEntry = "Account Name");
-
-		Accounts.addNewUserToBusinessAccount(
-			accountName = "Account Name",
-			assigneeName = "userfn1",
+		JSONAccountEntryUser.addAccountEntryUser(
+			accountEntryName = "Account Name",
 			userEmailAddress = "userea1@liferay.com",
 			userFirstName = "userfn1",
 			userLastName = "userln1",
@@ -160,7 +162,9 @@ definition {
 			portletName = "Account Management",
 			searchTerm = "Account Name");
 
-		LexiconEntry.gotoEllipsisMenuItem(menuItem = "Edit");
+		Accounts.goToEntryMenuItem(
+			menuItem = "Edit",
+			rowEntry = "Account Name");
 
 		Accounts.gotoAssigneeTab(assigneeTab = "Addresses");
 
@@ -190,18 +194,19 @@ definition {
 	@description = "This test asserts that an Account Admin can assign roles to users."
 	@priority = "5"
 	test AccountAdminCanAssignRolesToUsers {
-		task ("Add a new user into the 'Account Name' account") {
-			LexiconEntry.gotoEntryMenuItemNoError(
-				menuItem = "Manage Users",
-				rowEntry = "Account Name");
+		property portal.acceptance = "true";
 
-			Accounts.addNewUserToBusinessAccount(
-				accountName = "Account Name",
-				assigneeName = "user1",
+		task ("Add a new user into the 'Account Name' account") {
+			JSONAccountEntryUser.addAccountEntryUser(
+				accountEntryName = "Account Name",
 				userEmailAddress = "user1@liferay.com",
 				userFirstName = "user1",
 				userLastName = "user1",
 				userScreenName = "user1");
+
+			LexiconEntry.gotoEntry(rowEntry = "Account Name");
+
+			Accounts.gotoAssigneeTab(assigneeTab = "Users");
 
 			WaitForElementPresent(
 				key_rowEntry = "user1 user1",
@@ -209,9 +214,25 @@ definition {
 		}
 
 		task ("Assign new user the role of 'Account Administrator'") {
-			Accounts.addAssigneeToRoleViaUsersTab(
-				accountRoleTitle = "Account Administrator",
-				accountUserName = "user1 user1");
+			Navigator.gotoNavTab(navTab = "Users");
+
+			Accounts.goToEntryMenuItem(
+				menuItem = "Assign Roles",
+				rowEntry = "user1 user1");
+
+			SelectFrame(
+				key_title = "Assign Roles",
+				locator1 = "IFrame#MODAL_ANY");
+
+			Check(
+				key_tableEntry = "Account Administrator",
+				locator1 = "LexiconTable#TABLE_ENTRY_CHECKBOX");
+
+			SelectFrameTop();
+
+			Button.click(button = "Done");
+
+			Alert.viewSuccessMessage();
 		}
 
 		task ("Assert that the new user has 'Account Administator' listed in their role") {
@@ -234,7 +255,13 @@ definition {
 
 		Navigator.gotoPage(pageName = "2B Account Page");
 
-		Accounts.deactivateAccount(accountName = "Account Name");
+		Accounts.goToEntryMenuItem(
+			menuItem = "Deactivate",
+			rowEntry = "Account Name");
+
+		AssertConfirm(value1 = "Are you sure you want to deactivate this?");
+
+		Alert.viewSuccessMessage();
 
 		Accounts.viewInactiveAccount(accountName = "Account Name");
 	}
@@ -242,6 +269,8 @@ definition {
 	@description = "This test asserts that an Account can be deleted."
 	@priority = "4"
 	test AccountAdminCanDeleteAccount {
+		property portal.acceptance = "true";
+
 		Permissions.definePermissionViaJSONAPI(
 			resourceAction = "DELETE",
 			resourceName = "com.liferay.account.model.AccountEntry",
@@ -250,15 +279,34 @@ definition {
 
 		Navigator.gotoPage(pageName = "2B Account Page");
 
-		Accounts.deleteAccount(accountName = "Account Name");
+		Accounts.goToEntryMenuItem(
+			menuItem = "Delete",
+			rowEntry = "Account Name");
+
+		AssertConfirm(value1 = "Are you sure you want to delete this? It will be deleted immediately.");
+
+		Alert.viewSuccessMessage();
 	}
 
 	@description = "This test asserts that an Account Admin can edit an account he is assigned to."
-	@priority = "4"
+	@priority = "5"
 	test AccountAdminCanEditAccount {
-		Accounts.editPG(
-			accountName = "Account Name",
-			accountNameEdit = "This is a new update");
+		property portal.acceptance = "true";
+
+		Accounts.goToEntryMenuItem(
+			menuItem = "Edit",
+			rowEntry = "Account Name");
+
+		AssertTextEquals(
+			key_portletName = "Account",
+			locator1 = "Portlet#TITLE",
+			value1 = "Edit Account Name");
+
+		PortletEntry.inputName(name = "This is a new update");
+
+		Button.clickSave();
+
+		Alert.viewSuccessMessage();
 
 		Navigator.gotoPage(pageName = "2B Account Page");
 
@@ -275,13 +323,8 @@ definition {
 				userLoginEmailAddress = "test@liferay.com",
 				userLoginFullName = "Test Test");
 
-			Navigator.gotoPage(pageName = "2B Account Page");
-
-			LexiconEntry.gotoEntry(rowEntry = "Account Name");
-
-			Accounts.addNewUserToBusinessAccount(
-				accountName = "Account Name",
-				assigneeName = "userfn1",
+			JSONAccountEntryUser.addAccountEntryUser(
+				accountEntryName = "Account Name",
 				userEmailAddress = "userea1@liferay.com",
 				userFirstName = "userfn1",
 				userLastName = "userln1",
@@ -353,7 +396,7 @@ definition {
 
 			Navigator.gotoPage(pageName = "2B Account Page");
 
-			LexiconEntry.gotoEntryMenuItemNoError(
+			Accounts.goToEntryMenuItem(
 				menuItem = "Manage Users",
 				rowEntry = "Account Name");
 		}
@@ -370,7 +413,7 @@ definition {
 
 			Navigator.gotoPage(pageName = "2B Account Page");
 
-			LexiconEntry.gotoEntryMenuItemNoError(
+			Accounts.goToEntryMenuItem(
 				menuItem = "Manage Users",
 				rowEntry = "Account Name");
 
@@ -396,9 +439,29 @@ definition {
 
 			Navigator.gotoPage(pageName = "2B Account Page");
 
-			Accounts.editPG(
-				accountName = "Account Name",
-				domainNames = "gmail.com");
+			Accounts.goToEntryMenuItem(
+				menuItem = "Edit",
+				rowEntry = "Account Name");
+
+			AssertClick(
+				locator1 = "Account#VALID_DOMAINS_ADD_BUTTON",
+				value1 = "Add");
+
+			SelectFrame(locator1 = "IFrame#ADD_DOMAIN");
+
+			PortletEntry.inputText(
+				fieldLabel = "Domain",
+				text = "gmail.com");
+
+			Button.clickSave();
+
+			AssertElementPresent(
+				key_domainName = "gmail.com",
+				locator1 = "Account#VALID_DOMAINS_DOMAIN_NAME");
+
+			Button.clickSave();
+
+			Alert.viewSuccessMessage();
 		}
 
 		task ("Attempt to add user using the valid domain and assert that the new user is added into the account") {
@@ -414,7 +477,7 @@ definition {
 
 			Navigator.gotoPage(pageName = "2B Account Page");
 
-			LexiconEntry.gotoEntryMenuItemNoError(
+			Accounts.goToEntryMenuItem(
 				menuItem = "Manage Users",
 				rowEntry = "Account Name");
 
@@ -436,7 +499,7 @@ definition {
 
 			Navigator.gotoPage(pageName = "2B Account Page");
 
-			LexiconEntry.gotoEntryMenuItemNoError(
+			Accounts.goToEntryMenuItem(
 				menuItem = "Manage Users",
 				rowEntry = "Account Name");
 
@@ -451,7 +514,9 @@ definition {
 			portletName = "Account Management",
 			searchTerm = "Account Name");
 
-		LexiconEntry.gotoEllipsisMenuItem(menuItem = "Edit");
+		Accounts.goToEntryMenuItem(
+			menuItem = "Edit",
+			rowEntry = "Account Name");
 
 		Accounts.gotoAssigneeTab(assigneeTab = "Addresses");
 
@@ -490,7 +555,9 @@ definition {
 			portletName = "Account Management",
 			searchTerm = "Account Name");
 
-		LexiconEntry.gotoEllipsisMenuItem(menuItem = "Edit");
+		Accounts.goToEntryMenuItem(
+			menuItem = "Edit",
+			rowEntry = "Account Name");
 
 		Accounts.gotoAssigneeTab(assigneeTab = "Addresses");
 
@@ -531,6 +598,12 @@ definition {
 			userLoginEmailAddress = "test@liferay.com",
 			userLoginFullName = "Test Test");
 
+		Permissions.definePermissionViaJSONAPI(
+			resourceAction = "MANAGE_ORGANIZATIONS",
+			resourceName = "com.liferay.account.model.AccountEntry",
+			roleTitle = "Account Administrator",
+			roleType = "account");
+
 		for (var organizationNumber : list "1,2,3,4") {
 			JSONOrganization.addOrganization(
 				organizationName = "Organization ${organizationNumber}",
@@ -570,6 +643,12 @@ definition {
 		User.logoutAndLoginPG(
 			userLoginEmailAddress = "test@liferay.com",
 			userLoginFullName = "Test Test");
+
+		Permissions.definePermissionViaJSONAPI(
+			resourceAction = "MANAGE_ORGANIZATIONS",
+			resourceName = "com.liferay.account.model.AccountEntry",
+			roleTitle = "Account Administrator",
+			roleType = "account");
 
 		JSONOrganization.addOrganization(
 			organizationName = "Organization for Account",
@@ -612,21 +691,15 @@ definition {
 				userLoginEmailAddress = "test@liferay.com",
 				userLoginFullName = "Test Test");
 
-			Accounts.openAccountsAdmin();
-
-			LexiconEntry.gotoEntry(rowEntry = "Account Name");
-
-			Accounts.addNewUserToBusinessAccount(
-				accountName = "Account Name",
-				assigneeName = "userfn1",
+			JSONAccountEntryUser.addAccountEntryUser(
+				accountEntryName = "Account Name",
 				userEmailAddress = "userea1@liferay.com",
 				userFirstName = "userfn1",
 				userLastName = "userln5",
 				userScreenName = "usersn1");
 
-			Accounts.addNewUserToBusinessAccount(
-				accountName = "Account Name",
-				assigneeName = "userfn5",
+			JSONAccountEntryUser.addAccountEntryUser(
+				accountEntryName = "Account Name",
 				userEmailAddress = "userea3@liferay.com",
 				userFirstName = "userfn5",
 				userLastName = "userln2",
@@ -640,7 +713,7 @@ definition {
 
 			Navigator.gotoPage(pageName = "2B Account Page");
 
-			LexiconEntry.gotoEntryMenuItemNoError(
+			Accounts.goToEntryMenuItem(
 				menuItem = "Manage Users",
 				rowEntry = "Account Name");
 		}
@@ -706,19 +779,16 @@ definition {
 	@description = "This test asserts Account Administrators can search for account users"
 	@priority = "5"
 	test AdminCanSearchForAccountUsers {
+		property portal.acceptance = "true";
+
 		task ("Add several users to account") {
 			User.logoutAndLoginPG(
 				userLoginEmailAddress = "test@liferay.com",
 				userLoginFullName = "Test Test");
 
-			Accounts.openAccountsAdmin();
-
-			LexiconEntry.gotoEntry(rowEntry = "Account Name");
-
 			for (var userNum : list "2,3,4") {
-				Accounts.addNewUserToBusinessAccount(
-					accountName = "Account Name",
-					assigneeName = "userfn${userNum}",
+				JSONAccountEntryUser.addAccountEntryUser(
+					accountEntryName = "Account Name",
 					userEmailAddress = "userea${userNum}@liferay.com",
 					userFirstName = "userfn${userNum}",
 					userLastName = "userln${userNum}",
@@ -733,12 +803,12 @@ definition {
 
 			Navigator.gotoPage(pageName = "2B Account Page");
 
-			LexiconEntry.gotoEntryMenuItemNoError(
+			Accounts.goToEntryMenuItem(
 				menuItem = "Manage Users",
 				rowEntry = "Account Name");
 		}
 
-		task ("Assert all users can be searched") {
+		task ("Assert all users can be searched by first last name") {
 			for (var userNum : list "2,3,4") {
 				Search.searchPG(
 					portletName = "Account Name",
@@ -750,15 +820,46 @@ definition {
 
 				if ("${userNum}" == "2") {
 					LexiconEntry.viewNoEntry(rowEntry = "userfn3 userln3");
+
 					LexiconEntry.viewNoEntry(rowEntry = "userfn4 userln4");
 				}
 				else if ("${userNum}" == "3") {
 					LexiconEntry.viewNoEntry(rowEntry = "userfn2 userln2");
+
 					LexiconEntry.viewNoEntry(rowEntry = "userfn4 userln4");
 				}
 				else {
 					LexiconEntry.viewNoEntry(rowEntry = "userfn2 userln3");
+
 					LexiconEntry.viewNoEntry(rowEntry = "userfn3 userln3");
+				}
+			}
+		}
+
+		task ("Assert all users can be searched by email") {
+			for (var userNum : list "2,3,4") {
+				Search.searchPG(
+					portletName = "Account Name",
+					searchTerm = "userea${userNum}@liferay.com");
+
+				LexiconEntry.viewEntryName(rowEntry = "userea${userNum}@liferay.com");
+
+				LexiconEntry.viewNoEntry(rowEntry = "userea@liferay.com");
+
+				if ("${userNum}" == "2") {
+					LexiconEntry.viewNoEntry(rowEntry = "userea3@liferay.com");
+
+					LexiconEntry.viewNoEntry(rowEntry = "userea4@liferay.com");
+				}
+				else if ("${userNum}" == "3") {
+					LexiconEntry.viewNoEntry(rowEntry = "userea2@liferay.com");
+
+					LexiconEntry.viewNoEntry(rowEntry = "userea4@liferay.com");
+				}
+				else {
+					LexiconEntry.viewNoEntry(rowEntry = "userea2@liferay.com");
+
+					LexiconEntry.viewNoEntry(rowEntry = "userea3@liferay.com");
 				}
 			}
 		}
@@ -772,14 +873,9 @@ definition {
 				userLoginEmailAddress = "test@liferay.com",
 				userLoginFullName = "Test Test");
 
-			Accounts.openAccountsAdmin();
-
-			LexiconEntry.gotoEntry(rowEntry = "Account Name");
-
 			for (var userNum : list "2,3,4") {
-				Accounts.addNewUserToBusinessAccount(
-					accountName = "Account Name",
-					assigneeName = "userfn${userNum}",
+				JSONAccountEntryUser.addAccountEntryUser(
+					accountEntryName = "Account Name",
 					userEmailAddress = "userea${userNum}@liferay.com",
 					userFirstName = "userfn${userNum}",
 					userLastName = "userln${userNum}",
@@ -794,7 +890,7 @@ definition {
 
 			Navigator.gotoPage(pageName = "2B Account Page");
 
-			LexiconEntry.gotoEntryMenuItemNoError(
+			Accounts.goToEntryMenuItem(
 				menuItem = "Manage Users",
 				rowEntry = "Account Name");
 
@@ -857,7 +953,7 @@ definition {
 				category = "Site Builder",
 				portlet = "Pages");
 
-			SitePages.addPublicPage(
+			PagesAdmin.addPublicPage(
 				pageName = "2B New Site",
 				sitePageType = "Widget Page");
 
@@ -962,14 +1058,9 @@ definition {
 				userLoginEmailAddress = "test@liferay.com",
 				userLoginFullName = "Test Test");
 
-			Accounts.openAccountsAdmin();
-
-			LexiconEntry.gotoEntry(rowEntry = "Account Name");
-
 			for (var userNum : list "2,3,4") {
-				Accounts.addNewUserToBusinessAccount(
-					accountName = "Account Name",
-					assigneeName = "userfn${userNum}",
+				JSONAccountEntryUser.addAccountEntryUser(
+					accountEntryName = "Account Name",
 					userEmailAddress = "userea${userNum}@liferay.com",
 					userFirstName = "userfn${userNum}",
 					userLastName = "userln${userNum}",
@@ -992,7 +1083,7 @@ definition {
 
 			Navigator.gotoPage(pageName = "2B Account Page");
 
-			LexiconEntry.gotoEntryMenuItemNoError(
+			Accounts.goToEntryMenuItem(
 				menuItem = "Manage Users",
 				rowEntry = "Account Name");
 		}
@@ -1025,6 +1116,8 @@ definition {
 	@description = "This test asserts that an Account Admin cannot view accounts not assigned to him."
 	@priority = "5"
 	test CannotViewOtherAccounts {
+		property portal.acceptance = "true";
+
 		User.logoutAndLoginPG(
 			userLoginEmailAddress = "test@liferay.com",
 			userLoginFullName = "Test Test");
@@ -1053,6 +1146,8 @@ definition {
 	@description = "This test asserts that only business accounts can be added when the allowed account type is business"
 	@priority = "5"
 	test CanOnlyAddBusinessAccountsWhenAllowedAccountTypeIsBusiness {
+		property portal.acceptance = "true";
+
 		task ("Add account entry permission to Account Admin") {
 			User.logoutAndLoginPG(
 				userLoginEmailAddress = "test@liferay.com",
@@ -1098,6 +1193,8 @@ definition {
 	@description = "This test asserts that only person accounts can be added when the allowed account type is person"
 	@priority = "5"
 	test CanOnlyAddPersonAccountsWhenAllowedAccountTypeIsPerson {
+		property portal.acceptance = "true";
+
 		task ("Add account entry permission to Account Admin") {
 			User.logoutAndLoginPG(
 				userLoginEmailAddress = "test@liferay.com",
@@ -1251,19 +1348,14 @@ definition {
 	@description = "This test asserts that an Account Admin can remove a user from an account."
 	@priority = "5"
 	test CanRemoveUserFromAccount {
+		property portal.acceptance = "true";
+
 		User.logoutAndLoginPG(
 			userLoginEmailAddress = "test@liferay.com",
 			userLoginFullName = "Test Test");
 
-		Navigator.gotoPage(pageName = "2B Account Page");
-
-		LexiconEntry.gotoEntryMenuItemNoError(
-			menuItem = "Manage Users",
-			rowEntry = "Account Name");
-
-		Accounts.addNewUserToBusinessAccount(
-			accountName = "Account Name",
-			assigneeName = "user1",
+		JSONAccountEntryUser.addAccountEntryUser(
+			accountEntryName = "Account Name",
 			userEmailAddress = "user1@liferay.com",
 			userFirstName = "user1",
 			userLastName = "user1",
@@ -1273,26 +1365,25 @@ definition {
 			userLoginEmailAddress = "userea@liferay.com",
 			userLoginFullName = "userfn userln");
 
-		Navigator.gotoPage(pageName = "2B Account Page");
-
-		LexiconEntry.gotoEntryMenuItemNoError(
-			menuItem = "Manage Users",
-			rowEntry = "Account Name");
-
-		Accounts.addNewUserToBusinessAccount(
-			accountName = "Account Name",
-			assigneeName = "user2",
+		JSONAccountEntryUser.addAccountEntryUser(
+			accountEntryName = "Account Name",
 			userEmailAddress = "user2@liferay.com",
 			userFirstName = "user2",
 			userLastName = "user2",
 			userScreenName = "user2");
+
+		Navigator.gotoPage(pageName = "2B Account Page");
+
+		Accounts.goToEntryMenuItem(
+			menuItem = "Manage Users",
+			rowEntry = "Account Name");
 
 		AssertElementPresent(
 			key_tab = "Users",
 			locator1 = "NavTab#ACTIVE_TAB_LINK");
 
 		for (var users : list "user1 user1,user2 user2") {
-			LexiconEntry.gotoEntryMenuItemNoError(
+			Accounts.goToEntryMenuItem(
 				menuItem = "Remove",
 				rowEntry = "${users}");
 
@@ -1305,7 +1396,9 @@ definition {
 			portletName = "Account Management",
 			searchTerm = "Account Name");
 
-		LexiconEntry.gotoEllipsisMenuItem(menuItem = "Manage Users");
+		Accounts.goToEntryMenuItem(
+			menuItem = "Manage Users",
+			rowEntry = "Account Name");
 
 		LexiconEntry.viewNoEntry(rowEntry = "user1");
 
@@ -1315,35 +1408,43 @@ definition {
 	@description = "This test asserts that a user can select an account from the list as the active account. Backend tests are covering functionality for account selection."
 	@priority = "4"
 	test CanSetActiveAccount {
-		User.logoutAndLoginPG(
-			userLoginEmailAddress = "test@liferay.com",
-			userLoginFullName = "Test Test");
+		property portal.acceptance = "true";
 
-		Accounts.setAddAccountEntryPermissions(
-			roleTitle = "Reg Role Name",
-			userEmailAddress = "userea@liferay.com");
+		task ("Sign in as Super User to give permissions to add accounts to the Account Administrator user") {
+			User.logoutAndLoginPG(
+				userLoginEmailAddress = "test@liferay.com",
+				userLoginFullName = "Test Test");
 
-		User.logoutAndLoginPG(
-			userLoginEmailAddress = "userea@liferay.com",
-			userLoginFullName = "userfn userln");
+			Accounts.setAddAccountEntryPermissions(
+				roleTitle = "Reg Role Name",
+				userEmailAddress = "userea@liferay.com");
+		}
 
-		Navigator.gotoPage(pageName = "2B Account Page");
+		task ("Sign in as Account Administrator and create a new account") {
+			User.logoutAndLoginPG(
+				userLoginEmailAddress = "userea@liferay.com",
+				userLoginFullName = "userfn userln");
 
-		Accounts.addBusinessAccount(
-			accountDescription = "New Active Account Selection",
-			accountName = "New Selection for Test");
+			Navigator.gotoPage(pageName = "2B Account Page");
 
-		Navigator.gotoPage(pageName = "2B Account Page");
+			Accounts.addBusinessAccount(
+				accountDescription = "New Active Account Selection",
+				accountName = "New Selection for Test");
+		}
 
-		LexiconEntry.gotoEntryMenuItemNoError(
-			menuItem = "Select Account",
-			rowEntry = "New Selection for Test");
+		task ("Select new account to be main active account, denoted by a checkmark, and assert that previous account is no longer selected") {
+			Navigator.gotoPage(pageName = "2B Account Page");
 
-		Accounts.viewSelectedAccount(
-			previousAccount = "Account Name",
-			previousAccountSearchTerm = "&quot;Account Name&quot;",
-			selectedAccount = "New Selection for Test",
-			selectedAccountSearchTerm = "&quot;New Selection for Test&quot;");
+			Accounts.goToEntryMenuItem(
+				menuItem = "Select Account",
+				rowEntry = "New Selection for Test");
+
+			Accounts.viewSelectedAccount(entryName = "New Selection for Test");
+
+			AssertElementNotPresent(
+				key_entryName = "Account Name",
+				locator1 = "Account#SELECT_ACCOUNT_ENTRY_CHECKMARK");
+		}
 	}
 
 	@description = "This test searches for an Account within the list by Account Name and Account ID."
@@ -1387,7 +1488,13 @@ definition {
 
 		Navigator.gotoPage(pageName = "2B Account Page");
 
-		Accounts.deactivateAccount(accountName = "Account Name");
+		Accounts.goToEntryMenuItem(
+			menuItem = "Deactivate",
+			rowEntry = "Account Name");
+
+		AssertConfirm(value1 = "Are you sure you want to deactivate this?");
+
+		Alert.viewSuccessMessage();
 
 		Accounts.viewInactiveAccount(accountName = "Account Name");
 

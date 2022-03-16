@@ -23,17 +23,17 @@ PortletURL portletURL = commerceDiscountDisplayContext.getPortletURL();
 %>
 
 <div class="pt-4">
-	<aui:form action="<%= portletURL.toString() %>" cssClass="container-fluid container-fluid-max-xl" method="post" name="fm">
+	<aui:form action="<%= portletURL %>" cssClass="container-fluid container-fluid-max-xl" method="post" name="fm">
 		<aui:input name="<%= Constants.CMD %>" type="hidden" />
 		<aui:input name="redirect" type="hidden" value="<%= portletURL.toString() %>" />
 		<aui:input name="deleteDiscounts" type="hidden" />
 
-		<clay:headless-data-set-display
+		<frontend-data-set:headless-display
 			apiURL="/o/headless-commerce-admin-pricing/v2.0/discounts"
-			clayDataSetActionDropdownItems="<%= commerceDiscountDisplayContext.getDiscountClayDataSetActionDropdownItems() %>"
 			creationMenu="<%= commerceDiscountDisplayContext.getDiscountCreationMenu() %>"
+			fdsActionDropdownItems="<%= commerceDiscountDisplayContext.getDiscountFDSActionDropdownItems() %>"
 			formName="fm"
-			id="<%= CommercePricingDataSetConstants.COMMERCE_DATA_SET_KEY_DISCOUNTS %>"
+			id="<%= CommercePricingFDSNames.DISCOUNTS %>"
 			itemsPerPage="<%= 10 %>"
 			namespace="<%= liferayPortletResponse.getNamespace() %>"
 			pageNumber="<%= 1 %>"

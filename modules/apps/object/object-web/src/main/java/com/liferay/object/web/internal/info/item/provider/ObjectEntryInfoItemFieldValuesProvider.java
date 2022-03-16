@@ -36,6 +36,7 @@ import com.liferay.object.model.ObjectField;
 import com.liferay.object.service.ObjectEntryLocalService;
 import com.liferay.object.service.ObjectFieldLocalService;
 import com.liferay.object.web.internal.info.item.ObjectEntryInfoItemFields;
+import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.json.JSONFactory;
 import com.liferay.portal.kernel.json.JSONObject;
@@ -44,13 +45,17 @@ import com.liferay.portal.kernel.service.ServiceContext;
 import com.liferay.portal.kernel.service.ServiceContextThreadLocal;
 import com.liferay.portal.kernel.service.UserLocalService;
 import com.liferay.portal.kernel.theme.ThemeDisplay;
+import com.liferay.portal.kernel.util.FastDateFormatFactoryUtil;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.vulcan.util.TransformUtil;
 import com.liferay.template.info.item.provider.TemplateInfoItemFieldSetProvider;
 
 import java.io.Serializable;
 
+import java.text.Format;
+
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -93,9 +98,7 @@ public class ObjectEntryInfoItemFieldValuesProvider
 				ObjectEntry.class.getName(), objectEntry)
 		).infoFieldValues(
 			_templateInfoItemFieldSetProvider.getInfoFieldValues(
-				ObjectEntry.class.getName(),
-				String.valueOf(objectEntry.getObjectDefinitionId()),
-				objectEntry)
+				objectEntry.getModelClassName(), objectEntry)
 		).infoItemReference(
 			new InfoItemReference(
 				ObjectEntry.class.getName(), objectEntry.getObjectEntryId())
@@ -115,23 +118,23 @@ public class ObjectEntryInfoItemFieldValuesProvider
 		if (Validator.isNotNull(objectField.getRelationshipType())) {
 			return TextInfoFieldType.INSTANCE;
 		}
-		else if (Objects.equals(objectField.getType(), "Boolean")) {
+		else if (Objects.equals(objectField.getDBType(), "Boolean")) {
 			return BooleanInfoFieldType.INSTANCE;
 		}
-		else if (Objects.equals(objectField.getType(), "BigDecimal") ||
-				 Objects.equals(objectField.getType(), "Double") ||
-				 Objects.equals(objectField.getType(), "Integer") ||
-				 Objects.equals(objectField.getType(), "Long")) {
+		else if (Objects.equals(objectField.getDBType(), "BigDecimal") ||
+				 Objects.equals(objectField.getDBType(), "Double") ||
+				 Objects.equals(objectField.getDBType(), "Integer") ||
+				 Objects.equals(objectField.getDBType(), "Long")) {
 
 			return NumberInfoFieldType.INSTANCE;
 		}
-		else if (Objects.equals(objectField.getType(), "Blob")) {
+		else if (Objects.equals(objectField.getDBType(), "Blob")) {
 			return ImageInfoFieldType.INSTANCE;
 		}
-		else if (Objects.equals(objectField.getType(), "Date")) {
+		else if (Objects.equals(objectField.getDBType(), "Date")) {
 			return DateInfoFieldType.INSTANCE;
 		}
-		else if (Objects.equals(objectField.getType(), "String")) {
+		else if (Objects.equals(objectField.getDBType(), "String")) {
 			return TextInfoFieldType.INSTANCE;
 		}
 
@@ -163,7 +166,7 @@ public class ObjectEntryInfoItemFieldValuesProvider
 					objectEntry.getUserName()));
 			objectEntryFieldValues.add(
 				new InfoFieldValue<>(
-					ObjectEntryInfoItemFields.userProfileImage,
+					ObjectEntryInfoItemFields.userProfileImageInfoField,
 					_getWebImage(objectEntry.getUserId())));
 
 			ThemeDisplay themeDisplay = _getThemeDisplay();
@@ -217,6 +220,18 @@ public class ObjectEntryInfoItemFieldValuesProvider
 			ObjectField objectField, Map<String, Serializable> values)
 		throws PortalException {
 
+		Object value = values.get(objectField.getName());
+
+		if ((value == null) ||
+			(Validator.isNotNull(objectField.getRelationshipType()) &&
+			 (value instanceof Long) && Objects.equals(value, 0L))) {
+
+			return StringPool.BLANK;
+		}
+
+		ServiceContext serviceContext =
+			ServiceContextThreadLocal.getServiceContext();
+
 		if (Objects.equals(
 				_getInfoFieldType(objectField), ImageInfoFieldType.INSTANCE)) {
 
@@ -230,9 +245,6 @@ public class ObjectEntryInfoItemFieldValuesProvider
 			return webImage;
 		}
 		else if (objectField.getListTypeDefinitionId() != 0) {
-			ServiceContext serviceContext =
-				ServiceContextThreadLocal.getServiceContext();
-
 			ListTypeEntry listTypeEntry =
 				_listTypeEntryLocalService.fetchListTypeEntry(
 					objectField.getListTypeDefinitionId(),
@@ -247,6 +259,12 @@ public class ObjectEntryInfoItemFieldValuesProvider
 			if (objectEntry != null) {
 				return objectEntry.getTitleValue();
 			}
+		}
+		else if (Objects.equals(objectField.getDBType(), "Date")) {
+			Format dateFormat = FastDateFormatFactoryUtil.getDate(
+				serviceContext.getLocale());
+
+			return dateFormat.format((Date)values.get(objectField.getName()));
 		}
 
 		return values.get(objectField.getName());

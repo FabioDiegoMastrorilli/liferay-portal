@@ -229,8 +229,19 @@ public interface DL {
 
 	public String getTitleWithExtension(String title, String extension);
 
+	/**
+	 * @deprecated As of Cavanaugh (7.4.x), replaced by {@link
+	 *             #getUniqueFileName(long, long, String, boolean)}
+	 */
+	@Deprecated
 	public String getUniqueFileName(
 		long groupId, long folderId, String fileName);
+
+	public String getUniqueFileName(
+		long groupId, long folderId, String fileName,
+		boolean ignoreDuplicateTitle);
+
+	public String getUniqueTitle(long groupId, long folderId, String title);
 
 	/**
 	 * @deprecated As of Mueller (7.2.x), replaced by {@link

@@ -15,6 +15,7 @@
 package com.liferay.layout.page.template.item.selector.criterion;
 
 import com.liferay.item.selector.BaseItemSelectorCriterion;
+import com.liferay.portal.kernel.workflow.WorkflowConstants;
 
 /**
  * @author Lourdes Fernández Besada
@@ -24,26 +25,36 @@ public class LayoutPageTemplateEntryItemSelectorCriterion
 
 	public LayoutPageTemplateEntryItemSelectorCriterion() {
 		_groupId = 0;
-		_layoutType = 0;
+		_layoutTypes = new int[0];
+		_status = WorkflowConstants.STATUS_APPROVED;
 	}
 
 	public long getGroupId() {
 		return _groupId;
 	}
 
-	public int getLayoutType() {
-		return _layoutType;
+	public int[] getLayoutTypes() {
+		return _layoutTypes;
+	}
+
+	public int getStatus() {
+		return _status;
 	}
 
 	public void setGroupId(long groupId) {
 		_groupId = groupId;
 	}
 
-	public void setLayoutType(int layoutType) {
-		_layoutType = layoutType;
+	public void setLayoutTypes(int... layoutTypes) {
+		_layoutTypes = layoutTypes;
+	}
+
+	public void setStatus(int status) {
+		_status = status;
 	}
 
 	private long _groupId;
-	private int _layoutType;
+	private int[] _layoutTypes;
+	private int _status;
 
 }

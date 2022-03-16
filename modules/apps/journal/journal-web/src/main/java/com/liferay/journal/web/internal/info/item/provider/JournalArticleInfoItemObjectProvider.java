@@ -53,6 +53,7 @@ import org.osgi.service.component.annotations.Reference;
 		"info.item.identifier=com.liferay.info.item.ClassPKInfoItemIdentifier",
 		"info.item.identifier=com.liferay.info.item.GroupKeyInfoItemIdentifier",
 		"info.item.identifier=com.liferay.info.item.GroupUrlTitleInfoItemIdentifier",
+		"item.class.name=com.liferay.journal.model.JournalArticle",
 		"service.ranking:Integer=100"
 	},
 	service = InfoItemObjectProvider.class
@@ -114,7 +115,7 @@ public class JournalArticleInfoItemObjectProvider
 			if ((article != null) &&
 				!Objects.equals(
 					version, InfoItemIdentifier.VERSION_LATEST_APPROVED) &&
-				!_hasPermission(article)) {
+				_isSignedIn() && !_hasPermission(article)) {
 
 				article = _getArticle(
 					article.getResourcePrimKey(),
@@ -245,11 +246,22 @@ public class JournalArticleInfoItemObjectProvider
 		}
 		catch (PortalException portalException) {
 			if (_log.isDebugEnabled()) {
-				_log.debug(portalException, portalException);
+				_log.debug(portalException);
 			}
 		}
 
 		return false;
+	}
+
+	private boolean _isSignedIn() {
+		PermissionChecker permissionChecker =
+			PermissionThreadLocal.getPermissionChecker();
+
+		if (permissionChecker == null) {
+			return false;
+		}
+
+		return permissionChecker.isSignedIn();
 	}
 
 	private static final Log _log = LogFactoryUtil.getLog(

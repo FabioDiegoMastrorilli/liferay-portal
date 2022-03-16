@@ -20,6 +20,7 @@ import com.liferay.asset.kernel.model.AssetRendererFactory;
 import com.liferay.asset.publisher.constants.AssetPublisherWebKeys;
 import com.liferay.asset.publisher.util.AssetEntryResult;
 import com.liferay.asset.publisher.util.AssetPublisherHelper;
+import com.liferay.asset.publisher.web.internal.configuration.AssetPublisherSelectionStyleConfigurationUtil;
 import com.liferay.asset.publisher.web.internal.constants.AssetPublisherSelectionStyleConstants;
 import com.liferay.asset.publisher.web.internal.display.context.AssetPublisherDisplayContext;
 import com.liferay.asset.util.AssetHelper;
@@ -74,7 +75,8 @@ public class AssetRSSHelper {
 
 		String selectionStyle = portletPreferences.getValue(
 			"selectionStyle",
-			AssetPublisherSelectionStyleConstants.TYPE_DYNAMIC);
+			AssetPublisherSelectionStyleConfigurationUtil.
+				defaultSelectionStyle());
 
 		if (!selectionStyle.equals(
 				AssetPublisherSelectionStyleConstants.TYPE_DYNAMIC)) {
@@ -93,15 +95,15 @@ public class AssetRSSHelper {
 		String format = RSSUtil.getFeedTypeFormat(rssFeedType);
 		double version = RSSUtil.getFeedTypeVersion(rssFeedType);
 
-		String rss = exportToRSS(
+		String rss = _exportToRSS(
 			portletRequest, portletResponse, rssName, format, version,
 			rssDisplayStyle, assetLinkBehavior,
-			getAssetEntries(portletRequest, portletPreferences));
+			_getAssetEntries(portletRequest, portletPreferences));
 
 		return rss.getBytes(StringPool.UTF8);
 	}
 
-	protected String exportToRSS(
+	private String _exportToRSS(
 			PortletRequest portletRequest, PortletResponse portletResponse,
 			String name, String format, double version, String displayStyle,
 			String linkBehavior, List<AssetEntry> assetEntries)
@@ -142,7 +144,7 @@ public class AssetRSSHelper {
 
 			syndEntry.setDescription(syndContent);
 
-			String link = getEntryURL(
+			String link = _getEntryURL(
 				portletRequest, portletResponse, linkBehavior, assetEntry);
 
 			syndEntry.setLink(link);
@@ -165,7 +167,7 @@ public class AssetRSSHelper {
 
 		syndLinks.add(selfSyndLink);
 
-		String feedURL = getFeedURL(portletRequest);
+		String feedURL = _getFeedURL(portletRequest);
 
 		selfSyndLink.setHref(feedURL);
 
@@ -185,7 +187,7 @@ public class AssetRSSHelper {
 		return _rssExporter.export(syndFeed);
 	}
 
-	protected List<AssetEntry> getAssetEntries(
+	private List<AssetEntry> _getAssetEntries(
 			PortletRequest portletRequest,
 			PortletPreferences portletPreferences)
 		throws Exception {
@@ -226,7 +228,7 @@ public class AssetRSSHelper {
 		return assetEntries;
 	}
 
-	protected String getAssetPublisherURL(PortletRequest portletRequest)
+	private String _getAssetPublisherURL(PortletRequest portletRequest)
 		throws Exception {
 
 		ThemeDisplay themeDisplay = (ThemeDisplay)portletRequest.getAttribute(
@@ -256,20 +258,20 @@ public class AssetRSSHelper {
 		return sb.toString();
 	}
 
-	protected String getEntryURL(
+	private String _getEntryURL(
 			PortletRequest portletRequest, PortletResponse portletResponse,
 			String linkBehavior, AssetEntry assetEntry)
 		throws Exception {
 
 		if (linkBehavior.equals("viewInPortlet")) {
-			return getEntryURLViewInContext(
+			return _getEntryURLViewInContext(
 				portletRequest, portletResponse, assetEntry);
 		}
 
-		return getEntryURLAssetPublisher(portletRequest, assetEntry);
+		return _getEntryURLAssetPublisher(portletRequest, assetEntry);
 	}
 
-	protected String getEntryURLAssetPublisher(
+	private String _getEntryURLAssetPublisher(
 			PortletRequest portletRequest, AssetEntry assetEntry)
 		throws Exception {
 
@@ -278,11 +280,11 @@ public class AssetRSSHelper {
 				assetEntry.getClassName());
 
 		return StringBundler.concat(
-			getAssetPublisherURL(portletRequest),
+			_getAssetPublisherURL(portletRequest),
 			assetRendererFactory.getType(), "/id/", assetEntry.getEntryId());
 	}
 
-	protected String getEntryURLViewInContext(
+	private String _getEntryURLViewInContext(
 		PortletRequest portletRequest, PortletResponse portletResponse,
 		AssetEntry assetEntry) {
 
@@ -305,10 +307,8 @@ public class AssetRSSHelper {
 		return assetViewURL;
 	}
 
-	protected String getFeedURL(PortletRequest portletRequest)
-		throws Exception {
-
-		String feedURL = getAssetPublisherURL(portletRequest);
+	private String _getFeedURL(PortletRequest portletRequest) throws Exception {
+		String feedURL = _getAssetPublisherURL(portletRequest);
 
 		return feedURL.concat("rss");
 	}

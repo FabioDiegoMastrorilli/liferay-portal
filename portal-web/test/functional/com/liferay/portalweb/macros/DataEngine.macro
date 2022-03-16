@@ -87,7 +87,8 @@ definition {
 
 		for (var fieldName : list "${fieldNameList}") {
 			if ("${index}" == "1") {
-				firstFieldLabel = "${fieldName}";
+				var firstFieldLabel = "${fieldName}";
+
 				DataEngine.addField(
 					fieldFieldLabel = "${fieldName}",
 					fieldName = "${fieldName}");
@@ -105,7 +106,7 @@ definition {
 					targetFieldGroupLabel = "Fields Group");
 			}
 
-			if ("${fieldName}" == "Select from List" || "${fieldName}" == "Single Selection" || "${fieldName}" == "Multiple Selection") {
+			if (("${fieldName}" == "Select from List") || ("${fieldName}" == "Single Selection") || ("${fieldName}" == "Multiple Selection")) {
 				for (var i : list "1,2,3") {
 					DataEngine.addFieldOption(
 						fieldFieldLabel = "${fieldName}",
@@ -515,7 +516,7 @@ definition {
 		MenuItem.click(menuItem = "Edit");
 
 		for (var locale : list "${localeList}") {
-			PortletEntry.changeLocale(
+			DataEngine.changeLocale(
 				locale = "${locale}",
 				modal = "true");
 
@@ -697,6 +698,39 @@ definition {
 				key_optionLabel = "${optionLabel}",
 				locator1 = "DataEngineBuilder#OPTIONS_SWITCH_INDEXED",
 				optionIndex = "${optionIndex}");
+		}
+	}
+
+	macro changeLocale {
+		Portlet.waitForForm();
+
+		if (isSet(fieldName)) {
+			Click.clickNoMouseOver(
+				key_fieldName = "${fieldName}",
+				locator1 = "Button#LOCALIZATION");
+		}
+		else if (isSet(friendlyURLHistory)) {
+			Click.clickNoMouseOver(locator1 = "Icon#FRIENDLY_URL_HISTORY_LOCALIZATION");
+		}
+		else if (isSet(modal)) {
+			Click(locator1 = "Modal#LOCALIZATION_DROPDOWN_TOGGLE");
+		}
+		else {
+			Click.clickNoMouseOver(locator1 = "Button#LOCALIZATION_GENERIC");
+		}
+
+		if (isSet(localizedFriendlyURL)) {
+			Click.clickNoMouseOver(locator1 = "Icon#FRIENDLY_URL_HISTORY_SPANISH_LOCALIZATION");
+		}
+		else if (isSet(modal)) {
+			Click(
+				key_locale = "${locale}",
+				locator1 = "DataEngineBuilder#DROPDOWN_MENU_ITEM");
+		}
+		else {
+			Click(
+				key_locale = "${locale}",
+				locator1 = "Translation#LOCALIZATION_NAME");
 		}
 	}
 
@@ -1165,6 +1199,8 @@ definition {
 			key_optionValue = "${fieldLineType}",
 			locator1 = "WCEditWebContent#SELECTION_OPTION");
 
+		Pause(locator1 = "2000");
+
 		Click(locator1 = "Sidebar#BACK");
 	}
 
@@ -1302,10 +1338,6 @@ definition {
 			Click(
 				index = "${index}",
 				locator1 = "DataEngineBuilder#OPTION_REMOVE_BUTTON_INDEXED");
-		}
-
-		if (isSet(fieldFieldLabel)) {
-			Click(locator1 = "Sidebar#BACK");
 		}
 	}
 
@@ -1599,6 +1631,7 @@ definition {
 		AssertVisible(
 			key_fieldsetLabel = "${fieldsetName}",
 			locator1 = "DDMEditStructure#FORM_FIELD_SETS_CONTAINER_LABEL");
+
 		for (var fieldName : list "${fieldNameList}") {
 			AssertVisible(
 				key_fieldFieldLabel = "${fieldName}",
@@ -1683,6 +1716,17 @@ definition {
 			locator1 = "DataEngineBuilder#OPTION_SELECTED");
 
 		Click(locator1 = "Sidebar#BACK");
+	}
+
+	macro waitForAutoSave {
+		Pause(locator1 = "3000");
+
+		if (IsElementPresent(locator1 = "Button#PUBLISH")) {
+			Button.clickPublish();
+		}
+		else if (IsElementPresent(locator1 = "Button#SAVE")) {
+			Button.clickSave();
+		}
 	}
 
 }

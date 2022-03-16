@@ -16,6 +16,7 @@ import {
 	generateInstanceId,
 	getFieldProperties,
 	localizeField,
+	updateInputMaskProperties,
 } from '../../utils/fieldSupport';
 import {generateName, getRepeatedIndex} from '../../utils/repeatable.es';
 import {PagesVisitor} from '../../utils/visitors.es';
@@ -70,7 +71,10 @@ const getLocalizedValue = ({
 	const defaultValue = localizedValue[defaultLanguageId];
 
 	if (localizedValue) {
-		if (localizedValue[editingLanguageId] != null) {
+		if (
+			localizedValue[editingLanguageId] !== null &&
+			localizedValue[editingLanguageId] !== undefined
+		) {
 			if (
 				Array.isArray(localizedValue[editingLanguageId]) &&
 				!localizedValue[editingLanguageId]?.length &&
@@ -226,7 +230,7 @@ const removeLanguageFromForm = (focusedField, pages, ...deletedLanguageIds) => {
  * NOTE: This is a literal copy of the old LayoutProvider logic. Small changes
  * were made only to adapt to the reducer.
  */
-export default (state, action) => {
+export default function languageReducer(state, action) {
 	switch (action.type) {
 		case EVENT_TYPES.LANGUAGE.CHANGE: {
 			const {
@@ -259,7 +263,7 @@ export default (state, action) => {
 					// the fields in the settingsContext structure.
 
 					if (field.settingsContext) {
-						let newField = {
+						const newField = {
 							...field,
 							...updateFieldLanguage({
 								...field,
@@ -270,31 +274,10 @@ export default (state, action) => {
 							value: previousValue,
 						};
 
-						if (field.numericInputMask) {
-							const visitor = new PagesVisitor(
-								field.settingsContext.pages
-							);
-							let numericInputMask = {};
-							visitor.mapFields((field) => {
-								if (field.fieldName === 'numericInputMask') {
-									numericInputMask =
-										field.localizedValue[editingLanguageId];
-									newField = {
-										...newField,
-										...numericInputMask,
-									};
-								}
-							});
-
-							field.settingsContext.pages = visitor.mapFields(
-								(field) => {
-									return field.fieldName === 'predefinedValue'
-										? {
-												...field,
-												...numericInputMask,
-										  }
-										: field;
-								}
+						if (newField.inputMask) {
+							updateInputMaskProperties(
+								editingLanguageId,
+								newField
 							);
 						}
 
@@ -384,4 +367,4 @@ export default (state, action) => {
 		default:
 			return state;
 	}
-};
+}

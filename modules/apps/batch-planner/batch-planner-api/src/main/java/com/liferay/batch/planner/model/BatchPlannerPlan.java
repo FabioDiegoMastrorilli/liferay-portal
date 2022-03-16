@@ -62,4 +62,16 @@ public interface BatchPlannerPlan
 
 	public BatchPlannerLog fetchBatchPlannerLog();
 
+	public BatchPlannerPolicy fetchBatchPlannerPolicy(String name);
+
+	public BatchPlannerLog getBatchPlannerLog()
+		throws com.liferay.portal.kernel.exception.PortalException;
+
+	public java.util.List<BatchPlannerMapping> getBatchPlannerMappings();
+
+	public java.util.List<BatchPlannerPolicy> getBatchPlannerPolicies();
+
+	public BatchPlannerPolicy getBatchPlannerPolicy(String name)
+		throws com.liferay.portal.kernel.exception.PortalException;
+
 }

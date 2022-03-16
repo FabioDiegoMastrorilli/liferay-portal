@@ -21,6 +21,16 @@
 	<td></td>
 </tr>
 <tr>
+	<td>APPLICATION_SEARCH_FIELD_WIDGET_SEARCH_REMOTE_APP</td>
+	<td>//div[contains(@class,'sidebar-body__add-panel')]//div[contains(@class, 'text-truncate title')][contains(text(),'${key_remoteAppName}')]</td>
+	<td></td>
+</tr>
+<tr>
+	<td>REMOTE_APP_PROPERTY_HTML</td>
+	<td>//${key_customElementHtmlName}[contains(@test-data-user,'${key_customElementProperty}')]</td>
+	<td></td>
+</tr>
+<tr>
 	<td>REMOTE_TABLE_DELETE</td>
 	<td>//a[contains(@class,'dropdown-item') and contains(.,'Delete')]</td>
 	<td></td>
@@ -46,6 +56,11 @@
 	<td></td>
 </tr>
 <tr>
+	<td>TABLE_ENTRY_STATUS_REMOTE_TABLE</td>
+	<td>//div[contains(@class,'dnd-td')]//*[contains(@class,'workflow-status') and contains(.,'${key_tableEntryStatus}')]</td>
+	<td></td>
+</tr>
+<tr>
 	<td>TABLE_ENTRY_URL</td>
 	<td>//table//tbody//td[contains(text(),'${key_tableEntryURL}')]</td>
 	<td></td>
@@ -53,6 +68,16 @@
 <tr>
 	<td>TABLE_ENTRY_URL_REMOTE_TABLE</td>
 	<td>//div[contains(@class,'dnd-td') and contains(text(),'${key_tableEntryURL}')]</td>
+	<td></td>
+</tr>
+<tr>
+	<td>VANILLA_COUNTER_PAGE_COLUMN_N</td>
+	<td>//div[contains(@id,'main-content')]//div[contains(@class, 'col')]['${column_number}']//vanilla-counter</td>
+	<td></td>
+</tr>
+<tr>
+	<td>VANILLA_COUNTER_REMOTE_APP</td>
+	<td>//vanilla-counter</td>
 	<td></td>
 </tr>
 </tbody>

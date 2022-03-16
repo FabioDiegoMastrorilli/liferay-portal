@@ -1,0 +1,92 @@
+{
+	"label": {
+		"en_US": "Testray Build"
+	},
+	"name": "TestrayBuild",
+	"objectFields": [
+		{
+			"indexed": false,
+			"indexedAsKeyword": false,
+			"label": {
+				"en_US": "Name"
+			},
+			"name": "name",
+			"required": false,
+			"type": "String"
+		},
+		{
+			"indexed": false,
+			"indexedAsKeyword": false,
+			"label": {
+				"en_US": "Description"
+			},
+			"name": "description",
+			"required": false,
+			"type": "String"
+		},
+		{
+			"indexed": false,
+			"indexedAsKeyword": false,
+			"label": {
+				"en_US": "Template"
+			},
+			"name": "template",
+			"required": false,
+			"type": "Boolean"
+		},
+		{
+			"indexed": false,
+			"indexedAsKeyword": false,
+			"label": {
+				"en_US": "Date"
+			},
+			"name": "dueDate",
+			"required": false,
+			"type": "Date"
+		},
+		{
+			"indexed": false,
+			"indexedAsKeyword": false,
+			"label": {
+				"en_US": "Git Hash"
+			},
+			"name": "gitHash",
+			"required": false,
+			"type": "String"
+		},
+		{
+			"indexed": false,
+			"indexedAsKeyword": false,
+			"label": {
+				"en_US": "Git Hub Compare URLs"
+			},
+			"name": "githubCompareURLs",
+			"required": false,
+			"type": "String"
+		},
+		{
+			"indexed": false,
+			"indexedAsKeyword": false,
+			"label": {
+				"en_US": "Promoted"
+			},
+			"name": "promoted",
+			"required": false,
+			"type": "Boolean"
+		},
+		{
+			"indexed": false,
+			"indexedAsKeyword": false,
+			"label": {
+				"en_US": "Status"
+			},
+			"name": "dueStatus",
+			"required": false,
+			"type": "Integer"
+		}
+	],
+	"pluralLabel": {
+		"en_US": "Testray Builds"
+	},
+	"scope": "company"
+}

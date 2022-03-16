@@ -14,7 +14,6 @@
 
 package com.liferay.layout.page.template.internal.upgrade.v3_2_0;
 
-import com.liferay.layout.page.template.internal.upgrade.v2_0_0.util.LayoutPageTemplateCollectionTable;
 import com.liferay.petra.string.CharPool;
 import com.liferay.portal.kernel.dao.jdbc.AutoBatchPreparedStatementUtil;
 import com.liferay.portal.kernel.upgrade.UpgradeProcess;
@@ -22,7 +21,6 @@ import com.liferay.portal.kernel.util.StringUtil;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.sql.Statement;
 
 /**
@@ -33,12 +31,22 @@ public class LayoutPageTemplateCollectionUpgradeProcess extends UpgradeProcess {
 	@Override
 	protected void doUpgrade() throws Exception {
 		upgradeSchema();
-		upgradeLayoutPageTemplateCollectionKey();
+		_upgradeLayoutPageTemplateCollectionKey();
 	}
 
-	protected void upgradeLayoutPageTemplateCollectionKey()
-		throws SQLException {
+	protected void upgradeSchema() throws Exception {
+		alterTableAddColumn(
+			"LayoutPageTemplateCollection", "lptCollectionKey", "VARCHAR(75)");
+	}
 
+	private String _generateLayoutPageTemplateCollectionKey(String name) {
+		return StringUtil.replace(
+			StringUtil.toLowerCase(name.trim()),
+			new char[] {CharPool.FORWARD_SLASH, CharPool.SPACE},
+			new char[] {CharPool.DASH, CharPool.DASH});
+	}
+
+	private void _upgradeLayoutPageTemplateCollectionKey() throws Exception {
 		try (Statement s = connection.createStatement();
 			ResultSet resultSet = s.executeQuery(
 				"select layoutPageTemplateCollectionId, name from " +
@@ -66,19 +74,6 @@ public class LayoutPageTemplateCollectionUpgradeProcess extends UpgradeProcess {
 
 			preparedStatement.executeBatch();
 		}
-	}
-
-	protected void upgradeSchema() throws Exception {
-		alter(
-			LayoutPageTemplateCollectionTable.class,
-			new AlterTableAddColumn("lptCollectionKey", "VARCHAR(75)"));
-	}
-
-	private String _generateLayoutPageTemplateCollectionKey(String name) {
-		return StringUtil.replace(
-			StringUtil.toLowerCase(name.trim()),
-			new char[] {CharPool.FORWARD_SLASH, CharPool.SPACE},
-			new char[] {CharPool.DASH, CharPool.DASH});
 	}
 
 }

@@ -27,6 +27,10 @@ public class AccountGroupLocalServiceWrapper
 	implements AccountGroupLocalService,
 			   ServiceWrapper<AccountGroupLocalService> {
 
+	public AccountGroupLocalServiceWrapper() {
+		this(null);
+	}
+
 	public AccountGroupLocalServiceWrapper(
 		AccountGroupLocalService accountGroupLocalService) {
 
@@ -100,10 +104,12 @@ public class AccountGroupLocalServiceWrapper
 	 *
 	 * @param accountGroup the account group
 	 * @return the account group that was removed
+	 * @throws PortalException
 	 */
 	@Override
 	public com.liferay.account.model.AccountGroup deleteAccountGroup(
-		com.liferay.account.model.AccountGroup accountGroup) {
+			com.liferay.account.model.AccountGroup accountGroup)
+		throws com.liferay.portal.kernel.exception.PortalException {
 
 		return _accountGroupLocalService.deleteAccountGroup(accountGroup);
 	}
@@ -418,6 +424,18 @@ public class AccountGroupLocalServiceWrapper
 
 		return _accountGroupLocalService.searchAccountGroups(
 			companyId, keywords, start, end, orderByComparator);
+	}
+
+	@Override
+	public com.liferay.portal.kernel.search.BaseModelSearchResult
+		<com.liferay.account.model.AccountGroup> searchAccountGroups(
+			long companyId, String keywords,
+			java.util.LinkedHashMap<String, Object> params, int start, int end,
+			com.liferay.portal.kernel.util.OrderByComparator
+				<com.liferay.account.model.AccountGroup> orderByComparator) {
+
+		return _accountGroupLocalService.searchAccountGroups(
+			companyId, keywords, params, start, end, orderByComparator);
 	}
 
 	/**

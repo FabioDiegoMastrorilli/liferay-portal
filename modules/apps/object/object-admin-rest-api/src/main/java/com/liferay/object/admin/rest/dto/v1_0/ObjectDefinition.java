@@ -20,6 +20,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import com.liferay.petra.function.UnsafeSupplier;
 import com.liferay.petra.string.StringBundler;
+import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.vulcan.graphql.annotation.GraphQLField;
 import com.liferay.portal.vulcan.graphql.annotation.GraphQLName;
 import com.liferay.portal.vulcan.util.ObjectMapperUtil;
@@ -316,6 +317,35 @@ public class ObjectDefinition implements Serializable {
 
 	@Schema
 	@Valid
+	public ObjectLayout[] getObjectLayouts() {
+		return objectLayouts;
+	}
+
+	public void setObjectLayouts(ObjectLayout[] objectLayouts) {
+		this.objectLayouts = objectLayouts;
+	}
+
+	@JsonIgnore
+	public void setObjectLayouts(
+		UnsafeSupplier<ObjectLayout[], Exception> objectLayoutsUnsafeSupplier) {
+
+		try {
+			objectLayouts = objectLayoutsUnsafeSupplier.get();
+		}
+		catch (RuntimeException re) {
+			throw re;
+		}
+		catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	@GraphQLField
+	@JsonProperty(access = JsonProperty.Access.READ_WRITE)
+	protected ObjectLayout[] objectLayouts;
+
+	@Schema
+	@Valid
 	public ObjectRelationship[] getObjectRelationships() {
 		return objectRelationships;
 	}
@@ -345,6 +375,35 @@ public class ObjectDefinition implements Serializable {
 	@GraphQLField
 	@JsonProperty(access = JsonProperty.Access.READ_WRITE)
 	protected ObjectRelationship[] objectRelationships;
+
+	@Schema
+	@Valid
+	public ObjectView[] getObjectViews() {
+		return objectViews;
+	}
+
+	public void setObjectViews(ObjectView[] objectViews) {
+		this.objectViews = objectViews;
+	}
+
+	@JsonIgnore
+	public void setObjectViews(
+		UnsafeSupplier<ObjectView[], Exception> objectViewsUnsafeSupplier) {
+
+		try {
+			objectViews = objectViewsUnsafeSupplier.get();
+		}
+		catch (RuntimeException re) {
+			throw re;
+		}
+		catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	@GraphQLField
+	@JsonProperty(access = JsonProperty.Access.READ_WRITE)
+	protected ObjectView[] objectViews;
 
 	@Schema
 	public String getPanelAppOrder() {
@@ -433,6 +492,34 @@ public class ObjectDefinition implements Serializable {
 	protected Map<String, String> pluralLabel;
 
 	@Schema
+	public Boolean getPortlet() {
+		return portlet;
+	}
+
+	public void setPortlet(Boolean portlet) {
+		this.portlet = portlet;
+	}
+
+	@JsonIgnore
+	public void setPortlet(
+		UnsafeSupplier<Boolean, Exception> portletUnsafeSupplier) {
+
+		try {
+			portlet = portletUnsafeSupplier.get();
+		}
+		catch (RuntimeException re) {
+			throw re;
+		}
+		catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	@GraphQLField
+	@JsonProperty(access = JsonProperty.Access.READ_WRITE)
+	protected Boolean portlet;
+
+	@Schema
 	public String getScope() {
 		return scope;
 	}
@@ -516,6 +603,34 @@ public class ObjectDefinition implements Serializable {
 	@GraphQLField
 	@JsonProperty(access = JsonProperty.Access.READ_ONLY)
 	protected Boolean system;
+
+	@Schema
+	public Long getTitleObjectFieldId() {
+		return titleObjectFieldId;
+	}
+
+	public void setTitleObjectFieldId(Long titleObjectFieldId) {
+		this.titleObjectFieldId = titleObjectFieldId;
+	}
+
+	@JsonIgnore
+	public void setTitleObjectFieldId(
+		UnsafeSupplier<Long, Exception> titleObjectFieldIdUnsafeSupplier) {
+
+		try {
+			titleObjectFieldId = titleObjectFieldIdUnsafeSupplier.get();
+		}
+		catch (RuntimeException re) {
+			throw re;
+		}
+		catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	@GraphQLField
+	@JsonProperty(access = JsonProperty.Access.READ_WRITE)
+	protected Long titleObjectFieldId;
 
 	@Override
 	public boolean equals(Object object) {
@@ -669,6 +784,26 @@ public class ObjectDefinition implements Serializable {
 			sb.append("]");
 		}
 
+		if (objectLayouts != null) {
+			if (sb.length() > 1) {
+				sb.append(", ");
+			}
+
+			sb.append("\"objectLayouts\": ");
+
+			sb.append("[");
+
+			for (int i = 0; i < objectLayouts.length; i++) {
+				sb.append(String.valueOf(objectLayouts[i]));
+
+				if ((i + 1) < objectLayouts.length) {
+					sb.append(", ");
+				}
+			}
+
+			sb.append("]");
+		}
+
 		if (objectRelationships != null) {
 			if (sb.length() > 1) {
 				sb.append(", ");
@@ -682,6 +817,26 @@ public class ObjectDefinition implements Serializable {
 				sb.append(String.valueOf(objectRelationships[i]));
 
 				if ((i + 1) < objectRelationships.length) {
+					sb.append(", ");
+				}
+			}
+
+			sb.append("]");
+		}
+
+		if (objectViews != null) {
+			if (sb.length() > 1) {
+				sb.append(", ");
+			}
+
+			sb.append("\"objectViews\": ");
+
+			sb.append("[");
+
+			for (int i = 0; i < objectViews.length; i++) {
+				sb.append(String.valueOf(objectViews[i]));
+
+				if ((i + 1) < objectViews.length) {
 					sb.append(", ");
 				}
 			}
@@ -727,6 +882,16 @@ public class ObjectDefinition implements Serializable {
 			sb.append(_toJSON(pluralLabel));
 		}
 
+		if (portlet != null) {
+			if (sb.length() > 1) {
+				sb.append(", ");
+			}
+
+			sb.append("\"portlet\": ");
+
+			sb.append(portlet);
+		}
+
 		if (scope != null) {
 			if (sb.length() > 1) {
 				sb.append(", ");
@@ -761,6 +926,16 @@ public class ObjectDefinition implements Serializable {
 			sb.append(system);
 		}
 
+		if (titleObjectFieldId != null) {
+			if (sb.length() > 1) {
+				sb.append(", ");
+			}
+
+			sb.append("\"titleObjectFieldId\": ");
+
+			sb.append(titleObjectFieldId);
+		}
+
 		sb.append("}");
 
 		return sb.toString();
@@ -774,9 +949,9 @@ public class ObjectDefinition implements Serializable {
 	public String xClassName;
 
 	private static String _escape(Object object) {
-		String string = String.valueOf(object);
-
-		return string.replaceAll("\"", "\\\\\"");
+		return StringUtil.replace(
+			String.valueOf(object), _JSON_ESCAPE_STRINGS[0],
+			_JSON_ESCAPE_STRINGS[1]);
 	}
 
 	private static boolean _isArray(Object value) {
@@ -802,7 +977,7 @@ public class ObjectDefinition implements Serializable {
 			Map.Entry<String, ?> entry = iterator.next();
 
 			sb.append("\"");
-			sb.append(entry.getKey());
+			sb.append(_escape(entry.getKey()));
 			sb.append("\": ");
 
 			Object value = entry.getValue();
@@ -834,7 +1009,7 @@ public class ObjectDefinition implements Serializable {
 			}
 			else if (value instanceof String) {
 				sb.append("\"");
-				sb.append(value);
+				sb.append(_escape(value));
 				sb.append("\"");
 			}
 			else {
@@ -850,5 +1025,10 @@ public class ObjectDefinition implements Serializable {
 
 		return sb.toString();
 	}
+
+	private static final String[][] _JSON_ESCAPE_STRINGS = {
+		{"\\", "\"", "\b", "\f", "\n", "\r", "\t"},
+		{"\\\\", "\\\"", "\\b", "\\f", "\\n", "\\r", "\\t"}
+	};
 
 }

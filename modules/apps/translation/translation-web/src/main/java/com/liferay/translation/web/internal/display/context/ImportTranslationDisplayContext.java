@@ -14,13 +14,17 @@
 
 package com.liferay.translation.web.internal.display.context;
 
-import com.liferay.info.item.provider.InfoItemWorkflowProvider;
 import com.liferay.petra.portlet.url.builder.PortletURLBuilder;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.portlet.LiferayPortletResponse;
+import com.liferay.portal.kernel.service.WorkflowDefinitionLinkLocalService;
 import com.liferay.portal.kernel.util.ParamUtil;
+import com.liferay.portal.kernel.util.PortalUtil;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.kernel.workflow.WorkflowConstants;
+import com.liferay.translation.model.TranslationEntry;
+import com.liferay.translation.service.TranslationEntryLocalService;
+import com.liferay.translation.web.internal.configuration.FFBulkTranslationConfiguration;
 
 import javax.portlet.PortletURL;
 
@@ -32,20 +36,24 @@ import javax.servlet.http.HttpServletRequest;
 public class ImportTranslationDisplayContext {
 
 	public ImportTranslationDisplayContext(
-		long classNameId, long classPK, long groupId,
-		HttpServletRequest httpServletRequest,
-		InfoItemWorkflowProvider<Object> infoItemWorkflowProvider,
-		LiferayPortletResponse liferayPortletResponse, Object model,
-		String title) {
+		long classNameId, long classPK, long companyId,
+		FFBulkTranslationConfiguration ffBulkTranslationConfiguration,
+		long groupId, HttpServletRequest httpServletRequest,
+		LiferayPortletResponse liferayPortletResponse, String title,
+		TranslationEntryLocalService translationEntryLocalService,
+		WorkflowDefinitionLinkLocalService workflowDefinitionLinkLocalService) {
 
 		_classNameId = classNameId;
 		_classPK = classPK;
+		_companyId = companyId;
+		_ffBulkTranslationConfiguration = ffBulkTranslationConfiguration;
 		_groupId = groupId;
 		_httpServletRequest = httpServletRequest;
-		_infoItemWorkflowProvider = infoItemWorkflowProvider;
 		_liferayPortletResponse = liferayPortletResponse;
-		_model = model;
 		_title = title;
+		_translationEntryLocalService = translationEntryLocalService;
+		_workflowDefinitionLinkLocalService =
+			workflowDefinitionLinkLocalService;
 	}
 
 	public PortletURL getImportTranslationURL() throws PortalException {
@@ -65,13 +73,13 @@ public class ImportTranslationDisplayContext {
 	}
 
 	public String getPublishButtonLabel() throws PortalException {
-		if ((_infoItemWorkflowProvider == null) ||
-			!_infoItemWorkflowProvider.isWorkflowEnabled(_model)) {
+		if (_workflowDefinitionLinkLocalService.hasWorkflowDefinitionLink(
+				_companyId, _groupId, TranslationEntry.class.getName())) {
 
-			return "publish";
+			return "submit-for-publication";
 		}
 
-		return "submit-for-publication";
+		return "publish";
 	}
 
 	public String getRedirect() {
@@ -85,16 +93,8 @@ public class ImportTranslationDisplayContext {
 	}
 
 	public String getSaveButtonLabel() {
-		if (_infoItemWorkflowProvider == null) {
-			return "save";
-		}
-
-		int status = _infoItemWorkflowProvider.getStatus(_model);
-
-		if ((status == WorkflowConstants.STATUS_APPROVED) ||
-			(status == WorkflowConstants.STATUS_DRAFT) ||
-			(status == WorkflowConstants.STATUS_EXPIRED) ||
-			(status == WorkflowConstants.STATUS_SCHEDULED)) {
+		if (_workflowDefinitionLinkLocalService.hasWorkflowDefinitionLink(
+				_companyId, _groupId, TranslationEntry.class.getName())) {
 
 			return "save-as-draft";
 		}
@@ -106,16 +106,36 @@ public class ImportTranslationDisplayContext {
 		return _title;
 	}
 
-	public boolean isPending() throws PortalException {
-		if ((_infoItemWorkflowProvider == null) ||
-			!_infoItemWorkflowProvider.isWorkflowEnabled(_model)) {
+	public boolean isBulkTranslationEnabled() {
+		return _ffBulkTranslationConfiguration.enabled();
+	}
 
+	public boolean isPending() throws PortalException {
+		if (_workflowDefinitionLinkLocalService.hasWorkflowDefinitionLink(
+				_companyId, _groupId, TranslationEntry.class.getName()) &&
+			_isAnyTranslationPending()) {
+
+			return true;
+		}
+
+		return false;
+	}
+
+	private boolean _isAnyTranslationPending() {
+		if (_classPK == 0) {
 			return false;
 		}
 
-		if (_infoItemWorkflowProvider.getStatus(_model) ==
-				WorkflowConstants.STATUS_PENDING) {
+		int translationEntriesCount =
+			_translationEntryLocalService.getTranslationEntriesCount(
+				PortalUtil.getClassName(_classNameId), _classPK,
+				new int[] {
+					WorkflowConstants.STATUS_APPROVED,
+					WorkflowConstants.STATUS_DRAFT
+				},
+				true);
 
+		if (translationEntriesCount > 0) {
 			return true;
 		}
 
@@ -124,12 +144,16 @@ public class ImportTranslationDisplayContext {
 
 	private final long _classNameId;
 	private final long _classPK;
+	private final long _companyId;
+	private final FFBulkTranslationConfiguration
+		_ffBulkTranslationConfiguration;
 	private final long _groupId;
 	private final HttpServletRequest _httpServletRequest;
-	private final InfoItemWorkflowProvider<Object> _infoItemWorkflowProvider;
 	private final LiferayPortletResponse _liferayPortletResponse;
-	private final Object _model;
 	private String _redirect;
 	private final String _title;
+	private final TranslationEntryLocalService _translationEntryLocalService;
+	private final WorkflowDefinitionLinkLocalService
+		_workflowDefinitionLinkLocalService;
 
 }

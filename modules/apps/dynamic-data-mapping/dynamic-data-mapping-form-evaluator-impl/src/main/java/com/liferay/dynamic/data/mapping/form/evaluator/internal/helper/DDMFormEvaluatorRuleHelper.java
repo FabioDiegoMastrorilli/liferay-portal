@@ -18,13 +18,9 @@ import com.liferay.dynamic.data.mapping.expression.UpdateFieldPropertyRequest;
 import com.liferay.dynamic.data.mapping.form.evaluator.internal.expression.DDMFormEvaluatorExpressionObserver;
 import com.liferay.dynamic.data.mapping.model.DDMFormField;
 import com.liferay.dynamic.data.mapping.model.DDMFormRule;
-import com.liferay.dynamic.data.mapping.model.LocalizedValue;
-import com.liferay.petra.string.StringPool;
-import com.liferay.portal.kernel.util.GetterUtil;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Stream;
@@ -54,43 +50,15 @@ public class DDMFormEvaluatorRuleHelper {
 	protected void checkFieldAffectedByAction(
 		DDMFormRule ddmFormRule, DDMFormField ddmFormField) {
 
-		checkFieldAffectedByCalculateAction(ddmFormRule, ddmFormField);
-		checkFieldAffectedBySetReadOnlyAction(ddmFormRule, ddmFormField);
-		checkFieldAffectedBySetRequiredAction(ddmFormRule, ddmFormField);
-		checkFieldAffectedBySetVisibleAction(ddmFormRule, ddmFormField);
+		_checkFieldAffectedBySetReadOnlyAction(ddmFormRule, ddmFormField);
+		_checkFieldAffectedBySetRequiredAction(ddmFormRule, ddmFormField);
+		_checkFieldAffectedBySetVisibleAction(ddmFormRule, ddmFormField);
 	}
 
-	protected void checkFieldAffectedByCalculateAction(
+	private void _checkFieldAffectedBySetReadOnlyAction(
 		DDMFormRule ddmFormRule, DDMFormField ddmFormField) {
 
-		if (containsAction(
-				ddmFormRule, "calculate", ddmFormField.getName(),
-				GetterUtil.getString(ddmFormField.getProperty("value")))) {
-
-			String newValue = StringPool.BLANK;
-
-			LocalizedValue predefinedValue = ddmFormField.getPredefinedValue();
-
-			if (predefinedValue != null) {
-				newValue = GetterUtil.getString(
-					predefinedValue.getString(
-						new Locale(
-							(String)ddmFormField.getProperty("locale"))));
-			}
-
-			UpdateFieldPropertyRequest.Builder builder =
-				UpdateFieldPropertyRequest.Builder.newBuilder(
-					ddmFormField.getName(), "value", newValue);
-
-			_ddmFormEvaluatorExpressionObserver.updateFieldProperty(
-				builder.build());
-		}
-	}
-
-	protected void checkFieldAffectedBySetReadOnlyAction(
-		DDMFormRule ddmFormRule, DDMFormField ddmFormField) {
-
-		if (containsAction(
+		if (_containsAction(
 				ddmFormRule, "setEnabled", ddmFormField.getName(),
 				!ddmFormField.isReadOnly())) {
 
@@ -104,10 +72,10 @@ public class DDMFormEvaluatorRuleHelper {
 		}
 	}
 
-	protected void checkFieldAffectedBySetRequiredAction(
+	private void _checkFieldAffectedBySetRequiredAction(
 		DDMFormRule ddmFormRule, DDMFormField ddmFormField) {
 
-		if (containsAction(
+		if (_containsAction(
 				ddmFormRule, "setRequired", ddmFormField.getName(),
 				ddmFormField.isRequired())) {
 
@@ -121,10 +89,10 @@ public class DDMFormEvaluatorRuleHelper {
 		}
 	}
 
-	protected void checkFieldAffectedBySetVisibleAction(
+	private void _checkFieldAffectedBySetVisibleAction(
 		DDMFormRule ddmFormRule, DDMFormField ddmFormField) {
 
-		if (containsAction(
+		if (_containsAction(
 				ddmFormRule, "setVisible", ddmFormField.getName(), true)) {
 
 			UpdateFieldPropertyRequest.Builder builder =
@@ -136,11 +104,11 @@ public class DDMFormEvaluatorRuleHelper {
 		}
 	}
 
-	protected boolean containsAction(
+	private boolean _containsAction(
 		DDMFormRule ddmFormRule, String functionName, String ddmFormFieldName,
-		Object defaultValue) {
+		boolean defaultValue) {
 
-		String setPropertyAction = String.format(
+		String setBooleanPropertyAction = String.format(
 			"%s('%s', %s)", functionName, ddmFormFieldName, defaultValue);
 
 		List<String> actions = ddmFormRule.getActions();
@@ -148,7 +116,7 @@ public class DDMFormEvaluatorRuleHelper {
 		Stream<String> stream = actions.stream();
 
 		return stream.anyMatch(
-			action -> Objects.equals(setPropertyAction, action));
+			action -> Objects.equals(setBooleanPropertyAction, action));
 	}
 
 	private final DDMFormEvaluatorExpressionObserver

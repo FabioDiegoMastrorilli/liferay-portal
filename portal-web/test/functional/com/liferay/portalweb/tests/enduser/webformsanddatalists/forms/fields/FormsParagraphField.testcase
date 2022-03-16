@@ -2,6 +2,8 @@
 definition {
 
 	property custom.properties = "minifier.enabled=true";
+	property osgi.module.configuration.file.names = "com.liferay.frontend.js.loader.modules.extender.internal.configuration.Details.config";
+	property osgi.module.configurations = "waitTimeout=&quot;15&quot;";
 	property portal.release = "true";
 	property portal.upstream = "true";
 	property testray.main.component.name = "Forms";
@@ -22,18 +24,19 @@ definition {
 			Navigator.openURL();
 
 			ProductMenu.gotoPortlet(
-				category = "Content &amp; Data",
+				category = "Content & Data",
 				portlet = "Forms");
 
 			FormsAdmin.teardownForms();
 
-			Page.tearDownCP();
+			PagesAdmin.tearDownCP();
 		}
 	}
 
 	@description = "LPS-64798 - Verify that adding the Paragraph Field does not prevent page navigation"
 	@priority = "4"
 	test CanBeAddedWithoutAffectingNavigation {
+		property portal.acceptance = "true";
 		property test.name.skip.portal.instance = "FormsParagraphField#CanBeAddedWithoutAffectingNavigation";
 		property testray.component.names = "Training";
 
@@ -52,107 +55,9 @@ definition {
 			fieldType = "Paragraph",
 			formPageNumber = "0");
 
-		var fieldParagraphField = FormFields.getFieldName();
+		Form.editFieldLabelMetal(fieldValue = "Paragraph 1");
 
-		FormFields.editParagraphBody(content = "Paragraph body text.");
-
-		Form.closeSidebar();
-
-		Form.addTextField(
-			fieldPositionNumber = "1",
-			formPageNumber = "0");
-
-		var fieldTextField = FormFields.getFieldName();
-
-		Form.editFieldLabelMetal(fieldValue = "SingleLineText");
-
-		Form.closeSidebar();
-
-		Form.addTextField(
-			fieldPositionNumber = "2",
-			formPageNumber = "0");
-
-		var fieldMultilineTextField = FormFields.getFieldName();
-
-		Form.editFieldLabelMetal(fieldValue = "MultilineText");
-
-		FormFields.selectTextFieldLineOption(textFieldLineOption = "Multiple Lines");
-
-		FormFields.enableSwitch(fieldName = "Required Field");
-
-		Form.closeSidebar();
-
-		Form.gotoAddField(
-			fieldPositionNumber = "3",
-			fieldType = "Select from List",
-			formPageNumber = "0");
-
-		var fieldSelectFromListField = FormFields.getFieldName();
-
-		Form.editFieldLabelMetal(fieldValue = "Select");
-
-		FormFields.editOptionsRow(
-			optionName = "Select1",
-			optionValue = "Select 1");
-
-		FormFields.editOptionsRow(
-			optionName = "Select2",
-			optionValue = "Select 2",
-			rowNumber = "2");
-
-		Form.closeSidebar();
-
-		Form.gotoAddField(
-			fieldPositionNumber = "4",
-			fieldType = "Single Selection",
-			formPageNumber = "0");
-
-		var fieldSingleSelectionField = FormFields.getFieldName();
-
-		Form.editFieldLabelMetal(fieldValue = "Radio");
-
-		FormFields.editOptionsRow(
-			optionName = "Option1",
-			optionValue = "Option 1");
-
-		FormFields.editOptionsRow(
-			optionName = "Option2",
-			optionValue = "Option 2",
-			rowNumber = "2");
-
-		FormFields.enableSwitch(fieldName = "Required Field");
-
-		Form.closeSidebar();
-
-		Form.gotoAddField(
-			fieldPositionNumber = "5",
-			fieldType = "Date",
-			formPageNumber = "0");
-
-		var fieldDateField = FormFields.getFieldName();
-
-		Form.closeSidebar();
-
-		Form.gotoAddField(
-			fieldPositionNumber = "6",
-			fieldType = "Multiple Selection",
-			formPageNumber = "0");
-
-		var fieldMultipleSelectionField = FormFields.getFieldName();
-
-		Form.editFieldLabelMetal(fieldValue = "Checkbox");
-
-		FormFields.editOptionsRow(
-			optionName = "Checkbox1",
-			optionValue = "Checkbox 1",
-			rowNumber = "1");
-
-		FormFields.editOptionsRow(
-			optionName = "Checkbox2",
-			optionValue = "Checkbox 2",
-			rowNumber = "2");
-
-		FormFields.enableSwitch(fieldName = "Required Field");
+		FormFields.editParagraphBody(content = "Paragraph body text 1.");
 
 		Form.closeSidebar();
 
@@ -164,26 +69,12 @@ definition {
 
 		Form.gotoAddField(
 			fieldPositionNumber = "0",
-			fieldType = "Grid",
+			fieldType = "Paragraph",
 			formPageNumber = "1");
 
-		var fieldGridField = FormFields.getFieldName();
+		Form.editFieldLabelMetal(fieldValue = "Paragraph 2");
 
-		Form.editFieldLabelMetal(fieldValue = "Grid Field Survey");
-
-		for (var optionNumber : list "1,2,3") {
-			FormFields.editGridOptions(
-				gridField = "Row",
-				optionValue = "Option ${optionNumber}",
-				rowNumber = "${optionNumber}");
-		}
-
-		for (var optionNumber : list "1,2,3") {
-			FormFields.editGridOptions(
-				gridField = "Column",
-				optionValue = "Category ${optionNumber}",
-				rowNumber = "${optionNumber}");
-		}
+		FormFields.editParagraphBody(content = "Paragraph body text 2.");
 
 		Form.closeSidebar();
 
@@ -195,34 +86,12 @@ definition {
 
 		Form.gotoAddField(
 			fieldPositionNumber = "0",
-			fieldType = "Upload",
+			fieldType = "Paragraph",
 			formPageNumber = "2");
 
-		var fieldUploadField = FormFields.getFieldName();
+		Form.editFieldLabelMetal(fieldValue = "Paragraph 3");
 
-		Form.editFieldLabelMetal(
-			fieldPositionNumber = "0",
-			fieldValue = "Upload Field");
-
-		Form.closeSidebar();
-
-		Form.gotoAddField(
-			fieldPositionNumber = "1",
-			fieldType = "Numeric",
-			formPageNumber = "2");
-
-		var fieldNumericField = FormFields.getFieldName();
-
-		Form.editFieldLabelMetal(fieldValue = "Value");
-
-		Form.closeSidebar();
-
-		Form.gotoAddField(
-			fieldPositionNumber = "2",
-			fieldType = "Color",
-			formPageNumber = "2");
-
-		var colorFieldName = FormFields.getFieldName();
+		FormFields.editParagraphBody(content = "Paragraph body text 3.");
 
 		Form.closeSidebar();
 
@@ -232,7 +101,7 @@ definition {
 			category = "Site Builder",
 			portlet = "Pages");
 
-		SitePages.addPublicPage(pageName = "Form Page");
+		PagesAdmin.addPublicPage(pageName = "Form Page");
 
 		Navigator.gotoPage(pageName = "Form Page");
 
@@ -250,151 +119,27 @@ definition {
 
 		FormPortlet.waitFormRenderer(text = "Next");
 
-		FormFields.viewParagraphField(
-			fieldName = "${fieldParagraphField}",
-			fieldTitle = "Paragraph",
-			fieldValue = "Paragraph body text.");
-
-		FormFields.editText(
-			fieldName = "${fieldTextField}",
-			fieldValue = "Single Line Text");
-
-		FormFields.editTextMultiline(
-			fieldName = "${fieldMultilineTextField}",
-			fieldValue = "Multiline Text");
-
-		FormFields.selectSelectOption(
-			fieldName = "${fieldSelectFromListField}",
-			selectOption = "Select 1");
-
-		FormFields.selectRadioOption(
-			fieldName = "${fieldSingleSelectionField}",
-			radioOption = "Option 1");
-
-		FormFields.editDate(
-			fieldName = "${fieldDateField}",
-			fieldValue = "05/02/2016");
-
-		FormFields.selectCheckboxOption(
-			checkboxOption = "Checkbox 1",
-			fieldName = "${fieldMultipleSelectionField}");
+		FormFields.viewParagraphFieldTextBody(fieldValue = "Paragraph body text 1.");
 
 		FormPortlet.nextPage(
 			formPageCurrent = "Page 1",
 			formPageNext = "Page 2");
 
-		for (var optionNumber : list "1,2,3") {
-			FormFields.selectGridRadioOption(
-				categoryColumnName = "Category ${optionNumber}",
-				fieldName = "${fieldGridField}",
-				optionNumber = "${optionNumber}",
-				optionRowName = "Option ${optionNumber}");
-		}
+		FormFields.viewParagraphFieldTextBody(fieldValue = "Paragraph body text 2.");
 
 		FormPortlet.nextPage(
 			formPageCurrent = "Page 2",
 			formPageNext = "Page 3");
 
-		FormFields.viewUploadField(
-			fieldLabel = "Upload Field",
-			fieldName = "${fieldUploadField}");
-
-		ItemSelector.gotoItemSelectorViaSelectButton();
-
-		ItemSelector.uploadFile(
-			navTab = "Documents and Media",
-			uploadFileName = "Document_1.jpg");
-
-		FormFields.editColor(
-			colorSwatchItem = "2BA676",
-			fieldLabel = "Color");
+		FormFields.viewParagraphFieldTextBody(fieldValue = "Paragraph body text 3.");
 
 		FormPortlet.submitSuccessfully();
-
-		Navigator.openURL();
-
-		ProductMenu.gotoPortlet(
-			category = "Content & Data",
-			portlet = "Forms");
-
-		FormsAdminNavigator.gotoViewEntries();
-
-		FormsAdmin.viewFormTableEntry(
-			fieldLabel = "Status",
-			fieldValue = "Approved");
-
-		FormsAdminNavigator.gotoView();
-
-		FormFields.viewParagraphField(
-			fieldName = "${fieldParagraphField}",
-			fieldTitle = "Paragraph",
-			fieldValue = "Paragraph body text.");
-
-		FormsAdmin.viewTextEntry(
-			fieldLabel = "SingleLineText",
-			fieldName = "${fieldTextField}",
-			fieldValue = "Single Line Text");
-
-		FormsAdmin.viewMultilineTextEntry(
-			fieldLabel = "MultilineText",
-			fieldName = "${fieldMultilineTextField}",
-			fieldValue = "Multiline Text");
-
-		FormsAdmin.viewSelectEntry(
-			fieldLabel = "Select",
-			fieldName = "${fieldSelectFromListField}",
-			selectOption = "Select 1");
-
-		FormsAdmin.viewRadioEntry(
-			fieldLabel = "Radio",
-			fieldName = "${fieldSingleSelectionField}",
-			fieldValue = "Option 1");
-
-		FormsAdmin.viewDateEntry(
-			fieldLabel = "Date",
-			fieldName = "${fieldDateField}",
-			fieldValue = "05/02/2016");
-
-		FormsAdmin.viewCheckboxEntry(
-			fieldName = "${fieldMultipleSelectionField}",
-			fieldValue = "Checkbox 1");
-
-		FormPortlet.nextPage(
-			formPageCurrent = "Page 1",
-			formPageNext = "Page 2");
-
-		for (var optionNumber : list "1:1,2:2,3:3") {
-			var columnNumber = StringUtil.extractLast("${optionNumber}", ":");
-			var rowNumber = StringUtil.extractFirst("${optionNumber}", ":");
-
-			FormFields.assertGridOptionChecked(
-				columnValue = "Category ${rowNumber}",
-				rowValue = "Option ${columnNumber}");
-		}
-
-		FormPortlet.nextPage(
-			formPageCurrent = "Page 2",
-			formPageNext = "Page 3");
-
-		FormsAdmin.viewUploadFile(
-			fieldLabel = "Upload Field",
-			fieldName = "${fieldUploadField}",
-			uploadFileName = "Document_1.jpg");
-
-		FormFields.viewTextField(
-			fieldLabel = "Value",
-			fieldName = "${fieldNumericField}");
-
-		FormsAdmin.viewColorEntry(
-			fieldLabel = "Color",
-			fieldName = "${colorFieldName}",
-			fieldValue = "2BA676");
 	}
 
 	@description = "Verify that a Paragraph Field can be created"
 	@priority = "5"
 	test CanBeCreated {
-		property forms.functional = "true";
+		property portal.acceptance = "true";
 
 		FormsAdmin.addForm();
 
@@ -421,7 +166,7 @@ definition {
 	@description = "Verify that a Paragraph Field can be deleted"
 	@priority = "5"
 	test CanBeDeleted {
-		property forms.functional = "true";
+		property portal.acceptance = "true";
 
 		FormsAdmin.addForm();
 
@@ -457,7 +202,7 @@ definition {
 	@description = "Verify that a Paragraph Field can be duplicated"
 	@priority = "5"
 	test CanBeDuplicated {
-		property forms.functional = "true";
+		property portal.acceptance = "true";
 
 		FormsAdmin.addForm();
 
@@ -520,7 +265,7 @@ definition {
 	@description = "Verify that a Paragraph Field can be edited"
 	@priority = "5"
 	test CanBeEdited {
-		property forms.functional = "true";
+		property portal.acceptance = "true";
 
 		FormsAdmin.addForm();
 
@@ -557,8 +302,6 @@ definition {
 	@description = "Verify that a Form can be submitted with the Paragraph Field"
 	@priority = "5"
 	test CanBeSubmitted {
-		property forms.functional = "true";
-
 		FormsAdmin.addForm();
 
 		Form.editName(formName = "Form 1");
@@ -575,8 +318,7 @@ definition {
 
 		FormsAdminNavigator.gotoPublishCopyURLLink();
 
-		var publishedFormPublicURL = Form.getPublishedFormPublicURL(
-			publishedFormPublicURL = "${publishedFormPublicURL}");
+		var publishedFormPublicURL = Form.getPublishedFormPublicURL(publishedFormPublicURL = "${publishedFormPublicURL}");
 
 		Navigator.openSpecificURL(url = "${publishedFormPublicURL}");
 
@@ -593,7 +335,7 @@ definition {
 		Navigator.openURL();
 
 		ProductMenu.gotoPortlet(
-			category = "Content &amp; Data",
+			category = "Content & Data",
 			portlet = "Forms");
 
 		FormsAdminNavigator.gotoViewEntries();
@@ -608,8 +350,6 @@ definition {
 	@description = "Verify that a Table can be deleted in the Body Text by highlighting the table and pressing backspace"
 	@priority = "4"
 	test CanDeleteATableUsingBackspace {
-		property forms.functional = "false";
-
 		FormsAdmin.addForm();
 
 		Form.editName(formName = "Form 1");
@@ -631,7 +371,7 @@ definition {
 		Form.save();
 
 		ProductMenu.gotoPortlet(
-			category = "Content &amp; Data",
+			category = "Content & Data",
 			portlet = "Forms");
 
 		FormsAdminNavigator.gotoEditFormByName(formName = "Form 1");
@@ -648,7 +388,6 @@ definition {
 	@ignore = "Test Stub"
 	@priority = "4"
 	test CanDeleteATableUsingRightClick {
-		property forms.functional = "false";
 		property portal.acceptance = "false";
 
 		// TODO LPS-133010 CanDeleteATableUsingRightClick pending implementation
@@ -658,7 +397,6 @@ definition {
 	@description = "Verify that the Formatting Style can be changed using the predefined style options"
 	@priority = "4"
 	test CanEditFormattingStyle {
-		property forms.functional = "true";
 		property test.name.skip.portal.instance = "FormsParagraphField#CanEditFormattingStyle";
 
 		FormsAdmin.addForm();
@@ -727,7 +465,7 @@ definition {
 	@description = "Verify that a Form cannot be saved or published without adding anything in the Body Text"
 	@priority = "5"
 	test CannotBeSavedOrPublishedWithoutBodyText {
-		property forms.functional = "true";
+		property portal.acceptance = "true";
 
 		FormsAdmin.addForm();
 
@@ -781,7 +519,6 @@ definition {
 	@description = "Verify that a link to a URL can be added to the Body Text"
 	@priority = "5"
 	test CanSupportALinkToAURL {
-		property forms.functional = "true";
 		property test.name.skip.portal.instance = "FormsParagraphField#CanSupportALinkToAURL";
 
 		FormsAdmin.addForm();
@@ -808,7 +545,6 @@ definition {
 	@description = "Verify that Bulleted Lists can be added to the Body Text"
 	@priority = "5"
 	test CanSupportBulletedLists {
-		property forms.functional = "true";
 		property test.name.skip.portal.instance = "FormsParagraphField#CanSupportBulletedLists";
 
 		FormsAdmin.addForm();
@@ -838,7 +574,7 @@ definition {
 		AssertElementPresent(locator1 = "Message#SUCCESS");
 
 		ProductMenu.gotoPortlet(
-			category = "Content &amp; Data",
+			category = "Content & Data",
 			portlet = "Forms");
 
 		Click(
@@ -860,8 +596,6 @@ definition {
 	@description = "Verify that the Body Text supports HTML"
 	@priority = "5"
 	test CanSupportHTML {
-		property forms.functional = "true";
-
 		FormsAdmin.addForm();
 
 		Form.editName(formName = "Form 1");
@@ -894,7 +628,6 @@ definition {
 	@description = "Verify that an Image can be uploaded to the Body Text"
 	@priority = "5"
 	test CanSupportImages {
-		property forms.functional = "true";
 		property test.name.skip.portal.instance = "FormsParagraphField#CanSupportImages";
 
 		FormsAdmin.addForm();
@@ -929,7 +662,6 @@ definition {
 	@description = "Verify that Numbered Lists can be added to the Body Text"
 	@priority = "5"
 	test CanSupportNumberedLists {
-		property forms.functional = "true";
 		property test.name.skip.portal.instance = "FormsParagraphField#CanSupportNumberedLists";
 
 		FormsAdmin.addForm();
@@ -959,7 +691,7 @@ definition {
 		AssertElementPresent(locator1 = "Message#SUCCESS");
 
 		ProductMenu.gotoPortlet(
-			category = "Content &amp; Data",
+			category = "Content & Data",
 			portlet = "Forms");
 
 		Click(
@@ -981,7 +713,6 @@ definition {
 	@description = "Verify that a Table can be created in the Body Text"
 	@priority = "4"
 	test CanSupportTables {
-		property forms.functional = "true";
 		property test.name.skip.portal.instance = "FormsParagraphField#CanSupportTables";
 
 		FormsAdmin.addForm();
@@ -1018,7 +749,6 @@ definition {
 	@description = "Verify that a Video can be uploaded to the Body Text"
 	@priority = "5"
 	test CanSupportVideos {
-		property forms.functional = "true";
 		property test.name.skip.portal.instance = "FormsParagraphField#CanSupportVideos";
 
 		FormsAdmin.addForm();
@@ -1069,7 +799,6 @@ definition {
 	@description = "Verify that inputs to the Body Text can be undone and redone"
 	@priority = "5"
 	test CanUndoAndRedo {
-		property forms.functional = "true";
 		property test.name.skip.portal.instance = "FormsParagraphField#CanUndoAndRedo";
 
 		FormsAdmin.addForm();
@@ -1120,8 +849,6 @@ definition {
 	@description = "Verify that the Field Reference can be Edited"
 	@priority = "5"
 	test ReferenceCanBeEdited {
-		property forms.functional = "true";
-
 		FormsAdmin.addForm();
 
 		Form.editName(formName = "Form 1");
@@ -1150,7 +877,6 @@ definition {
 	@description = "Verify that text in the Body Text can be Bolded, Italicized and Underlined"
 	@priority = "5"
 	test TextCanBeBoldedItalicizedAndUnderlined {
-		property forms.functional = "true";
 		property test.name.skip.portal.instance = "FormsParagraphField#TextCanBeBoldedItalicizedAndUnderlined";
 
 		FormsAdmin.addForm();
@@ -1203,8 +929,6 @@ definition {
 	@description = "Verify that the Field Title can be edited"
 	@priority = "5"
 	test TitleCanBeEdited {
-		property forms.functional = "true";
-
 		FormsAdmin.addForm();
 
 		Form.editName(formName = "Form 1");

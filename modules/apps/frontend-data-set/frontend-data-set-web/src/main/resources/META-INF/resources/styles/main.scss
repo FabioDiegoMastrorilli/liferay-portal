@@ -1,6 +1,5 @@
 @import './variables';
 
-@import '../data_renderers/data_renderers';
 @import '../data_set_display';
 @import '../dnd_table';
 @import '../modal/modal';
@@ -58,19 +57,6 @@
 
 	&:last-child {
 		border-width: 0;
-	}
-}
-
-.modal-lg,
-.modal-xl {
-	max-width: 800px;
-}
-
-@media (min-width: 576px) {
-	.modal {
-		.modal-dialog {
-			display: block;
-		}
 	}
 }
 

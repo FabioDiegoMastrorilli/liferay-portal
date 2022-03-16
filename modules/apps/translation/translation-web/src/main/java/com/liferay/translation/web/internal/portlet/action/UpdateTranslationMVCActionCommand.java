@@ -32,22 +32,24 @@ import com.liferay.portal.kernel.service.ServiceContext;
 import com.liferay.portal.kernel.service.ServiceContextFactory;
 import com.liferay.portal.kernel.servlet.MultiSessionMessages;
 import com.liferay.portal.kernel.servlet.SessionErrors;
+import com.liferay.portal.kernel.util.ArrayUtil;
 import com.liferay.portal.kernel.util.LocaleUtil;
 import com.liferay.portal.kernel.util.ParamUtil;
-import com.liferay.portal.kernel.util.PropertiesParamUtil;
-import com.liferay.portal.kernel.util.UnicodeProperties;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.segments.constants.SegmentsExperienceConstants;
 import com.liferay.translation.constants.TranslationPortletKeys;
 import com.liferay.translation.service.TranslationEntryService;
-import com.liferay.translation.web.internal.util.TranslationRequestUtil;
+import com.liferay.translation.web.internal.helper.TranslationRequestHelper;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 import javax.portlet.ActionRequest;
 import javax.portlet.ActionResponse;
+import javax.portlet.PortletRequest;
 
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
@@ -75,10 +77,14 @@ public class UpdateTranslationMVCActionCommand extends BaseMVCActionCommand {
 				actionRequest, "segmentsExperienceId",
 				SegmentsExperienceConstants.ID_DEFAULT);
 
-			String className = TranslationRequestUtil.getClassName(
-				actionRequest, segmentsExperienceId);
-			long classPK = TranslationRequestUtil.getClassPK(
-				actionRequest, segmentsExperienceId);
+			TranslationRequestHelper translationRequestHelper =
+				new TranslationRequestHelper(
+					_infoItemServiceTracker, actionRequest);
+
+			String className = translationRequestHelper.getClassName(
+				segmentsExperienceId);
+			long classPK = translationRequestHelper.getClassPK(
+				segmentsExperienceId);
 
 			InfoItemReference infoItemReference = new InfoItemReference(
 				className, classPK);
@@ -116,13 +122,33 @@ public class UpdateTranslationMVCActionCommand extends BaseMVCActionCommand {
 			}
 		}
 		catch (Exception exception) {
-			_log.error(exception, exception);
+			_log.error(exception);
 
 			SessionErrors.add(actionRequest, exception.getClass(), exception);
 
 			actionResponse.setRenderParameter(
 				"mvcRenderCommandName", "/translation/translate");
 		}
+	}
+
+	private Map<String, String[]> _getInfoFieldParameterValues(
+		PortletRequest portletRequest) {
+
+		Map<String, String[]> values = new HashMap<>();
+
+		Map<String, String[]> parameterMap = portletRequest.getParameterMap();
+
+		for (String parameterName : parameterMap.keySet()) {
+			if (parameterName.startsWith(_PARAMETER_NAME_INFO_FIELD)) {
+				values.put(
+					parameterName.substring(
+						_PARAMETER_NAME_INFO_FIELD.length(),
+						parameterName.length() - 2),
+					portletRequest.getParameterValues(parameterName));
+			}
+		}
+
+		return values;
 	}
 
 	private <T> List<InfoField> _getInfoFields(String className, T object) {
@@ -140,36 +166,40 @@ public class UpdateTranslationMVCActionCommand extends BaseMVCActionCommand {
 
 		List<InfoFieldValue<Object>> infoFieldValues = new ArrayList<>();
 
-		UnicodeProperties infoFieldUnicodeProperties =
-			PropertiesParamUtil.getProperties(actionRequest, "infoField--");
+		Map<String, String[]> infoFieldParameterValues =
+			_getInfoFieldParameterValues(actionRequest);
+
 		InfoItemFieldValues infoItemFieldValues = _getInfoItemFieldValues(
 			className, object);
 
 		for (InfoField infoField : _getInfoFields(className, object)) {
-			String value = infoFieldUnicodeProperties.get(infoField.getName());
+			String[] infoFieldParameterValue = infoFieldParameterValues.get(
+				infoField.getName());
 
-			if (value != null) {
+			if (ArrayUtil.isNotEmpty(infoFieldParameterValue)) {
 				Locale sourceLocale = _getSourceLocale(actionRequest);
 
-				infoFieldValues.add(
-					new InfoFieldValue<>(
-						infoField,
-						InfoLocalizedValue.builder(
-						).value(
-							_getTargetLocale(actionRequest), value
-						).value(
-							biConsumer -> {
-								InfoFieldValue<Object> infoFieldValue =
-									infoItemFieldValues.getInfoFieldValue(
-										infoField.getName());
+				List<InfoFieldValue<Object>> sourceInfoFieldValues =
+					new ArrayList<>(
+						infoItemFieldValues.getInfoFieldValues(
+							infoField.getName()));
 
-								if (infoFieldValue != null) {
-									biConsumer.accept(
-										sourceLocale,
-										infoFieldValue.getValue(sourceLocale));
-								}
-							}
-						).build()));
+				for (int i = 0; i < infoFieldParameterValue.length; i++) {
+					InfoFieldValue<Object> sourceInfoFieldValue =
+						sourceInfoFieldValues.get(i);
+
+					infoFieldValues.add(
+						new InfoFieldValue<>(
+							infoField,
+							InfoLocalizedValue.builder(
+							).value(
+								_getTargetLocale(actionRequest),
+								infoFieldParameterValue[i]
+							).value(
+								sourceLocale,
+								sourceInfoFieldValue.getValue(sourceLocale)
+							).build()));
+				}
 			}
 		}
 
@@ -201,6 +231,8 @@ public class UpdateTranslationMVCActionCommand extends BaseMVCActionCommand {
 	private Locale _getTargetLocale(ActionRequest actionRequest) {
 		return LocaleUtil.fromLanguageId(_getTargetLanguageId(actionRequest));
 	}
+
+	private static final String _PARAMETER_NAME_INFO_FIELD = "infoField--";
 
 	private static final Log _log = LogFactoryUtil.getLog(
 		UpdateTranslationMVCActionCommand.class);

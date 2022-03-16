@@ -70,11 +70,11 @@ public class MySubscriptionsUtil {
 		String className, long classPK) {
 
 		try {
-			return doGetAssetRenderer(_getClassName(className), classPK);
+			return _getAssetRenderer(_getClassName(className), classPK);
 		}
 		catch (Exception exception) {
 			if (_log.isDebugEnabled()) {
-				_log.debug(exception, exception);
+				_log.debug(exception);
 			}
 		}
 
@@ -256,7 +256,7 @@ public class MySubscriptionsUtil {
 		return title;
 	}
 
-	protected static AssetRenderer<?> doGetAssetRenderer(
+	private static AssetRenderer<?> _getAssetRenderer(
 			String className, long classPK)
 		throws Exception {
 

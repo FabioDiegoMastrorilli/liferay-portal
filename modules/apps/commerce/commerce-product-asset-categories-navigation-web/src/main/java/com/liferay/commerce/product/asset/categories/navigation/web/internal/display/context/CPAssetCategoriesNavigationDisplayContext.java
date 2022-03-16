@@ -19,7 +19,6 @@ import com.liferay.asset.kernel.model.AssetVocabulary;
 import com.liferay.asset.kernel.model.AssetVocabularyConstants;
 import com.liferay.asset.kernel.service.AssetCategoryService;
 import com.liferay.asset.kernel.service.AssetVocabularyService;
-import com.liferay.commerce.account.model.CommerceAccount;
 import com.liferay.commerce.constants.CommerceWebKeys;
 import com.liferay.commerce.context.CommerceContext;
 import com.liferay.commerce.media.CommerceMediaResolver;
@@ -28,6 +27,7 @@ import com.liferay.commerce.product.constants.CPAttachmentFileEntryConstants;
 import com.liferay.commerce.product.model.CPAttachmentFileEntry;
 import com.liferay.commerce.product.service.CPAttachmentFileEntryService;
 import com.liferay.commerce.product.url.CPFriendlyURL;
+import com.liferay.commerce.util.CommerceUtil;
 import com.liferay.friendly.url.model.FriendlyURLEntry;
 import com.liferay.friendly.url.service.FriendlyURLEntryLocalService;
 import com.liferay.petra.string.StringBundler;
@@ -92,7 +92,7 @@ public class CPAssetCategoriesNavigationDisplayContext {
 			return _assetCategories;
 		}
 
-		AssetCategory assetCategory = getParentCategory();
+		AssetCategory assetCategory = _getParentCategory();
 
 		if (assetCategory != null) {
 			_assetCategories = _assetCategoryService.getVocabularyCategories(
@@ -163,9 +163,7 @@ public class CPAssetCategoriesNavigationDisplayContext {
 		return _cpAssetCategoriesNavigationPortletInstanceConfiguration;
 	}
 
-	public String getDefaultImageSrc(long categoryId, ThemeDisplay themeDisplay)
-		throws Exception {
-
+	public String getDefaultImageSrc(long categoryId) throws Exception {
 		List<CPAttachmentFileEntry> cpAttachmentFileEntries =
 			_cpAttachmentFileEntryService.getCPAttachmentFileEntries(
 				_portal.getClassNameId(AssetCategory.class), categoryId,
@@ -183,20 +181,10 @@ public class CPAssetCategoriesNavigationDisplayContext {
 			return null;
 		}
 
-		CommerceContext commerceContext =
-			(CommerceContext)_httpServletRequest.getAttribute(
-				CommerceWebKeys.COMMERCE_CONTEXT);
-
-		long commerceAccountId = 0;
-
-		CommerceAccount commerceAccount = commerceContext.getCommerceAccount();
-
-		if (commerceAccount != null) {
-			commerceAccountId = commerceAccount.getCommerceAccountId();
-		}
-
 		return _commerceMediaResolver.getURL(
-			commerceAccountId,
+			CommerceUtil.getCommerceAccountId(
+				(CommerceContext)_httpServletRequest.getAttribute(
+					CommerceWebKeys.COMMERCE_CONTEXT)),
 			cpAttachmentFileEntry.getCPAttachmentFileEntryId());
 	}
 
@@ -246,7 +234,7 @@ public class CPAssetCategoriesNavigationDisplayContext {
 		}
 		catch (Exception exception) {
 			if (_log.isDebugEnabled()) {
-				_log.debug(exception, exception);
+				_log.debug(exception);
 			}
 
 			return StringPool.BLANK;
@@ -276,7 +264,7 @@ public class CPAssetCategoriesNavigationDisplayContext {
 
 		long categoryId = 0;
 
-		AssetCategory assetCategory = getParentCategory();
+		AssetCategory assetCategory = _getParentCategory();
 
 		if (assetCategory == null) {
 			assetCategory = (AssetCategory)_httpServletRequest.getAttribute(
@@ -298,7 +286,7 @@ public class CPAssetCategoriesNavigationDisplayContext {
 		sb.append("<div class=\"lfr-asset-category-list-container\">");
 		sb.append("<ul class=\"lfr-asset-category-list\">");
 
-		buildCategoriesNavigation(categories, categoryId, themeDisplay, sb);
+		_buildCategoriesNavigation(categories, categoryId, themeDisplay, sb);
 
 		sb.append("</ul></div>");
 
@@ -315,7 +303,7 @@ public class CPAssetCategoriesNavigationDisplayContext {
 			useRootCategory();
 	}
 
-	protected void buildCategoriesNavigation(
+	private void _buildCategoriesNavigation(
 			List<AssetCategory> categories, long categoryId,
 			ThemeDisplay themeDisplay, StringBundler sb)
 		throws Exception {
@@ -351,7 +339,7 @@ public class CPAssetCategoriesNavigationDisplayContext {
 			if (!childAssetCategories.isEmpty()) {
 				sb.append("<ul>");
 
-				buildCategoriesNavigation(
+				_buildCategoriesNavigation(
 					childAssetCategories, categoryId, themeDisplay, sb);
 
 				sb.append("</ul>");
@@ -361,7 +349,7 @@ public class CPAssetCategoriesNavigationDisplayContext {
 		}
 	}
 
-	protected AssetCategory getParentCategory() throws PortalException {
+	private AssetCategory _getParentCategory() throws PortalException {
 		AssetCategory assetCategory = null;
 
 		if (useRootCategory()) {

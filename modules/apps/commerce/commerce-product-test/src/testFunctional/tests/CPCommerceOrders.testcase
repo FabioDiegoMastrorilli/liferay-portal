@@ -1,7 +1,6 @@
 @component-name = "portal-commerce"
 definition {
 
-	property portal.acceptance = "true";
 	property portal.release = "true";
 	property portal.upstream = "true";
 	property testray.main.component.name = "Order Management";
@@ -81,8 +80,8 @@ definition {
 		User.logoutPG();
 
 		CommerceLogin.miniumLogin(
+			newPassword = "test",
 			password = "ttest",
-			resetPassword = "test",
 			urlAppend = "web/minium",
 			userEmailAddress = "buyer@liferay.com");
 
@@ -95,6 +94,40 @@ definition {
 		Alert.viewErrorMessage(errorMessage = "Unable to create a new order as the open order limit has been reached.");
 	}
 
+	@description = "This is a test for COMMERCE-6912. Bulk delete orders"
+	@priority = "3"
+	test BulkDeleteOrders {
+		property portal.acceptance = "false";
+
+		CommerceAccelerators.initializeNewSiteViaAccelerator(siteName = "Minium");
+
+		JSONAccountEntry.addAccountEntry(
+			accountEntryName = "Commerce Account",
+			accountEntryType = "Business");
+
+		ApplicationsMenu.gotoSite(site = "Minium");
+
+		CommerceAcceleratorsInitializer.createNewOrderFromPendingOrders();
+
+		CommerceAcceleratorsInitializer.createNewOrderFromPendingOrders();
+
+		CommerceAcceleratorsInitializer.createNewOrderFromPendingOrders();
+
+		CommerceAcceleratorsInitializer.createNewOrderFromPendingOrders();
+
+		CommerceAcceleratorsInitializer.createNewOrderFromPendingOrders();
+
+		CommerceNavigator.gotoPortlet(
+			category = "Order Management",
+			portlet = "Orders");
+
+		while (IsElementNotPresent(locator1 = "CommerceNavigation#EMPTY_SEARCH_CONTAINER")) {
+			CommerceProducts.deleteEntries();
+		}
+
+		AssertElementPresent(locator1 = "CommerceNavigation#EMPTY_SEARCH_CONTAINER");
+	}
+
 	@description = "This is a test for COMMERCE-6210. Shipment cancelled"
 	@ignore = "true"
 	@priority = "3"
@@ -102,6 +135,26 @@ definition {
 		property portal.acceptance = "false";
 
 		// TODO COMMERCE-6210 CancelShipmentAndCreateNewFromPendingOrder Pending Implementation
+
+	}
+
+	@description = "[Please Update]"
+	@ignore = "true"
+	@priority = "3"
+	test CanEditOrderMeasurementUnit {
+		property portal.acceptance = "false";
+
+		// TODO COMMERCE-7982 CanEditOrderMeasurementUnit Pending Implementation
+
+	}
+
+	@description = "[Please Update]"
+	@ignore = "true"
+	@priority = "3"
+	test CanSetOrderQuantityToDecimal {
+		property portal.acceptance = "false";
+
+		// TODO COMMERCE-7983 CanSetOrderQuantityToDecimal Pending Implementation
 
 	}
 
@@ -178,6 +231,7 @@ definition {
 		Button.clickSave();
 	}
 
+	@ignore = "true"
 	test EditOrder {
 		property portal.acceptance = "quarantine";
 		property portal.release = "quarantine";
@@ -237,7 +291,7 @@ definition {
 
 		CommerceOrders.editOrderItemDetails(
 			orderItemQuantity = "4",
-			orderItemSKU = "MIN93015");
+			orderItemSku = "MIN93015");
 
 		CommerceNavigator.gotoPortlet(
 			category = "Order Management",
@@ -253,12 +307,14 @@ definition {
 			productListPrice = "50.00",
 			productName = "ABS Sensor",
 			productQuantity = "4",
-			productSKU = "MIN93015",
+			productSku = "MIN93015",
 			productTotalPrice = "100.00");
 	}
 
 	@description = "This is a workaround for an issue with Minium's sidebar on CI"
 	test EditOrderCheckingOutViaOrderDetails {
+		property portal.acceptance = "true";
+
 		CommerceAccelerators.initializeNewSiteViaAccelerator(siteName = "Minium");
 
 		CommerceNavigator.gotoPortlet(
@@ -313,7 +369,7 @@ definition {
 
 		CommerceOrders.editOrderItemDetails(
 			orderItemQuantity = "4",
-			orderItemSKU = "MIN93015");
+			orderItemSku = "MIN93015");
 
 		CommerceNavigator.gotoPortlet(
 			category = "Order Management",
@@ -328,8 +384,8 @@ definition {
 			paymentMethod = "Money Order",
 			productListPrice = "50.00",
 			productName = "ABS Sensor",
-			productQuantity = "4",
-			productSKU = "MIN93015",
+			productQuantity = "4.00",
+			productSku = "MIN93015",
 			productTotalPrice = "100.00");
 	}
 
@@ -665,8 +721,8 @@ definition {
 		User.logoutPG();
 
 		CommerceLogin.miniumLogin(
+			newPassword = "test",
 			password = "ttest",
-			resetPassword = "test",
 			urlAppend = "web/minium",
 			userEmailAddress = "buyer@liferay.com");
 
@@ -679,8 +735,6 @@ definition {
 			locator1 = "CommerceEntry#WORKFLOW_STATUS");
 
 		CommerceNavigator.gotoMiniCart();
-
-		Button.click(button = "Review Order");
 
 		Button.click(button = "View Details");
 
@@ -714,8 +768,8 @@ definition {
 		User.logoutPG();
 
 		CommerceLogin.miniumLogin(
+			newPassword = "ttest",
 			password = "test",
-			resetPassword = "ttest",
 			urlAppend = "web/minium",
 			userEmailAddress = "buyer@liferay.com");
 
@@ -799,8 +853,8 @@ definition {
 		User.logoutPG();
 
 		CommerceLogin.miniumLogin(
+			newPassword = "test",
 			password = "ttest",
-			resetPassword = "test",
 			urlAppend = "web/minium",
 			userEmailAddress = "buyer@liferay.com");
 
@@ -892,7 +946,7 @@ definition {
 	@description = "This is a test for COMMERCE-6216. Search Order from UI"
 	@priority = "3"
 	test SearchOrder {
-		property portal.acceptance = "false";
+		property portal.acceptance = "true";
 
 		// TODO Review
 
@@ -997,7 +1051,7 @@ definition {
 	@description = "This is a test for COMMERCE-5845. As a product specialist I want to see if a SKU is on order"
 	@priority = "3"
 	test ViewOrderSKU {
-		property portal.acceptance = "false";
+		property portal.acceptance = "true";
 
 		// TODO Review
 

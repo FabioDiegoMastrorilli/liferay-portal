@@ -30,7 +30,7 @@ import com.liferay.dynamic.data.mapping.service.DDMStructureLocalService;
 import com.liferay.dynamic.data.mapping.storage.StorageType;
 import com.liferay.dynamic.data.mapping.util.DDM;
 import com.liferay.dynamic.data.mapping.util.DefaultDDMStructureHelper;
-import com.liferay.petra.string.StringBundler;
+import com.liferay.petra.string.CharPool;
 import com.liferay.petra.string.StringPool;
 import com.liferay.portal.configuration.metatype.bnd.util.ConfigurableUtil;
 import com.liferay.portal.instance.lifecycle.BasePortalInstanceLifecycleListener;
@@ -46,15 +46,15 @@ import com.liferay.portal.kernel.service.ServiceContext;
 import com.liferay.portal.kernel.service.UserLocalService;
 import com.liferay.portal.kernel.util.HashMapBuilder;
 import com.liferay.portal.kernel.util.Portal;
+import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.Validator;
-
-import java.lang.reflect.Field;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
@@ -80,7 +80,7 @@ public class AddDefaultDocumentLibraryStructuresPortalInstanceLifecycleListener
 			return;
 		}
 
-		addDLRawMetadataStructures(company.getCompanyId());
+		_addDLRawMetadataStructures(company.getCompanyId());
 	}
 
 	@Activate
@@ -96,7 +96,39 @@ public class AddDefaultDocumentLibraryStructuresPortalInstanceLifecycleListener
 				clazz.getName());
 	}
 
-	protected void addDLRawMetadataStructures(long companyId) throws Exception {
+	@Deactivate
+	protected void deactivate() {
+		_singleVMPool.removePortalCache(_portalCache.getPortalCacheName());
+	}
+
+	@Reference(unbind = "-")
+	protected void setDDM(DDM ddm) {
+		_ddm = ddm;
+	}
+
+	@Reference(unbind = "-")
+	protected void setDDMStructureLocalService(
+		DDMStructureLocalService ddmStructureLocalService) {
+
+		_ddmStructureLocalService = ddmStructureLocalService;
+	}
+
+	@Reference(unbind = "-")
+	protected void setGroupLocalService(GroupLocalService groupLocalService) {
+		_groupLocalService = groupLocalService;
+	}
+
+	@Reference(target = ModuleServiceLifecycle.PORTAL_INITIALIZED, unbind = "-")
+	protected void setModuleServiceLifecycle(
+		ModuleServiceLifecycle moduleServiceLifecycle) {
+	}
+
+	@Reference(unbind = "-")
+	protected void setUserLocalService(UserLocalService userLocalService) {
+		_userLocalService = userLocalService;
+	}
+
+	private void _addDLRawMetadataStructures(long companyId) throws Exception {
 		ServiceContext serviceContext = new ServiceContext();
 
 		serviceContext.setAddGroupPermissions(true);
@@ -112,9 +144,10 @@ public class AddDefaultDocumentLibraryStructuresPortalInstanceLifecycleListener
 
 		Locale locale = _portal.getSiteDefaultLocale(group.getGroupId());
 
-		Map<String, Field[]> fields = RawMetadataProcessorUtil.getFields();
+		Map<String, Set<String>> fieldNames =
+			RawMetadataProcessorUtil.getFieldNames();
 
-		for (Map.Entry<String, Field[]> entry : fields.entrySet()) {
+		for (Map.Entry<String, Set<String>> entry : fieldNames.entrySet()) {
 			String name = entry.getKey();
 
 			DDMForm ddmForm = _buildDDMForm(entry.getValue(), locale);
@@ -156,39 +189,7 @@ public class AddDefaultDocumentLibraryStructuresPortalInstanceLifecycleListener
 		}
 	}
 
-	@Deactivate
-	protected void deactivate() {
-		_singleVMPool.removePortalCache(_portalCache.getPortalCacheName());
-	}
-
-	@Reference(unbind = "-")
-	protected void setDDM(DDM ddm) {
-		_ddm = ddm;
-	}
-
-	@Reference(unbind = "-")
-	protected void setDDMStructureLocalService(
-		DDMStructureLocalService ddmStructureLocalService) {
-
-		_ddmStructureLocalService = ddmStructureLocalService;
-	}
-
-	@Reference(unbind = "-")
-	protected void setGroupLocalService(GroupLocalService groupLocalService) {
-		_groupLocalService = groupLocalService;
-	}
-
-	@Reference(target = ModuleServiceLifecycle.PORTAL_INITIALIZED, unbind = "-")
-	protected void setModuleServiceLifecycle(
-		ModuleServiceLifecycle moduleServiceLifecycle) {
-	}
-
-	@Reference(unbind = "-")
-	protected void setUserLocalService(UserLocalService userLocalService) {
-		_userLocalService = userLocalService;
-	}
-
-	private DDMForm _buildDDMForm(Field[] fields, Locale locale) {
+	private DDMForm _buildDDMForm(Set<String> fieldNames, Locale locale) {
 		DDMForm ddmForm = new DDMForm();
 
 		ddmForm.setAvailableLocales(Collections.singleton(locale));
@@ -196,14 +197,8 @@ public class AddDefaultDocumentLibraryStructuresPortalInstanceLifecycleListener
 
 		List<DDMFormField> ddmFormFields = new ArrayList<>();
 
-		for (Field field : fields) {
-			Class<?> fieldClass = field.getDeclaringClass();
-
-			DDMFormField ddmFormField = new DDMFormField(
-				StringBundler.concat(
-					fieldClass.getSimpleName(), StringPool.UNDERLINE,
-					field.getName()),
-				"text");
+		for (String name : fieldNames) {
+			DDMFormField ddmFormField = new DDMFormField(name, "text");
 
 			ddmFormField.setDataType("string");
 			ddmFormField.setIndexType("text");
@@ -218,9 +213,9 @@ public class AddDefaultDocumentLibraryStructuresPortalInstanceLifecycleListener
 
 			label.addString(
 				locale,
-				StringBundler.concat(
-					"metadata.", fieldClass.getSimpleName(), StringPool.PERIOD,
-					field.getName()));
+				"metadata.".concat(
+					StringUtil.replaceFirst(
+						name, CharPool.UNDERLINE, CharPool.PERIOD)));
 			label.setDefaultLocale(locale);
 
 			LocalizedValue predefinedValue = ddmFormField.getPredefinedValue();

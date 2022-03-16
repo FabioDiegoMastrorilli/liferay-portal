@@ -3,7 +3,7 @@ definition {
 	macro _deleteAllWarehouseItems {
 		var baseURL = "${baseURL}";
 
-		if (contains("${baseURL}", "{baseURL}")) {
+		if (!(isSet(baseURL))) {
 			var baseURL = PropsUtil.get("portal.url");
 		}
 
@@ -18,7 +18,6 @@ definition {
 						-u test@liferay.com:test \
 						-H 'accept: application/json' \
 					''';
-
 				var warehouseItemsIds = JSONCurlUtil.get("${curl}", "$..['id']");
 
 				if ("${warehouseItemsIds}" != "") {
@@ -56,7 +55,7 @@ definition {
 	macro _getCommerceWarehouseIds {
 		var baseURL = "${baseURL}";
 
-		if (contains("${baseURL}", "{baseURL}")) {
+		if (!(isSet(baseURL))) {
 			var baseURL = PropsUtil.get("portal.url");
 		}
 
@@ -72,7 +71,6 @@ definition {
 				-u test@liferay.com:test \
 				-H 'accept: application/json' \
 			''';
-
 		var warehouseIds = JSONCurlUtil.get("${curl}", "$..['id']");
 
 		return "${warehouseIds}";
@@ -81,7 +79,7 @@ definition {
 	macro _getCommerceWarehousesCount {
 		var baseURL = "${baseURL}";
 
-		if (contains("${baseURL}", "{baseURL}")) {
+		if (!(isSet(baseURL))) {
 			var baseURL = PropsUtil.get("portal.url");
 		}
 
@@ -90,7 +88,6 @@ definition {
 				-u test@liferay.com:test \
 				-H 'accept: application/json' \
 			''';
-
 		var warehousesCount = JSONCurlUtil.get("${curl}", "$['totalCount']");
 
 		echo("The Commerce warehouses count is: ${warehousesCount}");

@@ -16,6 +16,8 @@ package com.liferay.data.engine.rest.internal.resource.v2_0;
 
 import com.liferay.data.engine.rest.dto.v2_0.DataDefinitionFieldLink;
 import com.liferay.data.engine.rest.resource.v2_0.DataDefinitionFieldLinkResource;
+import com.liferay.petra.function.UnsafeBiConsumer;
+import com.liferay.petra.function.UnsafeConsumer;
 import com.liferay.petra.function.UnsafeFunction;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.model.GroupedModel;
@@ -97,7 +99,7 @@ public abstract class BaseDataDefinitionFieldLinkResourceImpl
 	@javax.ws.rs.Produces({"application/json", "application/xml"})
 	@Override
 	public Page<DataDefinitionFieldLink>
-			getDataDefinitionDataDefinitionFieldLinkPage(
+			getDataDefinitionDataDefinitionFieldLinksPage(
 				@io.swagger.v3.oas.annotations.Parameter(hidden = true)
 				@javax.validation.constraints.NotNull
 				@javax.ws.rs.PathParam("dataDefinitionId")
@@ -148,7 +150,9 @@ public abstract class BaseDataDefinitionFieldLinkResourceImpl
 			Map<String, Serializable> parameters, String search)
 		throws Exception {
 
-		return null;
+		return getDataDefinitionDataDefinitionFieldLinksPage(
+			Long.parseLong((String)parameters.get("dataDefinitionId")),
+			(String)parameters.get("fieldName"));
 	}
 
 	@Override
@@ -183,6 +187,15 @@ public abstract class BaseDataDefinitionFieldLinkResourceImpl
 
 	public void setContextAcceptLanguage(AcceptLanguage contextAcceptLanguage) {
 		this.contextAcceptLanguage = contextAcceptLanguage;
+	}
+
+	public void setContextBatchUnsafeConsumer(
+		UnsafeBiConsumer
+			<java.util.Collection<DataDefinitionFieldLink>,
+			 UnsafeConsumer<DataDefinitionFieldLink, Exception>, Exception>
+				contextBatchUnsafeConsumer) {
+
+		this.contextBatchUnsafeConsumer = contextBatchUnsafeConsumer;
 	}
 
 	public void setContextCompany(
@@ -333,6 +346,10 @@ public abstract class BaseDataDefinitionFieldLinkResourceImpl
 	}
 
 	protected AcceptLanguage contextAcceptLanguage;
+	protected UnsafeBiConsumer
+		<java.util.Collection<DataDefinitionFieldLink>,
+		 UnsafeConsumer<DataDefinitionFieldLink, Exception>, Exception>
+			contextBatchUnsafeConsumer;
 	protected com.liferay.portal.kernel.model.Company contextCompany;
 	protected HttpServletRequest contextHttpServletRequest;
 	protected HttpServletResponse contextHttpServletResponse;

@@ -25,26 +25,31 @@ import com.liferay.commerce.order.importer.item.CommerceOrderImporterItem;
 import com.liferay.commerce.order.importer.item.CommerceOrderImporterItemImpl;
 import com.liferay.commerce.order.importer.type.CommerceOrderImporterType;
 import com.liferay.commerce.price.CommerceOrderPriceCalculation;
+import com.liferay.commerce.product.availability.CPAvailabilityChecker;
 import com.liferay.commerce.product.model.CPDefinition;
 import com.liferay.commerce.product.model.CPInstance;
 import com.liferay.commerce.product.model.CommerceChannel;
 import com.liferay.commerce.product.service.CPInstanceLocalService;
 import com.liferay.commerce.product.service.CommerceChannelLocalService;
+import com.liferay.commerce.product.util.CPInstanceHelper;
 import com.liferay.commerce.service.CommerceOrderItemService;
 import com.liferay.commerce.service.CommerceOrderService;
+import com.liferay.document.library.kernel.service.DLAppLocalService;
 import com.liferay.frontend.taglib.servlet.taglib.util.JSPRenderer;
-import com.liferay.petra.string.StringPool;
 import com.liferay.portal.configuration.metatype.bnd.util.ConfigurableUtil;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.language.LanguageUtil;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
+import com.liferay.portal.kernel.model.Company;
 import com.liferay.portal.kernel.module.configuration.ConfigurationProvider;
 import com.liferay.portal.kernel.repository.model.FileEntry;
+import com.liferay.portal.kernel.service.CompanyLocalService;
 import com.liferay.portal.kernel.service.UserLocalService;
 import com.liferay.portal.kernel.settings.GroupServiceSettingsLocator;
 import com.liferay.portal.kernel.util.FileUtil;
 import com.liferay.portal.kernel.util.GetterUtil;
+import com.liferay.portal.kernel.util.ParamUtil;
 import com.liferay.portal.kernel.util.ResourceBundleUtil;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.vulcan.util.TransformUtil;
@@ -53,6 +58,7 @@ import java.io.IOException;
 
 import java.nio.charset.Charset;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -89,6 +95,13 @@ public class CSVCommerceOrderImporterTypeImpl
 			HttpServletRequest httpServletRequest)
 		throws PortalException {
 
+		long fileEntryId = ParamUtil.getLong(
+			httpServletRequest, getCommerceOrderImporterItemParamName());
+
+		if (fileEntryId > 0) {
+			return _dlAppLocalService.getFileEntry(fileEntryId);
+		}
+
 		return null;
 	}
 
@@ -106,10 +119,15 @@ public class CSVCommerceOrderImporterTypeImpl
 			throw new CommerceOrderImporterTypeException();
 		}
 
+		CommerceChannel commerceChannel =
+			_commerceChannelLocalService.getCommerceChannelByOrderGroupId(
+				commerceOrder.getGroupId());
+
 		return CommerceOrderImporterTypeUtil.getCommerceOrderImporterItems(
 			_commerceContextFactory, commerceOrder,
 			_getCommerceOrderImporterItemImpls(
-				commerceOrder.getCompanyId(), (FileEntry)object),
+				commerceOrder.getCompanyId(), commerceChannel.getGroupId(),
+				(FileEntry)object),
 			_commerceOrderItemService, _commerceOrderPriceCalculation,
 			_commerceOrderService, _userLocalService);
 	}
@@ -187,23 +205,21 @@ public class CSVCommerceOrderImporterTypeImpl
 	}
 
 	private CommerceOrderImporterItemImpl[] _getCommerceOrderImporterItemImpls(
-			long companyId, FileEntry fileEntry)
+			long companyId, long commerceChannelGroupId, FileEntry fileEntry)
 		throws Exception {
 
 		CSVParser csvParser = _getCSVParser(fileEntry);
 
 		return TransformUtil.transformToArray(
 			csvParser.getRecords(),
-			csvRecord -> _toCommerceOrderImporterItemImpl(companyId, csvRecord),
+			csvRecord -> _toCommerceOrderImporterItemImpl(
+				companyId, commerceChannelGroupId, csvRecord),
 			CommerceOrderImporterItemImpl.class);
 	}
 
 	private CSVParser _getCSVParser(FileEntry fileEntry) throws Exception {
-		CSVFormat csvFormat = CSVFormat.DEFAULT;
-
-		csvFormat = csvFormat.withFirstRecordAsHeader();
-		csvFormat = csvFormat.withIgnoreSurroundingSpaces();
-		csvFormat = csvFormat.withNullString(StringPool.BLANK);
+		CSVFormat csvFormat = CommerceOrderImporterTypeUtil.getCSVFormat(
+			_commerceOrderImporterTypeConfiguration);
 
 		try {
 			return CSVParser.parse(
@@ -211,51 +227,84 @@ public class CSVCommerceOrderImporterTypeImpl
 				Charset.defaultCharset(), csvFormat);
 		}
 		catch (IOException ioException) {
-			_log.error(ioException, ioException);
+			if (_log.isDebugEnabled()) {
+				_log.debug(ioException);
+			}
 
 			throw new CommerceOrderImporterTypeException();
 		}
 	}
 
 	private CommerceOrderImporterItemImpl _toCommerceOrderImporterItemImpl(
-			long companyId, CSVRecord csvRecord)
+			long companyId, long commerceChannelGroupId, CSVRecord csvRecord)
 		throws Exception {
 
-		String skuExternalReferenceCode = csvRecord.get(
-			"skuExternalReferenceCode");
-		long skuId = GetterUtil.getLong(csvRecord.get("skuId"));
+		String sku = GetterUtil.getString(csvRecord.get("sku"));
 		int quantity = GetterUtil.getInteger(csvRecord.get("quantity"));
 
 		CPInstance cpInstance = null;
 
-		if (skuId > 0) {
-			cpInstance = _cpInstanceLocalService.fetchCPInstance(skuId);
+		if (Validator.isNotNull(sku)) {
+			List<CPInstance> cpInstances =
+				_cpInstanceLocalService.getCPInstances(companyId, sku);
+
+			if (!cpInstances.isEmpty()) {
+				cpInstance = cpInstances.get(0);
+			}
 		}
 
-		if ((cpInstance == null) &&
-			Validator.isNotNull(skuExternalReferenceCode)) {
-
+		if (cpInstance == null) {
 			cpInstance =
 				_cpInstanceLocalService.fetchCPInstanceByExternalReferenceCode(
-					companyId, skuExternalReferenceCode);
-		}
-
-		if ((cpInstance == null) || (quantity < 1)) {
-			throw new CommerceOrderImporterTypeException();
+					companyId, sku);
 		}
 
 		CommerceOrderImporterItemImpl commerceOrderImporterItemImpl =
 			new CommerceOrderImporterItemImpl();
 
-		commerceOrderImporterItemImpl.setCPInstanceId(
-			cpInstance.getCPInstanceId());
-		commerceOrderImporterItemImpl.setSku(cpInstance.getSku());
+		if (cpInstance == null) {
+			Company company = _companyLocalService.getCompany(companyId);
 
-		CPDefinition cpDefinition = cpInstance.getCPDefinition();
+			if (Validator.isNotNull(sku)) {
+				commerceOrderImporterItemImpl.setNameMap(
+					Collections.singletonMap(company.getLocale(), sku));
+			}
+			else {
+				commerceOrderImporterItemImpl.setNameMap(
+					Collections.singletonMap(
+						company.getLocale(), String.valueOf(sku)));
+			}
 
-		commerceOrderImporterItemImpl.setCPDefinitionId(
-			cpDefinition.getCPDefinitionId());
-		commerceOrderImporterItemImpl.setNameMap(cpDefinition.getNameMap());
+			commerceOrderImporterItemImpl.setErrorMessages(
+				new String[] {"the-product-is-no-longer-available"});
+		}
+		else {
+			CPInstance firstAvailableReplacementCPInstance =
+				_cpInstanceHelper.fetchFirstAvailableReplacementCPInstance(
+					commerceChannelGroupId, cpInstance.getCPInstanceId());
+
+			if ((firstAvailableReplacementCPInstance != null) &&
+				!_cpAvailabilityChecker.check(
+					commerceChannelGroupId, cpInstance, quantity)) {
+
+				commerceOrderImporterItemImpl.setReplacingSKU(
+					cpInstance.getSku());
+
+				cpInstance = firstAvailableReplacementCPInstance;
+			}
+
+			commerceOrderImporterItemImpl.setCPInstanceId(
+				cpInstance.getCPInstanceId());
+			commerceOrderImporterItemImpl.setSku(cpInstance.getSku());
+
+			CPDefinition cpDefinition = cpInstance.getCPDefinition();
+
+			commerceOrderImporterItemImpl.setCPDefinitionId(
+				cpDefinition.getCPDefinitionId());
+			commerceOrderImporterItemImpl.setNameMap(cpDefinition.getNameMap());
+		}
+
+		commerceOrderImporterItemImpl.setJSON("[]");
 
 		commerceOrderImporterItemImpl.setQuantity(quantity);
 
@@ -284,10 +333,22 @@ public class CSVCommerceOrderImporterTypeImpl
 	private CommerceOrderService _commerceOrderService;
 
 	@Reference
+	private CompanyLocalService _companyLocalService;
+
+	@Reference
 	private ConfigurationProvider _configurationProvider;
 
 	@Reference
+	private CPAvailabilityChecker _cpAvailabilityChecker;
+
+	@Reference
+	private CPInstanceHelper _cpInstanceHelper;
+
+	@Reference
 	private CPInstanceLocalService _cpInstanceLocalService;
+
+	@Reference
+	private DLAppLocalService _dlAppLocalService;
 
 	@Reference
 	private JSPRenderer _jspRenderer;

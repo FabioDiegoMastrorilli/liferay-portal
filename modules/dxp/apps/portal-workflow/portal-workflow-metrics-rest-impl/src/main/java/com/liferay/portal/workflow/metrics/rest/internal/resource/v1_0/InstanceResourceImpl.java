@@ -317,6 +317,7 @@ public class InstanceResourceImpl
 		getProcessInstance(processId, instanceId);
 
 		_instanceWorkflowMetricsIndexer.updateInstance(
+			instance.getActive(),
 			LocalizedMapUtil.getLocalizedMap(instance.getAssetTitle_i18n()),
 			LocalizedMapUtil.getLocalizedMap(instance.getAssetType_i18n()),
 			contextCompany.getCompanyId(), instanceId,
@@ -532,6 +533,7 @@ public class InstanceResourceImpl
 		}
 
 		return booleanQuery.addMustQueryClauses(
+			_queries.term("active", Boolean.TRUE),
 			_queries.term("deleted", Boolean.FALSE),
 			_queries.term("processId", processId));
 	}
@@ -928,7 +930,7 @@ public class InstanceResourceImpl
 		}
 		catch (Exception exception) {
 			if (_log.isWarnEnabled()) {
-				_log.warn(exception, exception);
+				_log.warn(exception);
 			}
 
 			return null;
@@ -1067,6 +1069,7 @@ public class InstanceResourceImpl
 			));
 
 		filterBooleanQuery.addMustQueryClauses(
+			_queries.term("blocked", Boolean.FALSE),
 			_queries.term("deleted", Boolean.FALSE),
 			_queries.term("processId", processId),
 			_queries.term("status", WorkflowMetricsSLAStatus.RUNNING.name()),

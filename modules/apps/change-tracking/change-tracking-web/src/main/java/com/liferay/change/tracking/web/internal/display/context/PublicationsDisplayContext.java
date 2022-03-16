@@ -16,8 +16,10 @@ package com.liferay.change.tracking.web.internal.display.context;
 
 import com.liferay.change.tracking.constants.CTActionKeys;
 import com.liferay.change.tracking.constants.CTConstants;
+import com.liferay.change.tracking.mapping.CTMappingTableInfo;
 import com.liferay.change.tracking.model.CTCollection;
 import com.liferay.change.tracking.model.CTPreferences;
+import com.liferay.change.tracking.service.CTCollectionLocalService;
 import com.liferay.change.tracking.service.CTCollectionService;
 import com.liferay.change.tracking.service.CTEntryLocalService;
 import com.liferay.change.tracking.service.CTPreferencesLocalService;
@@ -40,7 +42,6 @@ import com.liferay.portal.kernel.security.permission.ActionKeys;
 import com.liferay.portal.kernel.security.permission.PermissionChecker;
 import com.liferay.portal.kernel.theme.ThemeDisplay;
 import com.liferay.portal.kernel.util.HashMapBuilder;
-import com.liferay.portal.kernel.util.OrderByComparator;
 import com.liferay.portal.kernel.util.OrderByComparatorFactoryUtil;
 import com.liferay.portal.kernel.util.WebKeys;
 import com.liferay.portal.kernel.workflow.WorkflowConstants;
@@ -63,6 +64,7 @@ import javax.servlet.http.HttpServletRequest;
 public class PublicationsDisplayContext extends BasePublicationsDisplayContext {
 
 	public PublicationsDisplayContext(
+		CTCollectionLocalService ctCollectionLocalService,
 		CTCollectionService ctCollectionService,
 		CTDisplayRendererRegistry ctDisplayRendererRegistry,
 		CTEntryLocalService ctEntryLocalService,
@@ -72,6 +74,7 @@ public class PublicationsDisplayContext extends BasePublicationsDisplayContext {
 
 		super(httpServletRequest);
 
+		_ctCollectionLocalService = ctCollectionLocalService;
 		_ctCollectionService = ctCollectionService;
 		_ctDisplayRendererRegistry = ctDisplayRendererRegistry;
 		_ctEntryLocalService = ctEntryLocalService;
@@ -385,35 +388,34 @@ public class PublicationsDisplayContext extends BasePublicationsDisplayContext {
 
 		String keywords = displayTerms.getKeywords();
 
-		int count = _ctCollectionService.getCTCollectionsCount(
-			_themeDisplay.getCompanyId(),
-			new int[] {
-				WorkflowConstants.STATUS_DRAFT, WorkflowConstants.STATUS_EXPIRED
+		searchContainer.setResultsAndTotal(
+			() -> {
+				String column = searchContainer.getOrderByCol();
+
+				if (column.equals("modified-date")) {
+					column = "modifiedDate";
+				}
+
+				return _ctCollectionService.getCTCollections(
+					_themeDisplay.getCompanyId(),
+					new int[] {
+						WorkflowConstants.STATUS_DRAFT,
+						WorkflowConstants.STATUS_EXPIRED
+					},
+					keywords, searchContainer.getStart(),
+					searchContainer.getEnd(),
+					OrderByComparatorFactoryUtil.create(
+						"CTCollection", column,
+						Objects.equals(
+							searchContainer.getOrderByType(), "asc")));
 			},
-			keywords);
-
-		searchContainer.setTotal(count);
-
-		String column = searchContainer.getOrderByCol();
-
-		if (column.equals("modified-date")) {
-			column = "modifiedDate";
-		}
-
-		OrderByComparator<CTCollection> orderByComparator =
-			OrderByComparatorFactoryUtil.create(
-				"CTCollection", column,
-				Objects.equals(searchContainer.getOrderByType(), "asc"));
-
-		List<CTCollection> results = _ctCollectionService.getCTCollections(
-			_themeDisplay.getCompanyId(),
-			new int[] {
-				WorkflowConstants.STATUS_DRAFT, WorkflowConstants.STATUS_EXPIRED
-			},
-			keywords, searchContainer.getStart(), searchContainer.getEnd(),
-			orderByComparator);
-
-		searchContainer.setResults(results);
+			_ctCollectionService.getCTCollectionsCount(
+				_themeDisplay.getCompanyId(),
+				new int[] {
+					WorkflowConstants.STATUS_DRAFT,
+					WorkflowConstants.STATUS_EXPIRED
+				},
+				keywords));
 
 		_searchContainer = searchContainer;
 
@@ -486,6 +488,13 @@ public class PublicationsDisplayContext extends BasePublicationsDisplayContext {
 			return true;
 		}
 
+		List<CTMappingTableInfo> mappingTableInfos =
+			_ctCollectionLocalService.getCTMappingTableInfos(ctCollectionId);
+
+		if (!mappingTableInfos.isEmpty()) {
+			return true;
+		}
+
 		return false;
 	}
 
@@ -500,6 +509,7 @@ public class PublicationsDisplayContext extends BasePublicationsDisplayContext {
 	}
 
 	private final long _ctCollectionId;
+	private final CTCollectionLocalService _ctCollectionLocalService;
 	private final CTCollectionService _ctCollectionService;
 	private final CTDisplayRendererRegistry _ctDisplayRendererRegistry;
 	private final CTEntryLocalService _ctEntryLocalService;

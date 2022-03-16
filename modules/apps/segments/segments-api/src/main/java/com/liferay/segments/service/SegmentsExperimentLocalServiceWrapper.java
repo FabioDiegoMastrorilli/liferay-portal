@@ -30,6 +30,10 @@ public class SegmentsExperimentLocalServiceWrapper
 	implements SegmentsExperimentLocalService,
 			   ServiceWrapper<SegmentsExperimentLocalService> {
 
+	public SegmentsExperimentLocalServiceWrapper() {
+		this(null);
+	}
+
 	public SegmentsExperimentLocalServiceWrapper(
 		SegmentsExperimentLocalService segmentsExperimentLocalService) {
 
@@ -263,6 +267,15 @@ public class SegmentsExperimentLocalServiceWrapper
 
 		return _segmentsExperimentLocalService.dynamicQueryCount(
 			dynamicQuery, projection);
+	}
+
+	@Override
+	public com.liferay.segments.model.SegmentsExperience
+		fetchControlSegmentExperience(
+			com.liferay.segments.model.SegmentsExperience segmentsExperience) {
+
+		return _segmentsExperimentLocalService.fetchControlSegmentExperience(
+			segmentsExperience);
 	}
 
 	@Override

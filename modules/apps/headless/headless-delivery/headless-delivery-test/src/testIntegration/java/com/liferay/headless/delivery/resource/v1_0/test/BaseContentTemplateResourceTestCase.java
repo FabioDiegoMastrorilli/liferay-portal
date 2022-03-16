@@ -25,6 +25,7 @@ import com.fasterxml.jackson.databind.util.ISO8601DateFormat;
 import com.liferay.depot.model.DepotEntry;
 import com.liferay.depot.service.DepotEntryLocalServiceUtil;
 import com.liferay.headless.delivery.client.dto.v1_0.ContentTemplate;
+import com.liferay.headless.delivery.client.dto.v1_0.Field;
 import com.liferay.headless.delivery.client.http.HttpInvoker;
 import com.liferay.headless.delivery.client.pagination.Page;
 import com.liferay.headless.delivery.client.pagination.Pagination;
@@ -305,6 +306,42 @@ public abstract class BaseContentTemplateResourceTestCase {
 	}
 
 	@Test
+	public void testGetAssetLibraryContentTemplatesPageWithFilterDoubleEquals()
+		throws Exception {
+
+		List<EntityField> entityFields = getEntityFields(
+			EntityField.Type.DOUBLE);
+
+		if (entityFields.isEmpty()) {
+			return;
+		}
+
+		Long assetLibraryId =
+			testGetAssetLibraryContentTemplatesPage_getAssetLibraryId();
+
+		ContentTemplate contentTemplate1 =
+			testGetAssetLibraryContentTemplatesPage_addContentTemplate(
+				assetLibraryId, randomContentTemplate());
+
+		@SuppressWarnings("PMD.UnusedLocalVariable")
+		ContentTemplate contentTemplate2 =
+			testGetAssetLibraryContentTemplatesPage_addContentTemplate(
+				assetLibraryId, randomContentTemplate());
+
+		for (EntityField entityField : entityFields) {
+			Page<ContentTemplate> page =
+				contentTemplateResource.getAssetLibraryContentTemplatesPage(
+					assetLibraryId, null, null,
+					getFilterString(entityField, "eq", contentTemplate1),
+					Pagination.of(1, 2), null);
+
+			assertEquals(
+				Collections.singletonList(contentTemplate1),
+				(List<ContentTemplate>)page.getItems());
+		}
+	}
+
+	@Test
 	public void testGetAssetLibraryContentTemplatesPageWithFilterStringEquals()
 		throws Exception {
 
@@ -400,6 +437,20 @@ public abstract class BaseContentTemplateResourceTestCase {
 				BeanUtils.setProperty(
 					contentTemplate1, entityField.getName(),
 					DateUtils.addMinutes(new Date(), -2));
+			});
+	}
+
+	@Test
+	public void testGetAssetLibraryContentTemplatesPageWithSortDouble()
+		throws Exception {
+
+		testGetAssetLibraryContentTemplatesPageWithSort(
+			EntityField.Type.DOUBLE,
+			(entityField, contentTemplate1, contentTemplate2) -> {
+				BeanUtils.setProperty(
+					contentTemplate1, entityField.getName(), 0.1);
+				BeanUtils.setProperty(
+					contentTemplate2, entityField.getName(), 0.5);
 			});
 	}
 
@@ -624,6 +675,41 @@ public abstract class BaseContentTemplateResourceTestCase {
 	}
 
 	@Test
+	public void testGetSiteContentTemplatesPageWithFilterDoubleEquals()
+		throws Exception {
+
+		List<EntityField> entityFields = getEntityFields(
+			EntityField.Type.DOUBLE);
+
+		if (entityFields.isEmpty()) {
+			return;
+		}
+
+		Long siteId = testGetSiteContentTemplatesPage_getSiteId();
+
+		ContentTemplate contentTemplate1 =
+			testGetSiteContentTemplatesPage_addContentTemplate(
+				siteId, randomContentTemplate());
+
+		@SuppressWarnings("PMD.UnusedLocalVariable")
+		ContentTemplate contentTemplate2 =
+			testGetSiteContentTemplatesPage_addContentTemplate(
+				siteId, randomContentTemplate());
+
+		for (EntityField entityField : entityFields) {
+			Page<ContentTemplate> page =
+				contentTemplateResource.getSiteContentTemplatesPage(
+					siteId, null, null,
+					getFilterString(entityField, "eq", contentTemplate1),
+					Pagination.of(1, 2), null);
+
+			assertEquals(
+				Collections.singletonList(contentTemplate1),
+				(List<ContentTemplate>)page.getItems());
+		}
+	}
+
+	@Test
 	public void testGetSiteContentTemplatesPageWithFilterStringEquals()
 		throws Exception {
 
@@ -717,6 +803,20 @@ public abstract class BaseContentTemplateResourceTestCase {
 				BeanUtils.setProperty(
 					contentTemplate1, entityField.getName(),
 					DateUtils.addMinutes(new Date(), -2));
+			});
+	}
+
+	@Test
+	public void testGetSiteContentTemplatesPageWithSortDouble()
+		throws Exception {
+
+		testGetSiteContentTemplatesPageWithSort(
+			EntityField.Type.DOUBLE,
+			(entityField, contentTemplate1, contentTemplate2) -> {
+				BeanUtils.setProperty(
+					contentTemplate1, entityField.getName(), 0.1);
+				BeanUtils.setProperty(
+					contentTemplate2, entityField.getName(), 0.5);
 			});
 	}
 
@@ -901,19 +1001,19 @@ public abstract class BaseContentTemplateResourceTestCase {
 	}
 
 	@Test
-	public void testGetContentTemplate() throws Exception {
+	public void testGetSiteContentTemplate() throws Exception {
 		ContentTemplate postContentTemplate =
-			testGetContentTemplate_addContentTemplate();
+			testGetSiteContentTemplate_addContentTemplate();
 
 		ContentTemplate getContentTemplate =
-			contentTemplateResource.getContentTemplate(
+			contentTemplateResource.getSiteContentTemplate(
 				postContentTemplate.getSiteId(), postContentTemplate.getId());
 
 		assertEquals(postContentTemplate, getContentTemplate);
 		assertValid(getContentTemplate);
 	}
 
-	protected ContentTemplate testGetContentTemplate_addContentTemplate()
+	protected ContentTemplate testGetSiteContentTemplate_addContentTemplate()
 		throws Exception {
 
 		throw new UnsupportedOperationException(
@@ -921,7 +1021,7 @@ public abstract class BaseContentTemplateResourceTestCase {
 	}
 
 	@Test
-	public void testGraphQLGetContentTemplate() throws Exception {
+	public void testGraphQLGetSiteContentTemplate() throws Exception {
 		ContentTemplate contentTemplate =
 			testGraphQLContentTemplate_addContentTemplate();
 
@@ -950,7 +1050,7 @@ public abstract class BaseContentTemplateResourceTestCase {
 	}
 
 	@Test
-	public void testGraphQLGetContentTemplateNotFound() throws Exception {
+	public void testGraphQLGetSiteContentTemplateNotFound() throws Exception {
 		String irrelevantContentTemplateId =
 			"\"" + RandomTestUtil.randomString() + "\"";
 

@@ -12,6 +12,9 @@
  * details.
  */
 
+/* eslint-disable @liferay/aui/no-node */
+/* eslint-disable @liferay/aui/no-one */
+
 (function (A) {
 	var Lang = A.Lang;
 
@@ -205,7 +208,9 @@
 				return;
 			}
 
-			var currentColumnId = Util.getColumnId(container.attr('id'));
+			var containerId = container.attr('id');
+
+			var currentColumnId = containerId.replace(/layout-column_/, '');
 
 			var portletPosition = 0;
 
@@ -486,7 +491,7 @@
 
 			var canEditTitle = options.canEditTitle;
 			var columnPos = options.columnPos;
-			var isStatic = options.isStatic == 'no' ? null : options.isStatic;
+			var isStatic = options.isStatic === 'no' ? null : options.isStatic;
 			var namespacedId = options.namespacedId;
 			var portletId = options.portletId;
 			var refreshURL = options.refreshURL;
@@ -558,7 +563,10 @@
 
 			if (portlet) {
 				if (mergeWithRefreshURLData) {
-					data = A.merge(portlet.refreshURLData || {}, data || {});
+					data = {
+						...(portlet.refreshURLData || {}),
+						...(data || {}),
+					};
 				}
 				else {
 					data = data || portlet.refreshURLData || {};

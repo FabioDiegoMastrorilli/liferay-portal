@@ -73,7 +73,8 @@ const data = {
 };
 
 describe('The InstanceDetailsModal component should', () => {
-	let getByText, renderResult;
+	let getByText;
+	let renderResult;
 
 	const renderComponent = () => {
 		cleanup();
@@ -91,6 +92,7 @@ describe('The InstanceDetailsModal component should', () => {
 		beforeAll(async () => {
 			fetch.mockResolvedValueOnce({
 				json: () => Promise.resolve(data),
+				ok: true,
 			});
 
 			renderComponent();
@@ -175,6 +177,7 @@ describe('The InstanceDetailsModal component should', () => {
 						slaStatus: 'Untracked',
 						taskNames: ['Review'],
 					}),
+				ok: true,
 			});
 
 			renderComponent();

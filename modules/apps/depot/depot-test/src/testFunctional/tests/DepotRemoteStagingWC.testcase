@@ -190,7 +190,7 @@ definition {
 		WebContentNavigator.gotoAddCP();
 
 		WebContent.addWithFriendlyURL(
-			friendlyUrl = "friendlyurl",
+			friendlyURL = "friendlyurl",
 			webContentContent = "Web Content Content",
 			webContentTitle = "Web Content Title");
 
@@ -222,7 +222,8 @@ definition {
 		Panel.expandPanel(panel = "Friendly URL");
 
 		AssertTextEquals(
-			locator1 = "TextInput#FRIENDLY_URL",
+			inputFieldId = "friendlyURL",
+			locator1 = "TextInput#INPUT_ID",
 			value1 = "friendlyurl");
 
 		Navigator.openSitePage(
@@ -245,7 +246,9 @@ definition {
 			pageName = "Test Page",
 			siteName = "Remote Site");
 
-		WebContent.viewPGViaWCD(webContentContent = "Web Content Content");
+		WebContentDisplayPortlet.viewContent(
+			webContentContent = "Web Content Content",
+			webContentTitle = "Web Content Title");
 
 		User.loginPG(
 			nodePort = "8080",
@@ -275,7 +278,8 @@ definition {
 		Panel.expandPanel(panel = "Friendly URL");
 
 		AssertTextEquals(
-			locator1 = "TextInput#FRIENDLY_URL",
+			inputFieldId = "friendlyURL",
+			locator1 = "TextInput#INPUT_ID",
 			value1 = "friendlyurledit");
 
 		Navigator.openSitePage(
@@ -298,7 +302,9 @@ definition {
 			pageName = "Test Page",
 			siteName = "Remote Site");
 
-		WebContent.viewPGViaWCD(webContentContent = "Web Content Content");
+		WebContentDisplayPortlet.viewContent(
+			webContentContent = "Web Content Content",
+			webContentTitle = "Web Content Title");
 	}
 
 	@description = "This ensures that image in basic article in depot can be edited and republished in staging site when enabling remote staging."

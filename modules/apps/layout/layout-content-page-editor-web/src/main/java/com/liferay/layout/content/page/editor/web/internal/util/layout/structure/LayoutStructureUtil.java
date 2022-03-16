@@ -22,6 +22,7 @@ import com.liferay.layout.page.template.model.LayoutPageTemplateStructureRel;
 import com.liferay.layout.page.template.service.LayoutPageTemplateStructureLocalServiceUtil;
 import com.liferay.layout.page.template.service.LayoutPageTemplateStructureRelLocalServiceUtil;
 import com.liferay.layout.page.template.service.LayoutPageTemplateStructureServiceUtil;
+import com.liferay.layout.util.constants.LayoutDataItemTypeConstants;
 import com.liferay.layout.util.structure.DeletedLayoutStructureItem;
 import com.liferay.layout.util.structure.FragmentStyledLayoutStructureItem;
 import com.liferay.layout.util.structure.LayoutStructure;
@@ -32,7 +33,9 @@ import com.liferay.portal.kernel.json.JSONObject;
 import com.liferay.portal.kernel.util.ArrayUtil;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * @author Víctor Galán
@@ -89,6 +92,48 @@ public class LayoutStructureUtil {
 		}
 	}
 
+	public static List<String> getCollectionStyledLayoutStructureItemIds(
+		long fragmentEntryLinkId, LayoutStructure layoutStructure) {
+
+		if (layoutStructure == null) {
+			return Collections.emptyList();
+		}
+
+		LayoutStructureItem layoutStructureItem =
+			layoutStructure.getLayoutStructureItemByFragmentEntryLinkId(
+				fragmentEntryLinkId);
+
+		if (layoutStructureItem == null) {
+			return Collections.emptyList();
+		}
+
+		LayoutStructureItem currentLayoutStructureItem =
+			layoutStructure.getLayoutStructureItem(
+				layoutStructureItem.getParentItemId());
+
+		List<String> collectionStyledLayoutStructureItemIds = new ArrayList<>();
+
+		while (!Objects.equals(
+					currentLayoutStructureItem.getItemId(),
+					layoutStructure.getMainItemId())) {
+
+			if (Objects.equals(
+					LayoutDataItemTypeConstants.TYPE_COLLECTION,
+					currentLayoutStructureItem.getItemType())) {
+
+				collectionStyledLayoutStructureItemIds.add(
+					currentLayoutStructureItem.getItemId());
+			}
+
+			currentLayoutStructureItem = layoutStructure.getLayoutStructureItem(
+				currentLayoutStructureItem.getParentItemId());
+		}
+
+		Collections.reverse(collectionStyledLayoutStructureItemIds);
+
+		return collectionStyledLayoutStructureItemIds;
+	}
+
 	public static long[] getFragmentEntryLinkIds(
 		List<LayoutStructureItem> layoutStructureItems) {
 
@@ -128,6 +173,18 @@ public class LayoutStructureUtil {
 
 		return LayoutStructure.of(
 			layoutPageTemplateStructure.getData(segmentsExperienceId));
+	}
+
+	public static LayoutStructure getLayoutStructure(
+			long groupId, long plid, String segmentsExperienceKey)
+		throws PortalException {
+
+		LayoutPageTemplateStructure layoutPageTemplateStructure =
+			LayoutPageTemplateStructureLocalServiceUtil.
+				fetchLayoutPageTemplateStructure(groupId, plid, true);
+
+		return LayoutStructure.of(
+			layoutPageTemplateStructure.getData(segmentsExperienceKey));
 	}
 
 	public static boolean isPortletMarkedForDeletion(

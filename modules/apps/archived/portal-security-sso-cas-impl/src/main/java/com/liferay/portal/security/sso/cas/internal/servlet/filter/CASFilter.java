@@ -116,7 +116,7 @@ public class CASFilter extends BaseFilter {
 			}
 		}
 		catch (Exception exception) {
-			_log.error(exception, exception);
+			_log.error(exception);
 		}
 
 		return false;
@@ -125,42 +125,6 @@ public class CASFilter extends BaseFilter {
 	@Override
 	protected Log getLog() {
 		return _log;
-	}
-
-	protected TicketValidator getTicketValidator(long companyId)
-		throws Exception {
-
-		TicketValidator ticketValidator = _ticketValidators.get(companyId);
-
-		if (ticketValidator != null) {
-			return ticketValidator;
-		}
-
-		CASConfiguration casConfiguration =
-			_configurationProvider.getConfiguration(
-				CASConfiguration.class,
-				new CompanyServiceSettingsLocator(
-					companyId, CASConstants.SERVICE_NAME));
-
-		String serverUrl = casConfiguration.serverURL();
-
-		Cas20ProxyTicketValidator cas20ProxyTicketValidator =
-			new Cas20ProxyTicketValidator(serverUrl);
-
-		cas20ProxyTicketValidator.setCustomParameters(
-			HashMapBuilder.put(
-				"casServerLoginUrl", casConfiguration.loginURL()
-			).put(
-				"casServerUrlPrefix", serverUrl
-			).put(
-				"redirectAfterValidation", "false"
-			).put(
-				"serverName", casConfiguration.serverName()
-			).build());
-
-		_ticketValidators.put(companyId, cas20ProxyTicketValidator);
-
-		return cas20ProxyTicketValidator;
 	}
 
 	@Override
@@ -238,7 +202,7 @@ public class CASFilter extends BaseFilter {
 			return;
 		}
 
-		TicketValidator ticketValidator = getTicketValidator(companyId);
+		TicketValidator ticketValidator = _getTicketValidator(companyId);
 
 		Assertion assertion = null;
 
@@ -252,7 +216,7 @@ public class CASFilter extends BaseFilter {
 					ticketValidationException);
 			}
 			else if (_log.isInfoEnabled()) {
-				_log.info(ticketValidationException.getMessage());
+				_log.info(ticketValidationException);
 			}
 
 			_portal.sendError(
@@ -282,6 +246,42 @@ public class CASFilter extends BaseFilter {
 		ConfigurationProvider configurationProvider) {
 
 		_configurationProvider = configurationProvider;
+	}
+
+	private TicketValidator _getTicketValidator(long companyId)
+		throws Exception {
+
+		TicketValidator ticketValidator = _ticketValidators.get(companyId);
+
+		if (ticketValidator != null) {
+			return ticketValidator;
+		}
+
+		CASConfiguration casConfiguration =
+			_configurationProvider.getConfiguration(
+				CASConfiguration.class,
+				new CompanyServiceSettingsLocator(
+					companyId, CASConstants.SERVICE_NAME));
+
+		String serverUrl = casConfiguration.serverURL();
+
+		Cas20ProxyTicketValidator cas20ProxyTicketValidator =
+			new Cas20ProxyTicketValidator(serverUrl);
+
+		cas20ProxyTicketValidator.setCustomParameters(
+			HashMapBuilder.put(
+				"casServerLoginUrl", casConfiguration.loginURL()
+			).put(
+				"casServerUrlPrefix", serverUrl
+			).put(
+				"redirectAfterValidation", "false"
+			).put(
+				"serverName", casConfiguration.serverName()
+			).build());
+
+		_ticketValidators.put(companyId, cas20ProxyTicketValidator);
+
+		return cas20ProxyTicketValidator;
 	}
 
 	private static final Log _log = LogFactoryUtil.getLog(CASFilter.class);

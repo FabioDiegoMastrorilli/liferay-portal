@@ -22,6 +22,7 @@ import com.fasterxml.jackson.annotation.JsonValue;
 
 import com.liferay.petra.function.UnsafeSupplier;
 import com.liferay.petra.string.StringBundler;
+import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.vulcan.graphql.annotation.GraphQLField;
 import com.liferay.portal.vulcan.graphql.annotation.GraphQLName;
 import com.liferay.portal.vulcan.util.ObjectMapperUtil;
@@ -270,6 +271,44 @@ public class Layout implements Serializable {
 	@GraphQLField
 	@JsonProperty(access = JsonProperty.Access.READ_WRITE)
 	protected ContentDisplay contentDisplay;
+
+	@Schema
+	@Valid
+	public HtmlTag getHtmlTag() {
+		return htmlTag;
+	}
+
+	@JsonIgnore
+	public String getHtmlTagAsString() {
+		if (htmlTag == null) {
+			return null;
+		}
+
+		return htmlTag.toString();
+	}
+
+	public void setHtmlTag(HtmlTag htmlTag) {
+		this.htmlTag = htmlTag;
+	}
+
+	@JsonIgnore
+	public void setHtmlTag(
+		UnsafeSupplier<HtmlTag, Exception> htmlTagUnsafeSupplier) {
+
+		try {
+			htmlTag = htmlTagUnsafeSupplier.get();
+		}
+		catch (RuntimeException re) {
+			throw re;
+		}
+		catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	@GraphQLField
+	@JsonProperty(access = JsonProperty.Access.READ_WRITE)
+	protected HtmlTag htmlTag;
 
 	@Schema(deprecated = true)
 	@Valid
@@ -784,6 +823,20 @@ public class Layout implements Serializable {
 			sb.append("\"");
 		}
 
+		if (htmlTag != null) {
+			if (sb.length() > 1) {
+				sb.append(", ");
+			}
+
+			sb.append("\"htmlTag\": ");
+
+			sb.append("\"");
+
+			sb.append(htmlTag);
+
+			sb.append("\"");
+		}
+
 		if (justify != null) {
 			if (sb.length() > 1) {
 				sb.append(", ");
@@ -1092,6 +1145,45 @@ public class Layout implements Serializable {
 
 	}
 
+	@GraphQLName("HtmlTag")
+	public static enum HtmlTag {
+
+		ARTICLE("Article"), ASIDE("Aside"), DIV("Div"), FOOTER("Footer"),
+		HEADER("Header"), MAIN("Main"), NAV("Nav"), SECTION("Section");
+
+		@JsonCreator
+		public static HtmlTag create(String value) {
+			if ((value == null) || value.equals("")) {
+				return null;
+			}
+
+			for (HtmlTag htmlTag : values()) {
+				if (Objects.equals(htmlTag.getValue(), value)) {
+					return htmlTag;
+				}
+			}
+
+			throw new IllegalArgumentException("Invalid enum value: " + value);
+		}
+
+		@JsonValue
+		public String getValue() {
+			return _value;
+		}
+
+		@Override
+		public String toString() {
+			return _value;
+		}
+
+		private HtmlTag(String value) {
+			_value = value;
+		}
+
+		private final String _value;
+
+	}
+
 	@GraphQLName("Justify")
 	public static enum Justify {
 
@@ -1209,9 +1301,9 @@ public class Layout implements Serializable {
 	}
 
 	private static String _escape(Object object) {
-		String string = String.valueOf(object);
-
-		return string.replaceAll("\"", "\\\\\"");
+		return StringUtil.replace(
+			String.valueOf(object), _JSON_ESCAPE_STRINGS[0],
+			_JSON_ESCAPE_STRINGS[1]);
 	}
 
 	private static boolean _isArray(Object value) {
@@ -1237,7 +1329,7 @@ public class Layout implements Serializable {
 			Map.Entry<String, ?> entry = iterator.next();
 
 			sb.append("\"");
-			sb.append(entry.getKey());
+			sb.append(_escape(entry.getKey()));
 			sb.append("\": ");
 
 			Object value = entry.getValue();
@@ -1269,7 +1361,7 @@ public class Layout implements Serializable {
 			}
 			else if (value instanceof String) {
 				sb.append("\"");
-				sb.append(value);
+				sb.append(_escape(value));
 				sb.append("\"");
 			}
 			else {
@@ -1285,5 +1377,10 @@ public class Layout implements Serializable {
 
 		return sb.toString();
 	}
+
+	private static final String[][] _JSON_ESCAPE_STRINGS = {
+		{"\\", "\"", "\b", "\f", "\n", "\r", "\t"},
+		{"\\\\", "\\\"", "\\b", "\\f", "\\n", "\\r", "\\t"}
+	};
 
 }

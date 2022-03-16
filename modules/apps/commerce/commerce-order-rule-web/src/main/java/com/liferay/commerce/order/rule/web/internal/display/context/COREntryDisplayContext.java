@@ -26,7 +26,7 @@ import com.liferay.commerce.order.rule.entry.type.COREntryTypeJSPContributorRegi
 import com.liferay.commerce.order.rule.entry.type.COREntryTypeRegistry;
 import com.liferay.commerce.order.rule.model.COREntry;
 import com.liferay.commerce.order.rule.service.COREntryService;
-import com.liferay.commerce.order.rule.web.internal.display.context.util.COREntryRequestHelper;
+import com.liferay.commerce.order.rule.web.internal.display.context.helper.COREntryRequestHelper;
 import com.liferay.frontend.taglib.clay.data.set.servlet.taglib.util.ClayDataSetActionDropdownItem;
 import com.liferay.frontend.taglib.clay.servlet.taglib.util.CreationMenu;
 import com.liferay.petra.portlet.url.builder.PortletURLBuilder;
@@ -93,6 +93,23 @@ public class COREntryDisplayContext {
 		).setWindowState(
 			LiferayWindowState.POP_UP
 		).buildString();
+	}
+
+	public String getApplyTo() throws Exception {
+		COREntry corEntry = getCOREntry();
+
+		if (corEntry == null) {
+			return StringPool.BLANK;
+		}
+
+		UnicodeProperties typeSettingsUnicodeProperties =
+			UnicodePropertiesBuilder.fastLoad(
+				corEntry.getTypeSettings()
+			).build();
+
+		return GetterUtil.getString(
+			typeSettingsUnicodeProperties.getProperty(
+				COREntryConstants.TYPE_MINIMUM_ORDER_AMOUNT_FIELD_APPLY_TO));
 	}
 
 	public List<CommerceCurrency> getCommerceCurrencies()

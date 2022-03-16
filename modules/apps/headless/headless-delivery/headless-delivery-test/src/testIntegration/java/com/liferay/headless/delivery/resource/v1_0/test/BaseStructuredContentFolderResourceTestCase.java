@@ -24,6 +24,7 @@ import com.fasterxml.jackson.databind.util.ISO8601DateFormat;
 
 import com.liferay.depot.model.DepotEntry;
 import com.liferay.depot.service.DepotEntryLocalServiceUtil;
+import com.liferay.headless.delivery.client.dto.v1_0.Field;
 import com.liferay.headless.delivery.client.dto.v1_0.StructuredContentFolder;
 import com.liferay.headless.delivery.client.http.HttpInvoker;
 import com.liferay.headless.delivery.client.pagination.Page;
@@ -330,6 +331,44 @@ public abstract class BaseStructuredContentFolderResourceTestCase {
 	}
 
 	@Test
+	public void testGetAssetLibraryStructuredContentFoldersPageWithFilterDoubleEquals()
+		throws Exception {
+
+		List<EntityField> entityFields = getEntityFields(
+			EntityField.Type.DOUBLE);
+
+		if (entityFields.isEmpty()) {
+			return;
+		}
+
+		Long assetLibraryId =
+			testGetAssetLibraryStructuredContentFoldersPage_getAssetLibraryId();
+
+		StructuredContentFolder structuredContentFolder1 =
+			testGetAssetLibraryStructuredContentFoldersPage_addStructuredContentFolder(
+				assetLibraryId, randomStructuredContentFolder());
+
+		@SuppressWarnings("PMD.UnusedLocalVariable")
+		StructuredContentFolder structuredContentFolder2 =
+			testGetAssetLibraryStructuredContentFoldersPage_addStructuredContentFolder(
+				assetLibraryId, randomStructuredContentFolder());
+
+		for (EntityField entityField : entityFields) {
+			Page<StructuredContentFolder> page =
+				structuredContentFolderResource.
+					getAssetLibraryStructuredContentFoldersPage(
+						assetLibraryId, null, null, null,
+						getFilterString(
+							entityField, "eq", structuredContentFolder1),
+						Pagination.of(1, 2), null);
+
+			assertEquals(
+				Collections.singletonList(structuredContentFolder1),
+				(List<StructuredContentFolder>)page.getItems());
+		}
+	}
+
+	@Test
 	public void testGetAssetLibraryStructuredContentFoldersPageWithFilterStringEquals()
 		throws Exception {
 
@@ -437,6 +476,20 @@ public abstract class BaseStructuredContentFolderResourceTestCase {
 				BeanUtils.setProperty(
 					structuredContentFolder1, entityField.getName(),
 					DateUtils.addMinutes(new Date(), -2));
+			});
+	}
+
+	@Test
+	public void testGetAssetLibraryStructuredContentFoldersPageWithSortDouble()
+		throws Exception {
+
+		testGetAssetLibraryStructuredContentFoldersPageWithSort(
+			EntityField.Type.DOUBLE,
+			(entityField, structuredContentFolder1, structuredContentFolder2) ->{
+				BeanUtils.setProperty(
+					structuredContentFolder1, entityField.getName(), 0.1);
+				BeanUtils.setProperty(
+					structuredContentFolder2, entityField.getName(), 0.5);
 			});
 	}
 
@@ -638,12 +691,12 @@ public abstract class BaseStructuredContentFolderResourceTestCase {
 	}
 
 	@Test
-	public void testPutAssetLibraryStructuredContentFolderPermission()
+	public void testPutAssetLibraryStructuredContentFolderPermissionsPage()
 		throws Exception {
 
 		@SuppressWarnings("PMD.UnusedLocalVariable")
 		StructuredContentFolder structuredContentFolder =
-			testPutAssetLibraryStructuredContentFolderPermission_addStructuredContentFolder();
+			testPutAssetLibraryStructuredContentFolderPermissionsPage_addStructuredContentFolder();
 
 		@SuppressWarnings("PMD.UnusedLocalVariable")
 		com.liferay.portal.kernel.model.Role role = RoleTestUtil.addRole(
@@ -652,7 +705,7 @@ public abstract class BaseStructuredContentFolderResourceTestCase {
 		assertHttpResponseStatusCode(
 			200,
 			structuredContentFolderResource.
-				putAssetLibraryStructuredContentFolderPermissionHttpResponse(
+				putAssetLibraryStructuredContentFolderPermissionsPageHttpResponse(
 					testDepotEntry.getDepotEntryId(),
 					new Permission[] {
 						new Permission() {
@@ -666,7 +719,7 @@ public abstract class BaseStructuredContentFolderResourceTestCase {
 		assertHttpResponseStatusCode(
 			404,
 			structuredContentFolderResource.
-				putAssetLibraryStructuredContentFolderPermissionHttpResponse(
+				putAssetLibraryStructuredContentFolderPermissionsPageHttpResponse(
 					testDepotEntry.getDepotEntryId(),
 					new Permission[] {
 						new Permission() {
@@ -679,7 +732,7 @@ public abstract class BaseStructuredContentFolderResourceTestCase {
 	}
 
 	protected StructuredContentFolder
-			testPutAssetLibraryStructuredContentFolderPermission_addStructuredContentFolder()
+			testPutAssetLibraryStructuredContentFolderPermissionsPage_addStructuredContentFolder()
 		throws Exception {
 
 		return structuredContentFolderResource.
@@ -773,6 +826,43 @@ public abstract class BaseStructuredContentFolderResourceTestCase {
 						siteId, null, null, null,
 						getFilterString(
 							entityField, "between", structuredContentFolder1),
+						Pagination.of(1, 2), null);
+
+			assertEquals(
+				Collections.singletonList(structuredContentFolder1),
+				(List<StructuredContentFolder>)page.getItems());
+		}
+	}
+
+	@Test
+	public void testGetSiteStructuredContentFoldersPageWithFilterDoubleEquals()
+		throws Exception {
+
+		List<EntityField> entityFields = getEntityFields(
+			EntityField.Type.DOUBLE);
+
+		if (entityFields.isEmpty()) {
+			return;
+		}
+
+		Long siteId = testGetSiteStructuredContentFoldersPage_getSiteId();
+
+		StructuredContentFolder structuredContentFolder1 =
+			testGetSiteStructuredContentFoldersPage_addStructuredContentFolder(
+				siteId, randomStructuredContentFolder());
+
+		@SuppressWarnings("PMD.UnusedLocalVariable")
+		StructuredContentFolder structuredContentFolder2 =
+			testGetSiteStructuredContentFoldersPage_addStructuredContentFolder(
+				siteId, randomStructuredContentFolder());
+
+		for (EntityField entityField : entityFields) {
+			Page<StructuredContentFolder> page =
+				structuredContentFolderResource.
+					getSiteStructuredContentFoldersPage(
+						siteId, null, null, null,
+						getFilterString(
+							entityField, "eq", structuredContentFolder1),
 						Pagination.of(1, 2), null);
 
 			assertEquals(
@@ -881,6 +971,20 @@ public abstract class BaseStructuredContentFolderResourceTestCase {
 				BeanUtils.setProperty(
 					structuredContentFolder1, entityField.getName(),
 					DateUtils.addMinutes(new Date(), -2));
+			});
+	}
+
+	@Test
+	public void testGetSiteStructuredContentFoldersPageWithSortDouble()
+		throws Exception {
+
+		testGetSiteStructuredContentFoldersPageWithSort(
+			EntityField.Type.DOUBLE,
+			(entityField, structuredContentFolder1, structuredContentFolder2) ->{
+				BeanUtils.setProperty(
+					structuredContentFolder1, entityField.getName(), 0.1);
+				BeanUtils.setProperty(
+					structuredContentFolder2, entityField.getName(), 0.5);
 			});
 	}
 
@@ -1135,12 +1239,12 @@ public abstract class BaseStructuredContentFolderResourceTestCase {
 	}
 
 	@Test
-	public void testPutSiteStructuredContentFolderPermission()
+	public void testPutSiteStructuredContentFolderPermissionsPage()
 		throws Exception {
 
 		@SuppressWarnings("PMD.UnusedLocalVariable")
 		StructuredContentFolder structuredContentFolder =
-			testPutSiteStructuredContentFolderPermission_addStructuredContentFolder();
+			testPutSiteStructuredContentFolderPermissionsPage_addStructuredContentFolder();
 
 		@SuppressWarnings("PMD.UnusedLocalVariable")
 		com.liferay.portal.kernel.model.Role role = RoleTestUtil.addRole(
@@ -1149,7 +1253,7 @@ public abstract class BaseStructuredContentFolderResourceTestCase {
 		assertHttpResponseStatusCode(
 			200,
 			structuredContentFolderResource.
-				putSiteStructuredContentFolderPermissionHttpResponse(
+				putSiteStructuredContentFolderPermissionsPageHttpResponse(
 					structuredContentFolder.getSiteId(),
 					new Permission[] {
 						new Permission() {
@@ -1163,7 +1267,7 @@ public abstract class BaseStructuredContentFolderResourceTestCase {
 		assertHttpResponseStatusCode(
 			404,
 			structuredContentFolderResource.
-				putSiteStructuredContentFolderPermissionHttpResponse(
+				putSiteStructuredContentFolderPermissionsPageHttpResponse(
 					structuredContentFolder.getSiteId(),
 					new Permission[] {
 						new Permission() {
@@ -1176,7 +1280,7 @@ public abstract class BaseStructuredContentFolderResourceTestCase {
 	}
 
 	protected StructuredContentFolder
-			testPutSiteStructuredContentFolderPermission_addStructuredContentFolder()
+			testPutSiteStructuredContentFolderPermissionsPage_addStructuredContentFolder()
 		throws Exception {
 
 		return structuredContentFolderResource.postSiteStructuredContentFolder(
@@ -1207,10 +1311,12 @@ public abstract class BaseStructuredContentFolderResourceTestCase {
 	}
 
 	@Test
-	public void testPutStructuredContentFolderPermission() throws Exception {
+	public void testPutStructuredContentFolderPermissionsPage()
+		throws Exception {
+
 		@SuppressWarnings("PMD.UnusedLocalVariable")
 		StructuredContentFolder structuredContentFolder =
-			testPutStructuredContentFolderPermission_addStructuredContentFolder();
+			testPutStructuredContentFolderPermissionsPage_addStructuredContentFolder();
 
 		@SuppressWarnings("PMD.UnusedLocalVariable")
 		com.liferay.portal.kernel.model.Role role = RoleTestUtil.addRole(
@@ -1219,7 +1325,7 @@ public abstract class BaseStructuredContentFolderResourceTestCase {
 		assertHttpResponseStatusCode(
 			200,
 			structuredContentFolderResource.
-				putStructuredContentFolderPermissionHttpResponse(
+				putStructuredContentFolderPermissionsPageHttpResponse(
 					structuredContentFolder.getId(),
 					new Permission[] {
 						new Permission() {
@@ -1233,7 +1339,7 @@ public abstract class BaseStructuredContentFolderResourceTestCase {
 		assertHttpResponseStatusCode(
 			404,
 			structuredContentFolderResource.
-				putStructuredContentFolderPermissionHttpResponse(
+				putStructuredContentFolderPermissionsPageHttpResponse(
 					0L,
 					new Permission[] {
 						new Permission() {
@@ -1246,7 +1352,7 @@ public abstract class BaseStructuredContentFolderResourceTestCase {
 	}
 
 	protected StructuredContentFolder
-			testPutStructuredContentFolderPermission_addStructuredContentFolder()
+			testPutStructuredContentFolderPermissionsPage_addStructuredContentFolder()
 		throws Exception {
 
 		return structuredContentFolderResource.postSiteStructuredContentFolder(
@@ -1348,6 +1454,46 @@ public abstract class BaseStructuredContentFolderResourceTestCase {
 						parentStructuredContentFolderId, null, null,
 						getFilterString(
 							entityField, "between", structuredContentFolder1),
+						Pagination.of(1, 2), null);
+
+			assertEquals(
+				Collections.singletonList(structuredContentFolder1),
+				(List<StructuredContentFolder>)page.getItems());
+		}
+	}
+
+	@Test
+	public void testGetStructuredContentFolderStructuredContentFoldersPageWithFilterDoubleEquals()
+		throws Exception {
+
+		List<EntityField> entityFields = getEntityFields(
+			EntityField.Type.DOUBLE);
+
+		if (entityFields.isEmpty()) {
+			return;
+		}
+
+		Long parentStructuredContentFolderId =
+			testGetStructuredContentFolderStructuredContentFoldersPage_getParentStructuredContentFolderId();
+
+		StructuredContentFolder structuredContentFolder1 =
+			testGetStructuredContentFolderStructuredContentFoldersPage_addStructuredContentFolder(
+				parentStructuredContentFolderId,
+				randomStructuredContentFolder());
+
+		@SuppressWarnings("PMD.UnusedLocalVariable")
+		StructuredContentFolder structuredContentFolder2 =
+			testGetStructuredContentFolderStructuredContentFoldersPage_addStructuredContentFolder(
+				parentStructuredContentFolderId,
+				randomStructuredContentFolder());
+
+		for (EntityField entityField : entityFields) {
+			Page<StructuredContentFolder> page =
+				structuredContentFolderResource.
+					getStructuredContentFolderStructuredContentFoldersPage(
+						parentStructuredContentFolderId, null, null,
+						getFilterString(
+							entityField, "eq", structuredContentFolder1),
 						Pagination.of(1, 2), null);
 
 			assertEquals(
@@ -1469,6 +1615,20 @@ public abstract class BaseStructuredContentFolderResourceTestCase {
 				BeanUtils.setProperty(
 					structuredContentFolder1, entityField.getName(),
 					DateUtils.addMinutes(new Date(), -2));
+			});
+	}
+
+	@Test
+	public void testGetStructuredContentFolderStructuredContentFoldersPageWithSortDouble()
+		throws Exception {
+
+		testGetStructuredContentFolderStructuredContentFoldersPageWithSort(
+			EntityField.Type.DOUBLE,
+			(entityField, structuredContentFolder1, structuredContentFolder2) ->{
+				BeanUtils.setProperty(
+					structuredContentFolder1, entityField.getName(), 0.1);
+				BeanUtils.setProperty(
+					structuredContentFolder2, entityField.getName(), 0.5);
 			});
 	}
 
@@ -2711,13 +2871,20 @@ public abstract class BaseStructuredContentFolderResourceTestCase {
 		}
 
 		if (entityFieldName.equals("numberOfStructuredContentFolders")) {
-			throw new IllegalArgumentException(
-				"Invalid entity field " + entityFieldName);
+			sb.append(
+				String.valueOf(
+					structuredContentFolder.
+						getNumberOfStructuredContentFolders()));
+
+			return sb.toString();
 		}
 
 		if (entityFieldName.equals("numberOfStructuredContents")) {
-			throw new IllegalArgumentException(
-				"Invalid entity field " + entityFieldName);
+			sb.append(
+				String.valueOf(
+					structuredContentFolder.getNumberOfStructuredContents()));
+
+			return sb.toString();
 		}
 
 		if (entityFieldName.equals("parentStructuredContentFolderId")) {

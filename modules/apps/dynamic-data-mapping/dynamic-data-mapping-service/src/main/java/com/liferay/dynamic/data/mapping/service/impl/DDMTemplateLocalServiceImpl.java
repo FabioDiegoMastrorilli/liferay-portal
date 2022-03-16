@@ -30,7 +30,7 @@ import com.liferay.dynamic.data.mapping.exception.TemplateScriptException;
 import com.liferay.dynamic.data.mapping.exception.TemplateSmallImageContentException;
 import com.liferay.dynamic.data.mapping.exception.TemplateSmallImageNameException;
 import com.liferay.dynamic.data.mapping.exception.TemplateSmallImageSizeException;
-import com.liferay.dynamic.data.mapping.internal.search.util.DDMSearchHelper;
+import com.liferay.dynamic.data.mapping.internal.search.helper.DDMSearchHelper;
 import com.liferay.dynamic.data.mapping.model.DDMTemplate;
 import com.liferay.dynamic.data.mapping.model.DDMTemplateVersion;
 import com.liferay.dynamic.data.mapping.security.permission.DDMPermissionSupport;
@@ -41,7 +41,6 @@ import com.liferay.dynamic.data.mapping.service.persistence.DDMTemplateVersionPe
 import com.liferay.dynamic.data.mapping.util.DDMXML;
 import com.liferay.petra.string.StringBundler;
 import com.liferay.petra.string.StringPool;
-import com.liferay.petra.xml.XMLUtil;
 import com.liferay.portal.aop.AopService;
 import com.liferay.portal.configuration.metatype.bnd.util.ConfigurableUtil;
 import com.liferay.portal.kernel.dao.orm.QueryUtil;
@@ -65,7 +64,6 @@ import com.liferay.portal.kernel.service.UserLocalService;
 import com.liferay.portal.kernel.service.permission.ModelPermissions;
 import com.liferay.portal.kernel.settings.GroupServiceSettingsLocator;
 import com.liferay.portal.kernel.systemevent.SystemEvent;
-import com.liferay.portal.kernel.template.TemplateConstants;
 import com.liferay.portal.kernel.util.Constants;
 import com.liferay.portal.kernel.util.FileUtil;
 import com.liferay.portal.kernel.util.GetterUtil;
@@ -221,8 +219,6 @@ public class DDMTemplateLocalServiceImpl
 			templateKey = StringUtil.toUpperCase(templateKey.trim());
 		}
 
-		script = formatScript(type, language, script);
-
 		byte[] smallImageBytes = null;
 
 		if (smallImage) {
@@ -231,7 +227,7 @@ public class DDMTemplateLocalServiceImpl
 			}
 			catch (IOException ioException) {
 				if (_log.isDebugEnabled()) {
-					_log.debug(ioException, ioException);
+					_log.debug(ioException);
 				}
 			}
 
@@ -1450,8 +1446,6 @@ public class DDMTemplateLocalServiceImpl
 
 		User user = _userLocalService.getUser(userId);
 
-		script = formatScript(type, language, script);
-
 		byte[] smallImageBytes = null;
 
 		DDMTemplate template = ddmTemplateLocalService.getDDMTemplate(
@@ -1463,7 +1457,7 @@ public class DDMTemplateLocalServiceImpl
 			}
 			catch (IOException ioException) {
 				if (_log.isDebugEnabled()) {
-					_log.debug(ioException, ioException);
+					_log.debug(ioException);
 				}
 			}
 
@@ -1683,7 +1677,7 @@ public class DDMTemplateLocalServiceImpl
 			}
 			catch (IOException ioException) {
 				if (_log.isDebugEnabled()) {
-					_log.debug(ioException, ioException);
+					_log.debug(ioException);
 				}
 			}
 
@@ -1733,23 +1727,6 @@ public class DDMTemplateLocalServiceImpl
 		return newTemplate;
 	}
 
-	protected String formatScript(String type, String language, String script)
-		throws PortalException {
-
-		if (language.equals(TemplateConstants.LANG_TYPE_XSL)) {
-			try {
-				script = _ddmXML.validateXML(script);
-			}
-			catch (PortalException portalException) {
-				throw new TemplateScriptException(portalException);
-			}
-
-			script = XMLUtil.formatXML(script);
-		}
-
-		return script;
-	}
-
 	protected DDMGroupServiceConfiguration getDDMGroupServiceConfiguration(
 			long groupId)
 		throws ConfigurationException {
@@ -1790,7 +1767,7 @@ public class DDMTemplateLocalServiceImpl
 					FileUtil.write(smallImageFile, smallImage.getTextObj());
 				}
 				catch (IOException ioException) {
-					_log.error(ioException, ioException);
+					_log.error(ioException);
 				}
 			}
 		}
@@ -1933,7 +1910,7 @@ public class DDMTemplateLocalServiceImpl
 				getAncestorSiteAndDepotGroupIds(groupId, true);
 		}
 		catch (PortalException portalException) {
-			_log.error(portalException, portalException);
+			_log.error(portalException);
 
 			return new long[0];
 		}

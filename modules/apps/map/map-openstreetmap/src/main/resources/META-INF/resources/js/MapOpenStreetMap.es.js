@@ -32,6 +32,12 @@ class MapOpenStreetMap extends MapBase {
 	 * @review
 	 */
 	constructor(...args) {
+		MapBase.DialogImpl = OpenStreetMapDialog;
+		MapBase.GeocoderImpl = OpenStreetMapGeocoder;
+		MapBase.GeoJSONImpl = OpenStreetMapGeoJSON;
+		MapBase.MarkerImpl = OpenStreetMapMarker;
+		MapBase.SearchImpl = null;
+
 		super(...args);
 
 		this._map = null;
@@ -115,16 +121,6 @@ class MapOpenStreetMap extends MapBase {
 		}
 	}
 }
-
-MapBase.DialogImpl = OpenStreetMapDialog;
-
-MapBase.GeocoderImpl = OpenStreetMapGeocoder;
-
-MapBase.GeoJSONImpl = OpenStreetMapGeoJSON;
-
-MapBase.MarkerImpl = OpenStreetMapMarker;
-
-MapBase.SearchImpl = null;
 
 MapOpenStreetMap.CONTROLS_MAP = {
 	[MapBase.CONTROLS.ATTRIBUTION]: 'attributionControl',

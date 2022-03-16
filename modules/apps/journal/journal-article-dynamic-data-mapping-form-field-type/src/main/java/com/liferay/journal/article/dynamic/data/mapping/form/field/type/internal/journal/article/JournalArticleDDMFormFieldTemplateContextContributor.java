@@ -68,7 +68,7 @@ public class JournalArticleDDMFormFieldTemplateContextContributor
 
 		return HashMapBuilder.<String, Object>put(
 			"itemSelectorURL",
-			getItemSelectorURL(
+			_getItemSelectorURL(
 				ddmFormFieldRenderingContext,
 				ddmFormFieldRenderingContext.getHttpServletRequest())
 		).put(
@@ -103,7 +103,7 @@ public class JournalArticleDDMFormFieldTemplateContextContributor
 		).build();
 	}
 
-	protected String getItemSelectorURL(
+	private String _getItemSelectorURL(
 		DDMFormFieldRenderingContext ddmFormFieldRenderingContext,
 		HttpServletRequest httpServletRequest) {
 
@@ -162,6 +162,10 @@ public class JournalArticleDDMFormFieldTemplateContextContributor
 				defaultLocale, "the-selected-web-content-was-deleted");
 		}
 		catch (JSONException jsonException) {
+			if (_log.isDebugEnabled()) {
+				_log.debug(jsonException);
+			}
+
 			return StringPool.BLANK;
 		}
 	}
@@ -204,6 +208,10 @@ public class JournalArticleDDMFormFieldTemplateContextContributor
 			return jsonObject.toJSONString();
 		}
 		catch (JSONException jsonException) {
+			if (_log.isDebugEnabled()) {
+				_log.debug(jsonException);
+			}
+
 			return StringPool.BLANK;
 		}
 	}

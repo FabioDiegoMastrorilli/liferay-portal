@@ -21,11 +21,11 @@ definition {
 	macro addChildPage {
 		MouseOver(
 			key_itemName = "${parentPageName}",
-			locator1 = "SitePages#LIST_GROUP_ITEM");
+			locator1 = "PagesAdmin#LIST_GROUP_ITEM");
 
 		Click(
 			key_pageName = "${parentPageName}",
-			locator1 = "SitePages#LIST_GROUP_ITEM_PLUS_ICON");
+			locator1 = "PagesAdmin#LIST_GROUP_ITEM_PLUS_ICON");
 
 		ContentPages._selectCard(
 			basicTemplate = "${basicTemplate}",
@@ -78,15 +78,12 @@ definition {
 				portlet = "Pages");
 		}
 
-		var key_breadcrumbName="Pages";
-
-		Pause(locator1 = "3000");
-
 		if (IsElementPresent(locator1 = "Message#EMPTY_INFO_TAGLIB")) {
-			SitePages.gotoAddFirstPage(pageType = "Public Page");
+			PagesAdmin.gotoAddFirstPage(pageType = "Public Page");
 		}
 		else {
 			AssertClick(
+				key_breadcrumbName = "Pages",
 				locator1 = "Breadcrumb#BREADCRUMB_ENTRY",
 				value1 = "Pages");
 
@@ -115,7 +112,7 @@ definition {
 				vocabularyName = "${vocabularyName}");
 		}
 
-		SitePages._addPageToNavigationMenu(
+		PagesAdmin._addPageToNavigationMenu(
 			assertCheckboxMissing = "${assertCheckboxMissing}",
 			navigationMenus = "${navigationMenus}");
 
@@ -133,15 +130,12 @@ definition {
 				portlet = "Pages");
 		}
 
-		var key_breadcrumbName="Pages";
-
-		Pause(locator1 = "3000");
-
 		if (IsElementPresent(locator1 = "Message#EMPTY_INFO_TAGLIB")) {
-			SitePages.gotoAddFirstPage(pageType = "Private Page");
+			PagesAdmin.gotoAddFirstPage(pageType = "Private Page");
 		}
 		else {
 			AssertClick(
+				key_breadcrumbName = "Pages",
 				locator1 = "Breadcrumb#BREADCRUMB_ENTRY",
 				value1 = "Pages");
 
@@ -171,8 +165,6 @@ definition {
 				category = "Site Builder",
 				portlet = "Pages");
 		}
-
-		Pause(locator1 = "3000");
 
 		LexiconEntry.gotoAdd();
 
@@ -220,7 +212,7 @@ definition {
 
 		PageEditor.assertFragmentSidebarLoaded();
 
-		ControlMenu.viewHeaderTitle(headerTitle = "${pageName}");
+		ControlMenu.viewHeaderTitle(headerTitle = "${pageName} *");
 
 		PageEditor.viewFragmentEditableText(
 			editableText = "${collectionName}",
@@ -228,6 +220,14 @@ definition {
 			id = "element-text");
 
 		PageEditor.viewFragment(fragmentName = "Collection Display");
+	}
+
+	macro changeExperience {
+		ContentPages.openExperienceMenu();
+
+		MenuItem.click(menuItem = "${experienceName}");
+
+		ContentPages.viewCurrentExperience(experienceName = "${experienceName}");
 	}
 
 	macro focusSlide {
@@ -240,6 +240,28 @@ definition {
 		Click(locator1 = "Icon#EDIT_PENCIL");
 
 		PageEditor.assertFragmentSidebarLoaded();
+	}
+
+	macro openExperienceMenu {
+		Click(
+			key_text = "caret-double",
+			locator1 = "Icon#ANY");
+	}
+
+	macro viewCurrentExperience {
+		AssertVisible(
+			key_text = "${experienceName}",
+			locator1 = "Button#ANY");
+	}
+
+	macro viewExperienceOrder {
+		ContentPages.openExperienceMenu();
+
+		MenuItem.viewOrder(menuItemList = "${experienceNameList}");
+
+		Click(
+			key_text = "caret-double",
+			locator1 = "Icon#ANY");
 	}
 
 	macro viewFragmentBackgroundImage {
@@ -265,7 +287,6 @@ definition {
 					index = "${position}",
 					locator1 = "Fragment#CONTENT_DISPLAY_PREVIEW_IMAGE");
 			}
-
 			else {
 				AssertVisible(
 					assetType = "${assetType}",
@@ -274,7 +295,6 @@ definition {
 					locator1 = "Fragment#CONTENT_DISPLAY_IMAGE");
 			}
 		}
-
 		else {
 			AssertVisible(
 				fragmentName = "${fragmentName}",
@@ -297,7 +317,6 @@ definition {
 				locator1 = "Fragment#EDITABLE_FIELD_ANY",
 				value1 = "${text}");
 		}
-
 		else if (("${fragmentName}" == "Content Display") || ("${fragmentName}" == "Display Page Content")) {
 			if (!(isSet(assetType))) {
 				AssertTextEquals(
@@ -305,7 +324,6 @@ definition {
 					locator1 = "Fragment#CONTENT_DISPLAY_ASSET_SUMMARY",
 					value1 = "${text}");
 			}
-
 			else {
 				AssertTextEquals(
 					assetType = "${assetType}",
@@ -314,7 +332,6 @@ definition {
 					value1 = "${text}");
 			}
 		}
-
 		else {
 			AssertTextEquals(
 				fragmentName = "${fragmentName}",

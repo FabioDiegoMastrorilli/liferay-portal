@@ -18,6 +18,11 @@ import com.liferay.asset.kernel.model.AssetEntry;
 import com.liferay.asset.kernel.model.AssetLinkConstants;
 import com.liferay.asset.kernel.service.AssetEntryLocalService;
 import com.liferay.asset.kernel.service.AssetLinkLocalService;
+import com.liferay.commerce.price.list.constants.CommercePriceListConstants;
+import com.liferay.commerce.price.list.model.CommercePriceEntry;
+import com.liferay.commerce.price.list.model.CommercePriceList;
+import com.liferay.commerce.price.list.service.CommercePriceEntryLocalServiceUtil;
+import com.liferay.commerce.price.list.service.CommercePriceListLocalServiceUtil;
 import com.liferay.commerce.product.configuration.CProductVersionConfiguration;
 import com.liferay.commerce.product.constants.CPAttachmentFileEntryConstants;
 import com.liferay.commerce.product.constants.CPField;
@@ -37,12 +42,14 @@ import com.liferay.commerce.product.model.CPDefinitionOptionValueRel;
 import com.liferay.commerce.product.model.CPDefinitionSpecificationOptionValue;
 import com.liferay.commerce.product.model.CPDisplayLayout;
 import com.liferay.commerce.product.model.CPInstance;
+import com.liferay.commerce.product.model.CPInstanceOptionValueRel;
 import com.liferay.commerce.product.model.CProduct;
 import com.liferay.commerce.product.model.impl.CPDefinitionImpl;
 import com.liferay.commerce.product.model.impl.CPDefinitionModelImpl;
 import com.liferay.commerce.product.service.base.CPDefinitionLocalServiceBaseImpl;
 import com.liferay.commerce.product.type.CPType;
 import com.liferay.commerce.product.type.CPTypeServicesTracker;
+import com.liferay.commerce.product.type.virtual.constants.VirtualCPTypeConstants;
 import com.liferay.commerce.product.util.CPVersionContributor;
 import com.liferay.commerce.product.util.CPVersionContributorRegistryUtil;
 import com.liferay.dynamic.data.mapping.exception.NoSuchStructureException;
@@ -80,6 +87,7 @@ import com.liferay.portal.kernel.search.facet.Facet;
 import com.liferay.portal.kernel.search.facet.MultiValueFacet;
 import com.liferay.portal.kernel.service.GroupLocalService;
 import com.liferay.portal.kernel.service.ServiceContext;
+import com.liferay.portal.kernel.service.ServiceContextThreadLocal;
 import com.liferay.portal.kernel.service.WorkflowInstanceLinkLocalService;
 import com.liferay.portal.kernel.settings.SystemSettingsLocator;
 import com.liferay.portal.kernel.systemevent.SystemEvent;
@@ -116,8 +124,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
-import java.util.concurrent.Callable;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
@@ -202,9 +210,18 @@ public class CPDefinitionLocalServiceImpl
 		cpDefinition.setCPTaxCategoryId(cpTaxCategoryId);
 		cpDefinition.setProductTypeName(productTypeName);
 		cpDefinition.setIgnoreSKUCombinations(ignoreSKUCombinations);
-		cpDefinition.setShippable(shippable);
 		cpDefinition.setFreeShipping(freeShipping);
 		cpDefinition.setShipSeparately(shipSeparately);
+
+		if (StringUtil.equalsIgnoreCase(
+				productTypeName, VirtualCPTypeConstants.NAME)) {
+
+			cpDefinition.setShippable(false);
+		}
+		else {
+			cpDefinition.setShippable(shippable);
+		}
+
 		cpDefinition.setShippingExtraPrice(shippingExtraPrice);
 		cpDefinition.setWidth(width);
 		cpDefinition.setHeight(height);
@@ -269,7 +286,8 @@ public class CPDefinitionLocalServiceImpl
 				BigDecimal.ZERO, published, displayDateMonth, displayDateDay,
 				displayDateYear, displayDateHour, displayDateMinute,
 				expirationDateMonth, expirationDateDay, expirationDateYear,
-				expirationDateHour, expirationDateMinute, neverExpire,
+				expirationDateHour, expirationDateMinute, neverExpire, false,
+				false, 1, StringPool.BLANK, null, 0, null,
 				cpInstanceServiceContext);
 		}
 
@@ -627,6 +645,9 @@ public class CPDefinitionLocalServiceImpl
 			cpDefinitionOptionRelPersistence.findByCPDefinitionId(
 				cpDefinitionId);
 
+		List<CPDefinitionOptionRel> newCPDefinitionOptionRels = new ArrayList<>(
+			cpDefinitionOptionRels.size());
+
 		for (CPDefinitionOptionRel cpDefinitionOptionRel :
 				cpDefinitionOptionRels) {
 
@@ -644,6 +665,8 @@ public class CPDefinitionLocalServiceImpl
 
 			newCPDefinitionOptionRel = cpDefinitionOptionRelPersistence.update(
 				newCPDefinitionOptionRel);
+
+			newCPDefinitionOptionRels.add(newCPDefinitionOptionRel);
 
 			// CPDefinitionOptionValueRel
 
@@ -734,8 +757,92 @@ public class CPDefinitionLocalServiceImpl
 
 			newCPInstance.setUuid(PortalUUIDUtil.generate());
 			newCPInstance.setCPInstanceId(counterLocalService.increment());
+			newCPInstance.setCPInstanceUuid(PortalUUIDUtil.generate());
 
 			newCPInstance.setCPDefinitionId(newCPDefinitionId);
+
+			List<CPInstanceOptionValueRel> cpInstanceOptionValueRels =
+				cpInstanceOptionValueRelPersistence.findByCPInstanceId(
+					cpInstance.getCPInstanceId());
+
+			for (CPInstanceOptionValueRel cpInstanceOptionValueRel :
+					cpInstanceOptionValueRels) {
+
+				CPInstanceOptionValueRel newCPInstanceOptionValueRel =
+					(CPInstanceOptionValueRel)cpInstanceOptionValueRel.clone();
+
+				newCPInstanceOptionValueRel.setUuid(PortalUUIDUtil.generate());
+				newCPInstanceOptionValueRel.setCPInstanceOptionValueRelId(
+					counterLocalService.increment());
+				newCPInstanceOptionValueRel.setCPInstanceId(
+					newCPInstance.getCPInstanceId());
+
+				CPDefinitionOptionRel cpDefinitionOptionRel =
+					cpDefinitionOptionRelPersistence.findByPrimaryKey(
+						cpInstanceOptionValueRel.getCPDefinitionOptionRelId());
+
+				Stream<CPDefinitionOptionRel> cpDefinitionOptionRelStream =
+					newCPDefinitionOptionRels.stream();
+
+				Optional<CPDefinitionOptionRel> cpDefinitionOptionRelOptional =
+					cpDefinitionOptionRelStream.filter(
+						curCPDefinitionOptionRel ->
+							cpDefinitionOptionRel.getCPOptionId() ==
+								curCPDefinitionOptionRel.getCPOptionId()
+					).findFirst();
+
+				if (cpDefinitionOptionRelOptional.isPresent()) {
+					CPDefinitionOptionRel newCPDefinitionOptionRel =
+						cpDefinitionOptionRelOptional.get();
+
+					long cpDefinitionOptionRelId =
+						newCPDefinitionOptionRel.getCPDefinitionOptionRelId();
+
+					newCPInstanceOptionValueRel.setCPDefinitionOptionRelId(
+						cpDefinitionOptionRelId);
+
+					List<CPDefinitionOptionValueRel>
+						cpDefinitionOptionValueRels =
+							cpDefinitionOptionRel.
+								getCPDefinitionOptionValueRels();
+
+					Stream<CPDefinitionOptionValueRel>
+						cpDefinitionOptionValueRelsStream =
+							cpDefinitionOptionValueRels.stream();
+
+					Optional<CPDefinitionOptionValueRel>
+						cpDefinitionOptionValueRelOptional =
+							cpDefinitionOptionValueRelsStream.filter(
+								curCPDefinitionOptionValueRel ->
+									cpDefinitionOptionRelId ==
+										curCPDefinitionOptionValueRel.
+											getCPDefinitionOptionRelId()
+							).findFirst();
+
+					if (cpDefinitionOptionValueRelOptional.isPresent()) {
+						CPDefinitionOptionValueRel cpDefinitionOptionValueRel =
+							cpDefinitionOptionValueRelOptional.get();
+
+						newCPInstanceOptionValueRel.
+							setCPInstanceOptionValueRelId(
+								cpDefinitionOptionValueRel.
+									getCPDefinitionOptionValueRelId());
+					}
+				}
+
+				cpInstanceOptionValueRelLocalService.
+					updateCPInstanceOptionValueRel(newCPInstanceOptionValueRel);
+			}
+
+			ServiceContext serviceContext =
+				ServiceContextThreadLocal.getServiceContext();
+
+			_updateCommercePriceEntry(
+				newCPInstance, CommercePriceListConstants.TYPE_PRICE_LIST,
+				newCPInstance.getPrice(), serviceContext);
+			_updateCommercePriceEntry(
+				newCPInstance, CommercePriceListConstants.TYPE_PROMOTION,
+				newCPInstance.getPromoPrice(), serviceContext);
 
 			cpInstancePersistence.update(newCPInstance);
 		}
@@ -761,16 +868,11 @@ public class CPDefinitionLocalServiceImpl
 			long cProductId = newCPDefinition.getCProductId();
 
 			TransactionCommitCallbackUtil.registerCallback(
-				new Callable<Void>() {
+				() -> {
+					cpDefinitionLocalService.maintainVersionThreshold(
+						cProductId);
 
-					@Override
-					public Void call() throws Exception {
-						cpDefinitionLocalService.maintainVersionThreshold(
-							cProductId);
-
-						return null;
-					}
-
+					return null;
 				});
 		}
 
@@ -1326,7 +1428,7 @@ public class CPDefinitionLocalServiceImpl
 		}
 		catch (Exception exception) {
 			if (_log.isDebugEnabled()) {
-				_log.debug(exception, exception);
+				_log.debug(exception);
 			}
 
 			return Collections.emptyMap();
@@ -1352,7 +1454,7 @@ public class CPDefinitionLocalServiceImpl
 		}
 		catch (Exception exception) {
 			if (_log.isDebugEnabled()) {
-				_log.debug(exception, exception);
+				_log.debug(exception);
 			}
 
 			return StringPool.BLANK;
@@ -1455,7 +1557,7 @@ public class CPDefinitionLocalServiceImpl
 			threshold = cProductVersionConfiguration.versionThreshold();
 		}
 		catch (PortalException portalException) {
-			_log.error(portalException, portalException);
+			_log.error(portalException);
 
 			return;
 		}
@@ -1591,10 +1693,11 @@ public class CPDefinitionLocalServiceImpl
 				CPDefinitionExpirationDateException.class);
 		}
 
+		String productTypeName = cpDefinition.getProductTypeName();
+
 		validate(
 			groupId, ddmStructureKey, metaTitleMap, metaDescriptionMap,
-			metaKeywordsMap, displayDate, expirationDate,
-			cpDefinition.getProductTypeName());
+			metaKeywordsMap, displayDate, expirationDate, productTypeName);
 
 		if (cpDefinitionLocalService.isVersionable(cpDefinition)) {
 			cpDefinition = cpDefinitionLocalService.copyCPDefinition(
@@ -1610,9 +1713,18 @@ public class CPDefinitionLocalServiceImpl
 
 		cpDefinition.setCPTaxCategoryId(cpTaxCategoryId);
 		cpDefinition.setIgnoreSKUCombinations(ignoreSKUCombinations);
-		cpDefinition.setShippable(shippable);
 		cpDefinition.setFreeShipping(freeShipping);
 		cpDefinition.setShipSeparately(shipSeparately);
+
+		if (StringUtil.equalsIgnoreCase(
+				productTypeName, VirtualCPTypeConstants.NAME)) {
+
+			cpDefinition.setShippable(false);
+		}
+		else {
+			cpDefinition.setShippable(shippable);
+		}
+
 		cpDefinition.setShippingExtraPrice(shippingExtraPrice);
 		cpDefinition.setWidth(width);
 		cpDefinition.setHeight(height);
@@ -1673,7 +1785,7 @@ public class CPDefinitionLocalServiceImpl
 		}
 		catch (Exception exception) {
 			if (_log.isDebugEnabled()) {
-				_log.debug(exception, exception);
+				_log.debug(exception);
 			}
 
 			Group companyGroup = _groupLocalService.getCompanyGroup(
@@ -2514,10 +2626,40 @@ public class CPDefinitionLocalServiceImpl
 			}
 		}
 		catch (PortalException portalException) {
-			_log.error(portalException, portalException);
+			_log.error(portalException);
 		}
 
 		return false;
+	}
+
+	private void _updateCommercePriceEntry(
+			CPInstance cpInstance, String type, BigDecimal price,
+			ServiceContext serviceContext)
+		throws PortalException {
+
+		CommercePriceList commercePriceList =
+			CommercePriceListLocalServiceUtil.
+				getCatalogBaseCommercePriceListByType(
+					cpInstance.getGroupId(), type);
+
+		CommercePriceEntry commercePriceEntry =
+			CommercePriceEntryLocalServiceUtil.fetchCommercePriceEntry(
+				commercePriceList.getCommercePriceListId(),
+				cpInstance.getCPInstanceUuid());
+
+		if (commercePriceEntry == null) {
+			CPDefinition cpDefinition = cpInstance.getCPDefinition();
+
+			CommercePriceEntryLocalServiceUtil.addCommercePriceEntry(
+				cpDefinition.getCProductId(), cpInstance.getCPInstanceUuid(),
+				commercePriceList.getCommercePriceListId(), price, null,
+				serviceContext);
+		}
+		else {
+			CommercePriceEntryLocalServiceUtil.updateCommercePriceEntry(
+				commercePriceEntry.getCommercePriceEntryId(), price, null,
+				serviceContext);
+		}
 	}
 
 	private List<CPDefinitionLocalization> _updateCPDefinitionLocalizedFields(

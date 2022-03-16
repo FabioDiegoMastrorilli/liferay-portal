@@ -1,11 +1,12 @@
-@component-name = "portal-collaboration"
+@component-name = "portal-lima"
 definition {
 
 	property custom.properties = "default.layout.template.id=1_column${line.separator}jsonws.web.service.paths.excludes=";
+	property portal.acceptance = "true";
 	property portal.release = "true";
 	property portal.upstream = "true";
-	property testray.component.names = "Wiki";
-	property testray.main.component.name = "Notifications";
+	property testray.component.names = "Notifications";
+	property testray.main.component.name = "Wiki";
 
 	var pageName = "Wiki Test Page";
 	var portletName = "Wiki";
@@ -50,7 +51,7 @@ definition {
 		else {
 			WikiNode.tearDownCP();
 
-			Page.tearDownCP();
+			PagesAdmin.tearDownCP();
 
 			JSONUser.tearDownNonAdminUsers();
 		}

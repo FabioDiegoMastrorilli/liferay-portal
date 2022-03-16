@@ -16,7 +16,6 @@ package com.liferay.commerce.shop.by.diagram.model.impl;
 
 import com.liferay.commerce.shop.by.diagram.model.CSDiagramSetting;
 import com.liferay.commerce.shop.by.diagram.model.CSDiagramSettingModel;
-import com.liferay.commerce.shop.by.diagram.model.CSDiagramSettingSoap;
 import com.liferay.expando.kernel.model.ExpandoBridge;
 import com.liferay.expando.kernel.util.ExpandoBridgeFactoryUtil;
 import com.liferay.exportimport.kernel.lar.StagedModelType;
@@ -43,12 +42,10 @@ import java.lang.reflect.InvocationHandler;
 import java.sql.Blob;
 import java.sql.Types;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.BiConsumer;
@@ -77,10 +74,10 @@ public class CSDiagramSettingModelImpl
 	public static final String TABLE_NAME = "CSDiagramSetting";
 
 	public static final Object[][] TABLE_COLUMNS = {
-		{"uuid_", Types.VARCHAR}, {"CSDiagramSettingId", Types.BIGINT},
-		{"companyId", Types.BIGINT}, {"userId", Types.BIGINT},
-		{"userName", Types.VARCHAR}, {"createDate", Types.TIMESTAMP},
-		{"modifiedDate", Types.TIMESTAMP},
+		{"mvccVersion", Types.BIGINT}, {"uuid_", Types.VARCHAR},
+		{"CSDiagramSettingId", Types.BIGINT}, {"companyId", Types.BIGINT},
+		{"userId", Types.BIGINT}, {"userName", Types.VARCHAR},
+		{"createDate", Types.TIMESTAMP}, {"modifiedDate", Types.TIMESTAMP},
 		{"CPAttachmentFileEntryId", Types.BIGINT},
 		{"CPDefinitionId", Types.BIGINT}, {"color", Types.VARCHAR},
 		{"radius", Types.DOUBLE}, {"type_", Types.VARCHAR}
@@ -90,6 +87,7 @@ public class CSDiagramSettingModelImpl
 		new HashMap<String, Integer>();
 
 	static {
+		TABLE_COLUMNS_MAP.put("mvccVersion", Types.BIGINT);
 		TABLE_COLUMNS_MAP.put("uuid_", Types.VARCHAR);
 		TABLE_COLUMNS_MAP.put("CSDiagramSettingId", Types.BIGINT);
 		TABLE_COLUMNS_MAP.put("companyId", Types.BIGINT);
@@ -105,7 +103,7 @@ public class CSDiagramSettingModelImpl
 	}
 
 	public static final String TABLE_SQL_CREATE =
-		"create table CSDiagramSetting (uuid_ VARCHAR(75) null,CSDiagramSettingId LONG not null primary key,companyId LONG,userId LONG,userName VARCHAR(75) null,createDate DATE null,modifiedDate DATE null,CPAttachmentFileEntryId LONG,CPDefinitionId LONG,color VARCHAR(75) null,radius DOUBLE,type_ VARCHAR(75) null)";
+		"create table CSDiagramSetting (mvccVersion LONG default 0 not null,uuid_ VARCHAR(75) null,CSDiagramSettingId LONG not null primary key,companyId LONG,userId LONG,userName VARCHAR(75) null,createDate DATE null,modifiedDate DATE null,CPAttachmentFileEntryId LONG,CPDefinitionId LONG,color VARCHAR(75) null,radius DOUBLE,type_ VARCHAR(75) null)";
 
 	public static final String TABLE_SQL_DROP = "drop table CSDiagramSetting";
 
@@ -158,63 +156,6 @@ public class CSDiagramSettingModelImpl
 	 */
 	@Deprecated
 	public static void setFinderCacheEnabled(boolean finderCacheEnabled) {
-	}
-
-	/**
-	 * Converts the soap model instance into a normal model instance.
-	 *
-	 * @param soapModel the soap model instance to convert
-	 * @return the normal model instance
-	 * @deprecated As of Athanasius (7.3.x), with no direct replacement
-	 */
-	@Deprecated
-	public static CSDiagramSetting toModel(CSDiagramSettingSoap soapModel) {
-		if (soapModel == null) {
-			return null;
-		}
-
-		CSDiagramSetting model = new CSDiagramSettingImpl();
-
-		model.setUuid(soapModel.getUuid());
-		model.setCSDiagramSettingId(soapModel.getCSDiagramSettingId());
-		model.setCompanyId(soapModel.getCompanyId());
-		model.setUserId(soapModel.getUserId());
-		model.setUserName(soapModel.getUserName());
-		model.setCreateDate(soapModel.getCreateDate());
-		model.setModifiedDate(soapModel.getModifiedDate());
-		model.setCPAttachmentFileEntryId(
-			soapModel.getCPAttachmentFileEntryId());
-		model.setCPDefinitionId(soapModel.getCPDefinitionId());
-		model.setColor(soapModel.getColor());
-		model.setRadius(soapModel.getRadius());
-		model.setType(soapModel.getType());
-
-		return model;
-	}
-
-	/**
-	 * Converts the soap model instances into normal model instances.
-	 *
-	 * @param soapModels the soap model instances to convert
-	 * @return the normal model instances
-	 * @deprecated As of Athanasius (7.3.x), with no direct replacement
-	 */
-	@Deprecated
-	public static List<CSDiagramSetting> toModels(
-		CSDiagramSettingSoap[] soapModels) {
-
-		if (soapModels == null) {
-			return null;
-		}
-
-		List<CSDiagramSetting> models = new ArrayList<CSDiagramSetting>(
-			soapModels.length);
-
-		for (CSDiagramSettingSoap soapModel : soapModels) {
-			models.add(toModel(soapModel));
-		}
-
-		return models;
 	}
 
 	public CSDiagramSettingModelImpl() {
@@ -343,6 +284,12 @@ public class CSDiagramSettingModelImpl
 			attributeSetterBiConsumers =
 				new LinkedHashMap<String, BiConsumer<CSDiagramSetting, ?>>();
 
+		attributeGetterFunctions.put(
+			"mvccVersion", CSDiagramSetting::getMvccVersion);
+		attributeSetterBiConsumers.put(
+			"mvccVersion",
+			(BiConsumer<CSDiagramSetting, Long>)
+				CSDiagramSetting::setMvccVersion);
 		attributeGetterFunctions.put("uuid", CSDiagramSetting::getUuid);
 		attributeSetterBiConsumers.put(
 			"uuid",
@@ -409,6 +356,21 @@ public class CSDiagramSettingModelImpl
 			attributeGetterFunctions);
 		_attributeSetterBiConsumers = Collections.unmodifiableMap(
 			(Map)attributeSetterBiConsumers);
+	}
+
+	@JSON
+	@Override
+	public long getMvccVersion() {
+		return _mvccVersion;
+	}
+
+	@Override
+	public void setMvccVersion(long mvccVersion) {
+		if (_columnOriginalValues == Collections.EMPTY_MAP) {
+			_setColumnOriginalValues();
+		}
+
+		_mvccVersion = mvccVersion;
 	}
 
 	@JSON
@@ -724,6 +686,7 @@ public class CSDiagramSettingModelImpl
 	public Object clone() {
 		CSDiagramSettingImpl csDiagramSettingImpl = new CSDiagramSettingImpl();
 
+		csDiagramSettingImpl.setMvccVersion(getMvccVersion());
 		csDiagramSettingImpl.setUuid(getUuid());
 		csDiagramSettingImpl.setCSDiagramSettingId(getCSDiagramSettingId());
 		csDiagramSettingImpl.setCompanyId(getCompanyId());
@@ -747,6 +710,8 @@ public class CSDiagramSettingModelImpl
 	public CSDiagramSetting cloneWithOriginalValues() {
 		CSDiagramSettingImpl csDiagramSettingImpl = new CSDiagramSettingImpl();
 
+		csDiagramSettingImpl.setMvccVersion(
+			this.<Long>getColumnOriginalValue("mvccVersion"));
 		csDiagramSettingImpl.setUuid(
 			this.<String>getColumnOriginalValue("uuid_"));
 		csDiagramSettingImpl.setCSDiagramSettingId(
@@ -848,6 +813,8 @@ public class CSDiagramSettingModelImpl
 	public CacheModel<CSDiagramSetting> toCacheModel() {
 		CSDiagramSettingCacheModel csDiagramSettingCacheModel =
 			new CSDiagramSettingCacheModel();
+
+		csDiagramSettingCacheModel.mvccVersion = getMvccVersion();
 
 		csDiagramSettingCacheModel.uuid = getUuid();
 
@@ -1003,6 +970,7 @@ public class CSDiagramSettingModelImpl
 
 	}
 
+	private long _mvccVersion;
 	private String _uuid;
 	private long _CSDiagramSettingId;
 	private long _companyId;
@@ -1046,6 +1014,7 @@ public class CSDiagramSettingModelImpl
 	private void _setColumnOriginalValues() {
 		_columnOriginalValues = new HashMap<String, Object>();
 
+		_columnOriginalValues.put("mvccVersion", _mvccVersion);
 		_columnOriginalValues.put("uuid_", _uuid);
 		_columnOriginalValues.put("CSDiagramSettingId", _CSDiagramSettingId);
 		_columnOriginalValues.put("companyId", _companyId);
@@ -1083,29 +1052,31 @@ public class CSDiagramSettingModelImpl
 	static {
 		Map<String, Long> columnBitmasks = new HashMap<>();
 
-		columnBitmasks.put("uuid_", 1L);
+		columnBitmasks.put("mvccVersion", 1L);
 
-		columnBitmasks.put("CSDiagramSettingId", 2L);
+		columnBitmasks.put("uuid_", 2L);
 
-		columnBitmasks.put("companyId", 4L);
+		columnBitmasks.put("CSDiagramSettingId", 4L);
 
-		columnBitmasks.put("userId", 8L);
+		columnBitmasks.put("companyId", 8L);
 
-		columnBitmasks.put("userName", 16L);
+		columnBitmasks.put("userId", 16L);
 
-		columnBitmasks.put("createDate", 32L);
+		columnBitmasks.put("userName", 32L);
 
-		columnBitmasks.put("modifiedDate", 64L);
+		columnBitmasks.put("createDate", 64L);
 
-		columnBitmasks.put("CPAttachmentFileEntryId", 128L);
+		columnBitmasks.put("modifiedDate", 128L);
 
-		columnBitmasks.put("CPDefinitionId", 256L);
+		columnBitmasks.put("CPAttachmentFileEntryId", 256L);
 
-		columnBitmasks.put("color", 512L);
+		columnBitmasks.put("CPDefinitionId", 512L);
 
-		columnBitmasks.put("radius", 1024L);
+		columnBitmasks.put("color", 1024L);
 
-		columnBitmasks.put("type_", 2048L);
+		columnBitmasks.put("radius", 2048L);
+
+		columnBitmasks.put("type_", 4096L);
 
 		_columnBitmasks = Collections.unmodifiableMap(columnBitmasks);
 	}

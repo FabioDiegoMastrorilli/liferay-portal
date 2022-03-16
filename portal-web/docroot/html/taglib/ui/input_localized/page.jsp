@@ -127,14 +127,14 @@
 		}
 		%>
 
-		<div class="input-group-item input-group-item-shrink input-localized-content" role="menu">
+		<div class="input-group-item input-group-item-shrink input-localized-content">
 
 			<%
 			String normalizedSelectedLanguageId = StringUtil.replace(selectedLanguageId, '_', '-');
 			%>
 
 			<liferay-ui:icon-menu
-				direction="left-side"
+				direction="<%= languagesDropdownDirection %>"
 				icon="<%= StringUtil.toLowerCase(normalizedSelectedLanguageId) %>"
 				id='<%= namespace + id + "Menu" %>'
 				markupView="lexicon"
@@ -354,10 +354,22 @@
 					});
 				</c:when>
 				<c:otherwise>
-					Liferay.InputLocalized.register(
-						'<%= namespace + id + HtmlUtil.getAUICompatibleId(fieldSuffix) %>',
-						inputLocalizedProps
-					);
+					Liferay.Loader.require(
+					[
+						A.config.groups.components.mainModule,
+						A.config.groups.state.mainModule,
+					],
+					(frontendJsComponentsWebModule, frontendJsStateWebModule) => {
+
+						Liferay.InputLocalized.register(
+							'<%= namespace + id + HtmlUtil.getAUICompatibleId(fieldSuffix) %>',
+							{
+								frontendJsComponentsWebModule,
+								frontendJsStateWebModule,
+								...inputLocalizedProps
+							}
+						);
+					});
 				</c:otherwise>
 			</c:choose>
 

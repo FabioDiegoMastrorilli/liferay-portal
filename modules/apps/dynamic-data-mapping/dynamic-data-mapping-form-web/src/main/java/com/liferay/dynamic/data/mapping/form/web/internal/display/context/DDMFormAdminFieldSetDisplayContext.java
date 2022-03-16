@@ -23,7 +23,7 @@ import com.liferay.dynamic.data.mapping.form.renderer.DDMFormRenderer;
 import com.liferay.dynamic.data.mapping.form.renderer.DDMFormTemplateContextFactory;
 import com.liferay.dynamic.data.mapping.form.values.factory.DDMFormValuesFactory;
 import com.liferay.dynamic.data.mapping.form.web.internal.configuration.DDMFormWebConfiguration;
-import com.liferay.dynamic.data.mapping.form.web.internal.display.context.util.FieldSetPermissionCheckerHelper;
+import com.liferay.dynamic.data.mapping.form.web.internal.display.context.helper.FieldSetPermissionCheckerHelper;
 import com.liferay.dynamic.data.mapping.form.web.internal.instance.lifecycle.AddDefaultSharedFormLayoutPortalInstanceLifecycleListener;
 import com.liferay.dynamic.data.mapping.form.web.internal.search.FieldSetRowChecker;
 import com.liferay.dynamic.data.mapping.form.web.internal.search.FieldSetSearch;
@@ -112,8 +112,7 @@ public class DDMFormAdminFieldSetDisplayContext
 		DDMFormWebConfiguration ddmFormWebConfiguration,
 		DDMStorageAdapterTracker ddmStorageAdapterTracker,
 		DDMStructureLocalService ddmStructureLocalService,
-		DDMStructureService ddmStructureService,
-		boolean ffSubmissionsSettingsEnabled, JSONFactory jsonFactory,
+		DDMStructureService ddmStructureService, JSONFactory jsonFactory,
 		NPMResolver npmResolver,
 		ObjectDefinitionLocalService objectDefinitionLocalService,
 		Portal portal) {
@@ -130,8 +129,8 @@ public class DDMFormAdminFieldSetDisplayContext
 			ddmFormTemplateContextFactory, ddmFormValuesFactory,
 			ddmFormValuesMerger, ddmFormWebConfiguration,
 			ddmStorageAdapterTracker, ddmStructureLocalService,
-			ddmStructureService, ffSubmissionsSettingsEnabled, jsonFactory,
-			npmResolver, objectDefinitionLocalService, portal);
+			ddmStructureService, jsonFactory, npmResolver,
+			objectDefinitionLocalService, portal);
 
 		_fieldSetPermissionCheckerHelper = new FieldSetPermissionCheckerHelper(
 			ddmFormAdminRequestHelper);
@@ -158,7 +157,7 @@ public class DDMFormAdminFieldSetDisplayContext
 		}
 
 		return CreationMenuBuilder.addPrimaryDropdownItem(
-			getAddElementSetDropdownItem()
+			_getAddElementSetDropdownItem()
 		).build();
 	}
 
@@ -196,7 +195,7 @@ public class DDMFormAdminFieldSetDisplayContext
 			}
 			catch (PortalException portalException) {
 				if (_log.isDebugEnabled()) {
-					_log.debug(portalException, portalException);
+					_log.debug(portalException);
 				}
 			}
 		}
@@ -211,7 +210,7 @@ public class DDMFormAdminFieldSetDisplayContext
 		}
 
 		return DropdownItemListBuilder.add(
-			getAddElementSetDropdownItem()
+			_getAddElementSetDropdownItem()
 		).build();
 	}
 
@@ -221,11 +220,8 @@ public class DDMFormAdminFieldSetDisplayContext
 			return StringPool.BLANK;
 		}
 
-		HttpServletRequest httpServletRequest =
-			ddmFormAdminRequestHelper.getRequest();
-
 		return LanguageUtil.get(
-			httpServletRequest,
+			ddmFormAdminRequestHelper.getRequest(),
 			"accelerate-form-creation-with-reusable-field-groupings");
 	}
 
@@ -356,16 +352,6 @@ public class DDMFormAdminFieldSetDisplayContext
 		FieldSetSearch fieldSetSearch = new FieldSetSearch(
 			renderRequest, portletURL);
 
-		String orderByCol = getOrderByCol();
-		String orderByType = getOrderByType();
-
-		OrderByComparator<DDMStructure> orderByComparator =
-			getDDMStructureOrderByComparator(orderByCol, orderByType);
-
-		fieldSetSearch.setOrderByCol(orderByCol);
-		fieldSetSearch.setOrderByComparator(orderByComparator);
-		fieldSetSearch.setOrderByType(orderByType);
-
 		if (fieldSetSearch.isSearch()) {
 			fieldSetSearch.setEmptyResultsMessage("no-element-sets-were-found");
 		}
@@ -373,10 +359,33 @@ public class DDMFormAdminFieldSetDisplayContext
 			fieldSetSearch.setEmptyResultsMessage("there-are-no-element-sets");
 		}
 
-		fieldSetSearch.setRowChecker(new FieldSetRowChecker(renderResponse));
+		fieldSetSearch.setOrderByCol(getOrderByCol());
+		fieldSetSearch.setOrderByComparator(
+			_getDDMStructureOrderByComparator(
+				getOrderByCol(), getOrderByType()));
+		fieldSetSearch.setOrderByType(getOrderByType());
 
-		setFieldSetsSearchResults(fieldSetSearch);
-		setFieldSetsSearchTotal(fieldSetSearch);
+		FieldSetSearchTerms fieldSetSearchTerms =
+			(FieldSetSearchTerms)fieldSetSearch.getSearchTerms();
+
+		DDMStructureService ddmStructureService = getStructureService();
+
+		fieldSetSearch.setResultsAndTotal(
+			() -> ddmStructureService.search(
+				getCompanyId(), new long[] {getScopeGroupId()},
+				PortalUtil.getClassNameId(DDMFormInstance.class),
+				fieldSetSearchTerms.getKeywords(),
+				DDMStructureConstants.TYPE_FRAGMENT,
+				WorkflowConstants.STATUS_ANY, fieldSetSearch.getStart(),
+				fieldSetSearch.getEnd(), fieldSetSearch.getOrderByComparator()),
+			ddmStructureService.searchCount(
+				getCompanyId(), new long[] {getScopeGroupId()},
+				PortalUtil.getClassNameId(DDMFormInstance.class),
+				fieldSetSearchTerms.getKeywords(),
+				DDMStructureConstants.TYPE_FRAGMENT,
+				WorkflowConstants.STATUS_ANY));
+
+		fieldSetSearch.setRowChecker(new FieldSetRowChecker(renderResponse));
 
 		return fieldSetSearch;
 	}
@@ -399,8 +408,8 @@ public class DDMFormAdminFieldSetDisplayContext
 		return "structure";
 	}
 
-	protected UnsafeConsumer<DropdownItem, Exception>
-		getAddElementSetDropdownItem() {
+	private UnsafeConsumer<DropdownItem, Exception>
+		_getAddElementSetDropdownItem() {
 
 		return dropdownItem -> {
 			HttpServletRequest httpServletRequest =
@@ -421,7 +430,7 @@ public class DDMFormAdminFieldSetDisplayContext
 		};
 	}
 
-	protected OrderByComparator<DDMStructure> getDDMStructureOrderByComparator(
+	private OrderByComparator<DDMStructure> _getDDMStructureOrderByComparator(
 		String orderByCol, String orderByType) {
 
 		boolean orderByAsc = false;
@@ -443,38 +452,6 @@ public class DDMFormAdminFieldSetDisplayContext
 		}
 
 		return orderByComparator;
-	}
-
-	protected void setFieldSetsSearchResults(FieldSetSearch fieldSetSearch) {
-		FieldSetSearchTerms fieldSetSearchTerms =
-			(FieldSetSearchTerms)fieldSetSearch.getSearchTerms();
-
-		DDMStructureService ddmStructureService = getStructureService();
-
-		List<DDMStructure> results = ddmStructureService.search(
-			getCompanyId(), new long[] {getScopeGroupId()},
-			PortalUtil.getClassNameId(DDMFormInstance.class),
-			fieldSetSearchTerms.getKeywords(),
-			DDMStructureConstants.TYPE_FRAGMENT, WorkflowConstants.STATUS_ANY,
-			fieldSetSearch.getStart(), fieldSetSearch.getEnd(),
-			fieldSetSearch.getOrderByComparator());
-
-		fieldSetSearch.setResults(results);
-	}
-
-	protected void setFieldSetsSearchTotal(FieldSetSearch fieldSetSearch) {
-		FieldSetSearchTerms fieldSetSearchTerms =
-			(FieldSetSearchTerms)fieldSetSearch.getSearchTerms();
-
-		DDMStructureService ddmStructureService = getStructureService();
-
-		int total = ddmStructureService.searchCount(
-			getCompanyId(), new long[] {getScopeGroupId()},
-			PortalUtil.getClassNameId(DDMFormInstance.class),
-			fieldSetSearchTerms.getKeywords(),
-			DDMStructureConstants.TYPE_FRAGMENT, WorkflowConstants.STATUS_ANY);
-
-		fieldSetSearch.setTotal(total);
 	}
 
 	private static final Log _log = LogFactoryUtil.getLog(

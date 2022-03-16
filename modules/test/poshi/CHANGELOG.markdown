@@ -1,5 +1,152 @@
 # Poshi Runner Change Log
 
+## 1.0.337
+
+### Documentation
+
+* [POSHI-259](https://issues.liferay.com/browse/POSHI-259) - Finalize poshi standalone for usage
+
+### Validation
+
+* [POSHI-258](https://issues.liferay.com/browse/POSHI-258) -  Throws Poshi validation error on winOS
+
+## 1.0.336
+
+### Documentation
+
+* [POSHI-193](https://issues.liferay.com/browse/POSHI-193) - Create documentation for Poshi quick start guide
+
+### IDE
+
+* [POSHI-229](https://issues.liferay.com/browse/POSHI-229) - Begin migration of methods into PoshiParserUtil
+* [POSHI-235](https://issues.liferay.com/browse/POSHI-235) - Research and prototype creating a basic VSCode plugin config file for Poshi syntax
+
+### Other
+
+* [LPS-105380](https://issues.liferay.com/browse/LPS-105380) - SourceFormatter Improvements
+* [LPS-147432](https://issues.liferay.com/browse/LPS-147432) - SF rule: Enforce using PoshiScript instead of PoshiXML
+* [LRCI-2648](https://issues.liferay.com/browse/LRCI-2648) - Shift Testray 1 over to GCP instead of the Testray Mount
+* [LRCI-2776](https://issues.liferay.com/browse/LRCI-2776) - Rename the Testray Import task for Poshi Standalone
+* [LRCI-2801](https://issues.liferay.com/browse/LRCI-2801) - Simplify poshi standalone configuration
+
+### Runner
+
+* [POSHI-255](https://issues.liferay.com/browse/POSHI-255) - Casting failure in com.liferay.poshi.runner.util.HttpRequestUtilTest
+
+### Script
+
+* [POSHI-219](https://issues.liferay.com/browse/POSHI-219) - Add additional poshi script syntax validation
+
+### Standalone
+
+* [LRCI-2670](https://issues.liferay.com/browse/LRCI-2670) - Create a sample Poshi testcase for development
+* [LRCI-2671](https://issues.liferay.com/browse/LRCI-2671) - Implement Gradle tasks that will upload Poshi test results to Testray
+
+### Validation
+
+* [POSHI-145](https://issues.liferay.com/browse/POSHI-145) - *.function and *.macro files cannot share the same name
+* [POSHI-201](https://issues.liferay.com/browse/POSHI-201) - Validation doesn't fail for incorrect Util syntax
+* [POSHI-242](https://issues.liferay.com/browse/POSHI-242) - As a Poshi test writer/analyst, I should be able to see error snippets while running validation
+* [POSHI-33](https://issues.liferay.com/browse/POSHI-33) - Remove "component-name" attribute from Poshi Script validation
+
+### WebDriver
+
+* [POSHI-216](https://issues.liferay.com/browse/POSHI-216) - Make the _getOffsetDate reusable
+* [POSHI-240](https://issues.liferay.com/browse/POSHI-240) - Modify dragAndDrop to support offset
+* [POSHI-241](https://issues.liferay.com/browse/POSHI-241) - Consolidate wrappedWebDriver usages in BaseWebDriverImpl
+* [POSHI-243](https://issues.liferay.com/browse/POSHI-243) - Add method to get current UTC time
+* [POSHI-250](https://issues.liferay.com/browse/POSHI-250) - Change default browser type to Google Chrome
+
+## 1.0.329
+
+### Other
+
+* [LPS-105380](https://issues.liferay.com/browse/LPS-105380) - SourceFormatter Improvements
+* [LPS-141109](https://issues.liferay.com/browse/LPS-141109) - SF: Rebuild Poshi Script
+
+### Resources
+
+* [LRCI-2692](https://issues.liferay.com/browse/LRCI-2692) - Always use latest release of poshi runner resources
+* [LRQA-72244](https://issues.liferay.com/browse/LRQA-72244) - Formatting issues in source-format-jdk8/0/0
+
+### Runner
+
+* [POSHI-83](https://issues.liferay.com/browse/POSHI-83) - As a test engineer, exceptions from Javascript executor should be made clearer
+
+### Script
+
+* [LRCI-2691](https://issues.liferay.com/browse/LRCI-2691) - Add additional poshi script parser testing
+
+### Standalone
+
+* [LRCI-2670](https://issues.liferay.com/browse/LRCI-2670) - Create a sample Poshi testcase for development
+* [LRCI-2671](https://issues.liferay.com/browse/LRCI-2671) - Implement Gradle tasks that will upload Poshi test results to Testray
+
+### Utils
+
+* [LRCI-2605](https://issues.liferay.com/browse/LRCI-2605) - Allow testing for test.properties globs locally
+
+### WebDriver
+
+* [POSHI-226](https://issues.liferay.com/browse/POSHI-226) - Allow webdriver binary paths to be passed in as system properties
+* [POSHI-228](https://issues.liferay.com/browse/POSHI-228) - Modify selectFrame to switchTo current window
+
+## 1.0.324
+
+### Other
+
+* [LPS-141109](https://issues.liferay.com/browse/LPS-141109) - SF: Rebuild Poshi Script
+* [LRCI-2648](https://issues.liferay.com/browse/LRCI-2648) - Shift Testray 1 over to GCP instead of the Testray Mount
+
+### Script
+
+* [POSHI-211](https://issues.liferay.com/browse/POSHI-211) - Fix poshi script parsing to generate Poshi files
+
+### WebDriver
+
+* [POSHI-208](https://issues.liferay.com/browse/POSHI-208) - Update Ocular for use and replacement within Poshi
+* [POSHI-220](https://issues.liferay.com/browse/POSHI-220) - Add size method to ListUtil
+
+## 1.0.322
+
+### Other
+
+* [LPS-142690](https://issues.liferay.com/browse/LPS-142690) - Add task source-formatter-missing-override
+
+### Script
+
+* [POSHI-202](https://issues.liferay.com/browse/POSHI-202) - Change poshi script parsing to be independent of using java reflection for util classes
+* [POSHI-211](https://issues.liferay.com/browse/POSHI-211) - Fix poshi script parsing to generate Poshi files
+
+## 1.0.321
+
+### Script
+
+* [POSHI-202](https://issues.liferay.com/browse/POSHI-202) - Change poshi script parsing to be independent of using java reflection for util classes
+* [POSHI-211](https://issues.liferay.com/browse/POSHI-211) - Fix poshi script parsing to generate Poshi files
+
+## 1.0.320
+
+### Script
+
+* [POSHI-211](https://issues.liferay.com/browse/POSHI-211) - Fix poshi script parsing to generate Poshi files
+
+## 1.0.319
+
+### Resources
+
+* [POSHI-209](https://issues.liferay.com/browse/POSHI-209) - Update function files to poshi script
+* [POSHI-210](https://issues.liferay.com/browse/POSHI-210) - Update allowable resource jar names to include default resource jar
+
+### Script
+
+* [POSHI-203](https://issues.liferay.com/browse/POSHI-203) - Fix poshi script parsing for annotations that contain double quotation mark
+
+### WebDriver
+
+* [POSHI-208](https://issues.liferay.com/browse/POSHI-208) - Update Ocular for use and replacement within Poshi
+* [POSHI-213](https://issues.liferay.com/browse/POSHI-213) - Update typeKeys method to accept shortcut keys
+
 ## 1.0.316
 
 ### Other

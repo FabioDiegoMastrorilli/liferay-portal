@@ -102,28 +102,37 @@ export default function CollectionFilterConfigurationModal({
 			observer={observer}
 		>
 			<ClayModal.Header>
-				{Liferay.Language.get('filter-collection')}
+				{Liferay.Language.get('prefilter-collection')}
 			</ClayModal.Header>
+
 			<ClayModal.Body className="pt-0">
 				<FilterInformationToolbar
 					collectionConfiguration={collectionConfiguration}
 					itemConfig={itemConfig}
 					setItemConfig={setItemConfig}
 				/>
-				<div className="p-4">
+
+				<div className="pb-4 pt-3 px-4">
+					<p className="mb-4 page-editor__collection-filter-configuration-modal__type-label">
+						{Liferay.Language.get(
+							'by-prefiltering-the-collection-you-narrow-down-the-results-that-appear-on-the-page'
+						)}
+					</p>
+
 					{typeLabel && (
 						<p
 							className={classNames(
 								'page-editor__collection-filter-configuration-modal__type-label',
 								{
 									'mb-0': subtypeLabel,
-									'mb-3': !subtypeLabel,
+									'mb-4': !subtypeLabel,
 								}
 							)}
 						>
 							<span className="mr-1">
 								{Liferay.Language.get('type')}:
 							</span>
+
 							{typeLabel}
 						</p>
 					)}
@@ -133,6 +142,7 @@ export default function CollectionFilterConfigurationModal({
 							<span className="mr-1">
 								{Liferay.Language.get('subtype')}:
 							</span>
+
 							{subtypeLabel}
 						</p>
 					)}
@@ -165,6 +175,7 @@ export default function CollectionFilterConfigurationModal({
 					</div>
 				</div>
 			</ClayModal.Body>
+
 			<ClayModal.Footer
 				last={
 					<>
@@ -285,6 +296,7 @@ const FilterInformationToolbar = ({
 							</ClayToolbar.Section>
 						)}
 					</ClayToolbar.Item>
+
 					<ClayToolbar.Item>
 						<ClayButton
 							className="component-link tbar-link"

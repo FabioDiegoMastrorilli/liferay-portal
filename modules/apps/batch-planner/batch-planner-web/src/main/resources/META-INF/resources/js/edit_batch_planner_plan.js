@@ -12,25 +12,38 @@
  * details.
  */
 
+import {render} from '@liferay/frontend-js-react-web';
 import {fetch, openToast} from 'frontend-js-web';
+
+import TemplateSelect from './TemplateSelect';
+import {
+	SCHEMA_SELECTED_EVENT,
+	TEMPLATE_SELECTED_EVENT,
+	TEMPLATE_SOILED_EVENT,
+} from './constants';
 
 const HEADERS = new Headers({
 	'content-type': 'application/json',
 	'x-csrf-token': window.Liferay.authToken,
 });
 
-function enableButtons() {
-	const buttons = document.querySelectorAll('form button');
-	buttons.forEach((button) => {
-		button.removeAttribute('disabled');
-	});
+function trimPackage(name) {
+	if (!name || name.lastIndexOf('.') < 0) {
+		return name;
+	}
+
+	return name.substr(name.lastIndexOf('.') + 1);
 }
 
-function getOptionElement(label, schemaName, value) {
+function getOptionElement(label, schemaName, selected, value) {
 	const optionElement = document.createElement('option');
 
 	optionElement.innerHTML = label;
 	optionElement.value = value;
+
+	if (selected) {
+		optionElement.selected = true;
+	}
 
 	if (schemaName) {
 		optionElement.setAttribute('schemaName', schemaName);
@@ -39,22 +52,58 @@ function getOptionElement(label, schemaName, value) {
 	return optionElement;
 }
 
-export default function ({namespace}) {
+export default function ({
+	initialExternalType,
+	initialTemplateClassName,
+	initialTemplateHeadlessEndpoint,
+	initialTemplateMapping,
+	namespace,
+	templatesOptions,
+}) {
 	const headlessEnpointSelect = document.querySelector(
 		`#${namespace}headlessEndpoint`
 	);
 	const internalClassNameSelect = document.querySelector(
 		`#${namespace}internalClassName`
 	);
-
 	const taskItemDelegateNameInput = document.querySelector(
 		`#${namespace}taskItemDelegateName`
 	);
+	const externalTypeInput = document.querySelector(
+		`#${namespace}externalType`
+	);
 
-	headlessEnpointSelect.addEventListener('change', async (event) => {
-		event.target.disabled = true;
+	async function handleTemplateSelectedEvent({template}) {
+		if (template) {
+			if (template.externalType) {
+				externalTypeInput.value = template.externalType;
+			}
 
-		const headlessEnpoint = event.target.value;
+			const headlessTemplateOption = headlessEnpointSelect.querySelector(
+				`option[value='${template.headlessEndpoint}']`
+			);
+
+			headlessTemplateOption.selected = true;
+
+			await handleHeadlessSelectChange();
+
+			const internalClassTemplateOption = internalClassNameSelect.querySelector(
+				`option[value='${template.internalClassName}']`
+			);
+
+			internalClassTemplateOption.selected = true;
+
+			await handleClassNameSelectChange();
+		}
+	}
+
+	async function handleHeadlessSelectChange(event) {
+		if (event) {
+			Liferay.fire(TEMPLATE_SOILED_EVENT);
+			event.target.disabled = true;
+		}
+
+		const headlessEnpoint = headlessEnpointSelect.value;
 
 		if (!headlessEnpoint) {
 			internalClassNameSelect.innerHTML = '';
@@ -73,9 +122,12 @@ export default function ({namespace}) {
 			}
 
 			const {components} = await response.json();
+
 			internalClassNameSelect.innerHTML = '';
 
-			internalClassNameSelect.appendChild(getOptionElement('', '', ''));
+			internalClassNameSelect.appendChild(
+				getOptionElement('', '', false, '')
+			);
 
 			const keys = Object.keys(components.schemas).sort();
 
@@ -87,19 +139,19 @@ export default function ({namespace}) {
 				}
 
 				const className = properties['x-class-name'].default;
-
 				const schemaName = properties['x-schema-name']?.default;
 
 				const optionElement = getOptionElement(
 					trimPackage(className),
 					schemaName,
+					false,
 					className
 				);
 
 				internalClassNameSelect.appendChild(optionElement);
 			});
 
-			Liferay.fire('schema-selected', {
+			Liferay.fire(SCHEMA_SELECTED_EVENT, {
 				schema: null,
 			});
 
@@ -114,16 +166,17 @@ export default function ({namespace}) {
 			console.error('Failed to fetch ' + error);
 		}
 		finally {
-			event.target.disabled = false;
+			if (event) {
+				event.target.disabled = false;
+			}
 		}
-	});
+	}
 
-	internalClassNameSelect.addEventListener(
-		'change',
-		handleClassNameSelectChange
-	);
+	async function handleClassNameSelectChange(event) {
+		if (event) {
+			Liferay.fire(TEMPLATE_SOILED_EVENT);
+		}
 
-	async function handleClassNameSelectChange() {
 		const headlessEnpointValue = headlessEnpointSelect.value;
 
 		const selectedOption =
@@ -139,8 +192,8 @@ export default function ({namespace}) {
 			schemaName || selectedOption.value
 		);
 
-		if (!headlessEnpointValue || !internalClassNameValue) {
-			Liferay.fire('schema-selected', {
+		if (!internalClassNameValue) {
+			Liferay.fire(SCHEMA_SELECTED_EVENT, {
 				schema: null,
 			});
 
@@ -161,11 +214,13 @@ export default function ({namespace}) {
 
 			const schemaEntry = components.schemas[internalClassNameValue];
 
-			Liferay.fire('schema-selected', {
-				schema: schemaEntry.properties,
+			schemaEntry.required?.forEach((requiredField) => {
+				schemaEntry.properties[requiredField].required = true;
 			});
 
-			enableButtons();
+			Liferay.fire(SCHEMA_SELECTED_EVENT, {
+				schema: schemaEntry.properties,
+			});
 		}
 		catch (error) {
 			openToast({
@@ -177,11 +232,49 @@ export default function ({namespace}) {
 		}
 	}
 
-	function trimPackage(name) {
-		if (!name || name.lastIndexOf('.') < 0) {
-			return name;
-		}
+	Liferay.on(TEMPLATE_SELECTED_EVENT, handleTemplateSelectedEvent);
 
-		return name.substr(name.lastIndexOf('.') + 1);
+	headlessEnpointSelect.addEventListener(
+		'change',
+		handleHeadlessSelectChange
+	);
+
+	internalClassNameSelect.addEventListener(
+		'change',
+		handleClassNameSelectChange
+	);
+
+	let initialTemplate;
+
+	if (
+		initialTemplateHeadlessEndpoint &&
+		initialTemplateClassName &&
+		initialTemplateMapping
+	) {
+		initialTemplate = {
+			externalType: initialExternalType,
+			headlessEndpoint: initialTemplateHeadlessEndpoint,
+			internalClassName: initialTemplateClassName,
+			mapping: initialTemplateMapping,
+		};
 	}
+
+	render(
+		TemplateSelect,
+		{
+			initialTemplate,
+			initialTemplateOptions: templatesOptions,
+			portletNamespace: namespace,
+		},
+		document.getElementById(`${namespace}templateSelect`)
+	);
+
+	return {
+		dispose: () => {
+			Liferay.detach(
+				TEMPLATE_SELECTED_EVENT,
+				handleTemplateSelectedEvent
+			);
+		},
+	};
 }

@@ -21,10 +21,11 @@ import com.liferay.dynamic.data.mapping.form.values.factory.DDMFormValuesFactory
 import com.liferay.dynamic.data.mapping.form.web.internal.configuration.activator.DDMFormWebConfigurationActivator;
 import com.liferay.dynamic.data.mapping.form.web.internal.constants.DDMFormWebKeys;
 import com.liferay.dynamic.data.mapping.form.web.internal.display.context.DDMFormDisplayContext;
+import com.liferay.dynamic.data.mapping.form.web.internal.display.context.util.DDMFormInstanceSubmissionLimitStatusUtil;
 import com.liferay.dynamic.data.mapping.form.web.internal.instance.lifecycle.AddDefaultSharedFormLayoutPortalInstanceLifecycleListener;
 import com.liferay.dynamic.data.mapping.model.DDMFormInstance;
 import com.liferay.dynamic.data.mapping.service.DDMFormInstanceLocalService;
-import com.liferay.dynamic.data.mapping.service.DDMFormInstanceRecordLocalService;
+import com.liferay.dynamic.data.mapping.service.DDMFormInstanceRecordService;
 import com.liferay.dynamic.data.mapping.service.DDMFormInstanceRecordVersionLocalService;
 import com.liferay.dynamic.data.mapping.service.DDMFormInstanceService;
 import com.liferay.dynamic.data.mapping.service.DDMFormInstanceVersionLocalService;
@@ -113,7 +114,7 @@ public class DDMFormPortlet extends MVCPortlet {
 		catch (Exception exception) {
 			_portal.copyRequestParameters(actionRequest, actionResponse);
 
-			Throwable throwable = getRootCauseThrowable(exception);
+			Throwable throwable = _getRootCauseThrowable(exception);
 
 			hideDefaultErrorMessage(actionRequest);
 
@@ -142,7 +143,7 @@ public class DDMFormPortlet extends MVCPortlet {
 			if (_addDefaultSharedFormLayoutPortalInstanceLifecycleListener.
 					isSharedLayout(themeDisplay)) {
 
-				saveParametersInSession(actionRequest);
+				_saveParametersInSession(actionRequest);
 			}
 		}
 	}
@@ -160,12 +161,16 @@ public class DDMFormPortlet extends MVCPortlet {
 					WebKeys.PORTLET_DISPLAY_CONTEXT);
 
 			if (ddmFormDisplayContext.isFormShared()) {
-				saveRefererGroupIdInRequest(
+				_saveRefererGroupIdInRequest(
 					renderRequest, ddmFormDisplayContext);
 			}
 
-			if (ddmFormDisplayContext.isRequireAuthentication() &&
-				ddmFormDisplayContext.isSharedURL()) {
+			if ((DDMFormInstanceSubmissionLimitStatusUtil.
+					isLimitToOneSubmissionPerUser(
+						ddmFormDisplayContext.getFormInstance()) &&
+				 !ddmFormDisplayContext.isLoggedUser()) ||
+				(ddmFormDisplayContext.isRequireAuthentication() &&
+				 ddmFormDisplayContext.isSharedURL())) {
 
 				HttpServletResponse httpServletResponse =
 					_portal.getHttpServletResponse(renderResponse);
@@ -182,7 +187,7 @@ public class DDMFormPortlet extends MVCPortlet {
 		catch (Exception exception) {
 			if (isSessionErrorException(exception)) {
 				if (_log.isWarnEnabled()) {
-					_log.warn(exception, exception);
+					_log.warn(exception);
 				}
 
 				hideDefaultErrorMessage(renderRequest);
@@ -197,42 +202,9 @@ public class DDMFormPortlet extends MVCPortlet {
 		super.render(renderRequest, renderResponse);
 	}
 
-	protected Throwable getRootCauseThrowable(Throwable throwable) {
-		while (throwable.getCause() != null) {
-			throwable = throwable.getCause();
-		}
-
-		return throwable;
-	}
-
 	@Override
 	protected boolean isSessionErrorException(Throwable throwable) {
 		return false;
-	}
-
-	protected void saveParametersInSession(ActionRequest actionRequest) {
-		long formInstanceId = ParamUtil.getLong(
-			actionRequest, "formInstanceId");
-
-		if (formInstanceId > 0) {
-			PortletSession portletSession = actionRequest.getPortletSession();
-
-			portletSession.setAttribute("formInstanceId", formInstanceId);
-			portletSession.setAttribute("shared", Boolean.TRUE);
-		}
-	}
-
-	protected void saveRefererGroupIdInRequest(
-		RenderRequest renderRequest,
-		DDMFormDisplayContext ddmFormDisplayContext) {
-
-		DDMFormInstance ddmFormInstance =
-			ddmFormDisplayContext.getFormInstance();
-
-		if (ddmFormInstance != null) {
-			renderRequest.setAttribute(
-				DDMFormWebKeys.REFERER_GROUP_ID, ddmFormInstance.getGroupId());
-		}
 	}
 
 	@Reference(
@@ -248,7 +220,7 @@ public class DDMFormPortlet extends MVCPortlet {
 
 		DDMFormDisplayContext ddmFormDisplayContext = new DDMFormDisplayContext(
 			_ddmFormFieldTypeServicesTracker, _ddmFormInstanceLocalService,
-			_ddmFormInstanceRecordLocalService,
+			_ddmFormInstanceRecordService,
 			_ddmFormInstanceRecordVersionLocalService, _ddmFormInstanceService,
 			_ddmFormInstanceVersionLocalService, _ddmFormRenderer,
 			_ddmFormValuesFactory, _ddmFormValuesMerger,
@@ -260,6 +232,39 @@ public class DDMFormPortlet extends MVCPortlet {
 
 		renderRequest.setAttribute(
 			WebKeys.PORTLET_DISPLAY_CONTEXT, ddmFormDisplayContext);
+	}
+
+	private Throwable _getRootCauseThrowable(Throwable throwable) {
+		while (throwable.getCause() != null) {
+			throwable = throwable.getCause();
+		}
+
+		return throwable;
+	}
+
+	private void _saveParametersInSession(ActionRequest actionRequest) {
+		long formInstanceId = ParamUtil.getLong(
+			actionRequest, "formInstanceId");
+
+		if (formInstanceId > 0) {
+			PortletSession portletSession = actionRequest.getPortletSession();
+
+			portletSession.setAttribute("formInstanceId", formInstanceId);
+			portletSession.setAttribute("shared", Boolean.TRUE);
+		}
+	}
+
+	private void _saveRefererGroupIdInRequest(
+		RenderRequest renderRequest,
+		DDMFormDisplayContext ddmFormDisplayContext) {
+
+		DDMFormInstance ddmFormInstance =
+			ddmFormDisplayContext.getFormInstance();
+
+		if (ddmFormInstance != null) {
+			renderRequest.setAttribute(
+				DDMFormWebKeys.REFERER_GROUP_ID, ddmFormInstance.getGroupId());
+		}
 	}
 
 	private static final Log _log = LogFactoryUtil.getLog(DDMFormPortlet.class);
@@ -275,8 +280,7 @@ public class DDMFormPortlet extends MVCPortlet {
 	private DDMFormInstanceLocalService _ddmFormInstanceLocalService;
 
 	@Reference
-	private DDMFormInstanceRecordLocalService
-		_ddmFormInstanceRecordLocalService;
+	private DDMFormInstanceRecordService _ddmFormInstanceRecordService;
 
 	@Reference
 	private DDMFormInstanceRecordVersionLocalService

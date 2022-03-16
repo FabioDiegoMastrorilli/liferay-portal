@@ -24,6 +24,8 @@ CPCatalogEntry cpCatalogEntry = cpContentHelper.getCPCatalogEntry(request);
 CPSku cpSku = cpContentHelper.getDefaultCPSku(cpCatalogEntry);
 
 long cpDefinitionId = cpCatalogEntry.getCPDefinitionId();
+
+long commerceAccountId = CommerceUtil.getCommerceAccountId((CommerceContext)request.getAttribute(CommerceWebKeys.COMMERCE_CONTEXT));
 %>
 
 <div class="container-fluid product-detail" id="<portlet:namespace /><%= cpCatalogEntry.getCPDefinitionId() %>ProductContent">
@@ -50,8 +52,13 @@ long cpDefinitionId = cpCatalogEntry.getCPDefinitionId();
 					</div>
 
 					<div class="col-10 col-lg-10 col-md-9 full-image">
-						<c:if test="<%= Validator.isNotNull(cpCatalogEntry.getDefaultImageFileUrl()) %>">
-							<img class="center-block img-fluid" id="<portlet:namespace />full-image" src="<%= HtmlUtil.escapeAttribute(cpCatalogEntry.getDefaultImageFileUrl()) %>" />
+
+						<%
+						String defaultImageFileURL = cpContentHelper.getDefaultImageFileURL(commerceAccountId, cpCatalogEntry.getCPDefinitionId());
+						%>
+
+						<c:if test="<%= Validator.isNotNull(defaultImageFileURL) %>">
+							<img class="center-block img-fluid" id="<portlet:namespace />full-image" src="<%= HtmlUtil.escapeAttribute(defaultImageFileURL) %>" />
 						</c:if>
 					</div>
 				</div>
@@ -118,7 +125,7 @@ long cpDefinitionId = cpCatalogEntry.getCPDefinitionId();
 
 	<%
 	List<CPDefinitionSpecificationOptionValue> cpDefinitionSpecificationOptionValues = cpContentHelper.getCPDefinitionSpecificationOptionValues(cpDefinitionId);
-	List<CPMedia> cpMediaEntries = cpContentHelper.getCPAttachmentFileEntries(cpDefinitionId, themeDisplay);
+	List<CPMedia> cpMedias = cpContentHelper.getCPMedias(cpDefinitionId, themeDisplay);
 	List<CPOptionCategory> cpOptionCategories = cpContentHelper.getCPOptionCategories(company.getCompanyId());
 	%>
 
@@ -140,7 +147,7 @@ long cpDefinitionId = cpCatalogEntry.getCPDefinitionId();
 						</li>
 					</c:if>
 
-					<c:if test="<%= !cpMediaEntries.isEmpty() %>">
+					<c:if test="<%= !cpMedias.isEmpty() %>">
 						<li class="nav-item" role="presentation">
 							<a aria-controls="<portlet:namespace />attachments" aria-expanded="false" class="nav-link" data-toggle="tab" href="#<portlet:namespace />attachments" role="tab">
 								<%= LanguageUtil.get(resourceBundle, "attachments") %>
@@ -216,21 +223,21 @@ long cpDefinitionId = cpCatalogEntry.getCPDefinitionId();
 						</div>
 					</c:if>
 
-					<c:if test="<%= !cpMediaEntries.isEmpty() %>">
+					<c:if test="<%= !cpMedias.isEmpty() %>">
 						<div class="tab-pane" id="<portlet:namespace />attachments">
 							<div class="table-responsive">
 								<table class="table table-bordered table-striped">
 
 									<%
-									for (CPMedia curCPMedia : cpMediaEntries) {
+									for (CPMedia cpMedia : cpMedias) {
 									%>
 
 										<tr>
 											<td>
-												<span><%= HtmlUtil.escape(curCPMedia.getTitle()) %></span>
+												<span><%= HtmlUtil.escape(cpMedia.getTitle()) %></span>
 
 												<span>
-													<aui:icon cssClass="icon-monospaced" image="download" markupView="lexicon" target="_blank" url="<%= curCPMedia.getDownloadURL() %>" />
+													<aui:icon cssClass="icon-monospaced" image="download" markupView="lexicon" target="_blank" url="<%= cpMedia.getDownloadURL() %>" />
 												</span>
 											</td>
 										</tr>

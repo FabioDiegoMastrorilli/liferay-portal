@@ -27,6 +27,10 @@ public class CommerceOrderTypeLocalServiceWrapper
 	implements CommerceOrderTypeLocalService,
 			   ServiceWrapper<CommerceOrderTypeLocalService> {
 
+	public CommerceOrderTypeLocalServiceWrapper() {
+		this(null);
+	}
+
 	public CommerceOrderTypeLocalServiceWrapper(
 		CommerceOrderTypeLocalService commerceOrderTypeLocalService) {
 
@@ -387,6 +391,12 @@ public class CommerceOrderTypeLocalServiceWrapper
 	@Override
 	public int getCommerceOrderTypesCount() {
 		return _commerceOrderTypeLocalService.getCommerceOrderTypesCount();
+	}
+
+	@Override
+	public int getCommerceOrderTypesCount(long companyId, boolean active) {
+		return _commerceOrderTypeLocalService.getCommerceOrderTypesCount(
+			companyId, active);
 	}
 
 	@Override

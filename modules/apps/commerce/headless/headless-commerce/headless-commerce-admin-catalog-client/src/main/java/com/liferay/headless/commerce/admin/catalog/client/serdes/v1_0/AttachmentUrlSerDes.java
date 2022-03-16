@@ -61,7 +61,21 @@ public class AttachmentUrlSerDes {
 		sb.append("{");
 
 		DateFormat liferayToJSONDateFormat = new SimpleDateFormat(
-			"yyyy-MM-dd'T'HH:mm:ss'Z'");
+			"yyyy-MM-dd'T'HH:mm:ssXX");
+
+		if (attachmentUrl.getContentType() != null) {
+			if (sb.length() > 1) {
+				sb.append(", ");
+			}
+
+			sb.append("\"contentType\": ");
+
+			sb.append("\"");
+
+			sb.append(_escape(attachmentUrl.getContentType()));
+
+			sb.append("\"");
+		}
 
 		if (attachmentUrl.getCustomFields() != null) {
 			if (sb.length() > 1) {
@@ -222,7 +236,15 @@ public class AttachmentUrlSerDes {
 		Map<String, String> map = new TreeMap<>();
 
 		DateFormat liferayToJSONDateFormat = new SimpleDateFormat(
-			"yyyy-MM-dd'T'HH:mm:ss'Z'");
+			"yyyy-MM-dd'T'HH:mm:ssXX");
+
+		if (attachmentUrl.getContentType() == null) {
+			map.put("contentType", null);
+		}
+		else {
+			map.put(
+				"contentType", String.valueOf(attachmentUrl.getContentType()));
+		}
 
 		if (attachmentUrl.getCustomFields() == null) {
 			map.put("customFields", null);
@@ -332,7 +354,12 @@ public class AttachmentUrlSerDes {
 			AttachmentUrl attachmentUrl, String jsonParserFieldName,
 			Object jsonParserFieldValue) {
 
-			if (Objects.equals(jsonParserFieldName, "customFields")) {
+			if (Objects.equals(jsonParserFieldName, "contentType")) {
+				if (jsonParserFieldValue != null) {
+					attachmentUrl.setContentType((String)jsonParserFieldValue);
+				}
+			}
+			else if (Objects.equals(jsonParserFieldName, "customFields")) {
 				if (jsonParserFieldValue != null) {
 					attachmentUrl.setCustomFields(
 						Stream.of(

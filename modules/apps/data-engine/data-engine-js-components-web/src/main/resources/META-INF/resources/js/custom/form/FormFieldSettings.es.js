@@ -43,6 +43,7 @@ const StateSync = ({
 	defaultLanguageId,
 	editingLanguageId,
 	focusedField,
+	formBuilder,
 	objectFields,
 	pages,
 	rules,
@@ -84,6 +85,13 @@ const StateSync = ({
 		});
 	}, [dispatch, focusedField]);
 
+	useEffect(() => {
+		dispatch({
+			payload: formBuilder,
+			type: EVENT_TYPES.FORM_BUILDER.PAGES.UPDATE,
+		});
+	}, [dispatch, formBuilder]);
+
 	return null;
 };
 
@@ -92,7 +100,7 @@ const StateSync = ({
  * properties of a field, a new FormProvider is needed to control
  * the reducers of a Field's settingsContext structure.
  */
-export const FormFieldSettings = ({children, onAction, ...otherProps}) => {
+export function FormFieldSettings({children, onAction, ...otherProps}) {
 	const {config, state} = parseProps(otherProps);
 
 	return (
@@ -120,10 +128,11 @@ export const FormFieldSettings = ({children, onAction, ...otherProps}) => {
 				value={state}
 			>
 				<StateSync {...state} />
+
 				{children}
 			</FormProvider>
 		</ConfigProvider>
 	);
-};
+}
 
 FormFieldSettings.displayName = 'FormFieldSettings';

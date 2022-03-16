@@ -46,7 +46,6 @@ import com.liferay.search.experiences.service.SXPBlueprintServiceUtil;
  * </p>
  *
  * @author Brian Wing Shun Chan
- * @see SXPBlueprintServiceSoap
  * @generated
  */
 public class SXPBlueprintServiceHttp {
@@ -55,7 +54,7 @@ public class SXPBlueprintServiceHttp {
 			addSXPBlueprint(
 				HttpPrincipal httpPrincipal, String configurationJSON,
 				java.util.Map<java.util.Locale, String> descriptionMap,
-				String elementInstancesJSON,
+				String elementInstancesJSON, String schemaVersion,
 				java.util.Map<java.util.Locale, String> titleMap,
 				com.liferay.portal.kernel.service.ServiceContext serviceContext)
 		throws com.liferay.portal.kernel.exception.PortalException {
@@ -67,7 +66,7 @@ public class SXPBlueprintServiceHttp {
 
 			MethodHandler methodHandler = new MethodHandler(
 				methodKey, configurationJSON, descriptionMap,
-				elementInstancesJSON, titleMap, serviceContext);
+				elementInstancesJSON, schemaVersion, titleMap, serviceContext);
 
 			Object returnObj = null;
 
@@ -182,7 +181,7 @@ public class SXPBlueprintServiceHttp {
 				HttpPrincipal httpPrincipal, long sxpBlueprintId,
 				String configurationJSON,
 				java.util.Map<java.util.Locale, String> descriptionMap,
-				String elementInstancesJSON,
+				String elementInstancesJSON, String schemaVersion,
 				java.util.Map<java.util.Locale, String> titleMap,
 				com.liferay.portal.kernel.service.ServiceContext serviceContext)
 		throws com.liferay.portal.kernel.exception.PortalException {
@@ -194,7 +193,7 @@ public class SXPBlueprintServiceHttp {
 
 			MethodHandler methodHandler = new MethodHandler(
 				methodKey, sxpBlueprintId, configurationJSON, descriptionMap,
-				elementInstancesJSON, titleMap, serviceContext);
+				elementInstancesJSON, schemaVersion, titleMap, serviceContext);
 
 			Object returnObj = null;
 
@@ -229,7 +228,7 @@ public class SXPBlueprintServiceHttp {
 
 	private static final Class<?>[] _addSXPBlueprintParameterTypes0 =
 		new Class[] {
-			String.class, java.util.Map.class, String.class,
+			String.class, java.util.Map.class, String.class, String.class,
 			java.util.Map.class,
 			com.liferay.portal.kernel.service.ServiceContext.class
 		};
@@ -240,7 +239,7 @@ public class SXPBlueprintServiceHttp {
 	private static final Class<?>[] _updateSXPBlueprintParameterTypes3 =
 		new Class[] {
 			long.class, String.class, java.util.Map.class, String.class,
-			java.util.Map.class,
+			String.class, java.util.Map.class,
 			com.liferay.portal.kernel.service.ServiceContext.class
 		};
 

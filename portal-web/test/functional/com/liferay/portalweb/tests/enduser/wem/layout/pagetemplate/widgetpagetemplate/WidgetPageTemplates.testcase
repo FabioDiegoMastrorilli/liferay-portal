@@ -55,9 +55,9 @@ definition {
 		task ("Add a site and page basing on the created page template") {
 			JSONGroup.addGroup(groupName = "Site Name");
 
-			SitePages.openPagesAdmin(siteURLKey = "site-name");
+			PagesAdmin.openPagesAdmin(siteURLKey = "site-name");
 
-			SitePages.addPublicPage(
+			PagesAdmin.addPublicPage(
 				pageName = "Site Page",
 				pageTemplateName = "Page Template Name");
 		}
@@ -65,8 +65,8 @@ definition {
 		task ("View page template is added") {
 			Navigator.openSiteURL(siteName = "Site Name");
 
-			Page.viewPageTemplate(
-				page = "Site Page",
+			PagesAdmin.viewPageTemplate(
+				pageName = "Site Page",
 				pageTemplateName = "Page Template Name");
 		}
 
@@ -87,13 +87,13 @@ definition {
 		}
 
 		task ("Disable inherit changes") {
-			SitePages.openPagesAdmin(siteURLKey = "site-name");
+			PagesAdmin.openPagesAdmin(siteURLKey = "site-name");
 
-			SitePages.gotoPageMenuItem(
+			PagesAdmin.gotoPageEllipsisMenuItem(
 				menuItem = "Configure",
 				pageName = "Site Page");
 
-			Page.togglePageTemplateInheritChanges(toggleValue = "disable");
+			PagesAdmin.togglePageTemplateInheritChanges(toggleValue = "disable");
 
 			Button.clickSave();
 		}
@@ -190,9 +190,9 @@ definition {
 		}
 
 		task ("Add a page based on the widget page template") {
-			SitePages.openPagesAdmin(siteURLKey = "site-name");
+			PagesAdmin.openPagesAdmin(siteURLKey = "site-name");
 
-			SitePages.addPublicPage(
+			PagesAdmin.addPublicPage(
 				collectionName = "Page Template Collection",
 				pageName = "Test Page Name",
 				pageTemplateName = "Page Template Name");
@@ -243,13 +243,13 @@ definition {
 		}
 
 		task ("View inactive page template doesn't display") {
-			SitePages.openPagesAdmin(siteURLKey = "site-name");
+			PagesAdmin.openPagesAdmin(siteURLKey = "site-name");
 
 			LexiconEntry.gotoAddMenuItem(menuItem = "Public Page");
 
 			Navigator.gotoNavNested(navNested = "Global Templates");
 
-			Page.viewPageTemplateTypeNotPresent(pageTemplateName = "Page Template Name");
+			PagesAdmin.viewPageTemplateTypeNotPresent(pageTemplateName = "Page Template Name");
 		}
 
 		task ("Active the created page template and view status") {
@@ -265,13 +265,13 @@ definition {
 		}
 
 		task ("View active page template displays") {
-			SitePages.openPagesAdmin(siteURLKey = "site-name");
+			PagesAdmin.openPagesAdmin(siteURLKey = "site-name");
 
 			LexiconEntry.gotoAddMenuItem(menuItem = "Public Page");
 
 			Navigator.gotoNavNested(navNested = "Global Templates");
 
-			Page.viewPageTemplateTypePresent(pageTemplateName = "Page Template Name");
+			PagesAdmin.viewPageTemplateTypePresent(pageTemplateName = "Page Template Name");
 		}
 	}
 
@@ -466,7 +466,7 @@ definition {
 				item = "Edit",
 				pageTemplateName = "Department Landing Page");
 
-			for (var portletName : list "Media Gallery,Web Content Display,Web Content Display,Navigation Menu,Members,Asset Publisher") {
+			for (var portletName : list "Media Gallery,Web Content Display,Web Content Display,Menu Display,Members,Asset Publisher") {
 				Portlet.addPG(portletName = "${portletName}");
 			}
 		}
@@ -530,7 +530,7 @@ definition {
 
 			Portlet.viewSpecificPG(portletName = "Members");
 
-			Portlet.viewSpecificPG(portletName = "Navigation Menu");
+			Portlet.viewSpecificPG(portletName = "Menu Display");
 		}
 	}
 
@@ -558,7 +558,7 @@ definition {
 			PageTemplatesAdminGlobalSite.openGlobalPageTemplatesAdmin();
 
 			PageTemplatesAdminGlobalSite.viewDefaultLocalizedCP(
-				pageTemplateNameList = "Blog,Búsqueda,Wiki",
+				pageTemplateNameList = "Búsqueda",
 				portletTitle = "Plantillas de página");
 		}
 

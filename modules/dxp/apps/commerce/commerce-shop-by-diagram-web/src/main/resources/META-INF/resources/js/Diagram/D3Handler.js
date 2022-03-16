@@ -13,7 +13,11 @@ import {drag as d3drag, event as d3event, select as d3select} from 'd3';
 import {openToast} from 'frontend-js-web';
 
 import DiagramZoomHandler from '../utilities/DiagramZoomHandler';
-import {PINS_CIRCLE_RADIUS, PINS_RADIUS} from '../utilities/constants';
+import {
+	PINS_CIRCLE_RADIUS,
+	PINS_RADIUS,
+	ZOOM_DISABLED,
+} from '../utilities/constants';
 import {savePin} from '../utilities/data';
 import {
 	getAbsolutePositions,
@@ -79,10 +83,17 @@ class D3Handler extends DiagramZoomHandler {
 			.attr('y', 0)
 			.on('load', (_d, index, nodes) => {
 				const imageWidth = nodes[index].getBoundingClientRect().width;
+
 				const panX =
 					(wrappperBoundingClientRect.width - imageWidth) / 2;
 
-				this._d3diagramWrapper.call(this._zoom.translateBy, panX, 0);
+				if (!ZOOM_DISABLED) {
+					this._d3diagramWrapper.call(
+						this._zoom.translateBy,
+						panX,
+						0
+					);
+				}
 
 				this.imageRendered = true;
 
@@ -96,7 +107,7 @@ class D3Handler extends DiagramZoomHandler {
 	}
 
 	_handleZoom() {
-		this._resetActivePinsState();
+		this.resetActivePinsState();
 		this._setTooltipData(null);
 
 		super._handleZoom();
@@ -120,7 +131,7 @@ class D3Handler extends DiagramZoomHandler {
 		return super._recenterViewport(x, y, duration);
 	}
 
-	_resetActivePinsState() {
+	resetActivePinsState() {
 		if (this._activePin) {
 			this._activePin.classList.remove('active');
 		}
@@ -132,7 +143,7 @@ class D3Handler extends DiagramZoomHandler {
 	}
 
 	_handleImageClick() {
-		this._resetActivePinsState();
+		this.resetActivePinsState();
 
 		if (!this._allowPinsUpdate) {
 			this._setTooltipData(null);
@@ -186,7 +197,7 @@ class D3Handler extends DiagramZoomHandler {
 
 	updatePins(pins) {
 		this._pins = pins;
-		this._resetActivePinsState();
+		this.resetActivePinsState();
 
 		if (this.imageRendered) {
 			this._updatePrintedPins();
@@ -219,7 +230,7 @@ class D3Handler extends DiagramZoomHandler {
 	}
 
 	_selectPinNode(target) {
-		this._resetActivePinsState();
+		this.resetActivePinsState();
 
 		target.classList.add('active');
 
@@ -252,6 +263,7 @@ class D3Handler extends DiagramZoomHandler {
 						this._currentScale
 					)})`
 			)
+			.attr('role', 'pin')
 			.on('click', (_d, index, nodes) => {
 				this._selectPinNode(nodes[index]);
 			});
@@ -309,7 +321,7 @@ class D3Handler extends DiagramZoomHandler {
 
 		selectedPin.classList.add('drag-started');
 
-		this._resetActivePinsState();
+		this.resetActivePinsState();
 		this._setTooltipData(null);
 	}
 

@@ -655,6 +655,11 @@
 	<td></td>
 </tr>
 <tr>
+	<td>TEXT_MULTILINE_FIELD_2</td>
+	<td>//div[contains(@data-field-name,'Text')]//textarea</td>
+	<td></td>
+</tr>
+<tr>
 	<td></td>
 	<td></td>
 	<td></td>
@@ -678,6 +683,11 @@
 <tr>
 	<td>PARAGRAPH_BODY_TEXT_CONTENT</td>
 	<td>//div[(@class='form-group') and contains(@data-field-name,'${key_fieldName}')]//div</td>
+	<td></td>
+</tr>
+<tr>
+	<td>PARAGRAPH_BODY_TEXT_PAGES</td>
+	<td>//div[contains(@class,'liferay-ddm-form-field-paragraph-text')]//p[text()='${fieldValue}']</td>
 	<td></td>
 </tr>
 <tr>
@@ -769,7 +779,7 @@
 </tr>
 <tr>
 	<td>SELECT_FIELD_OPTIONS_LIST</td>
-	<td>//div[contains(@class, 'dropdown-menu') and contains(@class, 'show')]//li[contains(.,'${key_selectOption}')]</td>
+	<td>//div[@class='dropdown-menu ddm-btn-full ddm-select-dropdown show']//li//button[text()='${key_selectOption}']</td>
 	<td></td>
 </tr>
 <tr>
@@ -878,7 +888,7 @@
 <!--VALIDATION-->
 <tr>
 	<td>VALIDATION_ACCEPTED_DATE</td>
-	<td>//div[contains(@class,"form-group") and @data-field-name='selectedValidation']//div[contains(@class,"form-control results-chosen select-field-trigger")]</td>
+	<td>//div[contains(@class,'ddm-form-field-type__validation-date-accepted-date')]//div[contains(@class,"form-control results-chosen select-field-trigger")]</td>
 	<td></td>
 </tr>
 <tr>
@@ -887,8 +897,13 @@
 	<td></td>
 </tr>
 <tr>
+	<td>VALIDATION_ARGUMENT_2</td>
+	<td>//div[contains(@class,'form-control')]//div[contains(@class,'option-selected') and text()='Contains']</td>
+	<td></td>
+</tr>
+<tr>
 	<td>VALIDATION_ARGUMENT_OPTION</td>
-	<td>//div[contains(@data-field-name,'validation')]//ul[contains(@class,'results-chosen')]//li[contains(.,'${key_validationArgument}')] | //div[contains(@class,'dropdown-menu') and contains(@class,'show')]//ul[contains(@class,'list-unstyled')]//button[contains(text(),'${key_validationArgument}')]</td>
+	<td>//div[contains(@class,'dropdown-menu ddm-btn-full ddm-select-dropdown show')]//ul//li//button[text()='${key_validationArgument}']</td>
 	<td></td>
 </tr>
 <tr>
@@ -913,12 +928,12 @@
 </tr>
 <tr>
 	<td>VALIDATION_STARTS_FROM</td>
-	<td>//div[contains(@class,"form-group") and @data-field-name='selectedParameter']//label[text()='Starts From']/..//div[contains(@class,"form-control results-chosen select-field-trigger")]</td>
+	<td>//div[contains(@class,'ddm__validation-date-start-end')][1]//div[contains(@class,"form-control results-chosen select-field-trigger")]</td>
 	<td></td>
 </tr>
 <tr>
 	<td>VALIDATION_STARTS_FROM_OPERATION</td>
-	<td>//div[@data-field-name='selectedOperation_startsFrom']//div//div/div[text()='${startsFromOperation}']</td>
+	<td>//div[contains(@class,'ddm__custom-date')][1]//div/div[text()='Plus']</td>
 	<td></td>
 </tr>
 <tr>
@@ -933,17 +948,17 @@
 </tr>
 <tr>
 	<td>VALIDATION_STARTS_FROM_UNIT</td>
-	<td>//div[@data-field-name='selectedUnit_startsFrom']//div[contains(@class,'option-selected') and text()='${key_startsFromUnit}']</td>
+	<td>//div[contains(@class,'ddm__custom-date')][1]//div[contains(@class,'option-selected') and text()='Days']</td>
 	<td></td>
 </tr>
 <tr>
 	<td>VALIDATION_ENDS_ON</td>
-	<td>//div[contains(@class,"form-group") and @data-field-name='selectedParameter']//label[text()='Ends On']/..//div[contains(@class,"form-control results-chosen select-field-trigger")]</td>
+	<td>//div[contains(@class,'ddm__validation-date-start-end')][3]//div[contains(@class,"form-control results-chosen select-field-trigger")]</td>
 	<td></td>
 </tr>
 <tr>
 	<td>VALIDATION_ENDS_ON_OPERATION</td>
-	<td>//div[contains(@data-field-name,'selectedOperation_endsOn')]//div//div//div[text()='${key_endsOnOperation}']</td>
+	<td>//div[contains(@class,'ddm__custom-date')][2]//div/div[text()='Plus']</td>
 	<td></td>
 </tr>
 <tr>
@@ -958,12 +973,12 @@
 </tr>
 <tr>
 	<td>VALIDATION_ENDS_ON_UNIT</td>
-	<td>//div[@data-field-name='selectedUnit_endsOn']//div[contains(@class,'option-selected') and text()='Days']</td>
+	<td>//div[contains(@class,'ddm__custom-date')][2]//div[contains(@class,'option-selected') and text()='Days']</td>
 	<td></td>
 </tr>
 <tr>
 	<td>VALIDATION_ENDS_ON_UNIT_VALUE</td>
-	<td>//div[@data-field-name='selectedUnit_endsOn']//div[contains(@class,'option-selected') and text()='${key_endsOnUnit}']</td>
+	<td>//div[contains(@class,'ddm__custom-date')][2]//div[contains(@class,'option-selected') and text()='${key_endsOnUnit}']</td>
 	<td></td>
 </tr>
 <tr>

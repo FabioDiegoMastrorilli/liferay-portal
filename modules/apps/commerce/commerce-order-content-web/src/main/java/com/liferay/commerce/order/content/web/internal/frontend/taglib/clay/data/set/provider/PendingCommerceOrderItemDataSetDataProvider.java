@@ -14,6 +14,8 @@
 
 package com.liferay.commerce.order.content.web.internal.frontend.taglib.clay.data.set.provider;
 
+import com.liferay.commerce.constants.CommerceWebKeys;
+import com.liferay.commerce.context.CommerceContext;
 import com.liferay.commerce.currency.model.CommerceMoney;
 import com.liferay.commerce.model.CommerceOrder;
 import com.liferay.commerce.model.CommerceOrderItem;
@@ -31,6 +33,8 @@ import com.liferay.commerce.product.util.CPSubscriptionType;
 import com.liferay.commerce.product.util.CPSubscriptionTypeRegistry;
 import com.liferay.commerce.service.CommerceOrderItemService;
 import com.liferay.commerce.service.CommerceOrderService;
+import com.liferay.commerce.util.CommerceOrderItemQuantityFormatter;
+import com.liferay.commerce.util.CommerceUtil;
 import com.liferay.frontend.taglib.clay.data.Filter;
 import com.liferay.frontend.taglib.clay.data.Pagination;
 import com.liferay.frontend.taglib.clay.data.set.provider.ClayDataSetDataProvider;
@@ -91,7 +95,7 @@ public class PendingCommerceOrderItemDataSetDataProvider
 			return _getOrderItems(commerceOrderItems, httpServletRequest);
 		}
 		catch (Exception exception) {
-			_log.error(exception, exception);
+			_log.error(exception);
 		}
 
 		return Collections.emptyList();
@@ -334,24 +338,28 @@ public class PendingCommerceOrderItemDataSetDataProvider
 
 			orderItems.add(
 				new OrderItem(
-					commerceOrderItem.getCommerceOrderItemId(),
-					commerceOrderItem.getCommerceOrderId(),
-					commerceOrderItem.getSku(),
+					commerceOrderItem.getCPInstanceId(),
+					_formatDiscountAmount(commerceOrderItemPrice, locale),
+					_getCommerceOrderErrorMessages(
+						commerceOrderItem, commerceOrderValidatorResultMap),
+					_commerceOrderItemQuantityFormatter.format(
+						commerceOrderItem, locale),
+					_formatSubscriptionPeriod(commerceOrderItem, locale),
 					commerceOrderItem.getName(locale),
 					_getCommerceOrderOptions(commerceOrderItem, locale),
+					commerceOrderItem.getCommerceOrderId(),
+					commerceOrderItem.getCommerceOrderItemId(),
 					_getChildOrderItems(commerceOrderItem, httpServletRequest),
 					commerceOrderItem.getParentCommerceOrderItemId(),
 					_formatUnitPrice(commerceOrderItemPrice, locale),
-					_formatPromoPrice(commerceOrderItemPrice, locale),
-					_formatDiscountAmount(commerceOrderItemPrice, locale),
-					commerceOrderItem.getQuantity(),
-					_formatFinalPrice(commerceOrderItemPrice, locale),
+					_formatPromoPrice(commerceOrderItemPrice, locale), 0,
+					commerceOrderItem.getSku(),
 					_cpInstanceHelper.getCPInstanceThumbnailSrc(
+						CommerceUtil.getCommerceAccountId(
+							(CommerceContext)httpServletRequest.getAttribute(
+								CommerceWebKeys.COMMERCE_CONTEXT)),
 						commerceOrderItem.getCPInstanceId()),
-					0,
-					_getCommerceOrderErrorMessages(
-						commerceOrderItem, commerceOrderValidatorResultMap),
-					_formatSubscriptionPeriod(commerceOrderItem, locale)));
+					_formatFinalPrice(commerceOrderItemPrice, locale)));
 		}
 
 		return orderItems;
@@ -359,6 +367,10 @@ public class PendingCommerceOrderItemDataSetDataProvider
 
 	private static final Log _log = LogFactoryUtil.getLog(
 		PendingCommerceOrderItemDataSetDataProvider.class);
+
+	@Reference
+	private CommerceOrderItemQuantityFormatter
+		_commerceOrderItemQuantityFormatter;
 
 	@Reference
 	private CommerceOrderItemService _commerceOrderItemService;

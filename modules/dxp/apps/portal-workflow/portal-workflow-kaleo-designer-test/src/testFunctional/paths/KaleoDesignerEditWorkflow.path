@@ -83,6 +83,16 @@
 	<td></td>
 </tr>
 <tr>
+	<td>NODE_FIELD</td>
+	<td>//div[contains(@class,'tabs-content')]//li[contains(@class,'builder-field')][div[contains(@class,'field-label')][normalize-space(text())='${key_nodeNodeLabel}']]</td>
+	<td></td>
+</tr>
+<tr>
+	<td>NODE</td>
+	<td>//div[contains(@class,'drop-container')]//div[contains(@class,'diagram-node-${key_nodeType}')]</td>
+	<td></td>
+</tr>
+<tr>
 	<td>NODE_PNG</td>
 	<td>portal/screenshots/kaleodesigner/node_${key_nodeType}.png</td>
 	<td></td>
@@ -278,6 +288,11 @@
 <tr>
 	<td>SETTINGS_CELL_EDITOR_NOTIFICATIONS_RECIPIENT_EDITOR_ROLE_TYPE_SELECT</td>
 	<td>//select[@name='roleType']</td>
+	<td></td>
+</tr>
+<tr>
+	<td>ROLE_REMOVE_ICON</td>
+	<td>//div[contains(@class,'cell-editor-focused')]//div[@class='celleditor-view-dynamic-views']//div[contains(@class,'celleditor-assignment-view')][1]//div[@class='celleditor-view-menu'][2]//a</td>
 	<td></td>
 </tr>
 <tr>

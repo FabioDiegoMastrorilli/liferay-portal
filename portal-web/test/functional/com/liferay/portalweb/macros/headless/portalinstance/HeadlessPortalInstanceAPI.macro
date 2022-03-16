@@ -16,10 +16,9 @@ definition {
 			-u ${userName}:test \
 			-H Content-Type: application/json
 		''';
+		var json = JSONCurlUtil.get("${curl}");
 
-		var JSON = JSONCurlUtil.get("${curl}");
-
-		return "${JSON}";
+		return "${json}";
 	}
 
 	@summary = "Creates a new Portal Instance with domain = mailDomain, virtualHost = virtualHost, and portalInstanceId = webId"
@@ -29,19 +28,19 @@ definition {
 		var portalURL = JSONCompany.getDefaultPortalURL();
 
 		var parameters = JSONUtil2._addJSONObject(
-			JSON = "{}",
+			json = "{}",
 			key = "domain",
-			value = ""${domain}"");
+			value = "&quot;${domain}&quot;");
 
 		var parameters = JSONUtil2._addJSONObject(
-			JSON = "${parameters}",
+			json = "${parameters}",
 			key = "virtualHost",
-			value = ""${virtualHost}"");
+			value = "&quot;${virtualHost}&quot;");
 
 		var parameters = JSONUtil2._addJSONObject(
-			JSON = "${parameters}",
+			json = "${parameters}",
 			key = "portalInstanceId",
-			value = ""${portalInstanceId}"");
+			value = "&quot;${portalInstanceId}&quot;");
 
 		if ("${authenticationMethod}" == "By Screen Name") {
 			var userName = "test";
@@ -67,24 +66,24 @@ definition {
 		var portalURL = JSONCompany.getPortalURL();
 
 		var parameters = JSONUtil2._addJSONObject(
-			JSON = "{}",
+			json = "{}",
 			key = "domain",
-			value = ""${domain}"");
+			value = "&quot;${domain}&quot;");
 
 		var parameters = JSONUtil2._addJSONObject(
-			JSON = "${parameters}",
+			json = "${parameters}",
 			key = "virtualHost",
-			value = ""${virtualHost}"");
+			value = "&quot;${virtualHost}&quot;");
 
 		var parameters = JSONUtil2._addJSONObject(
-			JSON = "${parameters}",
+			json = "${parameters}",
 			key = "portalInstanceId",
-			value = ""${portalInstanceId}"");
+			value = "&quot;${portalInstanceId}&quot;");
 
 		var parameters = JSONUtil2._addJSONObject(
-			JSON = "${parameters}",
+			json = "${parameters}",
 			key = "siteInitializerKey",
-			value = ""${siteInitializerKey}"");
+			value = "&quot;${siteInitializerKey}&quot;");
 
 		if ("${authenticationMethod}" == "By Screen Name") {
 			var userName = "test";
@@ -105,9 +104,9 @@ definition {
 
 	@summary = "Clean up all Portal Instances that are not the default using Headless"
 	macro cleanAllPortalInstances {
-		var portalInstanceJSON = HeadlessPortalInstanceAPI._getPortalInstances(authenticationMethod = "${authenticationMethod}");
+		var portalInstanceJson = HeadlessPortalInstanceAPI._getPortalInstances(authenticationMethod = "${authenticationMethod}");
 
-		var portalInstanceIds = JSONUtil.getWithJSONPath("${portalInstanceJSON}","$.items..portalInstanceId");
+		var portalInstanceIds = JSONUtil.getWithJSONPath("${portalInstanceJson}", "$.items..portalInstanceId");
 
 		for (var portalInstanceId : list "${portalInstanceIds}") {
 			if ("${portalInstanceId}" != "liferay.com") {

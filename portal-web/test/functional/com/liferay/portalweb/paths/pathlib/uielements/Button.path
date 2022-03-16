@@ -11,8 +11,18 @@
 
 <tbody>
 <tr>
-	<td>ADD_ACTION</td>
-	<td>//span[contains(.,'Add Action')]</td>
+	<td>ADD</td>
+	<td>//button[contains(@id, 'addButton')]</td>
+	<td></td>
+</tr>
+<tr>
+	<td>ADD_DISABLED</td>
+	<td>//button[contains(@id, 'addButton') and @disabled]</td>
+	<td></td>
+</tr>
+<tr>
+	<td>DISABLED_BUTTON</td>
+	<td>//button[@disabled]</td>
 	<td></td>
 </tr>
 <tr>
@@ -81,6 +91,11 @@
 	<td></td>
 </tr>
 <tr>
+	<td>ANY_SECONDARY</td>
+	<td>//*[not(self::div)][contains(@class,'btn-secondary')][normalize-space()='${key_text}'][not(contains(@class,'navbar'))]</td>
+	<td></td>
+</tr>
+<tr>
 	<td>ANY_TITLE</td>
 	<td>//button[@title='${key_title}']</td>
 	<td></td>
@@ -112,12 +127,17 @@
 </tr>
 <tr>
 	<td>ANY_DISABLED</td>
-	<td>//button[@disabled][contains(@class,'btn')][normalize-space()='${key_text}']</td>
+	<td>//button[@disabled][contains(@class,'btn')][normalize-space()='${key_text}'] | //button[@disabled][contains(@class,'btn')][@*='${key_text}']</td>
 	<td></td>
 </tr>
 <tr>
 	<td>TRASH_DISABLED</td>
 	<td>//button[*[name()='svg'][contains(@class,'lexicon-icon-trash')]][@disabled='']</td>
+	<td></td>
+</tr>
+<tr>
+	<td>TRASH_ENABLED</td>
+	<td>//button[*[name()='svg'][contains(@class,'lexicon-icon-trash')]]</td>
 	<td></td>
 </tr>
 <tr>
@@ -173,11 +193,6 @@
 <tr>
 	<td>CHANGE</td>
 	<td>//button[contains(.,'Change')]</td>
-	<td></td>
-</tr>
-<tr>
-	<td>CHANGE_LOGO</td>
-	<td>//button[contains(@class,'edit-logo') and contains(.,'Change')]</td>
 	<td></td>
 </tr>
 <tr>
@@ -237,7 +252,7 @@
 </tr>
 <tr>
 	<td>COLOR_PICKER</td>
-	<td>//label[normalize-space(text())='${key_fieldLabel}']/following-sibling::div//div[contains(@class,'color-picker')]//button[contains(@class,'clay-color-btn')] | //div[contains(@class,'color-picker')][./label[normalize-space(text())='${key_fieldLabel}']]//button[contains(@class,'clay-color-btn')]</td>
+	<td>//label[normalize-space(text())='${key_fieldLabel}']/following-sibling::div//div[contains(@class,'color-picker')]//button[contains(@class,'clay-color-btn')] | //div[contains(@class,'color-picker')][./label[normalize-space(text())='${key_fieldLabel}']]//button[contains(@class,'clay-color-btn')] | //label[normalize-space(text())='${key_fieldLabel}']/following-sibling::div//div[contains(@class,'color-picker')]//button[contains(@class,'color-picker__selector')]</td>
 	<td></td>
 </tr>
 <tr>
@@ -293,11 +308,6 @@
 <tr>
 	<td>DELETE_FRAGMENT_COMMENT</td>
 	<td>//button[contains(@class,'page-editor')]/span[contains(.,'Delete')]</td>
-	<td></td>
-</tr>
-<tr>
-	<td>DELETE_LAYOUT_LOGO</td>
-	<td>//button[contains(@class,'delete-logo')]</td>
 	<td></td>
 </tr>
 <tr>
@@ -393,11 +403,6 @@
 <tr>
 	<td>EXPORT_MODAL_DISABLED</td>
 	<td>//div[contains(@class,'btn-group-item')]/button[@disabled and contains(.,'Export')]</td>
-	<td></td>
-</tr>
-<tr>
-	<td>FIELD_FILTER_APPLY</td>
-	<td>//tr[contains(.,'${key_fieldName}')]//button[contains(.,'Apply')]</td>
 	<td></td>
 </tr>
 <tr>
@@ -781,11 +786,6 @@
 	<td></td>
 </tr>
 <tr>
-	<td>SELECT_MOBILE_DEVICE_RULES</td>
-	<td>//div[@class='btn-toolbar']/button[contains(.,'Select')]</td>
-	<td></td>
-</tr>
-<tr>
 	<td>TRANSLATIONS_DONE</td>
 	<td>//a[contains(@class,'btn-sm btn-primary') and text()='Done']</td>
 	<td></td>
@@ -798,6 +798,11 @@
 <tr>
 	<td>SEND_INVITATIONS</td>
 	<td>//button[contains(@id,'InviteMembersPortlet')]//span[contains(.,'Send Invitations')]</td>
+	<td></td>
+</tr>
+<tr>
+	<td>SEND_NEW_PASSWORD</td>
+	<td>//button[contains(.,'Send New Password')]</td>
 	<td></td>
 </tr>
 <tr>
@@ -933,11 +938,6 @@
 <tr>
 	<td>VOTE</td>
 	<td>//button[contains(.,'Vote')]</td>
-	<td></td>
-</tr>
-<tr>
-	<td>WEB_CONTENT_CHOOSE</td>
-	<td>//tr[contains(.,'${key_webContentTitle}')]/td//button</td>
 	<td></td>
 </tr>
 <tr>

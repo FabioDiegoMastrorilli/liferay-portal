@@ -72,7 +72,7 @@
 </tr>
 <tr>
 	<td>ADD_SHIPMENT_ITEMS_CHECKBOX</td>
-	<td>//div[contains(text(), '${key_productSKU}')]/preceding-sibling::div[@class='dnd-td item-selector']//input[@type='checkbox']</td>
+	<td>//div[contains(text(), '${key_productSku}')]/preceding-sibling::div[@class='dnd-td item-selector']//input[@type='checkbox']</td>
 	<td></td>
 </tr>
 <tr>
@@ -286,8 +286,18 @@
 	<td></td>
 </tr>
 <tr>
+	<td>LEXICON_SELECT_ALL_CONTAINER_SPECIFIC</td>
+	<td>//div[contains(@class,'portlet-boundary')][${key_position}]//nav[contains(@class,'management-bar')]//div[contains(@class,'custom-checkbox')]</td>
+	<td></td>
+</tr>
+<tr>
 	<td>LEXICON_SELECT_ALL_INPUT</td>
 	<td>//nav[contains(@class,'management-bar')]//input[@type='checkbox']</td>
+	<td></td>
+</tr>
+<tr>
+	<td>LEXICON_SELECT_ALL_INPUT_SPECIFIC</td>
+	<td>//div[contains(@class,'portlet-boundary')][${key_position}]//nav[contains(@class,'management-bar')]//input[@type='checkbox']</td>
 	<td></td>
 </tr>
 <tr>
@@ -483,6 +493,11 @@
 <tr>
 	<td>UPLOAD_FILE_ENTRY</td>
 	<td>//li[contains(@class,'upload-file')]//input[@type='checkbox' and contains(@data-title,'${key_fileName}')]</td>
+	<td></td>
+</tr>
+<tr>
+	<td>SPECIFIC_CHECKBOX_IN_TABLE</td>
+	<td>//tr[contains(.,'${key_checkboxOption}')]//input</td>
 	<td></td>
 </tr>
 </tbody>

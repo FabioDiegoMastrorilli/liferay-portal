@@ -15,10 +15,11 @@
 package com.liferay.commerce.product.internal.util;
 
 import com.liferay.adaptive.media.image.html.AMImageHTMLTagFactory;
-import com.liferay.commerce.account.constants.CommerceAccountConstants;
 import com.liferay.commerce.account.util.CommerceAccountHelper;
+import com.liferay.commerce.inventory.CPDefinitionInventoryEngine;
 import com.liferay.commerce.media.CommerceMediaProvider;
 import com.liferay.commerce.media.CommerceMediaResolver;
+import com.liferay.commerce.product.availability.CPAvailabilityChecker;
 import com.liferay.commerce.product.catalog.CPCatalogEntry;
 import com.liferay.commerce.product.catalog.CPSku;
 import com.liferay.commerce.product.constants.CPAttachmentFileEntryConstants;
@@ -97,6 +98,38 @@ public class CPInstanceHelperImpl implements CPInstanceHelper {
 
 		return _fetchCPInstanceBySKUContributors(
 			cpDefinitionId, serializedDDMFormValues);
+	}
+
+	@Override
+	public CPInstance fetchFirstAvailableReplacementCPInstance(
+			long commerceChannelGroupId, long cpInstanceId)
+		throws PortalException {
+
+		CPInstance cpInstance = _cpInstanceLocalService.fetchCPInstance(
+			cpInstanceId);
+
+		if ((cpInstance == null) || !cpInstance.isDiscontinued() ||
+			_cpAvailabilityChecker.check(
+				commerceChannelGroupId, cpInstance,
+				_cpDefinitionInventoryEngine.getMinOrderQuantity(cpInstance))) {
+
+			return null;
+		}
+
+		return _fetchFirstAvailableReplacementCPInstance(
+			commerceChannelGroupId,
+			_cpInstanceLocalService.fetchCProductInstance(
+				cpInstance.getReplacementCProductId(),
+				cpInstance.getReplacementCPInstanceUuid()));
+	}
+
+	@Override
+	public CPInstance fetchReplacementCPInstance(
+			long cProductId, String cpInstanceUuid)
+		throws PortalException {
+
+		return _cpInstanceLocalService.fetchCProductInstance(
+			cProductId, cpInstanceUuid);
 	}
 
 	@Override
@@ -272,17 +305,18 @@ public class CPInstanceHelperImpl implements CPInstanceHelper {
 
 	@Override
 	public String getCPInstanceAdaptiveMediaImageHTMLTag(
-			long companyId, long cpInstanceId)
+			long commerceAccountId, long companyId, long cpInstanceId)
 		throws Exception {
 
 		FileVersion fileVersion = getCPInstanceImageFileVersion(
-			companyId, cpInstanceId);
+			commerceAccountId, companyId, cpInstanceId);
 
 		String originalImgTag = StringBundler.concat(
 			"<img class=\"aspect-ratio-bg-cover aspect-ratio-item ",
 			"aspect-ratio-item-center-middle aspect-ratio-item-fluid ",
 			"card-type-asset-icon\" src=\"",
-			getCPInstanceThumbnailSrc(cpInstanceId), "\" />");
+			getCPInstanceThumbnailSrc(commerceAccountId, cpInstanceId),
+			"\" />");
 
 		return _amImageHTMLTagFactory.create(
 			originalImgTag, fileVersion.getFileEntry());
@@ -384,13 +418,23 @@ public class CPInstanceHelperImpl implements CPInstanceHelper {
 
 	@Override
 	public FileVersion getCPInstanceImageFileVersion(
-			long companyId, long cpInstanceId)
+			long commerceAccountId, long companyId, long cpInstanceId)
 		throws Exception {
 
 		CPInstance cpInstance = _cpInstanceLocalService.fetchCPInstance(
 			cpInstanceId);
 
 		if (cpInstance == null) {
+			return null;
+		}
+
+		CPDefinition cpDefinition = _cpDefinitionLocalService.getCPDefinition(
+			cpInstance.getCPDefinitionId());
+
+		if (!_commerceProductViewPermission.contains(
+				PermissionThreadLocal.getPermissionChecker(), commerceAccountId,
+				cpDefinition.getCPDefinitionId())) {
+
 			return null;
 		}
 
@@ -421,10 +465,6 @@ public class CPInstanceHelperImpl implements CPInstanceHelper {
 				}
 			}
 
-			CPDefinition cpDefinition =
-				_cpDefinitionLocalService.getCPDefinition(
-					cpInstance.getCPDefinitionId());
-
 			FileEntry fileEntry =
 				_commerceMediaProvider.getDefaultImageFileEntry(
 					companyId, cpDefinition.getGroupId());
@@ -441,7 +481,8 @@ public class CPInstanceHelperImpl implements CPInstanceHelper {
 	}
 
 	@Override
-	public String getCPInstanceThumbnailSrc(long cpInstanceId)
+	public String getCPInstanceThumbnailSrc(
+			long commerceAccountId, long cpInstanceId)
 		throws Exception {
 
 		CPInstance cpInstance = _cpInstanceLocalService.fetchCPInstance(
@@ -468,14 +509,14 @@ public class CPInstanceHelperImpl implements CPInstanceHelper {
 		if (cpAttachmentFileEntries.isEmpty()) {
 			CPDefinition cpDefinition = cpInstance.getCPDefinition();
 
-			return cpDefinition.getDefaultImageThumbnailSrc();
+			return cpDefinition.getDefaultImageThumbnailSrc(commerceAccountId);
 		}
 
 		CPAttachmentFileEntry cpAttachmentFileEntry =
 			cpAttachmentFileEntries.get(0);
 
 		return _commerceMediaResolver.getThumbnailURL(
-			CommerceAccountConstants.ACCOUNT_ID_GUEST,
+			commerceAccountId,
 			cpAttachmentFileEntry.getCPAttachmentFileEntryId());
 	}
 
@@ -583,6 +624,11 @@ public class CPInstanceHelperImpl implements CPInstanceHelper {
 		return values;
 	}
 
+	@Override
+	public CPSku toCPSku(CPInstance cpInstance) {
+		return new CPSkuImpl(cpInstance);
+	}
+
 	private CPInstance _fetchCPInstanceBySKUContributors(
 			long cpDefinitionId, String json)
 		throws PortalException {
@@ -666,6 +712,25 @@ public class CPInstanceHelperImpl implements CPInstanceHelper {
 		return _cpInstanceLocalService.getCPInstance(cpInstanceId);
 	}
 
+	private CPInstance _fetchFirstAvailableReplacementCPInstance(
+			long commerceChannelGroupId, CPInstance cpInstance)
+		throws PortalException {
+
+		if ((cpInstance == null) || !cpInstance.isDiscontinued() ||
+			_cpAvailabilityChecker.check(
+				commerceChannelGroupId, cpInstance,
+				_cpDefinitionInventoryEngine.getMinOrderQuantity(cpInstance))) {
+
+			return cpInstance;
+		}
+
+		return _fetchFirstAvailableReplacementCPInstance(
+			commerceChannelGroupId,
+			_cpInstanceLocalService.fetchCProductInstance(
+				cpInstance.getReplacementCProductId(),
+				cpInstance.getReplacementCPInstanceUuid()));
+	}
+
 	private long _getTopId(Map<Long, Integer> idIdHits) {
 		long topId = 0;
 		int topIdHits = 0;
@@ -722,6 +787,12 @@ public class CPInstanceHelperImpl implements CPInstanceHelper {
 	@Reference
 	private CPAttachmentFileEntryLocalService
 		_cpAttachmentFileEntryLocalService;
+
+	@Reference
+	private CPAvailabilityChecker _cpAvailabilityChecker;
+
+	@Reference
+	private CPDefinitionInventoryEngine _cpDefinitionInventoryEngine;
 
 	@Reference
 	private CPDefinitionLocalService _cpDefinitionLocalService;

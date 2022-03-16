@@ -76,6 +76,11 @@
 	<td></td>
 </tr>
 <tr>
+	<td>SUBMIT_AGAIN_BUTTON</td>
+	<td>//button[@type='button' and text()='${key_submitAgainButton}']</td>
+	<td></td>
+</tr>
+<tr>
 	<td>NAME_FIELD</td>
 	<td>//div[contains(@class,'ddm-form-basic-info')]//div//div[contains(@class,'form-group')]//textarea[contains(@id, 'nameEditor')]</td>
 	<td></td>
@@ -307,22 +312,17 @@
 <!--PUBLISH-->
 <tr>
 	<td>PUBLISH_FORM_DESCRIPTION_FIELD</td>
-	<td>//div[contains(@class,'ddm-form-basic-info')]//p[contains(text(), '${key_formDescription}')]</td>
+	<td>//span[contains(@class,'lfr-ddm__default-page-header-description') and contains(., '${key_formDescription}')]</td>
 	<td></td>
 </tr>
 <tr>
 	<td>PUBLISH_FORM_NAME_FIELD</td>
-	<td>//h1[contains(@class,'form-name') and contains(.,'${key_formName}')]</td>
+	<td>//h1[contains(@class,'lfr-ddm__default-page-header-title') and contains(.,'${key_formName}')]</td>
 	<td></td>
 </tr>
 <tr>
 	<td>PUBLISH_FORM_PUBLIC_URL</td>
 	<td>//div[contains(@class,'share-form-modal-item-link')]//input[@class='form-control' and @type='text']</td>
-	<td></td>
-</tr>
-<tr>
-	<td>PUBLISH_URL_FORM_PAGE</td>
-	<td>//div[contains(@class,'ddm-form-basic-info')]</td>
 	<td></td>
 </tr>
 <tr>
@@ -364,6 +364,11 @@
 <tr>
 	<td>SETTINGS_TAB_WORKFLOW_CONFIGURATION</td>
 	<td>//div[contains(@class,'dropdown-menu')]//li/button[contains(@class,'dropdown-item') and contains(.,'${key_workflowDefinition}')]</td>
+	<td></td>
+</tr>
+<tr>
+	<td>MODULE_DEFINITION_TIMEOUT_JAVASCRIPT_LOADER</td>
+	<td>//div[@data-field-name="waitTimeout"]//input[@type="text"]</td>
 	<td></td>
 </tr>
 <tr>
@@ -425,7 +430,7 @@
 <!--SIDEBAR -->
 <tr>
 	<td>BUILDER_SIDEBAR_PANEL</td>
-	<td>//div[contains(@class,'sidebar')]//*[@*='Builder']</td>
+	<td>//div[contains(@class,'sidebar')]//*[@*='Builder'] | //div[contains(@class,'builder-sidebar')]//div[contains(@class,'sidebar-body')]</td>
 	<td></td>
 </tr>
 <tr>
@@ -504,6 +509,11 @@
 	<td></td>
 </tr>
 <tr>
+	<td>SIDEBAR_FIELDS_TAB_LOCALE</td>
+	<td>//*[contains(@class,'nav-link') and .='${key_localeFields}']</td>
+	<td></td>
+</tr>
+<tr>
 	<td>SIDEBAR_MENUITEM_REMOVE_FIELD</td>
 	<td>//a[@title='Remove Field'] | //button[text()='Delete']</td>
 	<td></td>
@@ -541,6 +551,32 @@
 <tr>
 	<td>VALIDATE_DELETE_FIELD_MODAL_DELETE_MESSAGE</td>
 	<td>//div[@class='modal-body'][contains(text(),'A rule is applied to this field. By deleting it, it will also break the rule that is using it.')]</td>
+	<td></td>
+</tr>
+<tr>
+	<td></td>
+	<td></td>
+	<td></td>
+</tr>
+<!--DATA_PROVIDER_INPUT_PARAMETER-->
+<tr>
+	<td>DATA_PROVIDER_INPUT_PARAMETER_LABEL_FIELD</td>
+	<td>//div[contains(@data-field-name,'inputParameters')]//input[@type='text' and contains(@name,'inputParameters') and contains(@placeholder,'label')]</td>
+	<td></td>
+</tr>
+<tr>
+	<td>DATA_PROVIDER_INPUT_PARAMETER_NAME_FIELD</td>
+	<td>//div[contains(@data-field-name,'inputParameters')]//input[@type='text' and contains(@name,'inputParameters') and contains(@placeholder,'parameter')]</td>
+	<td></td>
+</tr>
+<tr>
+	<td>DATA_PROVIDER_INPUT_PARAMETER_TYPE_FIELD</td>
+	<td>//div[contains(@data-field-name,'inputParameters')]//div[contains(@data-field-name,'inputParameterType')]//div[contains(@class,'form-builder-select-field')]</td>
+	<td></td>
+</tr>
+<tr>
+	<td>DATA_PROVIDER_INPUT_PARAMETER_TYPE_FIELD_OPTIONS_LIST</td>
+	<td>//div[contains(@class,'dropdown-menu') and contains(@class,'show')]//li[contains(.,'${key_inputParameterType}')]</td>
 	<td></td>
 </tr>
 <tr>

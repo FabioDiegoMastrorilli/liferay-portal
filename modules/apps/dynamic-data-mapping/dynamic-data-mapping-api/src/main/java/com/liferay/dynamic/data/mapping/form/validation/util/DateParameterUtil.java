@@ -29,6 +29,7 @@ import com.liferay.portal.kernel.util.TimeZoneUtil;
 import com.liferay.portal.kernel.util.Validator;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 
@@ -50,6 +51,15 @@ public class DateParameterUtil {
 			dateString, DateTimeFormatter.ofPattern("yyyy-MM-dd"));
 	}
 
+	public static LocalDateTime getLocalDateTime(String dateTimeString) {
+		if (Validator.isNull(dateTimeString)) {
+			return null;
+		}
+
+		return LocalDateTime.parse(
+			dateTimeString, DateTimeFormatter.ofPattern("yyyy-MM-dd H:mm"));
+	}
+
 	public static String getParameter(
 		DDMFormValues ddmFormValues, String key, String parameter,
 		String timeZoneId) {
@@ -61,7 +71,7 @@ public class DateParameterUtil {
 		}
 		catch (JSONException jsonException) {
 			if (_log.isDebugEnabled()) {
-				_log.debug(jsonException, jsonException);
+				_log.debug(jsonException);
 			}
 
 			return StringPool.BLANK;
@@ -152,6 +162,10 @@ public class DateParameterUtil {
 
 	private static String _getDateFieldValue(
 		String dateFieldName, DDMFormValues ddmFormValues) {
+
+		if (ddmFormValues == null) {
+			return null;
+		}
 
 		Map<String, List<DDMFormFieldValue>> ddmFormFieldValuesMap =
 			ddmFormValues.getDDMFormFieldValuesMap(true);

@@ -194,23 +194,19 @@ definition {
 		task ("Add the Display Page items to the navigation menu") {
 			NavigationMenusAdmin.addItem(
 				assetTitle = "Web Content Title",
-				item = "Display Page",
-				navItem = "Web Content");
+				item = "Web Content Article");
 
 			NavigationMenusAdmin.addItem(
 				assetTitle = "Blogs Entry Title",
-				item = "Display Page",
-				navItem = "Blogs");
+				item = "Blogs Entry");
 
 			NavigationMenusAdmin.addItem(
 				assetTitle = "Document Title",
-				item = "Display Page",
-				navItem = "Documents and Media");
+				item = "Document");
 
 			NavigationMenusAdmin.addItem(
-				assetTitle = "Category Name",
-				item = "Display Page",
-				navItem = "Categories");
+				assetTitleList = "Category Name",
+				item = "Category");
 		}
 
 		task ("View the Display Page items") {
@@ -256,6 +252,7 @@ definition {
 			ControlMenu.viewHeaderTitle(headerTitle = "Web Content DPT");
 
 			AssertTextEquals(
+				index = "1",
 				locator1 = "WCD#WEB_CONTENT_CONTENT",
 				value1 = "Web Content Content");
 
@@ -312,6 +309,7 @@ definition {
 				locator1 = "NavTab#ACTIVE_TAB_LINK");
 
 			AssertTextEquals(
+				index = "1",
 				locator1 = "WCD#WEB_CONTENT_CONTENT",
 				value1 = "Web Content Content");
 
@@ -1001,11 +999,11 @@ definition {
 		}
 
 		task ("Navigate to Pages admin in the live site") {
-			SitePages.openPagesAdmin(siteURLKey = "test-site-name");
+			PagesAdmin.openPagesAdmin(siteURLKey = "test-site-name");
 		}
 
 		task ("Delete the third page from the live site") {
-			SitePages.deletePage(pageName = "Test Page Name 3");
+			PagesAdmin.deletePage(pageName = "Test Page Name 3");
 		}
 
 		task ("Publish to live without the third page") {
@@ -1013,7 +1011,7 @@ definition {
 
 			LexiconEntry.gotoAdd();
 
-			if (IsElementPresent(locator1 = "StagingPublishToLive#PAGES_TO_PUBLISH_CHECKBOX_CHECKED", key_entryName = "Test Page Name 3")) {
+			if (IsElementPresent(key_entryName = "Test Page Name 3", locator1 = "StagingPublishToLive#PAGES_TO_PUBLISH_CHECKBOX_CHECKED")) {
 				Click(
 					key_entryName = "Test Page Name 3",
 					locator1 = "StagingPublishToLive#PAGES_TO_PUBLISH_CHECKBOX_CHECKED");
@@ -1226,11 +1224,11 @@ definition {
 		}
 
 		task ("Navigate to pages admin in the live site") {
-			SitePages.openPagesAdmin(siteURLKey = "test-site-name");
+			PagesAdmin.openPagesAdmin(siteURLKey = "test-site-name");
 		}
 
 		task ("Delete the third page from the live site") {
-			SitePages.deletePage(pageName = "Test Page Name 3");
+			PagesAdmin.deletePage(pageName = "Test Page Name 3");
 		}
 
 		task ("Publish to live without the third page") {
@@ -1238,7 +1236,7 @@ definition {
 
 			LexiconEntry.gotoAdd();
 
-			if (IsElementPresent(locator1 = "StagingPublishToLive#PAGES_TO_PUBLISH_CHECKBOX_CHECKED", key_entryName = "Test Page Name 3")) {
+			if (IsElementPresent(key_entryName = "Test Page Name 3", locator1 = "StagingPublishToLive#PAGES_TO_PUBLISH_CHECKBOX_CHECKED")) {
 				Click(
 					key_entryName = "Test Page Name 3",
 					locator1 = "StagingPublishToLive#PAGES_TO_PUBLISH_CHECKBOX_CHECKED");
@@ -1275,6 +1273,94 @@ definition {
 			AssertElementNotPresent(
 				key_pageName = "Test Page Name 3",
 				locator1 = "Home#PAGE");
+		}
+	}
+
+	@description = "This is a test for LPS-137577. The user can select multiple categories in the navigation menu in a staging site."
+	@priority = "4"
+	test SelectMultipleCategories {
+		task ("Add three hierarchy levels categories to a vocabulary within Global site") {
+			JSONCategory.addVocabulary(
+				groupName = "Global",
+				title = "Global Vocabulary Name");
+
+			JSONCategory.addCategory(
+				groupName = "Global",
+				title = "Global Category Name",
+				vocabularyName = "Global Vocabulary Name");
+
+			JSONCategory.addSubcategory(
+				groupName = "Global",
+				parentCategoryName = "Global Category Name",
+				title = "Global Subcategory Name",
+				vocabularyName = "Global Vocabulary Name");
+
+			JSONCategory.addSubcategory(
+				groupName = "Global",
+				parentCategoryName = "Global Subcategory Name",
+				title = "Global SubSubcategory Name",
+				vocabularyName = "Global Vocabulary Name");
+		}
+
+		task ("Add three hierarchy levels categories to a vocabulary within a staging site") {
+			JSONCategory.addVocabulary(
+				groupName = "Test Site Name (Staging)",
+				site = "false",
+				title = "Site Vocabulary Name");
+
+			JSONCategory.addCategory(
+				groupName = "Test Site Name (Staging)",
+				site = "false",
+				title = "Site Category Name",
+				vocabularyName = "Site Vocabulary Name");
+
+			JSONCategory.addSubcategory(
+				groupName = "Test Site Name (Staging)",
+				parentCategoryName = "Site Category Name",
+				site = "false",
+				title = "Site Subcategory Name",
+				vocabularyName = "Site Vocabulary Name");
+
+			JSONCategory.addSubcategory(
+				groupName = "Test Site Name (Staging)",
+				parentCategoryName = "Site Subcategory Name",
+				site = "false",
+				title = "Site SubSubcategory Name",
+				vocabularyName = "Site Vocabulary Name");
+		}
+
+		task ("Add a navigation menu") {
+			JSONSitenavigation.addSiteNavigationMenu(
+				groupName = "Test Site Name (Staging)",
+				site = "false",
+				siteNavigationMenuName = "Navigation Menu Name");
+		}
+
+		task ("Add all categories from each vocabulary into Navigation Menu") {
+			NavigationMenusAdmin.openNavigationMenusAdmin(siteURLKey = "test-site-name-staging");
+
+			NavigationMenusAdmin.editMenu(navigationMenuName = "Navigation Menu Name");
+
+			NavigationMenusAdmin.addItem(
+				assetTitleList = "Global Category Name,Global Subcategory Name,Global SubSubcategory Name,Site Category Name,Site Subcategory Name,Site SubSubcategory Name",
+				item = "Category");
+		}
+
+		task ("View categories are shown in hiearchy order") {
+			NavigationMenusAdmin.viewItemNested(
+				groupName = "Test Site Name (Staging)",
+				itemNameList = "Global Subcategory Name,Global SubSubcategory Name,Site Subcategory Name,Site SubSubcategory Name",
+				parentItemNameList = "Global Category Name,Global Subcategory Name,Site Category Name,Site Subcategory Name",
+				site = "false",
+				siteNavigationMenuName = "Navigation Menu Name");
+
+			NavigationMenusAdmin.viewItemNotNested(itemNameList = "Global Category Name,Site Category Name");
+		}
+
+		task ("Delete the global vocabulary") {
+			JSONCategory.deleteVocabulary(
+				groupName = "Global",
+				vocabularyName = "Global Vocabulary Name");
 		}
 	}
 

@@ -182,6 +182,7 @@ definition {
 		Upgrade.viewUpgrade();
 	}
 
+	@ignore = "true"
 	@priority = "4"
 	test ViewPortalSmokeArchiveAutoUpgrade740 {
 		property custom.properties = "upgrade.database.auto.run=true";

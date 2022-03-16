@@ -62,11 +62,13 @@ export default forwardRef(
 									<span>
 										<ClayIcon symbol="lock" />
 									</span>
+
 									{Liferay.Language.get(
 										'this-question-is-closed-new-answers-and-comments-are-disabled'
 									)}
 								</div>
 							)}
+
 							<QuestionsEditor
 								contents={content}
 								cssClass={
@@ -77,9 +79,9 @@ export default forwardRef(
 								editorConfig={{
 									readOnly: question && question.locked,
 								}}
-								onChange={(event) => {
-									setContent(event.editor.getData());
-								}}
+								onChange={(event) =>
+									setContent(event.editor.getData())
+								}
 								{...otherProps}
 							/>
 						</div>

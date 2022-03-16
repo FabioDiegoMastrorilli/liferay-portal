@@ -28,7 +28,7 @@ import com.liferay.frontend.taglib.clay.data.set.ClayDataSetDisplayView;
 import com.liferay.frontend.taglib.clay.data.set.provider.ClayDataSetDataProvider;
 import com.liferay.frontend.taglib.clay.data.set.view.table.selectable.BaseSelectableTableClayDataSetDisplayView;
 import com.liferay.petra.string.StringPool;
-import com.liferay.portal.kernel.bean.BeanPropertiesUtil;
+import com.liferay.portal.kernel.bean.BeanProperties;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.language.LanguageUtil;
 import com.liferay.portal.kernel.model.Country;
@@ -36,6 +36,7 @@ import com.liferay.portal.kernel.search.BaseModelSearchResult;
 import com.liferay.portal.kernel.search.Sort;
 import com.liferay.portal.kernel.service.CountryService;
 import com.liferay.portal.kernel.theme.ThemeDisplay;
+import com.liferay.portal.kernel.util.LocaleUtil;
 import com.liferay.portal.kernel.util.ParamUtil;
 import com.liferay.portal.kernel.util.Portal;
 import com.liferay.portal.kernel.util.ResourceBundleUtil;
@@ -103,12 +104,12 @@ public class CommerceShippingRestrictionsPageClayTable
 			_commerceShippingMethodService.getCommerceShippingMethods(
 				commerceChannel.getGroupId());
 
-		String orderByFieldName = BeanPropertiesUtil.getString(
+		String orderByFieldName = _beanProperties.getString(
 			sort, "fieldName", StringPool.BLANK);
 
 		String orderByType = "asc";
 
-		boolean reverse = BeanPropertiesUtil.getBooleanSilent(
+		boolean reverse = _beanProperties.getBooleanSilent(
 			sort, "reverse", false);
 
 		if (reverse) {
@@ -130,7 +131,7 @@ public class CommerceShippingRestrictionsPageClayTable
 					country.getTitle(themeDisplay.getLocale()),
 					_getFields(
 						country.getCountryId(), commerceShippingMethods,
-						themeDisplay.getLanguageId())));
+						LocaleUtil.toLanguageId(themeDisplay.getLocale()))));
 		}
 
 		return shippingRestrictions;
@@ -172,6 +173,9 @@ public class CommerceShippingRestrictionsPageClayTable
 
 		return restrictionFields;
 	}
+
+	@Reference
+	private BeanProperties _beanProperties;
 
 	@Reference
 	private CommerceAddressRestrictionLocalService

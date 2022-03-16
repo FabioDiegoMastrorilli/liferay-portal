@@ -243,7 +243,6 @@ definition {
 					actual = "${percentage}",
 					expected = "0%");
 			}
-
 			else {
 				TestUtils.assertEquals(
 					actual = "${percentage}",
@@ -269,51 +268,68 @@ definition {
 	@description = "Feature ID: Legacy | Automation ID: LRAC-8148 | Test Summary: Individuals usage update in real time"
 	@priority = "5"
 	test IndividualsUpdatesInRealTime {
-		ACUtils.addSiteAndPage();
+		property portal.acceptance = "true";
 
-		var propertyName = ACDXPSettings.connectDXPtoAnalyticsCloud(siteName = "Site Name");
+		var usernameList = "user1,user2,user3";
 
-		ACUtils.launchAC();
+		task ("Add a new site and widget page") {
+			ACUtils.addSiteAndPage();
+		}
 
-		ACProperties.switchProperty(propertyName = "${propertyName}");
+		task ("Get site assigned property name") {
+			var propertyName = ACDXPSettings.connectDXPtoAnalyticsCloud(siteName = "Site Name");
+		}
 
-		ACNavigation.goToSettings();
+		task ("Switch to new property in AC") {
+			ACUtils.launchAC();
 
-		ACSettings.goToUsage();
+			ACProperties.switchProperty(propertyName = "${propertyName}");
+		}
 
-		var currentIndividuals = ACSettings.getCurrentNumber(metricName = "Individuals");
+		task ("Go to settings and get the individuals number") {
+			ACNavigation.goToSettings();
 
-		ACUtils.launchDXP();
+			ACSettings.goToUsage();
 
-		JSONUser.addUser(
-			userEmailAddress = "userea@liferay.com",
-			userFirstName = "userfn",
-			userLastName = "userln",
-			userScreenName = "usersn");
+			var currentIndividuals = ACSettings.getCurrentNumber(metricName = "Individuals");
+		}
 
-		ACDXPSettings.syncNewContactData();
+		task ("Add 3 new users and sync the Contact Data") {
+			ACUtils.launchDXP();
 
-		User.logoutAndLoginPG(
-			userLoginEmailAddress = "userea@liferay.com",
-			userLoginFullName = "userfn userln");
+			for (var name : list "${usernameList}") {
+				JSONUser.addUser(
+					userEmailAddress = "${name}@liferay.com",
+					userFirstName = "${name}",
+					userLastName = "${name}",
+					userScreenName = "${name}");
 
-		ACUtils.navigateToSitePage(
-			pageName = "AC Page",
-			siteName = "Site Name");
+				ACDXPSettings.syncNewContactData();
+			}
+		}
 
-		ACUtils.closeAllSessionsAndWait();
+		task ("View the page as different users") {
+			for (var name : list "${usernameList}") {
+				ACUtils.navigateToSitePageWithUser(
+					emailList = "${name}@liferay.com",
+					pageName = "AC Page",
+					siteName = "Site Name");
+			}
 
-		ACUtils.launchAC();
+			ACUtils.closeAllSessionsAndWait();
+		}
 
-		ACNavigation.goToSettings();
+		task ("Go to AC and check that the number of individuals has changed") {
+			ACUtils.launchAC();
 
-		ACSettings.goToUsage();
+			ACNavigation.goToSettings();
 
-		var newIdividuals = MathUtil.sum("${currentIndividuals}", "1");
+			ACSettings.goToUsage();
 
-		ACSettings.assertOverviewUsage(
-			current = "${newIdividuals}",
-			metricName = "Individuals");
+			ACSettings.assertOverviewUsage(
+				metricName = "Individuals",
+				notEquals = "${currentIndividuals}");
+		}
 	}
 
 	@description = "Feature ID: Legacy | Automation ID: LRAC-9182 | Test Summary: Page views limit corresponds correctly with the plan and add-ons purchased."
@@ -390,7 +406,6 @@ definition {
 					actual = "${percentage}",
 					expected = "0%");
 			}
-
 			else {
 				TestUtils.assertEquals(
 					actual = "${percentage}",
@@ -433,8 +448,7 @@ definition {
 
 			var currentPageViews = ACSettings.getCurrentNumber(metricName = "Page Views");
 
-			var pageViewsNumber = StringUtil.replace("${currentPageViews}",",","");
-
+			var pageViewsNumber = StringUtil.replace("${currentPageViews}", ",", "");
 			var sumPageViews = ${pageViewsNumber} + 1;
 		}
 
@@ -457,7 +471,7 @@ definition {
 
 			var currentPageViews = ACSettings.getCurrentNumber(metricName = "Page Views");
 
-			var newPageViewsNumber = StringUtil.replace("${currentPageViews}",",","");
+			var newPageViewsNumber = StringUtil.replace("${currentPageViews}", ",", "");
 		}
 
 		task ("Compare the values") {

@@ -19,6 +19,7 @@ import classNames from 'classnames';
 import PropTypes from 'prop-types';
 import React from 'react';
 
+import {config} from '../../config/index';
 import {useIsActive} from '../../contexts/ControlsContext';
 
 export default function CollectionPagination({
@@ -31,20 +32,40 @@ export default function CollectionPagination({
 }) {
 	const isActive = useIsActive();
 	const {
+		displayAllPages,
 		numberOfItems,
 		numberOfItemsPerPage,
+		numberOfPages,
 		paginationType,
+		showAllItems,
 	} = collectionConfig;
 
 	const numericPaginationLabel = [
 		numberOfItemsPerPage && numberOfItems && totalNumberOfItems
 			? (activePage - 1) * numberOfItemsPerPage + 1
 			: 0,
-		Math.min(
-			Math.min(activePage * numberOfItemsPerPage, numberOfItems),
-			totalNumberOfItems
-		),
-		Math.min(numberOfItems, totalNumberOfItems),
+		paginationType && showAllItems
+			? Math.min(activePage * numberOfItemsPerPage, totalNumberOfItems)
+			: Math.min(
+					Math.min(activePage * numberOfItemsPerPage, numberOfItems),
+					totalNumberOfItems
+			  ),
+		paginationType && showAllItems
+			? totalNumberOfItems
+			: Math.min(numberOfItems, totalNumberOfItems),
+	];
+
+	const itemsPerPage = Math.min(
+		numberOfItemsPerPage,
+		config.searchContainerPageMaxDelta
+	);
+
+	const numericPaginationLabelValues = [
+		totalNumberOfItems ? (activePage - 1) * itemsPerPage + 1 : 0,
+		Math.min(activePage * itemsPerPage, totalNumberOfItems),
+		displayAllPages
+			? totalNumberOfItems
+			: Math.min(numberOfPages * itemsPerPage, totalNumberOfItems),
 	];
 
 	return (
@@ -64,12 +85,15 @@ export default function CollectionPagination({
 					<ClayPaginationBar.Results>
 						{Liferay.Util.sub(
 							Liferay.Language.get('showing-x-to-x-of-x-entries'),
-							numericPaginationLabel
+							config.paginationImprovementsEnabled
+								? numericPaginationLabelValues
+								: numericPaginationLabel
 						)}
 					</ClayPaginationBar.Results>
 
 					<ClayPaginationWithBasicItems
 						activePage={activePage}
+						disableEllipsis={config.paginationImprovementsEnabled}
 						onPageChange={onPageChange}
 						totalPages={
 							(Number.isFinite(totalPages) && totalPages) || 1
@@ -91,6 +115,7 @@ export default function CollectionPagination({
 							{Liferay.Language.get('previous')}
 						</span>
 					</ClayButton>
+
 					<ClayButton
 						className="font-weight-semi-bold ml-3 text-secondary"
 						disabled={activePage === totalPages}

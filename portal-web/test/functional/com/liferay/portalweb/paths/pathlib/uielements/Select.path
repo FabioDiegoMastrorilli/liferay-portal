@@ -21,11 +21,6 @@
 	<td></td>
 </tr>
 <tr>
-	<td>APPLICATION_DECORATORS</td>
-	<td>//div[label[contains(.,'Application Decorators')]]/select[contains(@id,'portletDecorator')]</td>
-	<td></td>
-</tr>
-<tr>
 	<td>ANY_DISABLED</td>
 	<td>//div[not(contains(@class,'hide'))]/div[contains(@class,'input-select-wrapper')][label[contains(.,'${key_selectFieldLabel}')]]/select[contains(@class,'disabled')]</td>
 	<td></td>
@@ -37,7 +32,7 @@
 </tr>
 <tr>
 	<td>BORDER_BOTTOM_SELECT_FIELD</td>
-	<td>//div[contains(@class,'label')][normalize-space()='${key_borderBottom}']/following-sibling::div[1]//div[label[contains(.,'${key_fieldLabel}')]]/select</td>
+	<td>//button[contains(@class,'collapse-icon')][normalize-space()='${key_borderBottom}']/following-sibling::div[1]//div[label[contains(.,'${key_fieldLabel}')]]/select</td>
 	<td></td>
 </tr>
 <tr>
@@ -88,6 +83,11 @@
 <tr>
 	<td>DEFAULT_LANGUAGE</td>
 	<td>//select[contains(@id,'languageId')]</td>
+	<td></td>
+</tr>
+<tr>
+	<td>SITE_DEFAULT_LANGUAGE</td>
+	<td>//select[contains(@name,'languageId')]</td>
 	<td></td>
 </tr>
 <tr>
@@ -203,6 +203,16 @@
 <tr>
 	<td>SELECT_ID</td>
 	<td>//select[contains(@id,'${selectFieldId}')]</td>
+	<td></td>
+</tr>
+<tr>
+	<td>SELECT_VALUE_ID</td>
+	<td>//select[contains(@id,'${selectFieldId}')]/option[normalize-space(text())='${option}']</td>
+	<td></td>
+</tr>
+<tr>
+	<td>SELECT</td>
+	<td>//select</td>
 	<td></td>
 </tr>
 <tr>

@@ -25,6 +25,7 @@ import com.fasterxml.jackson.databind.util.ISO8601DateFormat;
 import com.liferay.depot.model.DepotEntry;
 import com.liferay.depot.service.DepotEntryLocalServiceUtil;
 import com.liferay.headless.delivery.client.dto.v1_0.ContentStructure;
+import com.liferay.headless.delivery.client.dto.v1_0.Field;
 import com.liferay.headless.delivery.client.http.HttpInvoker;
 import com.liferay.headless.delivery.client.pagination.Page;
 import com.liferay.headless.delivery.client.pagination.Pagination;
@@ -303,6 +304,42 @@ public abstract class BaseContentStructureResourceTestCase {
 	}
 
 	@Test
+	public void testGetAssetLibraryContentStructuresPageWithFilterDoubleEquals()
+		throws Exception {
+
+		List<EntityField> entityFields = getEntityFields(
+			EntityField.Type.DOUBLE);
+
+		if (entityFields.isEmpty()) {
+			return;
+		}
+
+		Long assetLibraryId =
+			testGetAssetLibraryContentStructuresPage_getAssetLibraryId();
+
+		ContentStructure contentStructure1 =
+			testGetAssetLibraryContentStructuresPage_addContentStructure(
+				assetLibraryId, randomContentStructure());
+
+		@SuppressWarnings("PMD.UnusedLocalVariable")
+		ContentStructure contentStructure2 =
+			testGetAssetLibraryContentStructuresPage_addContentStructure(
+				assetLibraryId, randomContentStructure());
+
+		for (EntityField entityField : entityFields) {
+			Page<ContentStructure> page =
+				contentStructureResource.getAssetLibraryContentStructuresPage(
+					assetLibraryId, null, null,
+					getFilterString(entityField, "eq", contentStructure1),
+					Pagination.of(1, 2), null);
+
+			assertEquals(
+				Collections.singletonList(contentStructure1),
+				(List<ContentStructure>)page.getItems());
+		}
+	}
+
+	@Test
 	public void testGetAssetLibraryContentStructuresPageWithFilterStringEquals()
 		throws Exception {
 
@@ -399,6 +436,20 @@ public abstract class BaseContentStructureResourceTestCase {
 				BeanUtils.setProperty(
 					contentStructure1, entityField.getName(),
 					DateUtils.addMinutes(new Date(), -2));
+			});
+	}
+
+	@Test
+	public void testGetAssetLibraryContentStructuresPageWithSortDouble()
+		throws Exception {
+
+		testGetAssetLibraryContentStructuresPageWithSort(
+			EntityField.Type.DOUBLE,
+			(entityField, contentStructure1, contentStructure2) -> {
+				BeanUtils.setProperty(
+					contentStructure1, entityField.getName(), 0.1);
+				BeanUtils.setProperty(
+					contentStructure2, entityField.getName(), 0.5);
 			});
 	}
 
@@ -565,12 +616,12 @@ public abstract class BaseContentStructureResourceTestCase {
 	}
 
 	@Test
-	public void testPutAssetLibraryContentStructurePermission()
+	public void testPutAssetLibraryContentStructurePermissionsPage()
 		throws Exception {
 
 		@SuppressWarnings("PMD.UnusedLocalVariable")
 		ContentStructure contentStructure =
-			testPutAssetLibraryContentStructurePermission_addContentStructure();
+			testPutAssetLibraryContentStructurePermissionsPage_addContentStructure();
 
 		@SuppressWarnings("PMD.UnusedLocalVariable")
 		com.liferay.portal.kernel.model.Role role = RoleTestUtil.addRole(
@@ -579,7 +630,7 @@ public abstract class BaseContentStructureResourceTestCase {
 		assertHttpResponseStatusCode(
 			200,
 			contentStructureResource.
-				putAssetLibraryContentStructurePermissionHttpResponse(
+				putAssetLibraryContentStructurePermissionsPageHttpResponse(
 					testDepotEntry.getDepotEntryId(),
 					new Permission[] {
 						new Permission() {
@@ -593,7 +644,7 @@ public abstract class BaseContentStructureResourceTestCase {
 		assertHttpResponseStatusCode(
 			404,
 			contentStructureResource.
-				putAssetLibraryContentStructurePermissionHttpResponse(
+				putAssetLibraryContentStructurePermissionsPageHttpResponse(
 					testDepotEntry.getDepotEntryId(),
 					new Permission[] {
 						new Permission() {
@@ -606,7 +657,7 @@ public abstract class BaseContentStructureResourceTestCase {
 	}
 
 	protected ContentStructure
-			testPutAssetLibraryContentStructurePermission_addContentStructure()
+			testPutAssetLibraryContentStructurePermissionsPage_addContentStructure()
 		throws Exception {
 
 		throw new UnsupportedOperationException(
@@ -700,10 +751,10 @@ public abstract class BaseContentStructureResourceTestCase {
 	}
 
 	@Test
-	public void testPutContentStructurePermission() throws Exception {
+	public void testPutContentStructurePermissionsPage() throws Exception {
 		@SuppressWarnings("PMD.UnusedLocalVariable")
 		ContentStructure contentStructure =
-			testPutContentStructurePermission_addContentStructure();
+			testPutContentStructurePermissionsPage_addContentStructure();
 
 		@SuppressWarnings("PMD.UnusedLocalVariable")
 		com.liferay.portal.kernel.model.Role role = RoleTestUtil.addRole(
@@ -711,33 +762,35 @@ public abstract class BaseContentStructureResourceTestCase {
 
 		assertHttpResponseStatusCode(
 			200,
-			contentStructureResource.putContentStructurePermissionHttpResponse(
-				contentStructure.getId(),
-				new Permission[] {
-					new Permission() {
-						{
-							setActionIds(new String[] {"VIEW"});
-							setRoleName(role.getName());
+			contentStructureResource.
+				putContentStructurePermissionsPageHttpResponse(
+					contentStructure.getId(),
+					new Permission[] {
+						new Permission() {
+							{
+								setActionIds(new String[] {"VIEW"});
+								setRoleName(role.getName());
+							}
 						}
-					}
-				}));
+					}));
 
 		assertHttpResponseStatusCode(
 			404,
-			contentStructureResource.putContentStructurePermissionHttpResponse(
-				0L,
-				new Permission[] {
-					new Permission() {
-						{
-							setActionIds(new String[] {"-"});
-							setRoleName("-");
+			contentStructureResource.
+				putContentStructurePermissionsPageHttpResponse(
+					0L,
+					new Permission[] {
+						new Permission() {
+							{
+								setActionIds(new String[] {"-"});
+								setRoleName("-");
+							}
 						}
-					}
-				}));
+					}));
 	}
 
 	protected ContentStructure
-			testPutContentStructurePermission_addContentStructure()
+			testPutContentStructurePermissionsPage_addContentStructure()
 		throws Exception {
 
 		throw new UnsupportedOperationException(
@@ -815,6 +868,41 @@ public abstract class BaseContentStructureResourceTestCase {
 				contentStructureResource.getSiteContentStructuresPage(
 					siteId, null, null,
 					getFilterString(entityField, "between", contentStructure1),
+					Pagination.of(1, 2), null);
+
+			assertEquals(
+				Collections.singletonList(contentStructure1),
+				(List<ContentStructure>)page.getItems());
+		}
+	}
+
+	@Test
+	public void testGetSiteContentStructuresPageWithFilterDoubleEquals()
+		throws Exception {
+
+		List<EntityField> entityFields = getEntityFields(
+			EntityField.Type.DOUBLE);
+
+		if (entityFields.isEmpty()) {
+			return;
+		}
+
+		Long siteId = testGetSiteContentStructuresPage_getSiteId();
+
+		ContentStructure contentStructure1 =
+			testGetSiteContentStructuresPage_addContentStructure(
+				siteId, randomContentStructure());
+
+		@SuppressWarnings("PMD.UnusedLocalVariable")
+		ContentStructure contentStructure2 =
+			testGetSiteContentStructuresPage_addContentStructure(
+				siteId, randomContentStructure());
+
+		for (EntityField entityField : entityFields) {
+			Page<ContentStructure> page =
+				contentStructureResource.getSiteContentStructuresPage(
+					siteId, null, null,
+					getFilterString(entityField, "eq", contentStructure1),
 					Pagination.of(1, 2), null);
 
 			assertEquals(
@@ -918,6 +1006,20 @@ public abstract class BaseContentStructureResourceTestCase {
 				BeanUtils.setProperty(
 					contentStructure1, entityField.getName(),
 					DateUtils.addMinutes(new Date(), -2));
+			});
+	}
+
+	@Test
+	public void testGetSiteContentStructuresPageWithSortDouble()
+		throws Exception {
+
+		testGetSiteContentStructuresPageWithSort(
+			EntityField.Type.DOUBLE,
+			(entityField, contentStructure1, contentStructure2) -> {
+				BeanUtils.setProperty(
+					contentStructure1, entityField.getName(), 0.1);
+				BeanUtils.setProperty(
+					contentStructure2, entityField.getName(), 0.5);
 			});
 	}
 
@@ -1121,10 +1223,10 @@ public abstract class BaseContentStructureResourceTestCase {
 	}
 
 	@Test
-	public void testPutSiteContentStructurePermission() throws Exception {
+	public void testPutSiteContentStructurePermissionsPage() throws Exception {
 		@SuppressWarnings("PMD.UnusedLocalVariable")
 		ContentStructure contentStructure =
-			testPutSiteContentStructurePermission_addContentStructure();
+			testPutSiteContentStructurePermissionsPage_addContentStructure();
 
 		@SuppressWarnings("PMD.UnusedLocalVariable")
 		com.liferay.portal.kernel.model.Role role = RoleTestUtil.addRole(
@@ -1133,7 +1235,7 @@ public abstract class BaseContentStructureResourceTestCase {
 		assertHttpResponseStatusCode(
 			200,
 			contentStructureResource.
-				putSiteContentStructurePermissionHttpResponse(
+				putSiteContentStructurePermissionsPageHttpResponse(
 					contentStructure.getSiteId(),
 					new Permission[] {
 						new Permission() {
@@ -1147,7 +1249,7 @@ public abstract class BaseContentStructureResourceTestCase {
 		assertHttpResponseStatusCode(
 			404,
 			contentStructureResource.
-				putSiteContentStructurePermissionHttpResponse(
+				putSiteContentStructurePermissionsPageHttpResponse(
 					contentStructure.getSiteId(),
 					new Permission[] {
 						new Permission() {
@@ -1160,7 +1262,7 @@ public abstract class BaseContentStructureResourceTestCase {
 	}
 
 	protected ContentStructure
-			testPutSiteContentStructurePermission_addContentStructure()
+			testPutSiteContentStructurePermissionsPage_addContentStructure()
 		throws Exception {
 
 		throw new UnsupportedOperationException(

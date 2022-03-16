@@ -28,7 +28,7 @@ definition {
 		}
 	}
 
-	@description = "This is a test for LPS-120190. Can add fragments into drop zone of Dropdown fragment."
+	@description = "This is a test for LPS-120190 and LPS-125164. Can add fragments into drop zone of Dropdown fragment."
 	@priority = "5"
 	@uitest
 	test AddFragmentIntoDropdownPanel {
@@ -70,11 +70,15 @@ definition {
 		}
 
 		task ("Add a page based on custom master page") {
-			SitePages.openPagesAdmin(siteURLKey = "test-site-name");
+			PagesAdmin.openPagesAdmin(siteURLKey = "test-site-name");
 
 			ContentPages.addPage(
 				masterLayoutName = "Custom Masters Page Template",
 				pageName = "Test Content Page");
+		}
+
+		task ("Assert the console does not occur NPE error") {
+			AssertConsoleTextNotPresent(value1 = "java.lang.NullPointerException");
 		}
 
 		task ("Assert the dropdown panel is collapsed") {
@@ -181,7 +185,7 @@ definition {
 		}
 
 		task ("Add a page based on custom master page") {
-			SitePages.openPagesAdmin(siteURLKey = "test-site-name");
+			PagesAdmin.openPagesAdmin(siteURLKey = "test-site-name");
 
 			ContentPages.addPage(
 				masterLayoutName = "Custom Masters Page Template",
@@ -445,7 +449,7 @@ definition {
 		}
 
 		task ("Add a page based on custom master page") {
-			SitePages.openPagesAdmin(siteURLKey = "test-site-name");
+			PagesAdmin.openPagesAdmin(siteURLKey = "test-site-name");
 
 			ContentPages.addPage(
 				masterLayoutName = "Custom Masters Page Template",

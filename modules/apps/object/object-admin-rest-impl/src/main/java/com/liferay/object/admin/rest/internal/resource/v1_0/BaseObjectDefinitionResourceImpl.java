@@ -16,6 +16,7 @@ package com.liferay.object.admin.rest.internal.resource.v1_0;
 
 import com.liferay.object.admin.rest.dto.v1_0.ObjectDefinition;
 import com.liferay.object.admin.rest.resource.v1_0.ObjectDefinitionResource;
+import com.liferay.petra.function.UnsafeBiConsumer;
 import com.liferay.petra.function.UnsafeConsumer;
 import com.liferay.petra.function.UnsafeFunction;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
@@ -123,7 +124,7 @@ public abstract class BaseObjectDefinitionResourceImpl
 	/**
 	 * Invoke this method with the command line:
 	 *
-	 * curl -X 'POST' 'http://localhost:8080/o/object-admin/v1.0/object-definitions' -d $'{"active": ___, "label": ___, "name": ___, "objectActions": ___, "objectFields": ___, "objectRelationships": ___, "panelAppOrder": ___, "panelCategoryKey": ___, "pluralLabel": ___, "scope": ___}' --header 'Content-Type: application/json' -u 'test@liferay.com:test'
+	 * curl -X 'POST' 'http://localhost:8080/o/object-admin/v1.0/object-definitions' -d $'{"active": ___, "label": ___, "name": ___, "objectActions": ___, "objectFields": ___, "objectLayouts": ___, "objectRelationships": ___, "objectViews": ___, "panelAppOrder": ___, "panelCategoryKey": ___, "pluralLabel": ___, "portlet": ___, "scope": ___, "titleObjectFieldId": ___}' --header 'Content-Type: application/json' -u 'test@liferay.com:test'
 	 */
 	@io.swagger.v3.oas.annotations.tags.Tags(
 		value = {
@@ -299,7 +300,7 @@ public abstract class BaseObjectDefinitionResourceImpl
 	/**
 	 * Invoke this method with the command line:
 	 *
-	 * curl -X 'PATCH' 'http://localhost:8080/o/object-admin/v1.0/object-definitions/{objectDefinitionId}' -d $'{"active": ___, "label": ___, "name": ___, "objectActions": ___, "objectFields": ___, "objectRelationships": ___, "panelAppOrder": ___, "panelCategoryKey": ___, "pluralLabel": ___, "scope": ___}' --header 'Content-Type: application/json' -u 'test@liferay.com:test'
+	 * curl -X 'PATCH' 'http://localhost:8080/o/object-admin/v1.0/object-definitions/{objectDefinitionId}' -d $'{"active": ___, "label": ___, "name": ___, "objectActions": ___, "objectFields": ___, "objectLayouts": ___, "objectRelationships": ___, "objectViews": ___, "panelAppOrder": ___, "panelCategoryKey": ___, "pluralLabel": ___, "portlet": ___, "scope": ___, "titleObjectFieldId": ___}' --header 'Content-Type: application/json' -u 'test@liferay.com:test'
 	 */
 	@io.swagger.v3.oas.annotations.Parameters(
 		value = {
@@ -371,12 +372,21 @@ public abstract class BaseObjectDefinitionResourceImpl
 				objectDefinition.getPluralLabel());
 		}
 
+		if (objectDefinition.getPortlet() != null) {
+			existingObjectDefinition.setPortlet(objectDefinition.getPortlet());
+		}
+
 		if (objectDefinition.getScope() != null) {
 			existingObjectDefinition.setScope(objectDefinition.getScope());
 		}
 
 		if (objectDefinition.getSystem() != null) {
 			existingObjectDefinition.setSystem(objectDefinition.getSystem());
+		}
+
+		if (objectDefinition.getTitleObjectFieldId() != null) {
+			existingObjectDefinition.setTitleObjectFieldId(
+				objectDefinition.getTitleObjectFieldId());
 		}
 
 		preparePatch(objectDefinition, existingObjectDefinition);
@@ -388,7 +398,7 @@ public abstract class BaseObjectDefinitionResourceImpl
 	/**
 	 * Invoke this method with the command line:
 	 *
-	 * curl -X 'PUT' 'http://localhost:8080/o/object-admin/v1.0/object-definitions/{objectDefinitionId}' -d $'{"active": ___, "label": ___, "name": ___, "objectActions": ___, "objectFields": ___, "objectRelationships": ___, "panelAppOrder": ___, "panelCategoryKey": ___, "pluralLabel": ___, "scope": ___}' --header 'Content-Type: application/json' -u 'test@liferay.com:test'
+	 * curl -X 'PUT' 'http://localhost:8080/o/object-admin/v1.0/object-definitions/{objectDefinitionId}' -d $'{"active": ___, "label": ___, "name": ___, "objectActions": ___, "objectFields": ___, "objectLayouts": ___, "objectRelationships": ___, "objectViews": ___, "panelAppOrder": ___, "panelCategoryKey": ___, "pluralLabel": ___, "portlet": ___, "scope": ___, "titleObjectFieldId": ___}' --header 'Content-Type: application/json' -u 'test@liferay.com:test'
 	 */
 	@io.swagger.v3.oas.annotations.Parameters(
 		value = {
@@ -506,8 +516,14 @@ public abstract class BaseObjectDefinitionResourceImpl
 			objectDefinitionUnsafeConsumer =
 				objectDefinition -> postObjectDefinition(objectDefinition);
 
-		for (ObjectDefinition objectDefinition : objectDefinitions) {
-			objectDefinitionUnsafeConsumer.accept(objectDefinition);
+		if (contextBatchUnsafeConsumer != null) {
+			contextBatchUnsafeConsumer.accept(
+				objectDefinitions, objectDefinitionUnsafeConsumer);
+		}
+		else {
+			for (ObjectDefinition objectDefinition : objectDefinitions) {
+				objectDefinitionUnsafeConsumer.accept(objectDefinition);
+			}
 		}
 	}
 
@@ -586,6 +602,15 @@ public abstract class BaseObjectDefinitionResourceImpl
 
 	public void setContextAcceptLanguage(AcceptLanguage contextAcceptLanguage) {
 		this.contextAcceptLanguage = contextAcceptLanguage;
+	}
+
+	public void setContextBatchUnsafeConsumer(
+		UnsafeBiConsumer
+			<java.util.Collection<ObjectDefinition>,
+			 UnsafeConsumer<ObjectDefinition, Exception>, Exception>
+				contextBatchUnsafeConsumer) {
+
+		this.contextBatchUnsafeConsumer = contextBatchUnsafeConsumer;
 	}
 
 	public void setContextCompany(
@@ -741,6 +766,10 @@ public abstract class BaseObjectDefinitionResourceImpl
 	}
 
 	protected AcceptLanguage contextAcceptLanguage;
+	protected UnsafeBiConsumer
+		<java.util.Collection<ObjectDefinition>,
+		 UnsafeConsumer<ObjectDefinition, Exception>, Exception>
+			contextBatchUnsafeConsumer;
 	protected com.liferay.portal.kernel.model.Company contextCompany;
 	protected HttpServletRequest contextHttpServletRequest;
 	protected HttpServletResponse contextHttpServletResponse;

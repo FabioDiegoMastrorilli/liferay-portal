@@ -55,7 +55,37 @@ import org.osgi.service.component.annotations.Reference;
 public class EditAssetCategoryCPAttachmentFileEntryMVCActionCommand
 	extends BaseMVCActionCommand {
 
-	protected void deleteCPAttachmentFileEntry(ActionRequest actionRequest)
+	@Override
+	protected void doProcessAction(
+			ActionRequest actionRequest, ActionResponse actionResponse)
+		throws Exception {
+
+		String cmd = ParamUtil.getString(actionRequest, Constants.CMD);
+
+		try {
+			if (cmd.equals(Constants.ADD) || cmd.equals(Constants.UPDATE)) {
+				_updateCPAttachmentFileEntry(actionRequest);
+			}
+			else if (cmd.equals(Constants.DELETE)) {
+				_deleteCPAttachmentFileEntry(actionRequest);
+			}
+		}
+		catch (Exception exception) {
+			if (exception instanceof NoSuchFileEntryException) {
+				hideDefaultErrorMessage(actionRequest);
+				hideDefaultSuccessMessage(actionRequest);
+
+				SessionErrors.add(actionRequest, exception.getClass());
+			}
+			else {
+				_log.error(exception);
+
+				throw exception;
+			}
+		}
+	}
+
+	private void _deleteCPAttachmentFileEntry(ActionRequest actionRequest)
 		throws Exception {
 
 		long cpAttachmentFileEntryId = ParamUtil.getLong(
@@ -67,37 +97,7 @@ public class EditAssetCategoryCPAttachmentFileEntryMVCActionCommand
 		}
 	}
 
-	@Override
-	protected void doProcessAction(
-			ActionRequest actionRequest, ActionResponse actionResponse)
-		throws Exception {
-
-		String cmd = ParamUtil.getString(actionRequest, Constants.CMD);
-
-		try {
-			if (cmd.equals(Constants.ADD) || cmd.equals(Constants.UPDATE)) {
-				updateCPAttachmentFileEntry(actionRequest);
-			}
-			else if (cmd.equals(Constants.DELETE)) {
-				deleteCPAttachmentFileEntry(actionRequest);
-			}
-		}
-		catch (Exception exception) {
-			if (exception instanceof NoSuchFileEntryException) {
-				hideDefaultErrorMessage(actionRequest);
-				hideDefaultSuccessMessage(actionRequest);
-
-				SessionErrors.add(actionRequest, exception.getClass());
-			}
-			else {
-				_log.error(exception, exception);
-
-				throw exception;
-			}
-		}
-	}
-
-	protected void updateCPAttachmentFileEntry(ActionRequest actionRequest)
+	private void _updateCPAttachmentFileEntry(ActionRequest actionRequest)
 		throws Exception {
 
 		long cpAttachmentFileEntryId = ParamUtil.getLong(

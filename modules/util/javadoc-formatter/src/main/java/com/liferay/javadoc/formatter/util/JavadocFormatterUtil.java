@@ -71,7 +71,7 @@ public class JavadocFormatterUtil {
 			new String[] {
 				"**/.git/**", "**/.gradle/**", "**/bin/**", "**/build/**",
 				"**/classes/**", "**/node_modules/**",
-				"**/node_modules_cache/**", "**/portal-client/**", "**/tmp/**"
+				"**/node_modules_cache/**", "**/tmp/**"
 			},
 			new String[] {"**/*.java"});
 
@@ -90,7 +90,7 @@ public class JavadocFormatterUtil {
 			}
 			catch (Exception exception) {
 				if (_log.isDebugEnabled()) {
-					_log.debug(exception, exception);
+					_log.debug(exception);
 				}
 
 				continue;

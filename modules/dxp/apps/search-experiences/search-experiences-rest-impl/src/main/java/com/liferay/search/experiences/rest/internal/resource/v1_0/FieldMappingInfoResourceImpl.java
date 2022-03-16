@@ -43,6 +43,7 @@ import org.osgi.service.component.annotations.ServiceScope;
  * @author Brian Wing Shun Chan
  */
 @Component(
+	enabled = false,
 	properties = "OSGI-INF/liferay/rest/v1_0/field-mapping-info.properties",
 	scope = ServiceScope.PROTOTYPE, service = FieldMappingInfoResource.class
 )
@@ -103,12 +104,6 @@ public class FieldMappingInfoResourceImpl
 
 			String fieldPath = fieldName;
 
-			if (!Validator.isBlank(query) &&
-				!StringUtil.containsIgnoreCase(fieldPath, query)) {
-
-				continue;
-			}
-
 			if (!Validator.isBlank(path)) {
 				fieldPath = path + "." + fieldName;
 			}
@@ -120,6 +115,13 @@ public class FieldMappingInfoResourceImpl
 					query);
 			}
 			else {
+				if (!Validator.isBlank(query) &&
+					!StringUtil.containsIgnoreCase(
+						fieldPath, query, StringPool.BLANK)) {
+
+					continue;
+				}
+
 				String languageId = _getLanguageId(fieldName);
 
 				int languageIdPosition = -1;

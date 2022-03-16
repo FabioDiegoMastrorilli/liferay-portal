@@ -189,11 +189,11 @@ definition {
 		}
 
 		task ("Assert the mapped custom field is shown in display page template") {
-			var fileEntryID = JSONDocument.getFileEntryId(
+			var fileEntryId = JSONDocument.getFileEntryId(
 				dmDocumentTitle = "DM Title",
 				groupName = "Test Site Name");
 
-			Navigator.openWithAppendToBaseURL(urlAppend = "web/test-site-name/d/${fileEntryID}");
+			Navigator.openWithAppendToBaseURL(urlAppend = "web/test-site-name/d/${fileEntryId}");
 
 			AssertTextEquals(
 				locator1 = "ControlMenu#HEADING",
@@ -359,7 +359,7 @@ definition {
 
 			AssertVisible(
 				key_append = "//img[contains(@src,'Document_1.jpg')]",
-				key_URL = "https://liferay.com",
+				key_url = "https://liferay.com",
 				locator1 = "Fragment#FRAGMENT_LINK");
 
 			PageEditor.clickPublish();
@@ -399,12 +399,12 @@ definition {
 		task ("Assert mapped URL work in display page template") {
 			AssertVisible(
 				key_append = "//img[contains(@src,'Document_1.jpg')]",
-				key_URL = "https://liferay.com",
+				key_url = "https://liferay.com",
 				locator1 = "Fragment#FRAGMENT_LINK");
 
 			Click(
 				key_append = "//img[contains(@src,'Document_1.jpg')]",
-				key_URL = "https://liferay.com",
+				key_url = "https://liferay.com",
 				locator1 = "Fragment#FRAGMENT_LINK");
 
 			AssertLocation.assertPartialLocation(value1 = "https://www.liferay.com");
@@ -470,7 +470,7 @@ definition {
 
 			AssertVisible(
 				key_append = "[normalize-space(text())='Heading Example']",
-				key_URL = "https://liferay.com",
+				key_url = "https://liferay.com",
 				locator1 = "Fragment#FRAGMENT_LINK");
 
 			PageEditor.clickPublish();
@@ -510,12 +510,12 @@ definition {
 		task ("Assert mapped URL work in view mode") {
 			AssertVisible(
 				key_append = "[normalize-space(text())='Heading Example']",
-				key_URL = "https://liferay.com",
+				key_url = "https://liferay.com",
 				locator1 = "Fragment#FRAGMENT_LINK");
 
 			Click(
 				key_append = "[normalize-space(text())='Heading Example']",
-				key_URL = "https://liferay.com",
+				key_url = "https://liferay.com",
 				locator1 = "Fragment#FRAGMENT_LINK");
 
 			AssertLocation.assertPartialLocation(value1 = "https://www.liferay.com");
@@ -656,7 +656,6 @@ definition {
 
 		task ("View mapped content in display page template") {
 			var portalURL = PropsUtil.get("portal.url");
-
 			var n = "1";
 
 			for (var content : list "Webcontent Title,Webcontent Content,Test Test,${portalURL}/web/test-site-name/w/webcontent-title") {
@@ -752,12 +751,12 @@ definition {
 		task ("Assert mapped URL work in view mode") {
 			AssertVisible(
 				key_append = "//img[contains(@src,'data:image/png')]",
-				key_URL = "https://www.liferay.com",
+				key_url = "https://www.liferay.com",
 				locator1 = "Fragment#FRAGMENT_LINK");
 
 			Click(
 				key_append = "//img[contains(@src,'data:image/png')]",
-				key_URL = "https://www.liferay.com",
+				key_url = "https://www.liferay.com",
 				locator1 = "Fragment#FRAGMENT_LINK");
 
 			AssertLocation.assertPartialLocation(value1 = "https://www.liferay.com");
@@ -839,12 +838,12 @@ definition {
 		task ("Assert mapped URL work in view mode") {
 			AssertVisible(
 				key_append = "[normalize-space(text())='Go Somewhere']",
-				key_URL = "https://www.liferay.com",
+				key_url = "https://www.liferay.com",
 				locator1 = "Fragment#FRAGMENT_LINK");
 
 			Click(
 				key_append = "[normalize-space(text())='Go Somewhere']",
-				key_URL = "https://www.liferay.com",
+				key_url = "https://www.liferay.com",
 				locator1 = "Fragment#FRAGMENT_LINK");
 
 			AssertLocation.assertPartialLocation(value1 = "https://www.liferay.com");
@@ -926,12 +925,12 @@ definition {
 		task ("Assert mapped URL work in view mode") {
 			AssertVisible(
 				key_append = "[normalize-space(text())='Heading Example']",
-				key_URL = "https://www.liferay.com",
+				key_url = "https://www.liferay.com",
 				locator1 = "Fragment#FRAGMENT_LINK");
 
 			Click(
 				key_append = "[normalize-space(text())='Heading Example']",
-				key_URL = "https://www.liferay.com",
+				key_url = "https://www.liferay.com",
 				locator1 = "Fragment#FRAGMENT_LINK");
 
 			AssertLocation.assertPartialLocation(value1 = "https://www.liferay.com");
@@ -1021,9 +1020,7 @@ definition {
 	@priority = "4"
 	test ViewMappableFieldsAreGroupedByFieldset {
 		task ("Add a custom Document type") {
-			DMNavigator.openDocumentsAndMediaAdmin(siteURLKey = "test-site-name");
-
-			DMNavigator.gotoDocumentType();
+			DMNavigator.openDocumentTypesAdmin(siteURLKey = "test-site-name");
 
 			DMDocumentType.add(
 				dmDocumentTypeDescription = "DM Document Type Description",
@@ -1367,9 +1364,7 @@ definition {
 		}
 
 		task ("Add a custom Document type") {
-			DMNavigator.openDocumentsAndMediaAdmin(siteURLKey = "test-site-name");
-
-			DMNavigator.gotoDocumentType();
+			DMNavigator.openDocumentTypesAdmin(siteURLKey = "test-site-name");
 
 			DMDocumentType.add(
 				dmDocumentTypeDescription = "DM Document Type Description",

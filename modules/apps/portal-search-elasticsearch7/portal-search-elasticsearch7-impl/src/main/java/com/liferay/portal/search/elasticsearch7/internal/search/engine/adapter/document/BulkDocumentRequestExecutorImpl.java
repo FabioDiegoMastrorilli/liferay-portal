@@ -17,7 +17,7 @@ package com.liferay.portal.search.elasticsearch7.internal.search.engine.adapter.
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.search.elasticsearch7.internal.connection.ElasticsearchClientResolver;
-import com.liferay.portal.search.elasticsearch7.internal.util.SearchLogHelperUtil;
+import com.liferay.portal.search.elasticsearch7.internal.helper.SearchLogHelperUtil;
 import com.liferay.portal.search.engine.adapter.document.BulkDocumentItemResponse;
 import com.liferay.portal.search.engine.adapter.document.BulkDocumentRequest;
 import com.liferay.portal.search.engine.adapter.document.BulkDocumentResponse;
@@ -56,7 +56,7 @@ public class BulkDocumentRequestExecutorImpl
 
 		BulkRequest bulkRequest = createBulkRequest(bulkDocumentRequest);
 
-		BulkResponse bulkResponse = getBulkResponse(
+		BulkResponse bulkResponse = _getBulkResponse(
 			bulkRequest, bulkDocumentRequest);
 
 		SearchLogHelperUtil.logActionResponse(_log, bulkResponse);
@@ -146,23 +146,6 @@ public class BulkDocumentRequestExecutorImpl
 		return bulkRequest;
 	}
 
-	protected BulkResponse getBulkResponse(
-		BulkRequest bulkRequest, BulkDocumentRequest bulkDocumentRequest) {
-
-		RestHighLevelClient restHighLevelClient =
-			_elasticsearchClientResolver.getRestHighLevelClient(
-				bulkDocumentRequest.getConnectionId(),
-				bulkDocumentRequest.isPreferLocalCluster());
-
-		try {
-			return restHighLevelClient.bulk(
-				bulkRequest, RequestOptions.DEFAULT);
-		}
-		catch (IOException ioException) {
-			throw new RuntimeException(ioException);
-		}
-	}
-
 	@Reference(target = "(search.engine.impl=Elasticsearch)", unbind = "-")
 	protected void setElasticsearchBulkableDocumentRequestTranslator(
 		ElasticsearchBulkableDocumentRequestTranslator
@@ -177,6 +160,23 @@ public class BulkDocumentRequestExecutorImpl
 		ElasticsearchClientResolver elasticsearchClientResolver) {
 
 		_elasticsearchClientResolver = elasticsearchClientResolver;
+	}
+
+	private BulkResponse _getBulkResponse(
+		BulkRequest bulkRequest, BulkDocumentRequest bulkDocumentRequest) {
+
+		RestHighLevelClient restHighLevelClient =
+			_elasticsearchClientResolver.getRestHighLevelClient(
+				bulkDocumentRequest.getConnectionId(),
+				bulkDocumentRequest.isPreferLocalCluster());
+
+		try {
+			return restHighLevelClient.bulk(
+				bulkRequest, RequestOptions.DEFAULT);
+		}
+		catch (IOException ioException) {
+			throw new RuntimeException(ioException);
+		}
 	}
 
 	private static final Log _log = LogFactoryUtil.getLog(

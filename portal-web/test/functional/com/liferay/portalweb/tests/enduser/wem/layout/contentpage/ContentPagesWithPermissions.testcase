@@ -137,9 +137,9 @@ definition {
 		}
 
 		task ("Select the second web content in Web Content Display") {
-			WebContentDisplayPortlet.selectWebContent(
-				contentPage = "true",
-				webContentTitle = "WC WebContent Title 2");
+			WebContentDisplayPortlet.selectWebContent(webContentTitle = "WC WebContent Title 2");
+
+			IFrame.closeFrame();
 		}
 
 		task ("Add an Asset Publisher to page") {
@@ -283,9 +283,9 @@ definition {
 		}
 
 		task ("View the Preview and Discard Draft actions are invisible in Pages admin") {
-			SitePages.openPagesAdmin(siteURLKey = "test-site-name");
+			PagesAdmin.openPagesAdmin(siteURLKey = "test-site-name");
 
-			SitePages.clickPageMenu(pageName = "Test Content Page Name");
+			PagesAdmin.openPageEllipsisMenu(pageName = "Test Content Page Name");
 
 			for (var itemName : list "Preview Draft,Discard Draft") {
 				MenuItem.viewNotPresent(menuItem = "${itemName}");
@@ -311,7 +311,7 @@ definition {
 			PagesFinder.goToPagesFinder();
 
 			Click.mouseOverClick(
-				key_pageName = "Test Content Page Name*",
+				key_pageName = "Test Content Page Name",
 				locator1 = "PagesFinder#PAGE_ELLIPSIS_ICON");
 
 			MenuItem.viewNotVisible(menuItem = "Preview Draft");
@@ -910,9 +910,9 @@ definition {
 	@priority = "4"
 	test EditSpecificContentPageAsSiteMemberWithUpdatePermission {
 		task ("Grant Update permission of specific content page to Site Member") {
-			SitePages.openPagesAdmin(siteURLKey = "test-site-name");
+			PagesAdmin.openPagesAdmin(siteURLKey = "test-site-name");
 
-			SitePages.gotoPageMenuItem(
+			PagesAdmin.gotoPageEllipsisMenuItem(
 				menuItem = "Permissions",
 				pageName = "Test Content Page Name");
 
@@ -1129,7 +1129,7 @@ definition {
 		}
 
 		task ("Add a content page") {
-			SitePages.openPagesAdmin(siteURLKey = "test-site-name");
+			PagesAdmin.openPagesAdmin(siteURLKey = "test-site-name");
 
 			ContentPages.addPage(pageName = "Test Content Page Name");
 		}

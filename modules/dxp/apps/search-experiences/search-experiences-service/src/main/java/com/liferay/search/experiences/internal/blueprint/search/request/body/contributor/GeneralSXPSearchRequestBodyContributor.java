@@ -14,11 +14,12 @@
 
 package com.liferay.search.experiences.internal.blueprint.search.request.body.contributor;
 
+import com.liferay.portal.kernel.util.LocaleUtil;
+import com.liferay.portal.kernel.util.TimeZoneUtil;
 import com.liferay.portal.search.searcher.SearchRequestBuilder;
 import com.liferay.search.experiences.internal.blueprint.parameter.SXPParameterData;
 import com.liferay.search.experiences.rest.dto.v1_0.Configuration;
-import com.liferay.search.experiences.rest.dto.v1_0.General;
-import com.liferay.search.experiences.rest.dto.v1_0.SXPBlueprint;
+import com.liferay.search.experiences.rest.dto.v1_0.GeneralConfiguration;
 
 /**
  * @author André de Oliveira
@@ -28,35 +29,57 @@ public class GeneralSXPSearchRequestBodyContributor
 
 	@Override
 	public void contribute(
-		SearchRequestBuilder searchRequestBuilder, SXPBlueprint sxpBlueprint,
+		Configuration configuration, SearchRequestBuilder searchRequestBuilder,
 		SXPParameterData sxpParameterData) {
 
-		Configuration configuration = sxpBlueprint.getConfiguration();
+		GeneralConfiguration generalConfiguration =
+			configuration.getGeneralConfiguration();
 
-		General general = configuration.getGeneral();
-
-		if (general == null) {
+		if (generalConfiguration == null) {
 			return;
 		}
 
-		if (general.getEmptySearchEnabled() != null) {
+		if (generalConfiguration.getEmptySearchEnabled() != null) {
 			searchRequestBuilder.emptySearchEnabled(
-				general.getEmptySearchEnabled());
+				generalConfiguration.getEmptySearchEnabled());
 		}
 
-		if (general.getExplain() != null) {
-			searchRequestBuilder.explain(general.getExplain());
+		if (generalConfiguration.getExplain() != null) {
+			searchRequestBuilder.explain(generalConfiguration.getExplain());
 		}
 
-		if (general.getIncludeResponseString() != null) {
+		if (generalConfiguration.getIncludeResponseString() != null) {
 			searchRequestBuilder.includeResponseString(
-				general.getIncludeResponseString());
+				generalConfiguration.getIncludeResponseString());
+		}
+
+		if (generalConfiguration.getQueryString() != null) {
+			searchRequestBuilder.queryString(
+				generalConfiguration.getQueryString());
+		}
+
+		if (generalConfiguration.getSearchableAssetTypes() != null) {
+			searchRequestBuilder.modelIndexerClassNames(
+				generalConfiguration.getSearchableAssetTypes());
+		}
+
+		if (generalConfiguration.getLanguageId() != null) {
+			searchRequestBuilder.locale(
+				LocaleUtil.fromLanguageId(
+					generalConfiguration.getLanguageId()));
+		}
+
+		if (generalConfiguration.getTimeZoneId() != null) {
+			searchRequestBuilder.withSearchContext(
+				searchContext -> searchContext.setTimeZone(
+					TimeZoneUtil.getTimeZone(
+						generalConfiguration.getTimeZoneId())));
 		}
 	}
 
 	@Override
 	public String getName() {
-		return "general";
+		return "generalConfiguration";
 	}
 
 }

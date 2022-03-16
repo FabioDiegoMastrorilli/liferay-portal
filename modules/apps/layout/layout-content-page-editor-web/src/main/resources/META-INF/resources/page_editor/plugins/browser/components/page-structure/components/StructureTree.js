@@ -138,6 +138,7 @@ export default function PageStructureSidebar() {
 						)}
 					</ClayAlert>
 				)}
+
 				<DragAndDropContextProvider>
 					<Treeview
 						NodeComponent={StructureTreeNode}
@@ -251,6 +252,18 @@ function getMappedFieldLabel(
 			);
 
 		return field?.label;
+	}
+
+	return null;
+}
+
+function getNameInfo(item) {
+	if (
+		config.fragmentAdvancedOptionsEnabled &&
+		item.type === LAYOUT_DATA_ITEM_TYPES.container &&
+		item.config.htmlTag !== 'div'
+	) {
+		return item.config.htmlTag;
 	}
 
 	return null;
@@ -482,6 +495,7 @@ function visit(
 		isMasterItem: !isMasterPage && itemInMasterLayout,
 		itemType: ITEM_TYPES.layoutDataItem,
 		name: getLayoutDataItemLabel(item, fragmentEntryLinks),
+		nameInfo: getNameInfo(item),
 		onHoverNode,
 		parentItemId: item.parentId,
 		removable: !itemInMasterLayout && isRemovable(item, layoutData),

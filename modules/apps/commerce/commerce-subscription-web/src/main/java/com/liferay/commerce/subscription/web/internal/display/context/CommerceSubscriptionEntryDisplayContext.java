@@ -22,7 +22,7 @@ import com.liferay.commerce.model.CommerceOrderItem;
 import com.liferay.commerce.model.CommerceSubscriptionEntry;
 import com.liferay.commerce.payment.model.CommercePaymentMethodGroupRel;
 import com.liferay.commerce.payment.service.CommercePaymentMethodGroupRelLocalService;
-import com.liferay.commerce.product.display.context.util.CPRequestHelper;
+import com.liferay.commerce.product.display.context.helper.CPRequestHelper;
 import com.liferay.commerce.product.util.CPSubscriptionType;
 import com.liferay.commerce.product.util.CPSubscriptionTypeJSPContributor;
 import com.liferay.commerce.product.util.CPSubscriptionTypeJSPContributorRegistry;
@@ -371,7 +371,7 @@ public class CommerceSubscriptionEntryDisplayContext {
 			portletURL.setParameter("keywords", keywords);
 		}
 
-		portletURL.setParameter("navigation", getNavigation());
+		portletURL.setParameter("navigation", _getNavigation());
 
 		return portletURL;
 	}
@@ -418,7 +418,7 @@ public class CommerceSubscriptionEntryDisplayContext {
 		return false;
 	}
 
-	protected String getNavigation() {
+	private String _getNavigation() {
 		return ParamUtil.getString(_httpServletRequest, "navigation", "all");
 	}
 

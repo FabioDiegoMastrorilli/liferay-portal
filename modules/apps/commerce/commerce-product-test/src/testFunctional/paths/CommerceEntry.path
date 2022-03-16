@@ -46,6 +46,11 @@
 	<td></td>
 </tr>
 <tr>
+	<td>CHOOSE_ENTRY_BUTTON</td>
+	<td>//tr/td[contains(.,'${key_entryName}')]//..//button[contains(.,'Choose')]</td>
+	<td></td>
+</tr>
+<tr>
 	<td>ADD_TAG_BUTTON</td>
 	<td>//div/button[@title='Add Tags']</td>
 	<td></td>
@@ -53,6 +58,11 @@
 <tr>
 	<td>BASE_INFORMATION_TITLE_BAR</td>
 	<td>//div[contains (@id, 'baseInformationTitle')]/a</td>
+	<td></td>
+</tr>
+<tr>
+	<td>CATEGORY_CONTENT_TITLE</td>
+	<td>//div[contains(@class,'portlet-content-editable')]//*[contains(@class,'category-title')] | //div[contains(@class,'category-content')]</td>
 	<td></td>
 </tr>
 <tr>
@@ -76,6 +86,11 @@
 	<td></td>
 </tr>
 <tr>
+	<td>DISPLAY_PAGE_ITEM_REMOVE</td>
+	<td>//span[contains(@id,'displayPageItemRemove')]</td>
+	<td></td>
+</tr>
+<tr>
 	<td>DISPLAY_DATE_FIELD</td>
 	<td>//span/input[contains(@id,'displayDate') and (@placeholder='mm/dd/yyyy')]</td>
 	<td></td>
@@ -83,6 +98,11 @@
 <tr>
 	<td>DISPLAY_DATE_TIME_FIELD</td>
 	<td>//span/input[contains(@id,'displayDateTime') and (@placeholder='h:mm am/pm')]</td>
+	<td></td>
+</tr>
+<tr>
+	<td>DISPLAY_PAGE_ANY</td>
+	<td>//span[contains (@id,'displayPageNameInput')]</td>
 	<td></td>
 </tr>
 <tr>
@@ -133,6 +153,11 @@
 <tr>
 	<td>DISCOUNT_LEVEL_1_FIELD</td>
 	<td>//div/input[contains(@id,'level1')]</td>
+	<td></td>
+</tr>
+<tr>
+	<td>DISPLAY_ORDER_FIELD</td>
+	<td>//div/input[contains(@id,'displayOrder')]</td>
 	<td></td>
 </tr>
 <tr>
@@ -216,6 +241,16 @@
 	<td></td>
 </tr>
 <tr>
+	<td>OVERRIDE_DEFAULT_DISPLAY_PAGE</td>
+	<td>//h4[contains(.,'Override Default')]//..//div[contains(@class,'dnd-tr')][contains(.,'${key_entryName}') and contains(.,'${key_layout}')]</td>
+	<td></td>
+</tr>
+<tr>
+	<td>OVERRIDE_DEFAULT_DISPLAY_PAGE_LAYOUT</td>
+	<td>//div[contains(@class,'table')]//div[contains(text(),'${key_layout}')]</td>
+	<td></td>
+</tr>
+<tr>
 	<td>CURRENCY_SELECT</td>
 	<td>//div[label[contains(.,'Store Currency')]]/select</td>
 	<td></td>
@@ -267,7 +302,7 @@
 </tr>
 <tr>
 	<td>PRODUCT_SKU_CONFIGURATION_AVAILABLE_QUANTITY</td>
-	<td>//div[contains(@class,'dnd-table fixed table-style-stacked')]//descendant::div[16][contains(text(),'${key_productQuantity}')]</td>
+	<td>//div[contains(@class,'dnd-table fixed table-style-stacked')]//descendant::div[17][contains(text(),'${key_productQuantity}')]</td>
 	<td></td>
 </tr>
 <tr>
@@ -768,7 +803,7 @@
 </tr>
 <tr>
 	<td>PRODUCT_CARD_SKU</td>
-	<td>//div[@class="cp-information"]//span[contains(text(),'${key_productSKU}')]//following::p[contains(.,'${key_productName}')]</td>
+	<td>//div[@class="cp-information"]//span[contains(text(),'${key_productSku}')]//following::p[contains(.,'${key_productName}')]</td>
 	<td></td>
 </tr>
 <tr>
@@ -784,6 +819,11 @@
 <tr>
 	<td>DELIVERY_SUBSCRIPTION_TOGGLE</td>
 	<td>//h4[contains(text(), 'Delivery Subscription')]//following-sibling::span[contains(@class,'toggle-switch-handle')]</td>
+	<td></td>
+</tr>
+<tr>
+	<td>SKU_DISCONTINUED_TOGGLE</td>
+	<td>//label[contains(.,'Mark the SKU as Discontinued')]//span[contains(@class,'toggle-switch-handle')]</td>
 	<td></td>
 </tr>
 <tr>
@@ -874,7 +914,7 @@
 </tr>
 <tr>
 	<td>VALUE_PRODUCT_RELATIONS</td>
-	<td>//a[contains(text(),'${key_productName}')]/../../..//div[contains(@class,'dnd-td') and (text()='${key_Value}')]</td>
+	<td>//a[contains(text(),'${key_productName}')]/../../..//div[contains(@class,'dnd-td') and (text()='${key_value}')]</td>
 	<td></td>
 </tr>
 <tr>

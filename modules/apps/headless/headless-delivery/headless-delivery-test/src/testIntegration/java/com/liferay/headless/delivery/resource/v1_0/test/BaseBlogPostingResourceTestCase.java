@@ -23,6 +23,7 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.util.ISO8601DateFormat;
 
 import com.liferay.headless.delivery.client.dto.v1_0.BlogPosting;
+import com.liferay.headless.delivery.client.dto.v1_0.Field;
 import com.liferay.headless.delivery.client.dto.v1_0.Rating;
 import com.liferay.headless.delivery.client.http.HttpInvoker;
 import com.liferay.headless.delivery.client.pagination.Page;
@@ -428,9 +429,10 @@ public abstract class BaseBlogPostingResourceTestCase {
 	}
 
 	@Test
-	public void testPutBlogPostingPermission() throws Exception {
+	public void testPutBlogPostingPermissionsPage() throws Exception {
 		@SuppressWarnings("PMD.UnusedLocalVariable")
-		BlogPosting blogPosting = testPutBlogPostingPermission_addBlogPosting();
+		BlogPosting blogPosting =
+			testPutBlogPostingPermissionsPage_addBlogPosting();
 
 		@SuppressWarnings("PMD.UnusedLocalVariable")
 		com.liferay.portal.kernel.model.Role role = RoleTestUtil.addRole(
@@ -438,7 +440,7 @@ public abstract class BaseBlogPostingResourceTestCase {
 
 		assertHttpResponseStatusCode(
 			200,
-			blogPostingResource.putBlogPostingPermissionHttpResponse(
+			blogPostingResource.putBlogPostingPermissionsPageHttpResponse(
 				blogPosting.getId(),
 				new Permission[] {
 					new Permission() {
@@ -451,7 +453,7 @@ public abstract class BaseBlogPostingResourceTestCase {
 
 		assertHttpResponseStatusCode(
 			404,
-			blogPostingResource.putBlogPostingPermissionHttpResponse(
+			blogPostingResource.putBlogPostingPermissionsPageHttpResponse(
 				0L,
 				new Permission[] {
 					new Permission() {
@@ -463,7 +465,7 @@ public abstract class BaseBlogPostingResourceTestCase {
 				}));
 	}
 
-	protected BlogPosting testPutBlogPostingPermission_addBlogPosting()
+	protected BlogPosting testPutBlogPostingPermissionsPage_addBlogPosting()
 		throws Exception {
 
 		return blogPostingResource.postSiteBlogPosting(
@@ -557,6 +559,39 @@ public abstract class BaseBlogPostingResourceTestCase {
 	}
 
 	@Test
+	public void testGetSiteBlogPostingsPageWithFilterDoubleEquals()
+		throws Exception {
+
+		List<EntityField> entityFields = getEntityFields(
+			EntityField.Type.DOUBLE);
+
+		if (entityFields.isEmpty()) {
+			return;
+		}
+
+		Long siteId = testGetSiteBlogPostingsPage_getSiteId();
+
+		BlogPosting blogPosting1 = testGetSiteBlogPostingsPage_addBlogPosting(
+			siteId, randomBlogPosting());
+
+		@SuppressWarnings("PMD.UnusedLocalVariable")
+		BlogPosting blogPosting2 = testGetSiteBlogPostingsPage_addBlogPosting(
+			siteId, randomBlogPosting());
+
+		for (EntityField entityField : entityFields) {
+			Page<BlogPosting> page =
+				blogPostingResource.getSiteBlogPostingsPage(
+					siteId, null, null,
+					getFilterString(entityField, "eq", blogPosting1),
+					Pagination.of(1, 2), null);
+
+			assertEquals(
+				Collections.singletonList(blogPosting1),
+				(List<BlogPosting>)page.getItems());
+		}
+	}
+
+	@Test
 	public void testGetSiteBlogPostingsPageWithFilterStringEquals()
 		throws Exception {
 
@@ -634,6 +669,16 @@ public abstract class BaseBlogPostingResourceTestCase {
 				BeanUtils.setProperty(
 					blogPosting1, entityField.getName(),
 					DateUtils.addMinutes(new Date(), -2));
+			});
+	}
+
+	@Test
+	public void testGetSiteBlogPostingsPageWithSortDouble() throws Exception {
+		testGetSiteBlogPostingsPageWithSort(
+			EntityField.Type.DOUBLE,
+			(entityField, blogPosting1, blogPosting2) -> {
+				BeanUtils.setProperty(blogPosting1, entityField.getName(), 0.1);
+				BeanUtils.setProperty(blogPosting2, entityField.getName(), 0.5);
 			});
 	}
 
@@ -1033,10 +1078,10 @@ public abstract class BaseBlogPostingResourceTestCase {
 	}
 
 	@Test
-	public void testPutSiteBlogPostingPermission() throws Exception {
+	public void testPutSiteBlogPostingPermissionsPage() throws Exception {
 		@SuppressWarnings("PMD.UnusedLocalVariable")
 		BlogPosting blogPosting =
-			testPutSiteBlogPostingPermission_addBlogPosting();
+			testPutSiteBlogPostingPermissionsPage_addBlogPosting();
 
 		@SuppressWarnings("PMD.UnusedLocalVariable")
 		com.liferay.portal.kernel.model.Role role = RoleTestUtil.addRole(
@@ -1044,7 +1089,7 @@ public abstract class BaseBlogPostingResourceTestCase {
 
 		assertHttpResponseStatusCode(
 			200,
-			blogPostingResource.putSiteBlogPostingPermissionHttpResponse(
+			blogPostingResource.putSiteBlogPostingPermissionsPageHttpResponse(
 				blogPosting.getSiteId(),
 				new Permission[] {
 					new Permission() {
@@ -1057,7 +1102,7 @@ public abstract class BaseBlogPostingResourceTestCase {
 
 		assertHttpResponseStatusCode(
 			404,
-			blogPostingResource.putSiteBlogPostingPermissionHttpResponse(
+			blogPostingResource.putSiteBlogPostingPermissionsPageHttpResponse(
 				blogPosting.getSiteId(),
 				new Permission[] {
 					new Permission() {
@@ -1069,7 +1114,7 @@ public abstract class BaseBlogPostingResourceTestCase {
 				}));
 	}
 
-	protected BlogPosting testPutSiteBlogPostingPermission_addBlogPosting()
+	protected BlogPosting testPutSiteBlogPostingPermissionsPage_addBlogPosting()
 		throws Exception {
 
 		return blogPostingResource.postSiteBlogPosting(
@@ -2354,8 +2399,9 @@ public abstract class BaseBlogPostingResourceTestCase {
 		}
 
 		if (entityFieldName.equals("numberOfComments")) {
-			throw new IllegalArgumentException(
-				"Invalid entity field " + entityFieldName);
+			sb.append(String.valueOf(blogPosting.getNumberOfComments()));
+
+			return sb.toString();
 		}
 
 		if (entityFieldName.equals("relatedContents")) {

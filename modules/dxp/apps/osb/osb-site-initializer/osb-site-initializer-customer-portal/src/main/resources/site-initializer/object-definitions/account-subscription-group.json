@@ -1,0 +1,63 @@
+{
+	"label": {
+		"en-US": "Account Subscription Group"
+	},
+	"name": "AccountSubscriptionGroup",
+	"objectFields": [
+		{
+			"DBType": "String",
+			"indexed": true,
+			"indexedAsKeyword": false,
+			"label": {
+				"en-US": "Account Key"
+			},
+			"name": "accountKey",
+			"required": true
+		},
+		{
+			"DBType": "String",
+			"indexed": true,
+			"indexedAsKeyword": false,
+			"label": {
+				"en-US": "Activation Status"
+			},
+			"name": "activationStatus",
+			"required": false
+		},
+		{
+			"DBType": "String",
+			"indexed": true,
+			"indexedAsKeyword": false,
+			"label": {
+				"en-US": "Manage Contacts URL"
+			},
+			"name": "manageContactsURL",
+			"required": false
+		},
+		{
+			"DBType": "Boolean",
+			"indexed": true,
+			"indexedAsKeyword": false,
+			"label": {
+				"en-US": "Has Activation"
+			},
+			"name": "hasActivation",
+			"required": false
+		},
+		{
+			"DBType": "String",
+			"indexed": true,
+			"indexedAsKeyword": false,
+			"label": {
+				"en-US": "Name"
+			},
+			"name": "name",
+			"required": false
+		}
+	],
+	"pluralLabel": {
+		"en_US": "Account Subscription Groups"
+	},
+	"scope": "company",
+	"system": false
+}

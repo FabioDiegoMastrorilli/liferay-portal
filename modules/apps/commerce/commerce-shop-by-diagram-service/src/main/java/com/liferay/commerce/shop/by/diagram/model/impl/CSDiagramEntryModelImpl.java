@@ -16,7 +16,6 @@ package com.liferay.commerce.shop.by.diagram.model.impl;
 
 import com.liferay.commerce.shop.by.diagram.model.CSDiagramEntry;
 import com.liferay.commerce.shop.by.diagram.model.CSDiagramEntryModel;
-import com.liferay.commerce.shop.by.diagram.model.CSDiagramEntrySoap;
 import com.liferay.expando.kernel.model.ExpandoBridge;
 import com.liferay.expando.kernel.util.ExpandoBridgeFactoryUtil;
 import com.liferay.petra.string.StringBundler;
@@ -41,12 +40,10 @@ import java.lang.reflect.InvocationHandler;
 import java.sql.Blob;
 import java.sql.Types;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.BiConsumer;
@@ -75,19 +72,20 @@ public class CSDiagramEntryModelImpl
 	public static final String TABLE_NAME = "CSDiagramEntry";
 
 	public static final Object[][] TABLE_COLUMNS = {
-		{"CSDiagramEntryId", Types.BIGINT}, {"companyId", Types.BIGINT},
-		{"userId", Types.BIGINT}, {"userName", Types.VARCHAR},
-		{"createDate", Types.TIMESTAMP}, {"modifiedDate", Types.TIMESTAMP},
-		{"CPDefinitionId", Types.BIGINT}, {"CPInstanceId", Types.BIGINT},
-		{"CProductId", Types.BIGINT}, {"diagram", Types.BOOLEAN},
-		{"quantity", Types.INTEGER}, {"sequence", Types.VARCHAR},
-		{"sku", Types.VARCHAR}
+		{"mvccVersion", Types.BIGINT}, {"CSDiagramEntryId", Types.BIGINT},
+		{"companyId", Types.BIGINT}, {"userId", Types.BIGINT},
+		{"userName", Types.VARCHAR}, {"createDate", Types.TIMESTAMP},
+		{"modifiedDate", Types.TIMESTAMP}, {"CPDefinitionId", Types.BIGINT},
+		{"CPInstanceId", Types.BIGINT}, {"CProductId", Types.BIGINT},
+		{"diagram", Types.BOOLEAN}, {"quantity", Types.INTEGER},
+		{"sequence", Types.VARCHAR}, {"sku", Types.VARCHAR}
 	};
 
 	public static final Map<String, Integer> TABLE_COLUMNS_MAP =
 		new HashMap<String, Integer>();
 
 	static {
+		TABLE_COLUMNS_MAP.put("mvccVersion", Types.BIGINT);
 		TABLE_COLUMNS_MAP.put("CSDiagramEntryId", Types.BIGINT);
 		TABLE_COLUMNS_MAP.put("companyId", Types.BIGINT);
 		TABLE_COLUMNS_MAP.put("userId", Types.BIGINT);
@@ -104,7 +102,7 @@ public class CSDiagramEntryModelImpl
 	}
 
 	public static final String TABLE_SQL_CREATE =
-		"create table CSDiagramEntry (CSDiagramEntryId LONG not null primary key,companyId LONG,userId LONG,userName VARCHAR(75) null,createDate DATE null,modifiedDate DATE null,CPDefinitionId LONG,CPInstanceId LONG,CProductId LONG,diagram BOOLEAN,quantity INTEGER,sequence VARCHAR(75) null,sku VARCHAR(75) null)";
+		"create table CSDiagramEntry (mvccVersion LONG default 0 not null,CSDiagramEntryId LONG not null primary key,companyId LONG,userId LONG,userName VARCHAR(75) null,createDate DATE null,modifiedDate DATE null,CPDefinitionId LONG,CPInstanceId LONG,CProductId LONG,diagram BOOLEAN,quantity INTEGER,sequence VARCHAR(75) null,sku VARCHAR(75) null)";
 
 	public static final String TABLE_SQL_DROP = "drop table CSDiagramEntry";
 
@@ -130,7 +128,13 @@ public class CSDiagramEntryModelImpl
 	 * @deprecated As of Athanasius (7.3.x), replaced by {@link #getColumnBitmask(String)}
 	 */
 	@Deprecated
-	public static final long SEQUENCE_COLUMN_BITMASK = 2L;
+	public static final long CPINSTANCEID_COLUMN_BITMASK = 2L;
+
+	/**
+	 * @deprecated As of Athanasius (7.3.x), replaced by {@link #getColumnBitmask(String)}
+	 */
+	@Deprecated
+	public static final long SEQUENCE_COLUMN_BITMASK = 4L;
 
 	/**
 	 * @deprecated As of Athanasius (7.3.x), with no direct replacement
@@ -144,63 +148,6 @@ public class CSDiagramEntryModelImpl
 	 */
 	@Deprecated
 	public static void setFinderCacheEnabled(boolean finderCacheEnabled) {
-	}
-
-	/**
-	 * Converts the soap model instance into a normal model instance.
-	 *
-	 * @param soapModel the soap model instance to convert
-	 * @return the normal model instance
-	 * @deprecated As of Athanasius (7.3.x), with no direct replacement
-	 */
-	@Deprecated
-	public static CSDiagramEntry toModel(CSDiagramEntrySoap soapModel) {
-		if (soapModel == null) {
-			return null;
-		}
-
-		CSDiagramEntry model = new CSDiagramEntryImpl();
-
-		model.setCSDiagramEntryId(soapModel.getCSDiagramEntryId());
-		model.setCompanyId(soapModel.getCompanyId());
-		model.setUserId(soapModel.getUserId());
-		model.setUserName(soapModel.getUserName());
-		model.setCreateDate(soapModel.getCreateDate());
-		model.setModifiedDate(soapModel.getModifiedDate());
-		model.setCPDefinitionId(soapModel.getCPDefinitionId());
-		model.setCPInstanceId(soapModel.getCPInstanceId());
-		model.setCProductId(soapModel.getCProductId());
-		model.setDiagram(soapModel.isDiagram());
-		model.setQuantity(soapModel.getQuantity());
-		model.setSequence(soapModel.getSequence());
-		model.setSku(soapModel.getSku());
-
-		return model;
-	}
-
-	/**
-	 * Converts the soap model instances into normal model instances.
-	 *
-	 * @param soapModels the soap model instances to convert
-	 * @return the normal model instances
-	 * @deprecated As of Athanasius (7.3.x), with no direct replacement
-	 */
-	@Deprecated
-	public static List<CSDiagramEntry> toModels(
-		CSDiagramEntrySoap[] soapModels) {
-
-		if (soapModels == null) {
-			return null;
-		}
-
-		List<CSDiagramEntry> models = new ArrayList<CSDiagramEntry>(
-			soapModels.length);
-
-		for (CSDiagramEntrySoap soapModel : soapModels) {
-			models.add(toModel(soapModel));
-		}
-
-		return models;
 	}
 
 	public CSDiagramEntryModelImpl() {
@@ -328,6 +275,11 @@ public class CSDiagramEntryModelImpl
 			new LinkedHashMap<String, BiConsumer<CSDiagramEntry, ?>>();
 
 		attributeGetterFunctions.put(
+			"mvccVersion", CSDiagramEntry::getMvccVersion);
+		attributeSetterBiConsumers.put(
+			"mvccVersion",
+			(BiConsumer<CSDiagramEntry, Long>)CSDiagramEntry::setMvccVersion);
+		attributeGetterFunctions.put(
 			"CSDiagramEntryId", CSDiagramEntry::getCSDiagramEntryId);
 		attributeSetterBiConsumers.put(
 			"CSDiagramEntryId",
@@ -391,6 +343,21 @@ public class CSDiagramEntryModelImpl
 			attributeGetterFunctions);
 		_attributeSetterBiConsumers = Collections.unmodifiableMap(
 			(Map)attributeSetterBiConsumers);
+	}
+
+	@JSON
+	@Override
+	public long getMvccVersion() {
+		return _mvccVersion;
+	}
+
+	@Override
+	public void setMvccVersion(long mvccVersion) {
+		if (_columnOriginalValues == Collections.EMPTY_MAP) {
+			_setColumnOriginalValues();
+		}
+
+		_mvccVersion = mvccVersion;
 	}
 
 	@JSON
@@ -550,6 +517,16 @@ public class CSDiagramEntryModelImpl
 		_CPInstanceId = CPInstanceId;
 	}
 
+	/**
+	 * @deprecated As of Athanasius (7.3.x), replaced by {@link
+	 *             #getColumnOriginalValue(String)}
+	 */
+	@Deprecated
+	public long getOriginalCPInstanceId() {
+		return GetterUtil.getLong(
+			this.<Long>getColumnOriginalValue("CPInstanceId"));
+	}
+
 	@JSON
 	@Override
 	public long getCProductId() {
@@ -706,6 +683,7 @@ public class CSDiagramEntryModelImpl
 	public Object clone() {
 		CSDiagramEntryImpl csDiagramEntryImpl = new CSDiagramEntryImpl();
 
+		csDiagramEntryImpl.setMvccVersion(getMvccVersion());
 		csDiagramEntryImpl.setCSDiagramEntryId(getCSDiagramEntryId());
 		csDiagramEntryImpl.setCompanyId(getCompanyId());
 		csDiagramEntryImpl.setUserId(getUserId());
@@ -729,6 +707,8 @@ public class CSDiagramEntryModelImpl
 	public CSDiagramEntry cloneWithOriginalValues() {
 		CSDiagramEntryImpl csDiagramEntryImpl = new CSDiagramEntryImpl();
 
+		csDiagramEntryImpl.setMvccVersion(
+			this.<Long>getColumnOriginalValue("mvccVersion"));
 		csDiagramEntryImpl.setCSDiagramEntryId(
 			this.<Long>getColumnOriginalValue("CSDiagramEntryId"));
 		csDiagramEntryImpl.setCompanyId(
@@ -829,6 +809,8 @@ public class CSDiagramEntryModelImpl
 	public CacheModel<CSDiagramEntry> toCacheModel() {
 		CSDiagramEntryCacheModel csDiagramEntryCacheModel =
 			new CSDiagramEntryCacheModel();
+
+		csDiagramEntryCacheModel.mvccVersion = getMvccVersion();
 
 		csDiagramEntryCacheModel.CSDiagramEntryId = getCSDiagramEntryId();
 
@@ -978,6 +960,7 @@ public class CSDiagramEntryModelImpl
 
 	}
 
+	private long _mvccVersion;
 	private long _CSDiagramEntryId;
 	private long _companyId;
 	private long _userId;
@@ -1020,6 +1003,7 @@ public class CSDiagramEntryModelImpl
 	private void _setColumnOriginalValues() {
 		_columnOriginalValues = new HashMap<String, Object>();
 
+		_columnOriginalValues.put("mvccVersion", _mvccVersion);
 		_columnOriginalValues.put("CSDiagramEntryId", _CSDiagramEntryId);
 		_columnOriginalValues.put("companyId", _companyId);
 		_columnOriginalValues.put("userId", _userId);
@@ -1046,31 +1030,33 @@ public class CSDiagramEntryModelImpl
 	static {
 		Map<String, Long> columnBitmasks = new HashMap<>();
 
-		columnBitmasks.put("CSDiagramEntryId", 1L);
+		columnBitmasks.put("mvccVersion", 1L);
 
-		columnBitmasks.put("companyId", 2L);
+		columnBitmasks.put("CSDiagramEntryId", 2L);
 
-		columnBitmasks.put("userId", 4L);
+		columnBitmasks.put("companyId", 4L);
 
-		columnBitmasks.put("userName", 8L);
+		columnBitmasks.put("userId", 8L);
 
-		columnBitmasks.put("createDate", 16L);
+		columnBitmasks.put("userName", 16L);
 
-		columnBitmasks.put("modifiedDate", 32L);
+		columnBitmasks.put("createDate", 32L);
 
-		columnBitmasks.put("CPDefinitionId", 64L);
+		columnBitmasks.put("modifiedDate", 64L);
 
-		columnBitmasks.put("CPInstanceId", 128L);
+		columnBitmasks.put("CPDefinitionId", 128L);
 
-		columnBitmasks.put("CProductId", 256L);
+		columnBitmasks.put("CPInstanceId", 256L);
 
-		columnBitmasks.put("diagram", 512L);
+		columnBitmasks.put("CProductId", 512L);
 
-		columnBitmasks.put("quantity", 1024L);
+		columnBitmasks.put("diagram", 1024L);
 
-		columnBitmasks.put("sequence", 2048L);
+		columnBitmasks.put("quantity", 2048L);
 
-		columnBitmasks.put("sku", 4096L);
+		columnBitmasks.put("sequence", 4096L);
+
+		columnBitmasks.put("sku", 8192L);
 
 		_columnBitmasks = Collections.unmodifiableMap(columnBitmasks);
 	}

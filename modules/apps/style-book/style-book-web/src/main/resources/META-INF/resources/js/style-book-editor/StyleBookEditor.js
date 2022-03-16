@@ -12,6 +12,7 @@
  * details.
  */
 
+import {StyleErrorsContextProvider} from '@liferay/layout-content-page-editor-web';
 import {fetch, objectToFormData, openToast} from 'frontend-js-web';
 import React, {useEffect, useState} from 'react';
 
@@ -26,7 +27,6 @@ import {useCloseProductMenu} from './useCloseProductMenu';
 
 const StyleBookEditor = ({
 	frontendTokensValues: initialFrontendTokensValues,
-	initialPreviewLayout,
 }) => {
 	useCloseProductMenu();
 
@@ -35,9 +35,15 @@ const StyleBookEditor = ({
 	);
 	const [draftStatus, setDraftStatus] = useState(DRAFT_STATUS.notSaved);
 	const [previewLayout, setPreviewLayout] = useState(
-		config.templatesPreviewEnabled
-			? getMostRecentLayout(config.previewOptions)
-			: initialPreviewLayout
+		getMostRecentLayout(config.previewOptions)
+	);
+	const [previewLayoutType, setPreviewLayoutType] = useState(
+		() =>
+			config.previewOptions.find((type) =>
+				type.data.recentLayouts.find(
+					(layout) => layout === previewLayout
+				)
+			)?.type
 	);
 	const [loading, setLoading] = useState(true);
 
@@ -73,28 +79,33 @@ const StyleBookEditor = ({
 				frontendTokensValues,
 				loading,
 				previewLayout,
+				previewLayoutType,
 				setFrontendTokensValues,
 				setLoading,
 				setPreviewLayout,
+				setPreviewLayoutType,
 			}}
 		>
 			<div className="cadmin style-book-editor">
-				{config.templatesPreviewEnabled && <Toolbar />}
+				<StyleErrorsContextProvider>
+					<Toolbar />
 
-				<div className="d-flex">
-					<LayoutPreview />
-					<Sidebar />
-				</div>
+					<div className="d-flex">
+						<LayoutPreview />
+
+						<Sidebar />
+					</div>
+				</StyleErrorsContextProvider>
 			</div>
 		</StyleBookContextProvider>
 	);
 };
 
 export default function ({
-	defaultUserId,
+	fragmentCollectionPreviewURL = '',
 	frontendTokenDefinition = [],
 	frontendTokensValues = {},
-	initialPreviewLayout,
+	isPrivateLayoutsEnabled,
 	layoutsTreeURL,
 	namespace,
 	previewOptions,
@@ -102,13 +113,12 @@ export default function ({
 	redirectURL,
 	saveDraftURL,
 	styleBookEntryId,
-	templatesPreviewEnabled,
 	themeName,
 } = {}) {
 	initializeConfig({
-		defaultUserId,
+		fragmentCollectionPreviewURL,
 		frontendTokenDefinition,
-		initialPreviewLayout,
+		isPrivateLayoutsEnabled,
 		layoutsTreeURL,
 		namespace,
 		previewOptions,
@@ -116,16 +126,10 @@ export default function ({
 		redirectURL,
 		saveDraftURL,
 		styleBookEntryId,
-		templatesPreviewEnabled,
 		themeName,
 	});
 
-	return (
-		<StyleBookEditor
-			frontendTokensValues={frontendTokensValues}
-			initialPreviewLayout={initialPreviewLayout}
-		/>
-	);
+	return <StyleBookEditor frontendTokensValues={frontendTokensValues} />;
 }
 
 function saveDraft(frontendTokensValues, styleBookEntryId) {
@@ -165,6 +169,7 @@ function getMostRecentLayout(previewOptions) {
 		LAYOUT_TYPES.master,
 		LAYOUT_TYPES.pageTemplate,
 		LAYOUT_TYPES.displayPageTemplate,
+		LAYOUT_TYPES.fragmentCollection,
 	];
 
 	for (let i = 0; i < types.length; i++) {

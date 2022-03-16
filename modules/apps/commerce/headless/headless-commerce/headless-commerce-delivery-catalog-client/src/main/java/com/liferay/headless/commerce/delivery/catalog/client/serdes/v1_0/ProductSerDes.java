@@ -64,7 +64,7 @@ public class ProductSerDes {
 		sb.append("{");
 
 		DateFormat liferayToJSONDateFormat = new SimpleDateFormat(
-			"yyyy-MM-dd'T'HH:mm:ss'Z'");
+			"yyyy-MM-dd'T'HH:mm:ssXX");
 
 		if (product.getAttachments() != null) {
 			if (sb.length() > 1) {
@@ -438,6 +438,16 @@ public class ProductSerDes {
 			sb.append("\"");
 		}
 
+		if (product.getUrls() != null) {
+			if (sb.length() > 1) {
+				sb.append(", ");
+			}
+
+			sb.append("\"urls\": ");
+
+			sb.append(_toJSON(product.getUrls()));
+		}
+
 		sb.append("}");
 
 		return sb.toString();
@@ -457,7 +467,7 @@ public class ProductSerDes {
 		Map<String, String> map = new TreeMap<>();
 
 		DateFormat liferayToJSONDateFormat = new SimpleDateFormat(
-			"yyyy-MM-dd'T'HH:mm:ss'Z'");
+			"yyyy-MM-dd'T'HH:mm:ssXX");
 
 		if (product.getAttachments() == null) {
 			map.put("attachments", null);
@@ -642,6 +652,13 @@ public class ProductSerDes {
 		}
 		else {
 			map.put("urlImage", String.valueOf(product.getUrlImage()));
+		}
+
+		if (product.getUrls() == null) {
+			map.put("urls", null);
+		}
+		else {
+			map.put("urls", String.valueOf(product.getUrls()));
 		}
 
 		return map;
@@ -844,6 +861,12 @@ public class ProductSerDes {
 			else if (Objects.equals(jsonParserFieldName, "urlImage")) {
 				if (jsonParserFieldValue != null) {
 					product.setUrlImage((String)jsonParserFieldValue);
+				}
+			}
+			else if (Objects.equals(jsonParserFieldName, "urls")) {
+				if (jsonParserFieldValue != null) {
+					product.setUrls(
+						(Map)ProductSerDes.toMap((String)jsonParserFieldValue));
 				}
 			}
 		}

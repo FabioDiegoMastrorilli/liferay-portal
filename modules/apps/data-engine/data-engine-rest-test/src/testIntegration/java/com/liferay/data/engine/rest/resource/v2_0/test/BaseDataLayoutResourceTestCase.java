@@ -200,18 +200,18 @@ public abstract class BaseDataLayoutResourceTestCase {
 	}
 
 	@Test
-	public void testDeleteDataLayoutsDataDefinition() throws Exception {
+	public void testDeleteDataDefinitionDataLayout() throws Exception {
 		@SuppressWarnings("PMD.UnusedLocalVariable")
 		DataLayout dataLayout =
-			testDeleteDataLayoutsDataDefinition_addDataLayout();
+			testDeleteDataDefinitionDataLayout_addDataLayout();
 
 		assertHttpResponseStatusCode(
 			204,
-			dataLayoutResource.deleteDataLayoutsDataDefinitionHttpResponse(
+			dataLayoutResource.deleteDataDefinitionDataLayoutHttpResponse(
 				dataLayout.getDataDefinitionId()));
 	}
 
-	protected DataLayout testDeleteDataLayoutsDataDefinition_addDataLayout()
+	protected DataLayout testDeleteDataDefinitionDataLayout_addDataLayout()
 		throws Exception {
 
 		throw new UnsupportedOperationException(
@@ -327,6 +327,18 @@ public abstract class BaseDataLayoutResourceTestCase {
 				BeanUtils.setProperty(
 					dataLayout1, entityField.getName(),
 					DateUtils.addMinutes(new Date(), -2));
+			});
+	}
+
+	@Test
+	public void testGetDataDefinitionDataLayoutsPageWithSortDouble()
+		throws Exception {
+
+		testGetDataDefinitionDataLayoutsPageWithSort(
+			EntityField.Type.DOUBLE,
+			(entityField, dataLayout1, dataLayout2) -> {
+				BeanUtils.setProperty(dataLayout1, entityField.getName(), 0.1);
+				BeanUtils.setProperty(dataLayout2, entityField.getName(), 0.5);
 			});
 	}
 

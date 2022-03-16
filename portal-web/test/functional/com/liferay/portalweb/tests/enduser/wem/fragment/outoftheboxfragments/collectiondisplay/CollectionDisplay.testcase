@@ -120,7 +120,7 @@ definition {
 
 			for (var i : list "3,2,1") {
 				ContentPages.viewFragmentText(
-					assetType = "web-content",
+					assetType = "journal",
 					fragmentName = "Content Display",
 					position = "${n}",
 					text = "WC WebContent Content ${i}");
@@ -307,9 +307,7 @@ definition {
 		}
 
 		task ("Add a custom Document type") {
-			DMNavigator.openDocumentsAndMediaAdmin(siteURLKey = "test-site-name");
-
-			DMNavigator.gotoDocumentType();
+			DMNavigator.openDocumentTypesAdmin(siteURLKey = "test-site-name");
 
 			DMDocumentType.add(
 				dmDocumentTypeDescription = "DM Document Type Description",
@@ -1531,7 +1529,7 @@ definition {
 
 			for (var i : list "3,2,1") {
 				ContentPages.viewFragmentText(
-					assetType = "blog",
+					assetType = "widget-content",
 					fragmentName = "Content Display",
 					position = "${n}",
 					text = "Blogs Entry Content ${i}");
@@ -2321,9 +2319,7 @@ definition {
 		}
 
 		task ("Add a custom Document type") {
-			DMNavigator.openDocumentsAndMediaAdmin(siteURLKey = "test-site-name");
-
-			DMNavigator.gotoDocumentType();
+			DMNavigator.openDocumentTypesAdmin(siteURLKey = "test-site-name");
 
 			DMDocumentType.add(
 				dmDocumentTypeDescription = "DM Document Type Description",
@@ -2397,7 +2393,7 @@ definition {
 		task ("Access to the mapping panel of Heading") {
 			Click.clickNoWaitForVisible(
 				key_colPosition = "1",
-				key_element = "//div[contains(@class,'page-editor')]//li[contains(.,'Heading')]",
+				key_element = "//div[@aria-label='Heading']",
 				key_fragmentName = "Collection Display",
 				key_rowPosition = "1",
 				locator1 = "PageEditor#COLLECTION_CELL_NESTED_ELEMENT");
@@ -2470,7 +2466,7 @@ definition {
 		task ("Access to the mapping panel of Heading") {
 			Click.clickNoWaitForVisible(
 				key_colPosition = "1",
-				key_element = "//div[contains(@class,'page-editor')]//li[contains(.,'Heading')]",
+				key_element = "//div[@aria-label='Heading']",
 				key_fragmentName = "Collection Display",
 				key_rowPosition = "1",
 				locator1 = "PageEditor#COLLECTION_CELL_NESTED_ELEMENT");
@@ -2533,7 +2529,7 @@ definition {
 		task ("Access to the mapping panel of Heading") {
 			Click.clickNoWaitForVisible(
 				key_colPosition = "1",
-				key_element = "//div[contains(@class,'page-editor')]//li[contains(.,'Heading')]",
+				key_element = "//div[@aria-label='Heading']",
 				key_fragmentName = "Collection Display",
 				key_rowPosition = "1",
 				locator1 = "PageEditor#COLLECTION_CELL_NESTED_ELEMENT");
@@ -3076,7 +3072,7 @@ definition {
 
 			for (var i : list "3,2,1") {
 				ContentPages.viewFragmentText(
-					assetType = "web-content",
+					assetType = "journal",
 					fragmentName = "Content Display",
 					position = "${n}",
 					text = "WC WebContent Content ${i}");
@@ -3194,7 +3190,7 @@ definition {
 
 			for (var i : list "3,2,1") {
 				ContentPages.viewFragmentText(
-					assetType = "web-content",
+					assetType = "journal",
 					fragmentName = "Content Display",
 					position = "${n}",
 					text = "WC WebContent Text ${i} Text");

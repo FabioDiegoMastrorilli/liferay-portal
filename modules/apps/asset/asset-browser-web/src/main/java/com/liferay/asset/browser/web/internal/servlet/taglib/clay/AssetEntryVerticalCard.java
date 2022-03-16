@@ -110,7 +110,7 @@ public class AssetEntryVerticalCard implements VerticalCard {
 			}
 			catch (Exception exception) {
 				if (_log.isDebugEnabled()) {
-					_log.debug(exception, exception);
+					_log.debug(exception);
 				}
 			}
 		}
@@ -130,11 +130,16 @@ public class AssetEntryVerticalCard implements VerticalCard {
 		}
 		catch (Exception exception) {
 			if (_log.isDebugEnabled()) {
-				_log.debug(exception, exception);
+				_log.debug(exception);
 			}
 		}
 
 		return null;
+	}
+
+	@Override
+	public String getInputValue() {
+		return String.valueOf(_assetEntry.getEntryId());
 	}
 
 	@Override
@@ -167,7 +172,7 @@ public class AssetEntryVerticalCard implements VerticalCard {
 			}
 			catch (Exception exception) {
 				if (_log.isDebugEnabled()) {
-					_log.debug(exception, exception);
+					_log.debug(exception);
 				}
 			}
 		}

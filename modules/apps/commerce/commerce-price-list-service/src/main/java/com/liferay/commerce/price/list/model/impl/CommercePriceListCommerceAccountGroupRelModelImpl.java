@@ -16,7 +16,6 @@ package com.liferay.commerce.price.list.model.impl;
 
 import com.liferay.commerce.price.list.model.CommercePriceListCommerceAccountGroupRel;
 import com.liferay.commerce.price.list.model.CommercePriceListCommerceAccountGroupRelModel;
-import com.liferay.commerce.price.list.model.CommercePriceListCommerceAccountGroupRelSoap;
 import com.liferay.expando.kernel.model.ExpandoBridge;
 import com.liferay.expando.kernel.util.ExpandoBridgeFactoryUtil;
 import com.liferay.exportimport.kernel.lar.StagedModelType;
@@ -43,12 +42,10 @@ import java.lang.reflect.InvocationHandler;
 import java.sql.Blob;
 import java.sql.Types;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.BiConsumer;
@@ -78,7 +75,7 @@ public class CommercePriceListCommerceAccountGroupRelModelImpl
 	public static final String TABLE_NAME = "CPLCommerceGroupAccountRel";
 
 	public static final Object[][] TABLE_COLUMNS = {
-		{"uuid_", Types.VARCHAR},
+		{"mvccVersion", Types.BIGINT}, {"uuid_", Types.VARCHAR},
 		{"CPLCommerceAccountGroupRelId", Types.BIGINT},
 		{"companyId", Types.BIGINT}, {"userId", Types.BIGINT},
 		{"userName", Types.VARCHAR}, {"createDate", Types.TIMESTAMP},
@@ -92,6 +89,7 @@ public class CommercePriceListCommerceAccountGroupRelModelImpl
 		new HashMap<String, Integer>();
 
 	static {
+		TABLE_COLUMNS_MAP.put("mvccVersion", Types.BIGINT);
 		TABLE_COLUMNS_MAP.put("uuid_", Types.VARCHAR);
 		TABLE_COLUMNS_MAP.put("CPLCommerceAccountGroupRelId", Types.BIGINT);
 		TABLE_COLUMNS_MAP.put("companyId", Types.BIGINT);
@@ -106,7 +104,7 @@ public class CommercePriceListCommerceAccountGroupRelModelImpl
 	}
 
 	public static final String TABLE_SQL_CREATE =
-		"create table CPLCommerceGroupAccountRel (uuid_ VARCHAR(75) null,CPLCommerceAccountGroupRelId LONG not null primary key,companyId LONG,userId LONG,userName VARCHAR(75) null,createDate DATE null,modifiedDate DATE null,commercePriceListId LONG,commerceAccountGroupId LONG,order_ INTEGER,lastPublishDate DATE null)";
+		"create table CPLCommerceGroupAccountRel (mvccVersion LONG default 0 not null,uuid_ VARCHAR(75) null,CPLCommerceAccountGroupRelId LONG not null primary key,companyId LONG,userId LONG,userName VARCHAR(75) null,createDate DATE null,modifiedDate DATE null,commercePriceListId LONG,commerceAccountGroupId LONG,order_ INTEGER,lastPublishDate DATE null)";
 
 	public static final String TABLE_SQL_DROP =
 		"drop table CPLCommerceGroupAccountRel";
@@ -171,68 +169,6 @@ public class CommercePriceListCommerceAccountGroupRelModelImpl
 	 */
 	@Deprecated
 	public static final long ORDER_COLUMN_BITMASK = 16L;
-
-	/**
-	 * Converts the soap model instance into a normal model instance.
-	 *
-	 * @param soapModel the soap model instance to convert
-	 * @return the normal model instance
-	 * @deprecated As of Athanasius (7.3.x), with no direct replacement
-	 */
-	@Deprecated
-	public static CommercePriceListCommerceAccountGroupRel toModel(
-		CommercePriceListCommerceAccountGroupRelSoap soapModel) {
-
-		if (soapModel == null) {
-			return null;
-		}
-
-		CommercePriceListCommerceAccountGroupRel model =
-			new CommercePriceListCommerceAccountGroupRelImpl();
-
-		model.setUuid(soapModel.getUuid());
-		model.setCommercePriceListCommerceAccountGroupRelId(
-			soapModel.getCommercePriceListCommerceAccountGroupRelId());
-		model.setCompanyId(soapModel.getCompanyId());
-		model.setUserId(soapModel.getUserId());
-		model.setUserName(soapModel.getUserName());
-		model.setCreateDate(soapModel.getCreateDate());
-		model.setModifiedDate(soapModel.getModifiedDate());
-		model.setCommercePriceListId(soapModel.getCommercePriceListId());
-		model.setCommerceAccountGroupId(soapModel.getCommerceAccountGroupId());
-		model.setOrder(soapModel.getOrder());
-		model.setLastPublishDate(soapModel.getLastPublishDate());
-
-		return model;
-	}
-
-	/**
-	 * Converts the soap model instances into normal model instances.
-	 *
-	 * @param soapModels the soap model instances to convert
-	 * @return the normal model instances
-	 * @deprecated As of Athanasius (7.3.x), with no direct replacement
-	 */
-	@Deprecated
-	public static List<CommercePriceListCommerceAccountGroupRel> toModels(
-		CommercePriceListCommerceAccountGroupRelSoap[] soapModels) {
-
-		if (soapModels == null) {
-			return null;
-		}
-
-		List<CommercePriceListCommerceAccountGroupRel> models =
-			new ArrayList<CommercePriceListCommerceAccountGroupRel>(
-				soapModels.length);
-
-		for (CommercePriceListCommerceAccountGroupRelSoap soapModel :
-				soapModels) {
-
-			models.add(toModel(soapModel));
-		}
-
-		return models;
-	}
 
 	public static final long LOCK_EXPIRATION_TIME = GetterUtil.getLong(
 		com.liferay.commerce.price.list.service.util.ServiceProps.get(
@@ -382,6 +318,13 @@ public class CommercePriceListCommerceAccountGroupRelModelImpl
 					 BiConsumer<CommercePriceListCommerceAccountGroupRel, ?>>();
 
 		attributeGetterFunctions.put(
+			"mvccVersion",
+			CommercePriceListCommerceAccountGroupRel::getMvccVersion);
+		attributeSetterBiConsumers.put(
+			"mvccVersion",
+			(BiConsumer<CommercePriceListCommerceAccountGroupRel, Long>)
+				CommercePriceListCommerceAccountGroupRel::setMvccVersion);
+		attributeGetterFunctions.put(
 			"uuid", CommercePriceListCommerceAccountGroupRel::getUuid);
 		attributeSetterBiConsumers.put(
 			"uuid",
@@ -464,6 +407,21 @@ public class CommercePriceListCommerceAccountGroupRelModelImpl
 			attributeGetterFunctions);
 		_attributeSetterBiConsumers = Collections.unmodifiableMap(
 			(Map)attributeSetterBiConsumers);
+	}
+
+	@JSON
+	@Override
+	public long getMvccVersion() {
+		return _mvccVersion;
+	}
+
+	@Override
+	public void setMvccVersion(long mvccVersion) {
+		if (_columnOriginalValues == Collections.EMPTY_MAP) {
+			_setColumnOriginalValues();
+		}
+
+		_mvccVersion = mvccVersion;
 	}
 
 	@JSON
@@ -773,6 +731,8 @@ public class CommercePriceListCommerceAccountGroupRelModelImpl
 			commercePriceListCommerceAccountGroupRelImpl =
 				new CommercePriceListCommerceAccountGroupRelImpl();
 
+		commercePriceListCommerceAccountGroupRelImpl.setMvccVersion(
+			getMvccVersion());
 		commercePriceListCommerceAccountGroupRelImpl.setUuid(getUuid());
 		commercePriceListCommerceAccountGroupRelImpl.
 			setCommercePriceListCommerceAccountGroupRelId(
@@ -804,6 +764,8 @@ public class CommercePriceListCommerceAccountGroupRelModelImpl
 			commercePriceListCommerceAccountGroupRelImpl =
 				new CommercePriceListCommerceAccountGroupRelImpl();
 
+		commercePriceListCommerceAccountGroupRelImpl.setMvccVersion(
+			this.<Long>getColumnOriginalValue("mvccVersion"));
 		commercePriceListCommerceAccountGroupRelImpl.setUuid(
 			this.<String>getColumnOriginalValue("uuid_"));
 		commercePriceListCommerceAccountGroupRelImpl.
@@ -920,6 +882,9 @@ public class CommercePriceListCommerceAccountGroupRelModelImpl
 		CommercePriceListCommerceAccountGroupRelCacheModel
 			commercePriceListCommerceAccountGroupRelCacheModel =
 				new CommercePriceListCommerceAccountGroupRelCacheModel();
+
+		commercePriceListCommerceAccountGroupRelCacheModel.mvccVersion =
+			getMvccVersion();
 
 		commercePriceListCommerceAccountGroupRelCacheModel.uuid = getUuid();
 
@@ -1088,6 +1053,7 @@ public class CommercePriceListCommerceAccountGroupRelModelImpl
 
 	}
 
+	private long _mvccVersion;
 	private String _uuid;
 	private long _commercePriceListCommerceAccountGroupRelId;
 	private long _companyId;
@@ -1131,6 +1097,7 @@ public class CommercePriceListCommerceAccountGroupRelModelImpl
 	private void _setColumnOriginalValues() {
 		_columnOriginalValues = new HashMap<String, Object>();
 
+		_columnOriginalValues.put("mvccVersion", _mvccVersion);
 		_columnOriginalValues.put("uuid_", _uuid);
 		_columnOriginalValues.put(
 			"CPLCommerceAccountGroupRelId",
@@ -1172,27 +1139,29 @@ public class CommercePriceListCommerceAccountGroupRelModelImpl
 	static {
 		Map<String, Long> columnBitmasks = new HashMap<>();
 
-		columnBitmasks.put("uuid_", 1L);
+		columnBitmasks.put("mvccVersion", 1L);
 
-		columnBitmasks.put("CPLCommerceAccountGroupRelId", 2L);
+		columnBitmasks.put("uuid_", 2L);
 
-		columnBitmasks.put("companyId", 4L);
+		columnBitmasks.put("CPLCommerceAccountGroupRelId", 4L);
 
-		columnBitmasks.put("userId", 8L);
+		columnBitmasks.put("companyId", 8L);
 
-		columnBitmasks.put("userName", 16L);
+		columnBitmasks.put("userId", 16L);
 
-		columnBitmasks.put("createDate", 32L);
+		columnBitmasks.put("userName", 32L);
 
-		columnBitmasks.put("modifiedDate", 64L);
+		columnBitmasks.put("createDate", 64L);
 
-		columnBitmasks.put("commercePriceListId", 128L);
+		columnBitmasks.put("modifiedDate", 128L);
 
-		columnBitmasks.put("commerceAccountGroupId", 256L);
+		columnBitmasks.put("commercePriceListId", 256L);
 
-		columnBitmasks.put("order_", 512L);
+		columnBitmasks.put("commerceAccountGroupId", 512L);
 
-		columnBitmasks.put("lastPublishDate", 1024L);
+		columnBitmasks.put("order_", 1024L);
+
+		columnBitmasks.put("lastPublishDate", 2048L);
 
 		_columnBitmasks = Collections.unmodifiableMap(columnBitmasks);
 	}

@@ -22,6 +22,7 @@ import com.fasterxml.jackson.annotation.JsonValue;
 
 import com.liferay.petra.function.UnsafeSupplier;
 import com.liferay.petra.string.StringBundler;
+import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.vulcan.graphql.annotation.GraphQLField;
 import com.liferay.portal.vulcan.graphql.annotation.GraphQLName;
 import com.liferay.portal.vulcan.util.ObjectMapperUtil;
@@ -61,6 +62,44 @@ public class ObjectField implements Serializable {
 
 	@Schema
 	@Valid
+	public DBType getDBType() {
+		return DBType;
+	}
+
+	@JsonIgnore
+	public String getDBTypeAsString() {
+		if (DBType == null) {
+			return null;
+		}
+
+		return DBType.toString();
+	}
+
+	public void setDBType(DBType DBType) {
+		this.DBType = DBType;
+	}
+
+	@JsonIgnore
+	public void setDBType(
+		UnsafeSupplier<DBType, Exception> DBTypeUnsafeSupplier) {
+
+		try {
+			DBType = DBTypeUnsafeSupplier.get();
+		}
+		catch (RuntimeException re) {
+			throw re;
+		}
+		catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	@GraphQLField
+	@JsonProperty(access = JsonProperty.Access.READ_WRITE)
+	protected DBType DBType;
+
+	@Schema
+	@Valid
 	public Map<String, Map<String, String>> getActions() {
 		return actions;
 	}
@@ -88,6 +127,44 @@ public class ObjectField implements Serializable {
 	@GraphQLField
 	@JsonProperty(access = JsonProperty.Access.READ_ONLY)
 	protected Map<String, Map<String, String>> actions;
+
+	@Schema
+	@Valid
+	public BusinessType getBusinessType() {
+		return businessType;
+	}
+
+	@JsonIgnore
+	public String getBusinessTypeAsString() {
+		if (businessType == null) {
+			return null;
+		}
+
+		return businessType.toString();
+	}
+
+	public void setBusinessType(BusinessType businessType) {
+		this.businessType = businessType;
+	}
+
+	@JsonIgnore
+	public void setBusinessType(
+		UnsafeSupplier<BusinessType, Exception> businessTypeUnsafeSupplier) {
+
+		try {
+			businessType = businessTypeUnsafeSupplier.get();
+		}
+		catch (RuntimeException re) {
+			throw re;
+		}
+		catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	@GraphQLField
+	@JsonProperty(access = JsonProperty.Access.READ_WRITE)
+	protected BusinessType businessType;
 
 	@Schema
 	public Long getId() {
@@ -283,6 +360,77 @@ public class ObjectField implements Serializable {
 	protected String name;
 
 	@Schema
+	@Valid
+	public ObjectFieldSetting[] getObjectFieldSettings() {
+		return objectFieldSettings;
+	}
+
+	public void setObjectFieldSettings(
+		ObjectFieldSetting[] objectFieldSettings) {
+
+		this.objectFieldSettings = objectFieldSettings;
+	}
+
+	@JsonIgnore
+	public void setObjectFieldSettings(
+		UnsafeSupplier<ObjectFieldSetting[], Exception>
+			objectFieldSettingsUnsafeSupplier) {
+
+		try {
+			objectFieldSettings = objectFieldSettingsUnsafeSupplier.get();
+		}
+		catch (RuntimeException re) {
+			throw re;
+		}
+		catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	@GraphQLField
+	@JsonProperty(access = JsonProperty.Access.READ_WRITE)
+	protected ObjectFieldSetting[] objectFieldSettings;
+
+	@Schema
+	@Valid
+	public RelationshipType getRelationshipType() {
+		return relationshipType;
+	}
+
+	@JsonIgnore
+	public String getRelationshipTypeAsString() {
+		if (relationshipType == null) {
+			return null;
+		}
+
+		return relationshipType.toString();
+	}
+
+	public void setRelationshipType(RelationshipType relationshipType) {
+		this.relationshipType = relationshipType;
+	}
+
+	@JsonIgnore
+	public void setRelationshipType(
+		UnsafeSupplier<RelationshipType, Exception>
+			relationshipTypeUnsafeSupplier) {
+
+		try {
+			relationshipType = relationshipTypeUnsafeSupplier.get();
+		}
+		catch (RuntimeException re) {
+			throw re;
+		}
+		catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	@GraphQLField
+	@JsonProperty(access = JsonProperty.Access.READ_ONLY)
+	protected RelationshipType relationshipType;
+
+	@Schema
 	public Boolean getRequired() {
 		return required;
 	}
@@ -310,7 +458,7 @@ public class ObjectField implements Serializable {
 	@JsonProperty(access = JsonProperty.Access.READ_WRITE)
 	protected Boolean required;
 
-	@Schema
+	@Schema(deprecated = true)
 	@Valid
 	public Type getType() {
 		return type;
@@ -342,6 +490,7 @@ public class ObjectField implements Serializable {
 		}
 	}
 
+	@Deprecated
 	@GraphQLField
 	@JsonProperty(access = JsonProperty.Access.READ_WRITE)
 	protected Type type;
@@ -373,6 +522,20 @@ public class ObjectField implements Serializable {
 
 		sb.append("{");
 
+		if (DBType != null) {
+			if (sb.length() > 1) {
+				sb.append(", ");
+			}
+
+			sb.append("\"DBType\": ");
+
+			sb.append("\"");
+
+			sb.append(DBType);
+
+			sb.append("\"");
+		}
+
 		if (actions != null) {
 			if (sb.length() > 1) {
 				sb.append(", ");
@@ -381,6 +544,20 @@ public class ObjectField implements Serializable {
 			sb.append("\"actions\": ");
 
 			sb.append(_toJSON(actions));
+		}
+
+		if (businessType != null) {
+			if (sb.length() > 1) {
+				sb.append(", ");
+			}
+
+			sb.append("\"businessType\": ");
+
+			sb.append("\"");
+
+			sb.append(businessType);
+
+			sb.append("\"");
 		}
 
 		if (id != null) {
@@ -461,6 +638,40 @@ public class ObjectField implements Serializable {
 			sb.append("\"");
 		}
 
+		if (objectFieldSettings != null) {
+			if (sb.length() > 1) {
+				sb.append(", ");
+			}
+
+			sb.append("\"objectFieldSettings\": ");
+
+			sb.append("[");
+
+			for (int i = 0; i < objectFieldSettings.length; i++) {
+				sb.append(String.valueOf(objectFieldSettings[i]));
+
+				if ((i + 1) < objectFieldSettings.length) {
+					sb.append(", ");
+				}
+			}
+
+			sb.append("]");
+		}
+
+		if (relationshipType != null) {
+			if (sb.length() > 1) {
+				sb.append(", ");
+			}
+
+			sb.append("\"relationshipType\": ");
+
+			sb.append("\"");
+
+			sb.append(relationshipType);
+
+			sb.append("\"");
+		}
+
 		if (required != null) {
 			if (sb.length() > 1) {
 				sb.append(", ");
@@ -497,11 +708,132 @@ public class ObjectField implements Serializable {
 	)
 	public String xClassName;
 
+	@GraphQLName("BusinessType")
+	public static enum BusinessType {
+
+		ATTACHMENT("Attachment"), BOOLEAN("Boolean"), DATE("Date"),
+		DECIMAL("Decimal"), INTEGER("Integer"), LONG_INTEGER("LongInteger"),
+		LONG_TEXT("LongText"), PICKLIST("Picklist"),
+		PRECISION_DECIMAL("PrecisionDecimal"), RELATIONSHIP("Relationship"),
+		TEXT("Text");
+
+		@JsonCreator
+		public static BusinessType create(String value) {
+			if ((value == null) || value.equals("")) {
+				return null;
+			}
+
+			for (BusinessType businessType : values()) {
+				if (Objects.equals(businessType.getValue(), value)) {
+					return businessType;
+				}
+			}
+
+			throw new IllegalArgumentException("Invalid enum value: " + value);
+		}
+
+		@JsonValue
+		public String getValue() {
+			return _value;
+		}
+
+		@Override
+		public String toString() {
+			return _value;
+		}
+
+		private BusinessType(String value) {
+			_value = value;
+		}
+
+		private final String _value;
+
+	}
+
+	@GraphQLName("DBType")
+	public static enum DBType {
+
+		BIG_DECIMAL("BigDecimal"), BOOLEAN("Boolean"), CLOB("Clob"),
+		DATE("Date"), DOUBLE("Double"), INTEGER("Integer"), LONG("Long"),
+		STRING("String");
+
+		@JsonCreator
+		public static DBType create(String value) {
+			if ((value == null) || value.equals("")) {
+				return null;
+			}
+
+			for (DBType dbType : values()) {
+				if (Objects.equals(dbType.getValue(), value)) {
+					return dbType;
+				}
+			}
+
+			throw new IllegalArgumentException("Invalid enum value: " + value);
+		}
+
+		@JsonValue
+		public String getValue() {
+			return _value;
+		}
+
+		@Override
+		public String toString() {
+			return _value;
+		}
+
+		private DBType(String value) {
+			_value = value;
+		}
+
+		private final String _value;
+
+	}
+
+	@GraphQLName("RelationshipType")
+	public static enum RelationshipType {
+
+		ONE_TO_MANY("oneToMany"), ONE_TO_ONE("oneToOne");
+
+		@JsonCreator
+		public static RelationshipType create(String value) {
+			if ((value == null) || value.equals("")) {
+				return null;
+			}
+
+			for (RelationshipType relationshipType : values()) {
+				if (Objects.equals(relationshipType.getValue(), value)) {
+					return relationshipType;
+				}
+			}
+
+			throw new IllegalArgumentException("Invalid enum value: " + value);
+		}
+
+		@JsonValue
+		public String getValue() {
+			return _value;
+		}
+
+		@Override
+		public String toString() {
+			return _value;
+		}
+
+		private RelationshipType(String value) {
+			_value = value;
+		}
+
+		private final String _value;
+
+	}
+
 	@GraphQLName("Type")
 	public static enum Type {
 
-		BIG_DECIMAL("BigDecimal"), BOOLEAN("Boolean"), DATE("Date"),
-		DOUBLE("Double"), INTEGER("Integer"), LONG("Long"), STRING("String");
+		BIG_DECIMAL("BigDecimal"), BOOLEAN("Boolean"), CLOB("Clob"),
+		DATE("Date"), DOUBLE("Double"), INTEGER("Integer"), LONG("Long"),
+		STRING("String");
 
 		@JsonCreator
 		public static Type create(String value) {
@@ -537,9 +869,9 @@ public class ObjectField implements Serializable {
 	}
 
 	private static String _escape(Object object) {
-		String string = String.valueOf(object);
-
-		return string.replaceAll("\"", "\\\\\"");
+		return StringUtil.replace(
+			String.valueOf(object), _JSON_ESCAPE_STRINGS[0],
+			_JSON_ESCAPE_STRINGS[1]);
 	}
 
 	private static boolean _isArray(Object value) {
@@ -565,7 +897,7 @@ public class ObjectField implements Serializable {
 			Map.Entry<String, ?> entry = iterator.next();
 
 			sb.append("\"");
-			sb.append(entry.getKey());
+			sb.append(_escape(entry.getKey()));
 			sb.append("\": ");
 
 			Object value = entry.getValue();
@@ -597,7 +929,7 @@ public class ObjectField implements Serializable {
 			}
 			else if (value instanceof String) {
 				sb.append("\"");
-				sb.append(value);
+				sb.append(_escape(value));
 				sb.append("\"");
 			}
 			else {
@@ -613,5 +945,10 @@ public class ObjectField implements Serializable {
 
 		return sb.toString();
 	}
+
+	private static final String[][] _JSON_ESCAPE_STRINGS = {
+		{"\\", "\"", "\b", "\f", "\n", "\r", "\t"},
+		{"\\\\", "\\\"", "\\b", "\\f", "\\n", "\\r", "\\t"}
+	};
 
 }

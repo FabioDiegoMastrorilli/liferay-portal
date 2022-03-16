@@ -20,7 +20,6 @@ import com.liferay.commerce.model.CommerceOrder;
 import com.liferay.commerce.order.CommerceOrderHttpHelper;
 import com.liferay.commerce.order.CommerceOrderValidatorRegistry;
 import com.liferay.commerce.price.CommerceOrderPriceCalculation;
-import com.liferay.commerce.price.CommerceProductPriceCalculation;
 import com.liferay.commerce.product.constants.CPConstants;
 import com.liferay.commerce.product.service.CommerceChannelLocalService;
 import com.liferay.commerce.product.util.CPDefinitionHelper;
@@ -65,7 +64,8 @@ import org.osgi.service.component.annotations.Reference;
 		"javax.portlet.init-param.view-template=/cart_total/view.jsp",
 		"javax.portlet.name=" + CommercePortletKeys.COMMERCE_CART_CONTENT_TOTAL,
 		"javax.portlet.resource-bundle=content.Language",
-		"javax.portlet.security-role-ref=power-user,user"
+		"javax.portlet.security-role-ref=power-user,user",
+		"javax.portlet.version=3.0"
 	},
 	service = {CommerceCartContentTotalPortlet.class, Portlet.class}
 )
@@ -83,8 +83,7 @@ public class CommerceCartContentTotalPortlet extends MVCPortlet {
 						_commerceChannelLocalService, _commerceOrderHttpHelper,
 						_commerceOrderItemService,
 						_commerceOrderPriceCalculation,
-						_commerceOrderValidatorRegistry,
-						_commerceProductPriceCalculation, _cpDefinitionHelper,
+						_commerceOrderValidatorRegistry, _cpDefinitionHelper,
 						_cpInstanceHelper,
 						_commerceOrderModelResourcePermission,
 						_commerceProductPortletResourcePermission,
@@ -95,7 +94,7 @@ public class CommerceCartContentTotalPortlet extends MVCPortlet {
 				commerceCartContentTotalDisplayContext);
 		}
 		catch (PortalException portalException) {
-			_log.error(portalException, portalException);
+			_log.error(portalException);
 		}
 
 		super.render(renderRequest, renderResponse);
@@ -129,9 +128,6 @@ public class CommerceCartContentTotalPortlet extends MVCPortlet {
 		target = "(resource.name=" + CPConstants.RESOURCE_NAME_PRODUCT + ")"
 	)
 	private PortletResourcePermission _commerceProductPortletResourcePermission;
-
-	@Reference
-	private CommerceProductPriceCalculation _commerceProductPriceCalculation;
 
 	@Reference
 	private CPDefinitionHelper _cpDefinitionHelper;

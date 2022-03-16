@@ -126,6 +126,7 @@ const TranslationAdminSelector = ({
 						<span className="inline-item">
 							<ClayIcon symbol={selectedLocale.symbol} />
 						</span>
+
 						<span className="btn-section">
 							{selectedLocale.label}
 						</span>
@@ -139,7 +140,7 @@ const TranslationAdminSelector = ({
 						const isDefaultLocale =
 							activeLocale.id === defaultLanguageId;
 
-						const localeValue = translations[label];
+						const localeValue = translations[activeLocale.id];
 
 						return (
 							<ClayDropDown.Item

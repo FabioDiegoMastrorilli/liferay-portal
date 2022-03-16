@@ -36,8 +36,6 @@ import com.liferay.portlet.display.template.PortletDisplayTemplate;
 import com.liferay.portlet.display.template.constants.PortletDisplayTemplateConstants;
 import com.liferay.template.model.TemplateEntry;
 
-import java.util.HashMap;
-import java.util.Locale;
 import java.util.Map;
 
 /**
@@ -46,13 +44,15 @@ import java.util.Map;
 public class TemplateDisplayTemplateTransformer {
 
 	public TemplateDisplayTemplateTransformer(
-		TemplateEntry templateEntry, InfoItemFieldValues infoItemFieldValues) {
+		TemplateEntry templateEntry, InfoItemFieldValues infoItemFieldValues,
+		TemplateNodeFactory templateNodeFactory) {
 
 		_templateEntry = templateEntry;
 		_infoItemFieldValues = infoItemFieldValues;
+		_templateNodeFactory = templateNodeFactory;
 	}
 
-	public String transform(Locale locale) throws Exception {
+	public String transform() throws Exception {
 		ServiceContext serviceContext =
 			ServiceContextThreadLocal.getServiceContext();
 
@@ -89,10 +89,8 @@ public class TemplateDisplayTemplateTransformer {
 				continue;
 			}
 
-			TemplateNode templateNode = new TemplateNode(
-				themeDisplay, infoField.getName(),
-				String.valueOf(infoFieldValue.getValue(locale)),
-				StringPool.BLANK, new HashMap<>());
+			TemplateNode templateNode = _templateNodeFactory.createTemplateNode(
+				infoFieldValue, themeDisplay);
 
 			contextObjects.put(infoField.getName(), templateNode);
 		}
@@ -114,6 +112,7 @@ public class TemplateDisplayTemplateTransformer {
 
 	private final InfoItemFieldValues _infoItemFieldValues;
 	private final TemplateEntry _templateEntry;
+	private final TemplateNodeFactory _templateNodeFactory;
 
 	private static class TransformerHolder {
 

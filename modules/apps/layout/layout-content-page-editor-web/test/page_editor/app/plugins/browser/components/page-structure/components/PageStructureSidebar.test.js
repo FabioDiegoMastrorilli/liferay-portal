@@ -29,7 +29,15 @@ import PageStructureSidebar from '../../../../../../../../src/main/resources/MET
 
 jest.mock(
 	'../../../../../../../../src/main/resources/META-INF/resources/page_editor/app/config',
-	() => ({config: {layoutType: 'content'}})
+	() => ({
+		config: {
+			availableViewportSizes: {
+				desktop: {label: 'Desktop'},
+			},
+			commonStyles: [],
+			layoutType: 'content',
+		},
+	})
 );
 
 const renderComponent = ({
@@ -40,9 +48,11 @@ const renderComponent = ({
 	rootItemChildren = ['01-container'],
 	viewportSize = VIEWPORT_SIZES.desktop,
 } = {}) => {
-	Liferay.Util.sub.mockImplementation((langKey, args) =>
-		[langKey, ...args].join('-')
-	);
+	Liferay.Util.sub.mockImplementation((langKey, args) => {
+		const nextArgs = Array.isArray(args) ? args : [args];
+
+		return [langKey, ...nextArgs].join('-');
+	});
 
 	return render(
 		<DndProvider backend={HTML5Backend}>
@@ -103,7 +113,9 @@ const renderComponent = ({
 								},
 								'02-row': {
 									children: ['03-column'],
-									config: {},
+									config: {
+										numberOfColumns: 1,
+									},
 									itemId: '02-row',
 									parentId: '01-container',
 									type: LAYOUT_DATA_ITEM_TYPES.row,

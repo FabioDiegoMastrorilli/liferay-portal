@@ -28,7 +28,7 @@ import com.liferay.dynamic.data.mapping.exception.StructureDuplicateStructureKey
 import com.liferay.dynamic.data.mapping.exception.StructureNameException;
 import com.liferay.dynamic.data.mapping.internal.background.task.DDMStructureIndexerTracker;
 import com.liferay.dynamic.data.mapping.internal.constants.DDMDestinationNames;
-import com.liferay.dynamic.data.mapping.internal.search.util.DDMSearchHelper;
+import com.liferay.dynamic.data.mapping.internal.search.helper.DDMSearchHelper;
 import com.liferay.dynamic.data.mapping.internal.util.DDMFormTemplateSynchonizer;
 import com.liferay.dynamic.data.mapping.io.DDMFormDeserializer;
 import com.liferay.dynamic.data.mapping.io.DDMFormDeserializerDeserializeRequest;
@@ -114,7 +114,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.Callable;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -429,7 +428,9 @@ public class DDMStructureLocalServiceImpl
 		// Resources
 
 		_resourceLocalService.copyModelResources(
-			structure.getCompanyId(), DDMStructure.class.getName(),
+			structure.getCompanyId(),
+			_ddmPermissionSupport.getStructureModelResourceName(
+				structure.getClassName()),
 			structure.getPrimaryKey(), newStructure.getPrimaryKey());
 
 		// Structure version
@@ -545,9 +546,7 @@ public class DDMStructureLocalServiceImpl
 						noSuchStructureLayoutException) {
 
 				if (_log.isDebugEnabled()) {
-					_log.debug(
-						noSuchStructureLayoutException,
-						noSuchStructureLayoutException);
+					_log.debug(noSuchStructureLayoutException);
 				}
 			}
 
@@ -1841,7 +1840,7 @@ public class DDMStructureLocalServiceImpl
 			}
 			catch (Exception exception) {
 				if (_log.isDebugEnabled()) {
-					_log.debug(exception, exception);
+					_log.debug(exception);
 				}
 			}
 		}
@@ -1958,27 +1957,22 @@ public class DDMStructureLocalServiceImpl
 		return ddmFormSerializerSerializeResponse.getContent();
 	}
 
-	protected void syncStructureTemplatesFields(final DDMStructure structure) {
+	protected void syncStructureTemplatesFields(DDMStructure structure) {
 		TransactionCommitCallbackUtil.registerCallback(
-			new Callable<Void>() {
+			() -> {
+				DDMFormTemplateSynchonizer ddmFormTemplateSynchonizer =
+					new DDMFormTemplateSynchonizer(
+						structure.getDDMForm(), _jsonDDMFormDeserializer,
+						_jsonDDMFormSerializer, _ddmTemplateLocalService);
 
-				@Override
-				public Void call() throws Exception {
-					DDMFormTemplateSynchonizer ddmFormTemplateSynchonizer =
-						new DDMFormTemplateSynchonizer(
-							structure.getDDMForm(), _jsonDDMFormDeserializer,
-							_jsonDDMFormSerializer, _ddmTemplateLocalService);
+				List<DDMTemplate> templates = getStructureTemplates(
+					structure, DDMTemplateConstants.TEMPLATE_TYPE_FORM);
 
-					List<DDMTemplate> templates = getStructureTemplates(
-						structure, DDMTemplateConstants.TEMPLATE_TYPE_FORM);
+				ddmFormTemplateSynchonizer.setDDMFormTemplates(templates);
 
-					ddmFormTemplateSynchonizer.setDDMFormTemplates(templates);
+				ddmFormTemplateSynchonizer.synchronize();
 
-					ddmFormTemplateSynchonizer.synchronize();
-
-					return null;
-				}
-
+				return null;
 			});
 	}
 
@@ -2170,7 +2164,7 @@ public class DDMStructureLocalServiceImpl
 				getAncestorSiteAndDepotGroupIds(groupId, true);
 		}
 		catch (PortalException portalException) {
-			_log.error(portalException, portalException);
+			_log.error(portalException);
 
 			return new long[0];
 		}

@@ -45,16 +45,6 @@ import org.osgi.service.component.annotations.Reference;
 public class AssetCategoryMainImageInfoItemFieldReader
 	implements InfoItemFieldReader<AssetCategory> {
 
-	/**
-	 *   @deprecated As of Cavanaugh (7.4.x), replaced by {@link
-	 *          #getInfoField()}
-	 */
-	@Deprecated
-	@Override
-	public InfoField getField() {
-		return getInfoField();
-	}
-
 	@Override
 	public InfoField getInfoField() {
 		return InfoField.builder(
@@ -94,7 +84,7 @@ public class AssetCategoryMainImageInfoItemFieldReader
 		}
 		catch (PortalException portalException) {
 			if (_log.isDebugEnabled()) {
-				_log.debug(portalException, portalException);
+				_log.debug(portalException);
 			}
 		}
 

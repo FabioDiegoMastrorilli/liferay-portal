@@ -154,6 +154,8 @@ public class AMImageEntryProcessor implements DLProcessor, ImageProcessor {
 
 		if (!adaptiveMediaOptional.isPresent()) {
 			_processAMImage(fileVersion);
+
+			return fileVersion.getSize();
 		}
 
 		return adaptiveMediaOptional.flatMap(
@@ -241,7 +243,7 @@ public class AMImageEntryProcessor implements DLProcessor, ImageProcessor {
 		}
 		catch (PortalException portalException) {
 			if (_log.isWarnEnabled()) {
-				_log.warn(portalException, portalException);
+				_log.warn(portalException);
 			}
 
 			return false;

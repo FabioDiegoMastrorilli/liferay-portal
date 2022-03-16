@@ -30,10 +30,12 @@ import com.liferay.info.list.renderer.DefaultInfoListRendererContext;
 import com.liferay.info.list.renderer.InfoListRenderer;
 import com.liferay.layout.display.page.LayoutDisplayPageProvider;
 import com.liferay.layout.display.page.constants.LayoutDisplayPageWebKeys;
+import com.liferay.layout.helper.CollectionPaginationHelper;
 import com.liferay.layout.responsive.ResponsiveLayoutStructureUtil;
 import com.liferay.layout.taglib.internal.display.context.RenderCollectionLayoutStructureItemDisplayContext;
 import com.liferay.layout.taglib.internal.display.context.RenderLayoutStructureDisplayContext;
 import com.liferay.layout.taglib.internal.servlet.ServletContextUtil;
+import com.liferay.layout.taglib.internal.util.FFLayoutTaglibConfigurationUtil;
 import com.liferay.layout.util.constants.LayoutStructureConstants;
 import com.liferay.layout.util.structure.CollectionStyledLayoutStructureItem;
 import com.liferay.layout.util.structure.ColumnLayoutStructureItem;
@@ -53,6 +55,7 @@ import com.liferay.portal.kernel.model.LayoutConstants;
 import com.liferay.portal.kernel.model.LayoutTemplate;
 import com.liferay.portal.kernel.model.LayoutTemplateConstants;
 import com.liferay.portal.kernel.model.LayoutTypePortlet;
+import com.liferay.portal.kernel.service.LayoutLocalServiceUtil;
 import com.liferay.portal.kernel.service.LayoutTemplateLocalServiceUtil;
 import com.liferay.portal.kernel.servlet.PipingServletResponse;
 import com.liferay.portal.kernel.template.StringTemplateResource;
@@ -64,7 +67,6 @@ import com.liferay.portal.util.PropsValues;
 import com.liferay.taglib.util.IncludeTag;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 
 import javax.servlet.http.HttpServletRequest;
@@ -76,10 +78,6 @@ import javax.servlet.jsp.PageContext;
  * @author Eudaldo Alonso
  */
 public class RenderLayoutStructureTag extends IncludeTag {
-
-	public Map<String, Object> getFieldValues() {
-		return _fieldValues;
-	}
 
 	public LayoutStructure getLayoutStructure() {
 		return _layoutStructure;
@@ -95,10 +93,6 @@ public class RenderLayoutStructureTag extends IncludeTag {
 
 	public boolean isShowPreview() {
 		return _showPreview;
-	}
-
-	public void setFieldValues(Map<String, Object> fieldValues) {
-		_fieldValues = fieldValues;
 	}
 
 	public void setLayoutStructure(LayoutStructure layoutStructure) {
@@ -128,7 +122,6 @@ public class RenderLayoutStructureTag extends IncludeTag {
 	protected void cleanUp() {
 		super.cleanUp();
 
-		_fieldValues = null;
 		_layoutStructure = null;
 		_mainItemId = null;
 		_mode = FragmentEntryLinkConstants.VIEW;
@@ -147,8 +140,8 @@ public class RenderLayoutStructureTag extends IncludeTag {
 		RenderLayoutStructureDisplayContext
 			renderLayoutStructureDisplayContext =
 				new RenderLayoutStructureDisplayContext(
-					getFieldValues(), getRequest(), getLayoutStructure(),
-					getMainItemId(), getMode(), isShowPreview());
+					getRequest(), getLayoutStructure(), getMainItemId(),
+					getMode(), isShowPreview());
 
 		_renderLayoutStructure(
 			renderLayoutStructureDisplayContext.getMainChildrenItemIds(),
@@ -162,6 +155,13 @@ public class RenderLayoutStructureTag extends IncludeTag {
 			RenderLayoutStructureDisplayContext
 				renderLayoutStructureDisplayContext)
 		throws Exception {
+
+		List<String> collectionStyledLayoutStructureItemIds =
+			renderLayoutStructureDisplayContext.
+				getCollectionStyledLayoutStructureItemIds();
+
+		collectionStyledLayoutStructureItemIds.add(
+			layoutStructureItem.getItemId());
 
 		JspWriter jspWriter = pageContext.getOut();
 
@@ -195,6 +195,9 @@ public class RenderLayoutStructureTag extends IncludeTag {
 
 		if (ListUtil.isEmpty(collection)) {
 			_renderEmptyState(jspWriter);
+
+			collectionStyledLayoutStructureItemIds.remove(
+				collectionStyledLayoutStructureItemIds.size() - 1);
 
 			return;
 		}
@@ -238,6 +241,14 @@ public class RenderLayoutStructureTag extends IncludeTag {
 				int numberOfRows =
 					renderCollectionLayoutStructureItemDisplayContext.
 						getNumberOfRows();
+
+				ContainerTag containerTag = new ContainerTag();
+
+				containerTag.setCssClass("overflow-hidden px-0");
+				containerTag.setFluid(true);
+				containerTag.setPageContext(pageContext);
+
+				containerTag.doStartTag();
 
 				for (int i = 0; i < numberOfRows; i++) {
 					RowTag rowTag = new RowTag();
@@ -284,7 +295,7 @@ public class RenderLayoutStructureTag extends IncludeTag {
 						colTag.doStartTag();
 
 						_renderLayoutStructure(
-							layoutStructureItem.getChildrenItemIds(),
+							layoutStructureItem.getChildrenItemIds(), index,
 							renderLayoutStructureDisplayContext);
 
 						colTag.doEndTag();
@@ -292,6 +303,8 @@ public class RenderLayoutStructureTag extends IncludeTag {
 
 					rowTag.doEndTag();
 				}
+
+				containerTag.doEndTag();
 			}
 			finally {
 				httpServletRequest.removeAttribute(
@@ -307,8 +320,7 @@ public class RenderLayoutStructureTag extends IncludeTag {
 
 		if (Objects.equals(
 				collectionStyledLayoutStructureItem.getPaginationType(),
-				RenderCollectionLayoutStructureItemDisplayContext.
-					PAGINATION_TYPE_NUMERIC)) {
+				CollectionPaginationHelper.PAGINATION_TYPE_NUMERIC)) {
 
 			PaginationBarTag paginationBarTag = new PaginationBarTag();
 
@@ -335,8 +347,7 @@ public class RenderLayoutStructureTag extends IncludeTag {
 
 		if (Objects.equals(
 				collectionStyledLayoutStructureItem.getPaginationType(),
-				RenderCollectionLayoutStructureItemDisplayContext.
-					PAGINATION_TYPE_SIMPLE)) {
+				CollectionPaginationHelper.PAGINATION_TYPE_SIMPLE)) {
 
 			jspWriter.write("<div class=\"d-flex flex-grow-1 h-100 ");
 			jspWriter.write("justify-content-center py-3\" ");
@@ -399,6 +410,9 @@ public class RenderLayoutStructureTag extends IncludeTag {
 		}
 
 		jspWriter.write("</div>");
+
+		collectionStyledLayoutStructureItemIds.remove(
+			collectionStyledLayoutStructureItemIds.size() - 1);
 	}
 
 	private void _renderColumnLayoutStructureItem(
@@ -467,7 +481,17 @@ public class RenderLayoutStructureTag extends IncludeTag {
 			jspWriter.write("\">");
 		}
 
-		jspWriter.write("<div class=\"");
+		String htmlTag = containerStyledLayoutStructureItem.getHtmlTag();
+
+		if (!FFLayoutTaglibConfigurationUtil.fragmentAdvancedOptionsEnabled() ||
+			Validator.isNull(htmlTag)) {
+
+			htmlTag = "div";
+		}
+
+		jspWriter.write(StringPool.LESS_THAN);
+		jspWriter.write(htmlTag);
+		jspWriter.write(" class=\"");
 		jspWriter.write(
 			renderLayoutStructureDisplayContext.getCssClass(
 				containerStyledLayoutStructureItem));
@@ -481,7 +505,9 @@ public class RenderLayoutStructureTag extends IncludeTag {
 			layoutStructureItem.getChildrenItemIds(),
 			renderLayoutStructureDisplayContext);
 
-		jspWriter.write("</div>");
+		jspWriter.write("</");
+		jspWriter.write(htmlTag);
+		jspWriter.write(StringPool.GREATER_THAN);
 
 		if (Validator.isNotNull(containerLinkHref)) {
 			jspWriter.write("</a>");
@@ -503,8 +529,9 @@ public class RenderLayoutStructureTag extends IncludeTag {
 		Layout layout = themeDisplay.getLayout();
 
 		if (Objects.equals(layout.getType(), LayoutConstants.TYPE_PORTLET)) {
-			LayoutTypePortlet layoutTypePortlet =
-				themeDisplay.getLayoutTypePortlet();
+			LayoutTypePortlet layoutTypePortlet = _updateLayoutTemplate(
+				layout, themeDisplay.getLayoutTypePortlet(),
+				themeDisplay.getThemeId());
 
 			String layoutTemplateId = layoutTypePortlet.getLayoutTemplateId();
 
@@ -560,12 +587,12 @@ public class RenderLayoutStructureTag extends IncludeTag {
 		jspWriter.write("</span></span></div>");
 		jspWriter.write("<div class=\"c-empty-state-text\">");
 		jspWriter.write(
-			LanguageUtil.get(getRequest(), "sorry-there-are-no-results-found"));
+			LanguageUtil.get(getRequest(), "sorry,-no-results-were-found"));
 		jspWriter.write("</div></div></div>");
 	}
 
 	private void _renderFragmentStyledLayoutStructureItem(
-			LayoutStructureItem layoutStructureItem,
+			int collectionElementIndex, LayoutStructureItem layoutStructureItem,
 			RenderLayoutStructureDisplayContext
 				renderLayoutStructureDisplayContext)
 		throws Exception {
@@ -600,7 +627,10 @@ public class RenderLayoutStructureTag extends IncludeTag {
 					renderLayoutStructureDisplayContext.
 						getDefaultFragmentRendererContext(
 							fragmentEntryLink,
-							fragmentStyledLayoutStructureItem.getItemId());
+							fragmentStyledLayoutStructureItem.getItemId(),
+							renderLayoutStructureDisplayContext.
+								getCollectionStyledLayoutStructureItemIds(),
+							collectionElementIndex);
 
 				jspWriter.write("<div class=\"");
 				jspWriter.write(
@@ -630,7 +660,7 @@ public class RenderLayoutStructureTag extends IncludeTag {
 	}
 
 	private void _renderLayoutStructure(
-			List<String> childrenItemIds,
+			List<String> childrenItemIds, int collectionElementIndex,
 			RenderLayoutStructureDisplayContext
 				renderLayoutStructureDisplayContext)
 		throws Exception {
@@ -665,7 +695,8 @@ public class RenderLayoutStructureTag extends IncludeTag {
 						FragmentStyledLayoutStructureItem) {
 
 				_renderFragmentStyledLayoutStructureItem(
-					layoutStructureItem, renderLayoutStructureDisplayContext);
+					collectionElementIndex, layoutStructureItem,
+					renderLayoutStructureDisplayContext);
 			}
 			else if (layoutStructureItem instanceof
 						RowStyledLayoutStructureItem) {
@@ -676,9 +707,20 @@ public class RenderLayoutStructureTag extends IncludeTag {
 			else {
 				_renderLayoutStructure(
 					layoutStructureItem.getChildrenItemIds(),
+					collectionElementIndex,
 					renderLayoutStructureDisplayContext);
 			}
 		}
+	}
+
+	private void _renderLayoutStructure(
+			List<String> childrenItemIds,
+			RenderLayoutStructureDisplayContext
+				renderLayoutStructureDisplayContext)
+		throws Exception {
+
+		_renderLayoutStructure(
+			childrenItemIds, -1, renderLayoutStructureDisplayContext);
 	}
 
 	private void _renderRowStyledLayoutStructureItem(
@@ -792,9 +834,36 @@ public class RenderLayoutStructureTag extends IncludeTag {
 		jspWriter.write("</div>");
 	}
 
+	private LayoutTypePortlet _updateLayoutTemplate(
+			Layout layout, LayoutTypePortlet layoutTypePortlet, String themeId)
+		throws Exception {
+
+		String layoutTemplateId = layoutTypePortlet.getLayoutTemplateId();
+
+		if (Validator.isNull(layoutTemplateId)) {
+			return layoutTypePortlet;
+		}
+
+		LayoutTemplate layoutTemplate =
+			LayoutTemplateLocalServiceUtil.getLayoutTemplate(
+				layoutTemplateId, false, themeId);
+
+		if (layoutTemplate != null) {
+			return layoutTypePortlet;
+		}
+
+		layoutTypePortlet.setLayoutTemplateId(
+			layout.getUserId(), PropsValues.DEFAULT_LAYOUT_TEMPLATE_ID);
+
+		layout = LayoutLocalServiceUtil.updateLayout(
+			layout.getGroupId(), layout.isPrivateLayout(), layout.getLayoutId(),
+			layout.getTypeSettings());
+
+		return (LayoutTypePortlet)layout.getLayoutType();
+	}
+
 	private static final String _PAGE = "/render_layout_structure/page.jsp";
 
-	private Map<String, Object> _fieldValues;
 	private LayoutStructure _layoutStructure;
 	private String _mainItemId;
 	private String _mode = FragmentEntryLinkConstants.VIEW;

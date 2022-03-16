@@ -16,6 +16,8 @@ package com.liferay.headless.delivery.internal.resource.v1_0;
 
 import com.liferay.headless.delivery.dto.v1_0.ContentTemplate;
 import com.liferay.headless.delivery.resource.v1_0.ContentTemplateResource;
+import com.liferay.petra.function.UnsafeBiConsumer;
+import com.liferay.petra.function.UnsafeConsumer;
 import com.liferay.petra.function.UnsafeFunction;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.model.GroupedModel;
@@ -212,7 +214,7 @@ public abstract class BaseContentTemplateResourceImpl
 	@javax.ws.rs.Path("/sites/{siteId}/content-templates/{contentTemplateId}")
 	@javax.ws.rs.Produces({"application/json", "application/xml"})
 	@Override
-	public ContentTemplate getContentTemplate(
+	public ContentTemplate getSiteContentTemplate(
 			@io.swagger.v3.oas.annotations.Parameter(hidden = true)
 			@javax.validation.constraints.NotNull
 			@javax.ws.rs.PathParam("siteId")
@@ -308,6 +310,15 @@ public abstract class BaseContentTemplateResourceImpl
 
 	public void setContextAcceptLanguage(AcceptLanguage contextAcceptLanguage) {
 		this.contextAcceptLanguage = contextAcceptLanguage;
+	}
+
+	public void setContextBatchUnsafeConsumer(
+		UnsafeBiConsumer
+			<java.util.Collection<ContentTemplate>,
+			 UnsafeConsumer<ContentTemplate, Exception>, Exception>
+				contextBatchUnsafeConsumer) {
+
+		this.contextBatchUnsafeConsumer = contextBatchUnsafeConsumer;
 	}
 
 	public void setContextCompany(
@@ -458,6 +469,10 @@ public abstract class BaseContentTemplateResourceImpl
 	}
 
 	protected AcceptLanguage contextAcceptLanguage;
+	protected UnsafeBiConsumer
+		<java.util.Collection<ContentTemplate>,
+		 UnsafeConsumer<ContentTemplate, Exception>, Exception>
+			contextBatchUnsafeConsumer;
 	protected com.liferay.portal.kernel.model.Company contextCompany;
 	protected HttpServletRequest contextHttpServletRequest;
 	protected HttpServletResponse contextHttpServletResponse;

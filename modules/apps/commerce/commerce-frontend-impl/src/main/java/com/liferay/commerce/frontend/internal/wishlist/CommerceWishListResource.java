@@ -151,13 +151,13 @@ public class CommerceWishListResource {
 		catch (Exception exception) {
 			wishListItemUpdated.setSuccess(false);
 
-			_log.error(exception, exception);
+			_log.error(exception);
 		}
 
-		return getResponse(wishListItemUpdated);
+		return _getResponse(wishListItemUpdated);
 	}
 
-	protected Response getResponse(Object object) {
+	private Response _getResponse(Object object) {
 		if (object == null) {
 			return Response.status(
 				Response.Status.NOT_FOUND
@@ -172,7 +172,7 @@ public class CommerceWishListResource {
 			).build();
 		}
 		catch (JsonProcessingException jsonProcessingException) {
-			_log.error(jsonProcessingException, jsonProcessingException);
+			_log.error(jsonProcessingException);
 		}
 
 		return Response.status(

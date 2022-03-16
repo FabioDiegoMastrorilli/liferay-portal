@@ -73,7 +73,9 @@ import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.model.Company;
 import com.liferay.portal.kernel.model.Group;
+import com.liferay.portal.kernel.model.Layout;
 import com.liferay.portal.kernel.model.ModelHintsUtil;
+import com.liferay.portal.kernel.model.PortletPreferences;
 import com.liferay.portal.kernel.model.ResourceConstants;
 import com.liferay.portal.kernel.model.SystemEventConstants;
 import com.liferay.portal.kernel.model.User;
@@ -97,6 +99,8 @@ import com.liferay.portal.kernel.security.permission.ActionKeys;
 import com.liferay.portal.kernel.service.ClassNameLocalService;
 import com.liferay.portal.kernel.service.CompanyLocalService;
 import com.liferay.portal.kernel.service.GroupLocalService;
+import com.liferay.portal.kernel.service.LayoutLocalService;
+import com.liferay.portal.kernel.service.PortletPreferencesLocalService;
 import com.liferay.portal.kernel.service.ResourceLocalService;
 import com.liferay.portal.kernel.service.ServiceContext;
 import com.liferay.portal.kernel.service.UserLocalService;
@@ -110,7 +114,7 @@ import com.liferay.portal.kernel.theme.ThemeDisplay;
 import com.liferay.portal.kernel.util.Constants;
 import com.liferay.portal.kernel.util.ContentTypes;
 import com.liferay.portal.kernel.util.EscapableLocalizableFunction;
-import com.liferay.portal.kernel.util.FriendlyURLNormalizerUtil;
+import com.liferay.portal.kernel.util.FriendlyURLNormalizer;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.HashMapBuilder;
 import com.liferay.portal.kernel.util.HtmlUtil;
@@ -121,6 +125,7 @@ import com.liferay.portal.kernel.util.ObjectValuePair;
 import com.liferay.portal.kernel.util.OrderByComparator;
 import com.liferay.portal.kernel.util.ParamUtil;
 import com.liferay.portal.kernel.util.Portal;
+import com.liferay.portal.kernel.util.PortletKeys;
 import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.SubscriptionSender;
 import com.liferay.portal.kernel.util.TempFileEntryUtil;
@@ -1942,8 +1947,8 @@ public class MBMessageLocalServiceImpl extends MBMessageLocalServiceBaseImpl {
 		String portletId = PortletProviderUtil.getPortletId(
 			MBMessage.class.getName(), PortletProvider.Action.VIEW);
 
-		String layoutURL = _portal.getLayoutFullURL(
-			message.getGroupId(), portletId);
+		String layoutURL = _getLayoutFullURL(
+			message, portletId, serviceContext);
 
 		if (Validator.isNotNull(layoutURL)) {
 			return StringBundler.concat(
@@ -2215,7 +2220,7 @@ public class MBMessageLocalServiceImpl extends MBMessageLocalServiceBaseImpl {
 				notifyDiscussionSubscribers(userId, message, serviceContext);
 			}
 			catch (Exception exception) {
-				_log.error(exception, exception);
+				_log.error(exception);
 			}
 
 			return;
@@ -2561,7 +2566,8 @@ public class MBMessageLocalServiceImpl extends MBMessageLocalServiceBaseImpl {
 		return _configurationProvider.getConfiguration(
 			CommentGroupServiceConfiguration.class,
 			new GroupServiceSettingsLocator(
-				groupId, CommentConstants.SERVICE_NAME));
+				groupId, CommentConstants.SERVICE_NAME,
+				CommentGroupServiceConfiguration.class.getName()));
 	}
 
 	private long _getFileEntryMessageId(long fileEntryId)
@@ -2599,6 +2605,48 @@ public class MBMessageLocalServiceImpl extends MBMessageLocalServiceBaseImpl {
 		}
 
 		return StringPool.BLANK;
+	}
+
+	private String _getLayoutFullURL(
+			MBMessage message, String portletId, ServiceContext serviceContext)
+		throws PortalException {
+
+		String layoutFullURL = StringPool.BLANK;
+
+		Layout layout = _layoutLocalService.fetchLayout(
+			_portal.getPlidFromPortletId(
+				message.getGroupId(), false, portletId));
+		ThemeDisplay themeDisplay = serviceContext.getThemeDisplay();
+
+		if ((layout != null) && (themeDisplay != null)) {
+			layoutFullURL = _portal.getLayoutFullURL(layout, themeDisplay);
+		}
+		else {
+			layoutFullURL = _portal.getLayoutFullURL(
+				message.getGroupId(), portletId);
+		}
+
+		if (Validator.isNotNull(layoutFullURL)) {
+			return layoutFullURL;
+		}
+
+		List<Layout> layouts = _layoutLocalService.getPublishedLayouts(
+			message.getGroupId(), QueryUtil.ALL_POS, QueryUtil.ALL_POS, null);
+
+		for (Layout curLayout : layouts) {
+			PortletPreferences portletPreferences =
+				_portletPreferencesLocalService.fetchPortletPreferences(
+					PortletKeys.PREFS_OWNER_ID_DEFAULT,
+					PortletKeys.PREFS_OWNER_TYPE_LAYOUT, curLayout.getPlid(),
+					portletId);
+
+			if (portletPreferences != null) {
+				return _portal.getLayoutFullURL(
+					curLayout, serviceContext.getThemeDisplay(), false);
+			}
+		}
+
+		return null;
 	}
 
 	private String _getLocalizedRootCategoryName(Group group, Locale locale) {
@@ -2639,7 +2687,7 @@ public class MBMessageLocalServiceImpl extends MBMessageLocalServiceBaseImpl {
 			subject = String.valueOf(id);
 		}
 		else {
-			subject = FriendlyURLNormalizerUtil.normalizeWithPeriodsAndSlashes(
+			subject = _friendlyURLNormalizer.normalizeWithPeriodsAndSlashes(
 				subject);
 		}
 
@@ -2865,10 +2913,16 @@ public class MBMessageLocalServiceImpl extends MBMessageLocalServiceBaseImpl {
 	private ExpandoRowLocalService _expandoRowLocalService;
 
 	@Reference
+	private FriendlyURLNormalizer _friendlyURLNormalizer;
+
+	@Reference
 	private GroupLocalService _groupLocalService;
 
 	@Reference
 	private Http _http;
+
+	@Reference
+	private LayoutLocalService _layoutLocalService;
 
 	@Reference
 	private LiferayJSONDeserializationWhitelist
@@ -2891,6 +2945,9 @@ public class MBMessageLocalServiceImpl extends MBMessageLocalServiceBaseImpl {
 
 	@Reference
 	private PortletFileRepository _portletFileRepository;
+
+	@Reference
+	private PortletPreferencesLocalService _portletPreferencesLocalService;
 
 	@Reference
 	private RatingsStatsLocalService _ratingsStatsLocalService;

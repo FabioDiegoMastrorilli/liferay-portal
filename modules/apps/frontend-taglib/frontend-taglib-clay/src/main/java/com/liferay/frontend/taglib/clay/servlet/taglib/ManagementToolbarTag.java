@@ -14,6 +14,7 @@
 
 package com.liferay.frontend.taglib.clay.servlet.taglib;
 
+import com.liferay.frontend.taglib.clay.internal.configuration.FFManagementToolbarConfigurationUtil;
 import com.liferay.frontend.taglib.clay.internal.servlet.taglib.BaseContainerTag;
 import com.liferay.frontend.taglib.clay.internal.servlet.taglib.display.context.ManagementToolbarDefaults;
 import com.liferay.frontend.taglib.clay.servlet.taglib.display.context.ManagementToolbarDisplayContext;
@@ -173,6 +174,7 @@ public class ManagementToolbarTag extends BaseContainerTag {
 		return _managementToolbarDisplayContext;
 	}
 
+	@Override
 	public String getNamespace() {
 		if (_namespace != null) {
 			return _namespace;
@@ -193,6 +195,16 @@ public class ManagementToolbarTag extends BaseContainerTag {
 		}
 
 		return _namespace;
+	}
+
+	public List<DropdownItem> getOrderDropdownItems() {
+		if ((_orderDropdownItems == null) &&
+			(_managementToolbarDisplayContext != null)) {
+
+			return _managementToolbarDisplayContext.getOrderDropdownItems();
+		}
+
+		return _orderDropdownItems;
 	}
 
 	public String getSearchActionURL() {
@@ -464,8 +476,13 @@ public class ManagementToolbarTag extends BaseContainerTag {
 		_managementToolbarDisplayContext = managementToolbarDisplayContext;
 	}
 
+	@Override
 	public void setNamespace(String namespace) {
 		_namespace = namespace;
+	}
+
+	public void setOrderDropdownItems(List<DropdownItem> orderDropdownItems) {
+		_orderDropdownItems = orderDropdownItems;
 	}
 
 	public void setSearchActionURL(String searchActionURL) {
@@ -585,6 +602,7 @@ public class ManagementToolbarTag extends BaseContainerTag {
 		_itemsTotal = null;
 		_managementToolbarDisplayContext = null;
 		_namespace = null;
+		_orderDropdownItems = null;
 		_searchActionURL = null;
 		_searchContainerId = null;
 		_searchFormMethod = null;
@@ -632,6 +650,7 @@ public class ManagementToolbarTag extends BaseContainerTag {
 		props.put("initialSelectAllButtonVisible", isShowSelectAllButton());
 		props.put("initialSelectedItems", getSelectedItems());
 		props.put("itemsTotal", getItemsTotal());
+		props.put("orderDropdownItems", getOrderDropdownItems());
 
 		String searchActionURL = getSearchActionURL();
 
@@ -655,6 +674,9 @@ public class ManagementToolbarTag extends BaseContainerTag {
 		props.put("selectAllURL", getSelectAllURL());
 		props.put("selectable", isSelectable());
 		props.put("showCreationMenu", isShowCreationMenu());
+		props.put(
+			"showDesignImprovementsFF",
+			FFManagementToolbarConfigurationUtil.showDesignImprovements());
 		props.put("showInfoButton", isShowInfoButton());
 		props.put("showResultsBar", isShowResultsBar());
 		props.put("showSearch", isShowSearch());
@@ -807,6 +829,11 @@ public class ManagementToolbarTag extends BaseContainerTag {
 		if (!active && (getFilterDropdownItems() != null)) {
 			jspWriter.write("<li class=\"nav-item\"><div class=\"dropdown\">");
 			jspWriter.write("<button class=\"btn btn-unstyled dropdown-toggle");
+
+			if (FFManagementToolbarConfigurationUtil.showDesignImprovements()) {
+				jspWriter.write(" ml-2 mr-2");
+			}
+
 			jspWriter.write(" nav-link\"");
 
 			if (disabled) {
@@ -815,9 +842,29 @@ public class ManagementToolbarTag extends BaseContainerTag {
 
 			jspWriter.write(" type=\"button\"><span class=\"");
 			jspWriter.write("navbar-breakpoint-down-d-none\"><span class=\"");
+
+			if (FFManagementToolbarConfigurationUtil.showDesignImprovements()) {
+				jspWriter.write("inline-item inline-item-before\">");
+
+				iconTag = new IconTag();
+
+				iconTag.setSymbol("filter");
+
+				iconTag.doTag(pageContext);
+
+				jspWriter.write("</span><span class=\"");
+			}
+
 			jspWriter.write("navbar-text-truncate\">");
-			jspWriter.write(
-				LanguageUtil.get(resourceBundle, "filter-and-order"));
+
+			if (FFManagementToolbarConfigurationUtil.showDesignImprovements()) {
+				jspWriter.write(LanguageUtil.get(resourceBundle, "filter"));
+			}
+			else {
+				jspWriter.write(
+					LanguageUtil.get(resourceBundle, "filter-and-order"));
+			}
+
 			jspWriter.write("</span>");
 
 			iconTag = new IconTag();
@@ -838,7 +885,68 @@ public class ManagementToolbarTag extends BaseContainerTag {
 			jspWriter.write("</span></button></div></li>");
 		}
 
-		if (getSortingURL() != null) {
+		List<DropdownItem> orderDropdownItems = getOrderDropdownItems();
+
+		if (FFManagementToolbarConfigurationUtil.showDesignImprovements() &&
+			!active && (orderDropdownItems != null) &&
+			(orderDropdownItems.size() > 1)) {
+
+			jspWriter.write("<li class=\"nav-item\"><div class=\"dropdown\">");
+			jspWriter.write("<button class=\"btn btn-unstyled dropdown-toggle");
+			jspWriter.write(" ml-2 mr-2 nav-link\"");
+
+			if (disabled) {
+				jspWriter.write(" disabled");
+			}
+
+			jspWriter.write(" type=\"button\"><span class=\"");
+			jspWriter.write("navbar-breakpoint-down-d-none\"><span class=\"");
+			jspWriter.write("inline-item inline-item-before\">");
+
+			iconTag = new IconTag();
+
+			String orderSymbol = "order-list-down";
+
+			if (getSortingOrder().equals("asc")) {
+				orderSymbol = "order-list-up";
+			}
+
+			iconTag.setSymbol(orderSymbol);
+
+			iconTag.doTag(pageContext);
+
+			jspWriter.write("</span><span class=\"navbar-text-truncate\">");
+			jspWriter.write(LanguageUtil.get(resourceBundle, "order"));
+			jspWriter.write("</span>");
+
+			iconTag = new IconTag();
+
+			iconTag.setCssClass("inline-item inline-item-after");
+			iconTag.setSymbol("caret-bottom");
+
+			iconTag.doTag(pageContext);
+
+			jspWriter.write("</span><span class=\"navbar-breakpoint-d-none\">");
+
+			iconTag = new IconTag();
+
+			iconTag.setSymbol(orderSymbol);
+
+			iconTag.doTag(pageContext);
+
+			jspWriter.write("</span></button></div></li>");
+		}
+
+		Boolean showOrderToggle =
+			((orderDropdownItems != null) &&
+			 (orderDropdownItems.size() == 1)) ||
+			ListUtil.isEmpty(orderDropdownItems);
+
+		if ((!FFManagementToolbarConfigurationUtil.showDesignImprovements() &&
+			 (getSortingURL() != null)) ||
+			(FFManagementToolbarConfigurationUtil.showDesignImprovements() &&
+			 (getSortingURL() != null) && showOrderToggle)) {
+
 			jspWriter.write("<li class=\"nav-item\">");
 
 			LinkTag linkTag = new LinkTag();
@@ -908,7 +1016,7 @@ public class ManagementToolbarTag extends BaseContainerTag {
 
 			if (searchActionURL != null) {
 				jspWriter.write(" action=\"");
-				jspWriter.write(searchActionURL);
+				jspWriter.write(HtmlUtil.escapeAttribute(searchActionURL));
 				jspWriter.write("\"");
 			}
 
@@ -1005,7 +1113,10 @@ public class ManagementToolbarTag extends BaseContainerTag {
 
 			jspWriter.write("</button></li>");
 
-			if (isShowInfoButton()) {
+			if (!FFManagementToolbarConfigurationUtil.
+					showDesignImprovements() &&
+				isShowInfoButton()) {
+
 				jspWriter.write("<li class=\"nav-item\"><button class=\"");
 				jspWriter.write(" nav-link nav-link-monospaced btn");
 				jspWriter.write(" btn-monospaced btn-unstyled\" type=\"button");
@@ -1023,8 +1134,14 @@ public class ManagementToolbarTag extends BaseContainerTag {
 			if (getViewTypeItems() != null) {
 				jspWriter.write("<li class=\"nav-item\"><div class=\"dropdown");
 				jspWriter.write("\"><button class=\"dropdown-toggle nav-link");
-				jspWriter.write(" nav-link-monospaced btn btn-monospaced");
-				jspWriter.write(" btn-unstyled\" type=\"button\">");
+
+				if (!FFManagementToolbarConfigurationUtil.
+						showDesignImprovements()) {
+
+					jspWriter.write(" nav-link-monospaced btn btn-monospaced");
+				}
+
+				jspWriter.write(" btn btn-unstyled\" type=\"button\">");
 
 				for (ViewTypeItem viewTypeItem : getViewTypeItems()) {
 					if ((Boolean)viewTypeItem.get("active")) {
@@ -1033,6 +1150,18 @@ public class ManagementToolbarTag extends BaseContainerTag {
 						iconTag.setSymbol((String)viewTypeItem.get("icon"));
 
 						iconTag.doTag(pageContext);
+
+						if (FFManagementToolbarConfigurationUtil.
+								showDesignImprovements()) {
+
+							iconTag = new IconTag();
+
+							iconTag.setCssClass(
+								"inline-item inline-item-after");
+							iconTag.setSymbol("caret-double-l");
+
+							iconTag.doTag(pageContext);
+						}
 
 						break;
 					}
@@ -1046,13 +1175,55 @@ public class ManagementToolbarTag extends BaseContainerTag {
 
 				LinkTag linkTag = new LinkTag();
 
-				linkTag.setCssClass(
-					"nav-btn nav-btn-monospaced btn btn-primary");
+				if (FFManagementToolbarConfigurationUtil.
+						showDesignImprovements()) {
+
+					linkTag.setCssClass(
+						"d-md-none nav-btn nav-btn-monospaced btn btn-primary");
+				}
+				else {
+					linkTag.setCssClass(
+						"nav-btn nav-btn-monospaced btn btn-primary");
+				}
+
 				linkTag.setIcon("plus");
 
 				linkTag.doTag(pageContext);
 
 				jspWriter.write("</li>");
+
+				if (FFManagementToolbarConfigurationUtil.
+						showDesignImprovements()) {
+
+					jspWriter.write("<li class=\"nav-item\">");
+
+					linkTag = new LinkTag();
+
+					linkTag.setCssClass(
+						"nav-btn d-md-flex d-none pl-4 pr-4 btn btn-primary");
+					linkTag.setLabel(LanguageUtil.get(resourceBundle, "new"));
+
+					linkTag.doTag(pageContext);
+
+					jspWriter.write("</li>");
+				}
+			}
+
+			if (FFManagementToolbarConfigurationUtil.showDesignImprovements() &&
+				isShowInfoButton()) {
+
+				jspWriter.write("<li class=\"nav-item\"><button class=\"");
+				jspWriter.write(" nav-link nav-link-monospaced btn");
+				jspWriter.write(" btn-monospaced btn-unstyled\" type=\"button");
+				jspWriter.write("\">");
+
+				iconTag = new IconTag();
+
+				iconTag.setSymbol("info-circle-open");
+
+				iconTag.doTag(pageContext);
+
+				jspWriter.write("</button></li>");
 			}
 
 			jspWriter.write("</ul>");
@@ -1102,7 +1273,7 @@ public class ManagementToolbarTag extends BaseContainerTag {
 			LinkTag linkTag = new LinkTag();
 
 			linkTag.setCssClass("component-link tbar-link");
-			linkTag.setHref(getClearResultsURL());
+			linkTag.setHref(HtmlUtil.escapeAttribute(getClearResultsURL()));
 			linkTag.setLabel(LanguageUtil.get(resourceBundle, "clear"));
 
 			linkTag.doTag(pageContext);
@@ -1207,6 +1378,7 @@ public class ManagementToolbarTag extends BaseContainerTag {
 	private Integer _itemsTotal;
 	private ManagementToolbarDisplayContext _managementToolbarDisplayContext;
 	private String _namespace;
+	private List<DropdownItem> _orderDropdownItems;
 	private String _searchActionURL;
 	private String _searchContainerId;
 	private String _searchFormMethod;

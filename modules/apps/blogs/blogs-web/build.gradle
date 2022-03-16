@@ -1,5 +1,5 @@
 dependencies {
-	compileOnly group: "biz.aQute.bnd", name: "biz.aQute.bnd.annotation", version: "4.2.0"
+	compileOnly group: "com.liferay", name: "biz.aQute.bnd.annotation", version: "4.2.0.LIFERAY-PATCHED-2"
 	compileOnly group: "com.liferay.portal", name: "com.liferay.portal.impl", version: "default"
 	compileOnly group: "com.liferay.portal", name: "com.liferay.portal.kernel", version: "default"
 	compileOnly group: "com.liferay.portal", name: "com.liferay.util.taglib", version: "default"
@@ -17,6 +17,7 @@ dependencies {
 	compileOnly project(":apps:blogs:blogs-api")
 	compileOnly project(":apps:blogs:blogs-item-selector-api")
 	compileOnly project(":apps:bulk:bulk-selection-api")
+	compileOnly project(":apps:change-tracking:change-tracking-spi")
 	compileOnly project(":apps:changeset:changeset-api")
 	compileOnly project(":apps:comment:comment-taglib")
 	compileOnly project(":apps:document-library:document-library-api")
@@ -28,6 +29,7 @@ dependencies {
 	compileOnly project(":apps:export-import:export-import-changeset-taglib")
 	compileOnly project(":apps:flags:flags-taglib")
 	compileOnly project(":apps:friendly-url:friendly-url-api")
+	compileOnly project(":apps:friendly-url:friendly-url-taglib")
 	compileOnly project(":apps:frontend-editor:frontend-editor-taglib")
 	compileOnly project(":apps:frontend-taglib:frontend-taglib")
 	compileOnly project(":apps:frontend-taglib:frontend-taglib-clay")

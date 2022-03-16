@@ -13,12 +13,7 @@
  */
 
 import '@testing-library/jest-dom/extend-expect';
-import {
-	cleanup,
-	fireEvent,
-	render,
-	waitForElement,
-} from '@testing-library/react';
+import {fireEvent, render} from '@testing-library/react';
 import React from 'react';
 import {act} from 'react-dom/test-utils';
 
@@ -63,13 +58,11 @@ function _renderFlagsComponent({
 }
 
 describe('Flags', () => {
-	afterEach(cleanup);
-
 	it('renders', () => {
 		const {getByRole, getByText} = _renderFlagsComponent();
 
-		expect(getByText('report'));
-		expect(getByRole('button'));
+		expect(getByText('report')).toBeTruthy();
+		expect(getByRole('button')).toBeTruthy();
 	});
 
 	it('renders with only icon visible (text visually hidden)', () => {
@@ -85,7 +78,7 @@ describe('Flags', () => {
 	});
 
 	it('submits a report successfully with baseData', async () => {
-		const {getByRole} = _renderFlagsComponent({
+		const {findByRole, getByRole} = _renderFlagsComponent({
 			baseData: {
 				testingField: 'testingValue',
 			},
@@ -95,7 +88,7 @@ describe('Flags', () => {
 		await act(async () => {
 			fireEvent.click(getByRole('button'));
 
-			const form = await waitForElement(() => getByRole('form'));
+			const form = await findByRole('form');
 
 			[...form.elements].forEach((element) => {
 				element.value = 'someValue';

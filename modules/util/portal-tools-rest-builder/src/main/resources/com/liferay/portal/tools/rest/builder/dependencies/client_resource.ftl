@@ -202,7 +202,7 @@ public interface ${schemaName}Resource {
 				HttpInvoker httpInvoker = HttpInvoker.newHttpInvoker();
 
 				<#if freeMarkerTool.hasHTTPMethod(javaMethodSignature, "delete", "patch", "post", "put")>
-					<#if freeMarkerTool.hasRequestBodyMediaType(javaMethodSignature, "multipart/form-data")>
+					<#if freeMarkerTool.hasRequestBodyMediaType(javaMethodSignature, "multipart/form-data") && freeMarkerTool.hasParameter(javaMethodSignature, "multipartBody")>
 						httpInvoker.multipart();
 
 						httpInvoker.part("${schemaVarName}", ${schemaName}SerDes.toJSON(${schemaVarName}));
@@ -260,7 +260,7 @@ public interface ${schemaName}Resource {
 
 				<#list javaMethodSignature.javaMethodParameters as javaMethodParameter>
 					<#if stringUtil.equals(javaMethodParameter.parameterType, "java.util.Date")>
-						DateFormat liferayToJSONDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
+						DateFormat liferayToJSONDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssXX");
 
 						<#break>
 					</#if>

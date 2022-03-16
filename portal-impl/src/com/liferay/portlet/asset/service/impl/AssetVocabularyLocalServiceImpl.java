@@ -65,7 +65,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Objects;
 
 /**
  * Provides the local service for accessing, adding, deleting, and updating
@@ -148,23 +147,6 @@ public class AssetVocabularyLocalServiceImpl
 				locale, StringPool.BLANK
 			).build(),
 			null, serviceContext);
-	}
-
-	/**
-	 * @deprecated As of Cavanaugh (7.4.x), replaced by {@link
-	 * #addVocabulary(String, long, long, String, String, Map, Map, String, int, ServiceContext)}
-	 */
-	@Deprecated
-	@Override
-	public AssetVocabulary addVocabulary(
-			long userId, long groupId, String name, String title,
-			Map<Locale, String> titleMap, Map<Locale, String> descriptionMap,
-			String settings, int visibilityType, ServiceContext serviceContext)
-		throws PortalException {
-
-		return assetVocabularyLocalService.addVocabulary(
-			null, userId, groupId, name, title, titleMap, descriptionMap,
-			settings, visibilityType, serviceContext);
 	}
 
 	@Override
@@ -555,7 +537,7 @@ public class AssetVocabularyLocalServiceImpl
 
 		name = _getVocabularyName(name);
 
-		if (!Objects.equals(vocabulary.getName(), name)) {
+		if (!StringUtil.equalsIgnoreCase(vocabulary.getName(), name)) {
 			validate(vocabulary.getGroupId(), name);
 		}
 

@@ -14,7 +14,6 @@
 
 package com.liferay.fragment.entry.processor.editable.internal.parser;
 
-import com.liferay.fragment.entry.processor.editable.EditableFragmentEntryProcessor;
 import com.liferay.fragment.entry.processor.editable.parser.EditableElementParser;
 import com.liferay.fragment.entry.processor.helper.FragmentEntryProcessorHelper;
 import com.liferay.fragment.exception.FragmentEntryContentException;
@@ -44,6 +43,8 @@ import java.util.Locale;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.ResourceBundle;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.jsoup.nodes.Element;
 
@@ -60,25 +61,13 @@ import org.osgi.service.component.annotations.Reference;
 public class ImageEditableElementParser implements EditableElementParser {
 
 	@Override
-	public String getFieldTemplate() {
-		return _TMPL_IMAGE_FIELD_TEMPLATE;
-	}
-
-	@Override
 	public JSONObject getFieldTemplateConfigJSONObject(
 		String fieldName, Locale locale, Object fieldValue) {
 
 		String alt = StringPool.BLANK;
 		Object fileEntryId = 0;
 
-		if (fieldValue == null) {
-			alt = StringUtil.replace(
-				_TMPL_IMAGE_FIELD_ALT_TEMPLATE, "field_name", fieldName);
-			fileEntryId = StringUtil.replace(
-				_TMPL_IMAGE_FIELD_FILE_ENTRY_ID_TEMPLATE, "field_name",
-				fieldName);
-		}
-		else if (fieldValue instanceof JSONObject) {
+		if (fieldValue instanceof JSONObject) {
 			JSONObject fieldValueJSONObject = (JSONObject)fieldValue;
 
 			alt = fieldValueJSONObject.getString("alt");
@@ -220,7 +209,9 @@ public class ImageEditableElementParser implements EditableElementParser {
 			}
 		}
 
-		if (Validator.isNotNull(value)) {
+		Matcher matcher = _pattern.matcher(replaceableElement.attr("src"));
+
+		if (Validator.isNotNull(value) && !matcher.matches()) {
 			replaceableElement.attr("src", _html.unescape(value));
 		}
 
@@ -305,25 +296,11 @@ public class ImageEditableElementParser implements EditableElementParser {
 		}
 	}
 
-	private static final String _TMPL_IMAGE_FIELD_ALT_TEMPLATE =
-		StringUtil.read(
-			EditableFragmentEntryProcessor.class,
-			"/META-INF/resources/fragment/entry/processor/editable" +
-				"/image_field_alt_template.tmpl");
-
-	private static final String _TMPL_IMAGE_FIELD_FILE_ENTRY_ID_TEMPLATE =
-		StringUtil.read(
-			EditableFragmentEntryProcessor.class,
-			"/META-INF/resources/fragment/entry/processor/editable" +
-				"/image_field_file_entry_id_template.tmpl");
-
-	private static final String _TMPL_IMAGE_FIELD_TEMPLATE = StringUtil.read(
-		EditableFragmentEntryProcessor.class,
-		"/META-INF/resources/fragment/entry/processor/editable" +
-			"/image_field_template.tmpl");
-
 	private static final Log _log = LogFactoryUtil.getLog(
 		ImageEditableElementParser.class);
+
+	private static final Pattern _pattern = Pattern.compile(
+		"\\[resources:(.+?)\\]");
 
 	@Reference
 	private FragmentEntryProcessorHelper _fragmentEntryProcessorHelper;

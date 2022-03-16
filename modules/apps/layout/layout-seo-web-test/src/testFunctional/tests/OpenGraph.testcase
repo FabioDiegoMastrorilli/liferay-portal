@@ -1,6 +1,7 @@
-@component-name = "portal-collaboration"
+@component-name = "portal-lima"
 definition {
 
+	property portal.acceptance = "true";
 	property portal.release = "true";
 	property portal.upstream = "true";
 	property testray.main.component.name = "SEO";
@@ -34,12 +35,13 @@ definition {
 		}
 	}
 
-	@description = "This ensures that the user can customize OG tags."
+	@description = "This ensures that the user can customize OG tags, also covers LPS-134658."
 	@priority = "5"
 	@refactordone
 	test CanCustomizeMetaTags {
 		var portalURL = PropsUtil.get("portal.url");
-		var siteID = JSONGroupSetter.setGroupId(groupName = "Test Site Name");
+
+		var siteId = JSONGroupSetter.setGroupId(groupName = "Test Site Name");
 
 		Navigator.openToGroupPagesPortlet(
 			groupName = "Test Site Name",
@@ -54,11 +56,19 @@ definition {
 			pageName = "Test Page Name",
 			uploadFileName = "Document_1.jpg");
 
+		Page.viewPreview(
+			description = "This is a custom description",
+			htmlTitle = "This is a custom title",
+			key_imageName = "Document_1.jpg",
+			openGraph = "true",
+			portalURL = "${portalURL}",
+			siteNameURL = "test-site-name");
+
 		Navigator.openSpecificURL(url = "${portalURL}/c/portal/logout");
 
 		Navigator.openSpecificURL(url = "${portalURL}/web/test-site-name/test-page-name");
 
-		OpenGraph.viewOpenGraphProperties(ogPropertyList = '''"og:title" content="This is a custom title","og:description" content="This is a custom description","og:image" content="${portalURL}/documents/${siteID}/0/Document_1.jpg''');
+		OpenGraph.viewOpenGraphProperties(ogPropertyList = '''"og:title" content="This is a custom title","og:description" content="This is a custom description","og:image" content="${portalURL}/documents/${siteId}/0/Document_1.jpg''');
 	}
 
 	@description = "This ensures that the user can customize OG tags with escape characters."
@@ -154,7 +164,8 @@ definition {
 	@refactordone
 	test CanEditMetaTagCustomizations {
 		var portalURL = PropsUtil.get("portal.url");
-		var siteID = JSONGroupSetter.setGroupId(groupName = "Test Site Name");
+
+		var siteId = JSONGroupSetter.setGroupId(groupName = "Test Site Name");
 
 		Navigator.openToGroupPagesPortlet(
 			groupName = "Test Site Name",
@@ -180,7 +191,7 @@ definition {
 
 		Navigator.openSpecificURL(url = "${portalURL}/web/test-site-name/test-page-name");
 
-		OpenGraph.viewOpenGraphProperties(ogPropertyList = '''"og:title" content="This is a custom title edit","og:description" content="This is a custom description edit","og:image" content="${portalURL}/documents/${siteID}/0/Document_2''');
+		OpenGraph.viewOpenGraphProperties(ogPropertyList = '''"og:title" content="This is a custom title edit","og:description" content="This is a custom description edit","og:image" content="${portalURL}/documents/${siteId}/0/Document_2''');
 	}
 
 	@description = "This test ensures that user can map the blogs with open graph meta tags for display pages."
@@ -366,19 +377,23 @@ definition {
 
 		DMNavigator.openDocumentsAndMediaAdmin(siteURLKey = "test-site-name");
 
-		var dmFileEntryID = JSONDocument.getFileEntryId(
+		var dmFileEntryId = JSONDocument.getFileEntryId(
 			dmDocumentTitle = "DM Document Title",
 			groupName = "Test Site Name");
+
 		var portalURL = PropsUtil.get("portal.url");
-		var siteID = JSONGroupAPI._getGroupIdByName(groupName = "Test Site Name", site = "true");
+
+		var siteId = JSONGroupAPI._getGroupIdByName(
+			groupName = "Test Site Name",
+			site = "true");
 
 		Navigator.openSpecificURL(url = "${portalURL}/c/portal/logout");
 
-		Navigator.openWithAppendToBaseURL(urlAppend = "web/test-site-name/d/${dmFileEntryID}");
+		Navigator.openWithAppendToBaseURL(urlAppend = "web/test-site-name/d/${dmFileEntryId}");
 
 		OpenGraph.viewOpenGraphProperties(ogPropertyList = '''"og:title" content="Title is File Name: Document_1.jpg","og:description" content="Description is MIME Type: image/jpeg"''');
 
-		OpenGraph.viewOpenGraphProperties(ogPropertyList = '''"og:image:alt" content="Image Alt is Author Name: Test Test","og:image" content="${portalURL}/documents/${siteID}/0/Document_1''');
+		OpenGraph.viewOpenGraphProperties(ogPropertyList = '''"og:image:alt" content="Image Alt is Author Name: Test Test","og:image" content="${portalURL}/documents/${siteId}/0/Document_1''');
 	}
 
 	@description = "This test ensures that image meta tags are displayed with the site image and alt description in the HTML when the image fields are not mapped in the display page."
@@ -440,13 +455,16 @@ definition {
 			siteURLKey = "test-site-name");
 
 		var portalURL = PropsUtil.get("portal.url");
-		var siteID = JSONGroupAPI._getGroupIdByName(groupName = "Test Site Name", site = "true");
+
+		var siteId = JSONGroupAPI._getGroupIdByName(
+			groupName = "Test Site Name",
+			site = "true");
 
 		Navigator.openSpecificURL(url = "${portalURL}/c/portal/logout");
 
 		Navigator.openWithAppendToBaseURL(urlAppend = "web/test-site-name/b/blogs-entry-title");
 
-		OpenGraph.viewOpenGraphProperties(ogPropertyList = '''"og:image:alt" content="This is image alternative description","og:image" content="${portalURL}/documents/${siteID}/0/Document_1''');
+		OpenGraph.viewOpenGraphProperties(ogPropertyList = '''"og:image:alt" content="This is image alternative description","og:image" content="${portalURL}/documents/${siteId}/0/Document_1''');
 	}
 
 	@description = "This test ensures that user can map the web content with open graph meta tags for display pages."
@@ -475,6 +493,20 @@ definition {
 
 		OpenGraph.viewDefaultMappedField(portlet = "Open Graph");
 
+		OpenGraph.mapEditableTextToField(
+			field = "Description",
+			mappedField = "Description",
+			mappedFieldName = "Description",
+			mappedFieldText = "Description is ",
+			textType = "TextArea");
+
+		Button.clickSave();
+
+		OpenGraph.viewMappedField(
+			mappedField = "Description",
+			mappedFieldValue = "Description is Description: ${description:Description}",
+			textType = "TextArea");
+
 		JSONWebcontent.addWebContent(
 			content = "Web Content Content",
 			description = "Web Content Description",
@@ -494,7 +526,7 @@ definition {
 
 		Navigator.openWithAppendToBaseURL(urlAppend = "web/test-site-name/w/web-content-title");
 
-		OpenGraph.viewOpenGraphProperties(ogPropertyList = '''"og:title" content="Web Content Title","og:description" content="Web Content Description"''');
+		OpenGraph.viewOpenGraphProperties(ogPropertyList = '''"og:title" content="Web Content Title","og:description" content="Description is Description: Web Content Description"''');
 	}
 
 	@description = "This ensures that the user can reset to the default OG title tag."
@@ -567,9 +599,9 @@ definition {
 	test CanViewNewPageWithMetaTags {
 		var portalURL = PropsUtil.get("portal.url");
 
-		SitePages.openPagesAdmin(siteURLKey = "test-site-name");
+		PagesAdmin.openPagesAdmin(siteURLKey = "test-site-name");
 
-		SitePages.addPublicPage(
+		PagesAdmin.addPublicPage(
 			customDescription = "This is a new description",
 			customTitle = "This is a new title",
 			openGraph = "true",

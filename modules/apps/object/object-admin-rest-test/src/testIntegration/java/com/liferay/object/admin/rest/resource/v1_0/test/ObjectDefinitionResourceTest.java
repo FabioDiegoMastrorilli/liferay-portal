@@ -42,6 +42,7 @@ public class ObjectDefinitionResourceTest
 	extends BaseObjectDefinitionResourceTestCase {
 
 	@After
+	@Override
 	public void tearDown() throws Exception {
 		super.tearDown();
 
@@ -54,9 +55,7 @@ public class ObjectDefinitionResourceTest
 						noSuchObjectDefinitionException) {
 
 				if (_log.isDebugEnabled()) {
-					_log.debug(
-						noSuchObjectDefinitionException,
-						noSuchObjectDefinitionException);
+					_log.debug(noSuchObjectDefinitionException);
 				}
 			}
 		}
@@ -133,13 +132,15 @@ public class ObjectDefinitionResourceTest
 			new ObjectField[] {
 				new ObjectField() {
 					{
+						setBusinessType(BusinessType.TEXT);
+						setDBType(ObjectField.DBType.create("String"));
 						setLabel(Collections.singletonMap("en_US", "Column"));
 						setName("column");
-						setType(ObjectField.Type.create("String"));
 					}
 				}
 			});
 		objectDefinition.setScope(ObjectDefinitionConstants.SCOPE_COMPANY);
+		objectDefinition.setTitleObjectFieldId(Long.valueOf(0));
 
 		return objectDefinition;
 	}

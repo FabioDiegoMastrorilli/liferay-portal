@@ -143,6 +143,7 @@ function Modal({
 					status={status}
 				>
 					{title && <ClayModal.Header>{title}</ClayModal.Header>}
+
 					<div
 						className="modal-body modal-body-iframe"
 						style={{
@@ -151,6 +152,7 @@ function Modal({
 						}}
 					>
 						<iframe src={url} title={title} />
+
 						{loading && (
 							<div className="loader-container">
 								<ClayLoadingIndicator />
@@ -165,7 +167,7 @@ function Modal({
 
 Modal.propTypes = {
 	closeOnSubmit: PropTypes.bool,
-	id: PropTypes.string.isRequired,
+	id: PropTypes.oneOfType([PropTypes.number, PropTypes.string]).isRequired,
 	onClose: PropTypes.func,
 	status: PropTypes.string,
 	title: PropTypes.string,

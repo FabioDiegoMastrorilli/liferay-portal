@@ -473,13 +473,6 @@ public interface WebKeys {
 
 	public static final String PORTAL_PREFERENCES = "PORTAL_PREFERENCES";
 
-	/**
-	 * @deprecated As of Athanasius (7.3.x), with no direct replacement
-	 */
-	@Deprecated
-	public static final String PORTAL_RESILIENCY_ACTION =
-		"PORTAL_RESILIENCY_ACTION";
-
 	public static final String PORTAL_SERVLET_URL_PATTERNS =
 		"PORTAL_SERVLET_URL_PATTERNS";
 
@@ -822,8 +815,5 @@ public interface WebKeys {
 	public static final String WORKFLOW_INSTANCE = "WORKFLOW_INSTANCE";
 
 	public static final String WORKFLOW_TASK = "WORKFLOW_TASK";
-
-	public static final String XUGGLER_INSTALL_STATUS =
-		"XUGGLER_INSTALL_STATUS";
 
 }

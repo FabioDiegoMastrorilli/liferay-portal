@@ -42,7 +42,6 @@ definition {
 	@priority = "3"
 	test OrderDynamicSegmentMembershipPreview {
 		var usernameList = "user1,user2,user3";
-
 		var emailList = "user1@liferay.com,user2@liferay.com,user3@liferay.com";
 
 		task ("Add 3 new users in DXP") {
@@ -84,7 +83,7 @@ definition {
 
 			ACSegments.createDynamicSegment();
 
-			ACSegments.nameSegment(segmentName = "Dynamic Segment Test");
+			ACUtils.setItemName(itemName = "Dynamic Segment Test");
 		}
 
 		task ("Add a criteria") {
@@ -102,7 +101,7 @@ definition {
 		task ("Edit the segment") {
 			ACNavigation.goToSegments();
 
-			ACSegments.editSegment(searchTerm = "Dynamic Segment Test");
+			ACSegments.editSegment(segmentName = "Dynamic Segment Test");
 		}
 
 		task ("View members in Preview mode and order by name descending") {
@@ -146,7 +145,7 @@ definition {
 
 			ACSegments.createDynamicSegment();
 
-			ACSegments.nameSegment(segmentName = "Dynamic Segment Test");
+			ACUtils.setItemName(itemName = "Dynamic Segment Test");
 
 			ACSegments.goToSidebarAttributes(criterion = "Individual Attributes");
 
@@ -235,7 +234,7 @@ definition {
 
 			ACSegments.createDynamicSegment();
 
-			ACSegments.nameSegment(segmentName = "Dynamic Segment Test");
+			ACUtils.setItemName(itemName = "Dynamic Segment Test");
 
 			ACSegments.goToSidebarAttributes(criterion = "Individual Attributes");
 
@@ -325,7 +324,7 @@ definition {
 
 			ACSegments.createDynamicSegment();
 
-			ACSegments.nameSegment(segmentName = "Dynamic Segment Test");
+			ACUtils.setItemName(itemName = "Dynamic Segment Test");
 
 			ACSegments.includeAnonymous();
 
@@ -385,9 +384,7 @@ definition {
 		// AC Refactor ticket: LRAC-8887
 
 		var userList = "user1,user2";
-
 		var emailList = "user1@liferay.com,user2@liferay.com";
-
 		var nameList = "user1 user1,user2 user2";
 
 		var propertyName = ACDXPSettings.connectDXPtoAnalyticsCloud(siteName = "Site Name");
@@ -431,7 +428,7 @@ definition {
 
 			ACSegments.createStaticSegment();
 
-			ACSegments.nameSegment(segmentName = "Static Segment Test");
+			ACUtils.setItemName(itemName = "Static Segment Test");
 
 			ACSegments.addStaticMultiMember(tableMember = "${nameList}");
 
@@ -450,7 +447,7 @@ definition {
 		task ("Go to Segment and remove a user") {
 			ACNavigation.goToSegments();
 
-			ACSegments.editSegment(searchTerm = "Static Segment Test");
+			ACSegments.editSegment(segmentName = "Static Segment Test");
 
 			ACSegments.removeStaticMember(tableMember = "user2 user2");
 

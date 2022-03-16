@@ -23,7 +23,7 @@ import com.liferay.dynamic.data.lists.model.DDLRecordVersion;
 import com.liferay.dynamic.data.lists.service.DDLRecordLocalServiceUtil;
 import com.liferay.dynamic.data.lists.util.comparator.DDLRecordCreateDateComparator;
 import com.liferay.dynamic.data.lists.util.comparator.DDLRecordModifiedDateComparator;
-import com.liferay.dynamic.data.lists.web.internal.display.context.util.DDLRequestHelper;
+import com.liferay.dynamic.data.lists.web.internal.display.context.helper.DDLRequestHelper;
 import com.liferay.dynamic.data.lists.web.internal.search.RecordSearch;
 import com.liferay.dynamic.data.lists.web.internal.security.permission.resource.DDLRecordSetPermission;
 import com.liferay.dynamic.data.mapping.exception.StorageException;
@@ -51,7 +51,7 @@ import com.liferay.portal.kernel.model.User;
 import com.liferay.portal.kernel.portlet.LiferayPortletRequest;
 import com.liferay.portal.kernel.portlet.LiferayPortletResponse;
 import com.liferay.portal.kernel.portlet.PortletURLUtil;
-import com.liferay.portal.kernel.search.BaseModelSearchResult;
+import com.liferay.portal.kernel.portlet.SearchOrderByUtil;
 import com.liferay.portal.kernel.search.Field;
 import com.liferay.portal.kernel.search.SearchContext;
 import com.liferay.portal.kernel.search.SearchContextFactory;
@@ -190,16 +190,10 @@ public class DDLViewRecordsDisplayContext {
 			List<DDMFormField> ddmFormFields = new ArrayList<>();
 
 			for (DDMFormField ddmFormField : ddmForm.getDDMFormFields()) {
-				addDDMFormField(ddmFormFields, ddmFormField);
+				_addDDMFormField(ddmFormFields, ddmFormField);
 			}
 
-			int totalColumns = _TOTAL_COLUMNS;
-
-			if (ddmFormFields.size() < totalColumns) {
-				totalColumns = ddmFormFields.size();
-			}
-
-			_ddmFormFields = ddmFormFields.subList(0, totalColumns);
+			_ddmFormFields = ddmFormFields;
 		}
 
 		return _ddmFormFields;
@@ -218,7 +212,7 @@ public class DDLViewRecordsDisplayContext {
 			new LinkedHashMap<>();
 
 		for (DDMFormFieldValue ddmFormFieldValue : ddmFormFieldValues) {
-			putDDMFormFieldValue(ddmFormFieldValuesMap, ddmFormFieldValue);
+			_putDDMFormFieldValue(ddmFormFieldValuesMap, ddmFormFieldValue);
 		}
 
 		return ddmFormFieldValuesMap;
@@ -264,13 +258,27 @@ public class DDLViewRecordsDisplayContext {
 	}
 
 	public String getOrderByCol() {
-		return ParamUtil.getString(
-			_liferayPortletRequest, "orderByCol", "modified-date");
+		if (Validator.isNotNull(_orderByCol)) {
+			return _orderByCol;
+		}
+
+		_orderByCol = SearchOrderByUtil.getOrderByCol(
+			_liferayPortletRequest, DDLPortletKeys.DYNAMIC_DATA_LISTS,
+			"view-records-order-by-col", "modified-date");
+
+		return _orderByCol;
 	}
 
 	public String getOrderByType() {
-		return ParamUtil.getString(
-			_liferayPortletRequest, "orderByType", "asc");
+		if (Validator.isNotNull(_orderByType)) {
+			return _orderByType;
+		}
+
+		_orderByType = SearchOrderByUtil.getOrderByType(
+			_liferayPortletRequest, DDLPortletKeys.DYNAMIC_DATA_LISTS,
+			"view-records-order-by-type", "asc");
+
+		return _orderByType;
 	}
 
 	public PortletURL getPortletURL() {
@@ -278,7 +286,7 @@ public class DDLViewRecordsDisplayContext {
 			PortletURLUtil.getCurrent(
 				_liferayPortletRequest, _liferayPortletResponse)
 		).setMVCPath(
-			getMVCPath()
+			_getMVCPath()
 		).setRedirect(
 			ParamUtil.getString(_liferayPortletRequest, "redirect")
 		).setKeywords(
@@ -369,16 +377,6 @@ public class DDLViewRecordsDisplayContext {
 		SearchContainer<DDLRecord> recordSearch = new RecordSearch(
 			_liferayPortletRequest, portletURL, headerNames);
 
-		if (!_user.isDefaultUser()) {
-			recordSearch.setRowChecker(
-				new EmptyOnClickRowChecker(_liferayPortletResponse));
-		}
-
-		recordSearch.setOrderByCol(getOrderByCol());
-		recordSearch.setOrderByComparator(
-			getDDLRecordOrderByComparator(getOrderByCol(), getOrderByType()));
-		recordSearch.setOrderByType(getOrderByType());
-
 		if (recordSearch.isSearch()) {
 			recordSearch.setEmptyResultsMessage(
 				LanguageUtil.format(
@@ -389,8 +387,42 @@ public class DDLViewRecordsDisplayContext {
 			recordSearch.setEmptyResultsMessage("there-are-no-records");
 		}
 
-		setDDLRecordSearchResults(recordSearch);
-		setDDLRecordSearchTotal(recordSearch);
+		recordSearch.setOrderByCol(getOrderByCol());
+		recordSearch.setOrderByComparator(
+			getDDLRecordOrderByComparator(getOrderByCol(), getOrderByType()));
+		recordSearch.setOrderByType(getOrderByType());
+
+		DisplayTerms displayTerms = recordSearch.getDisplayTerms();
+
+		int status = WorkflowConstants.STATUS_APPROVED;
+
+		if (isShowAddRecordButton()) {
+			status = WorkflowConstants.STATUS_ANY;
+		}
+
+		int ddlRecordStatus = status;
+
+		if (Validator.isNull(displayTerms.getKeywords())) {
+			recordSearch.setResultsAndTotal(
+				() -> DDLRecordLocalServiceUtil.getRecords(
+					_ddlRecordSet.getRecordSetId(), ddlRecordStatus,
+					recordSearch.getStart(), recordSearch.getEnd(),
+					recordSearch.getOrderByComparator()),
+				DDLRecordLocalServiceUtil.getRecordsCount(
+					_ddlRecordSet.getRecordSetId(), ddlRecordStatus));
+		}
+		else {
+			SearchContext searchContext = _getSearchContext(
+				recordSearch, ddlRecordStatus);
+
+			recordSearch.setResultsAndTotal(
+				DDLRecordLocalServiceUtil.searchDDLRecords(searchContext));
+		}
+
+		if (!_user.isDefaultUser()) {
+			recordSearch.setRowChecker(
+				new EmptyOnClickRowChecker(_liferayPortletResponse));
+		}
 
 		return recordSearch;
 	}
@@ -399,7 +431,7 @@ public class DDLViewRecordsDisplayContext {
 		return PortletURLBuilder.createRenderURL(
 			_liferayPortletResponse
 		).setMVCPath(
-			getMVCPath()
+			_getMVCPath()
 		).setRedirect(
 			PortalUtil.getCurrentURL(_liferayPortletRequest)
 		).setParameter(
@@ -487,22 +519,6 @@ public class DDLViewRecordsDisplayContext {
 		return !_user.isDefaultUser();
 	}
 
-	protected void addDDMFormField(
-		List<DDMFormField> ddmFormFields, DDMFormField ddmFormField) {
-
-		if (!isDDMFormFieldTransient(ddmFormField)) {
-			ddmFormFields.add(ddmFormField);
-
-			return;
-		}
-
-		for (DDMFormField nestedDDMFormField :
-				ddmFormField.getNestedDDMFormFields()) {
-
-			addDDMFormField(ddmFormFields, nestedDDMFormField);
-		}
-	}
-
 	protected List<DropdownItem> getFilterNavigationDropdownItems() {
 		return DropdownItemListBuilder.add(
 			dropdownItem -> {
@@ -518,14 +534,6 @@ public class DDLViewRecordsDisplayContext {
 
 	protected String getKeywords() {
 		return ParamUtil.getString(_liferayPortletRequest, "keywords");
-	}
-
-	protected String getMVCPath() {
-		if (isAdminPortlet()) {
-			return "/view_record_set.jsp";
-		}
-
-		return "/view_selected_record_set.jsp";
 	}
 
 	protected UnsafeConsumer<DropdownItem, Exception> getOrderByDropdownItem(
@@ -555,33 +563,8 @@ public class DDLViewRecordsDisplayContext {
 		return _ddlRequestHelper.getPortletName();
 	}
 
-	protected SearchContext getSearchContext(
-		SearchContainer<DDLRecord> recordSearch, int status) {
-
-		SearchContext searchContext = SearchContextFactory.getInstance(
-			_ddlRequestHelper.getRequest());
-
-		searchContext.setAttribute(Field.STATUS, status);
-		searchContext.setAttribute(
-			"recordSetId", _ddlRecordSet.getRecordSetId());
-		searchContext.setAttribute("recordSetScope", _ddlRecordSet.getScope());
-		searchContext.setEnd(recordSearch.getEnd());
-		searchContext.setKeywords(getKeywords());
-		searchContext.setStart(recordSearch.getStart());
-
-		return searchContext;
-	}
-
 	protected boolean hasResults() throws PortalException {
 		if (getTotalItems() > 0) {
-			return true;
-		}
-
-		return false;
-	}
-
-	protected boolean isDDMFormFieldTransient(DDMFormField ddmFormField) {
-		if (Validator.isNull(ddmFormField.getDataType())) {
 			return true;
 		}
 
@@ -608,7 +591,56 @@ public class DDLViewRecordsDisplayContext {
 		return showAddRecordButton;
 	}
 
-	protected void putDDMFormFieldValue(
+	private void _addDDMFormField(
+		List<DDMFormField> ddmFormFields, DDMFormField ddmFormField) {
+
+		if (!_isDDMFormFieldTransient(ddmFormField)) {
+			ddmFormFields.add(ddmFormField);
+
+			return;
+		}
+
+		for (DDMFormField nestedDDMFormField :
+				ddmFormField.getNestedDDMFormFields()) {
+
+			_addDDMFormField(ddmFormFields, nestedDDMFormField);
+		}
+	}
+
+	private String _getMVCPath() {
+		if (isAdminPortlet()) {
+			return "/view_record_set.jsp";
+		}
+
+		return "/view_selected_record_set.jsp";
+	}
+
+	private SearchContext _getSearchContext(
+		SearchContainer<DDLRecord> recordSearch, int status) {
+
+		SearchContext searchContext = SearchContextFactory.getInstance(
+			_ddlRequestHelper.getRequest());
+
+		searchContext.setAttribute(Field.STATUS, status);
+		searchContext.setAttribute(
+			"recordSetId", _ddlRecordSet.getRecordSetId());
+		searchContext.setAttribute("recordSetScope", _ddlRecordSet.getScope());
+		searchContext.setEnd(recordSearch.getEnd());
+		searchContext.setKeywords(getKeywords());
+		searchContext.setStart(recordSearch.getStart());
+
+		return searchContext;
+	}
+
+	private boolean _isDDMFormFieldTransient(DDMFormField ddmFormField) {
+		if (Validator.isNull(ddmFormField.getDataType())) {
+			return true;
+		}
+
+		return false;
+	}
+
+	private void _putDDMFormFieldValue(
 		Map<String, List<DDMFormFieldValue>> ddmFormFieldValuesMap,
 		DDMFormFieldValue ddmFormFieldValue) {
 
@@ -627,75 +659,10 @@ public class DDLViewRecordsDisplayContext {
 		for (DDMFormFieldValue nestedDDMFormFieldValue :
 				ddmFormFieldValue.getNestedDDMFormFieldValues()) {
 
-			putDDMFormFieldValue(
+			_putDDMFormFieldValue(
 				ddmFormFieldValuesMap, nestedDDMFormFieldValue);
 		}
 	}
-
-	protected void setDDLRecordSearchResults(
-			SearchContainer<DDLRecord> recordSearch)
-		throws PortalException {
-
-		List<DDLRecord> results = null;
-
-		DisplayTerms displayTerms = recordSearch.getDisplayTerms();
-
-		int status = WorkflowConstants.STATUS_APPROVED;
-
-		if (isShowAddRecordButton()) {
-			status = WorkflowConstants.STATUS_ANY;
-		}
-
-		if (Validator.isNull(displayTerms.getKeywords())) {
-			results = DDLRecordLocalServiceUtil.getRecords(
-				_ddlRecordSet.getRecordSetId(), status, recordSearch.getStart(),
-				recordSearch.getEnd(), recordSearch.getOrderByComparator());
-		}
-		else {
-			SearchContext searchContext = getSearchContext(
-				recordSearch, status);
-
-			BaseModelSearchResult<DDLRecord> baseModelSearchResult =
-				DDLRecordLocalServiceUtil.searchDDLRecords(searchContext);
-
-			results = baseModelSearchResult.getBaseModels();
-		}
-
-		recordSearch.setResults(results);
-	}
-
-	protected void setDDLRecordSearchTotal(
-			SearchContainer<DDLRecord> recordSearch)
-		throws PortalException {
-
-		int total;
-
-		DisplayTerms displayTerms = recordSearch.getDisplayTerms();
-
-		int status = WorkflowConstants.STATUS_APPROVED;
-
-		if (isShowAddRecordButton()) {
-			status = WorkflowConstants.STATUS_ANY;
-		}
-
-		if (Validator.isNull(displayTerms.getKeywords())) {
-			total = DDLRecordLocalServiceUtil.getRecordsCount(
-				_ddlRecordSet.getRecordSetId(), status);
-		}
-		else {
-			SearchContext searchContext = getSearchContext(
-				recordSearch, status);
-
-			BaseModelSearchResult<DDLRecord> baseModelSearchResult =
-				DDLRecordLocalServiceUtil.searchDDLRecords(searchContext);
-
-			total = baseModelSearchResult.getLength();
-		}
-
-		recordSearch.setTotal(total);
-	}
-
-	private static final int _TOTAL_COLUMNS = 5;
 
 	private final DDLRecordSet _ddlRecordSet;
 	private final DDLRequestHelper _ddlRequestHelper;
@@ -704,6 +671,8 @@ public class DDLViewRecordsDisplayContext {
 	private final long _formDDMTemplateId;
 	private final LiferayPortletRequest _liferayPortletRequest;
 	private final LiferayPortletResponse _liferayPortletResponse;
+	private String _orderByCol;
+	private String _orderByType;
 	private final User _user;
 
 }

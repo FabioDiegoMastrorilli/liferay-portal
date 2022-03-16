@@ -32,9 +32,12 @@ import com.liferay.item.selector.criteria.URLItemSelectorReturnType;
 import com.liferay.item.selector.criteria.UUIDItemSelectorReturnType;
 import com.liferay.item.selector.criteria.group.criterion.GroupItemSelectorCriterion;
 import com.liferay.petra.portlet.url.builder.PortletURLBuilder;
+import com.liferay.petra.portlet.url.builder.ResourceURLBuilder;
+import com.liferay.petra.reflect.GenericUtil;
 import com.liferay.petra.string.StringBundler;
 import com.liferay.portal.kernel.dao.search.SearchContainer;
 import com.liferay.portal.kernel.exception.PortalException;
+import com.liferay.portal.kernel.json.JSONUtil;
 import com.liferay.portal.kernel.module.configuration.ConfigurationProviderUtil;
 import com.liferay.portal.kernel.portlet.LiferayPortletRequest;
 import com.liferay.portal.kernel.portlet.LiferayPortletResponse;
@@ -56,6 +59,7 @@ import com.liferay.users.admin.item.selector.UserItemSelectorCriterion;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
@@ -221,7 +225,7 @@ public class ContentDashboardAdminDisplayContext {
 					"selectedContentDashboardItemSubtype",
 				contentDashboardItemSubtypeItemSelectorCriterion)
 		).setParameter(
-			"checkedContentDashboardItemSubtypes",
+			"checkedContentDashboardItemSubtypesPayload",
 			() -> {
 				List<? extends ContentDashboardItemSubtype>
 					contentDashboardItemSubtypes =
@@ -235,7 +239,16 @@ public class ContentDashboardAdminDisplayContext {
 						InfoItemReference infoItemReference =
 							contentDashboardItemSubtype.getInfoItemReference();
 
-						return String.valueOf(infoItemReference.getClassPK());
+						Class<?> genericClass = GenericUtil.getGenericClass(
+							contentDashboardItemSubtype);
+
+						return JSONUtil.put(
+							"className", infoItemReference.getClassName()
+						).put(
+							"classPK", infoItemReference.getClassPK()
+						).put(
+							"entryClassName", genericClass.getName()
+						).toString();
 					}
 				).toArray(
 					String[]::new
@@ -430,6 +443,21 @@ public class ContentDashboardAdminDisplayContext {
 		_userId = _portal.getUserId(_liferayPortletRequest);
 
 		return _userId;
+	}
+
+	public HashMap<String, Object> getXlsProps() {
+		return HashMapBuilder.<String, Object>put(
+			"fileURL",
+			() -> ResourceURLBuilder.createResourceURL(
+				_liferayPortletResponse
+			).setBackURL(
+				_portal.getCurrentURL(_liferayPortletRequest)
+			).setResourceID(
+				"/content_dashboard/get_content_dashboard_items_xls"
+			).buildString()
+		).put(
+			"total", _searchContainer.getTotal()
+		).build();
 	}
 
 	public boolean isSwapConfigurationEnabled() {

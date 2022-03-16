@@ -10,7 +10,7 @@ definition {
 	}
 
 	tearDown {
-		Page.tearDownCP();
+		PagesAdmin.tearDownCP();
 	}
 
 	@description = "This test asserts that apps in App Management do not display in non default instances"
@@ -197,6 +197,7 @@ definition {
 	@description = "This ensures that the Blogs app in the app manager can be deactivated and reactivated."
 	@priority = "5"
 	test CanDeactivateAndActivateBlogs {
+		property portal.acceptance = "true";
 		property test.name.skip.portal.instance = "AppManagement#CanDeactivateAndActivateBlogs";
 		property testray.main.component.name = "Blogs";
 
@@ -261,6 +262,7 @@ definition {
 	@description = "This ensures that the Document Library Opener app in the app manager can be deactivated and reactivated."
 	@priority = "5"
 	test CanDeactivateAndActivateDocumentLibraryOpener {
+		property portal.acceptance = "true";
 		property test.name.skip.portal.instance = "AppManagement#CanDeactivateAndActivateDocumentLibraryOpener";
 		property testray.main.component.name = "Document Management";
 
@@ -325,6 +327,7 @@ definition {
 	@description = "This ensures that the Message Boards app in the app manager can be deactivated and reactivated."
 	@priority = "5"
 	test CanDeactivateAndActivateMessageBoards {
+		property portal.acceptance = "true";
 		property test.name.skip.portal.instance = "AppManagement#CanDeactivateAndActivateMessageBoards";
 		property testray.main.component.name = "Message Boards";
 
@@ -357,6 +360,7 @@ definition {
 	@description = "This ensures that the Notifications app in the app manager can be deactivated and reactivated."
 	@priority = "5"
 	test CanDeactivateAndActivateNotifications {
+		property portal.acceptance = "true";
 		property test.name.skip.portal.instance = "AppManagement#CanDeactivateAndActivateNotifications";
 		property testray.main.component.name = "Notifications";
 
@@ -421,6 +425,7 @@ definition {
 	@description = "This ensures that the Ratings app in the app manager can be deactivated and reactivated."
 	@priority = "5"
 	test CanDeactivateAndActivateRatings {
+		property portal.acceptance = "true";
 		property test.name.skip.portal.instance = "AppManagement#CanDeactivateAndActivateRatings";
 		property testray.main.component.name = "Ratings";
 
@@ -517,6 +522,7 @@ definition {
 	@description = "This ensures that the Wiki app in the app manager can be deactivated and reactivated."
 	@priority = "5"
 	test CanDeactivateAndActivateWiki {
+		property portal.acceptance = "true";
 		property test.name.skip.portal.instance = "AppManagement#CanDeactivateAndActivateWiki";
 		property testray.main.component.name = "Wiki";
 
@@ -584,9 +590,7 @@ definition {
 
 		AssertElementPresent(locator1 = "TextInput#FILE");
 
-		UploadFileWithCustomPath.uploadArchiveFile(
-			fileName = "title.zip",
-			filePath = "enduser/wem/fragment");
+		UploadDependencyFile.uploadArchiveFile(fileName = "title.zip");
 
 		Button.clickInstall();
 

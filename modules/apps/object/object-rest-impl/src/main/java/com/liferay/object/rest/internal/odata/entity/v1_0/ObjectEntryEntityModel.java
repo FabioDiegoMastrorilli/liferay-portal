@@ -14,7 +14,10 @@
 
 package com.liferay.object.rest.internal.odata.entity.v1_0;
 
+import com.liferay.object.constants.ObjectFieldConstants;
 import com.liferay.object.model.ObjectField;
+import com.liferay.object.rest.internal.configuration.activator.FFSearchAndSortMetadataColumnsConfigurationActivator;
+import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.search.Field;
 import com.liferay.portal.kernel.util.HashMapBuilder;
 import com.liferay.portal.odata.entity.BooleanEntityField;
@@ -38,8 +41,14 @@ import java.util.Optional;
  */
 public class ObjectEntryEntityModel implements EntityModel {
 
-	public ObjectEntryEntityModel(List<ObjectField> objectFields) {
+	public ObjectEntryEntityModel(
+		FFSearchAndSortMetadataColumnsConfigurationActivator
+			ffSearchAndSortMetadataColumnsConfigurationActivator,
+		List<ObjectField> objectFields) {
+
 		_entityFieldsMap = HashMapBuilder.<String, EntityField>put(
+			"creator", new StringEntityField("creator", locale -> "creator")
+		).put(
 			"creatorId",
 			new IntegerEntityField("creatorId", locale -> Field.USER_ID)
 		).put(
@@ -72,13 +81,44 @@ public class ObjectEntryEntityModel implements EntityModel {
 			"userId", new IntegerEntityField("userId", locale -> Field.USER_ID)
 		).build();
 
+		if (ffSearchAndSortMetadataColumnsConfigurationActivator.enabled()) {
+			_entityFieldsMap.put(
+				"creator",
+				new StringEntityField(
+					"creator",
+					locale -> Field.getSortableFieldName(Field.USER_NAME)));
+			_entityFieldsMap.put(
+				"id",
+				new IdEntityField(
+					"id",
+					locale -> Field.getSortableFieldName(Field.ENTRY_CLASS_PK),
+					String::valueOf));
+		}
+
 		for (ObjectField objectField : objectFields) {
-			_getEntityField(
-				objectField
-			).ifPresent(
-				entityField -> _entityFieldsMap.put(
-					objectField.getName(), entityField)
-			);
+			if (Objects.equals(
+					objectField.getRelationshipType(), "oneToMany")) {
+
+				String objectFieldName = objectField.getName();
+
+				String relationshipIdName = objectFieldName.substring(
+					objectFieldName.lastIndexOf(StringPool.UNDERLINE) + 1);
+
+				_entityFieldsMap.put(
+					relationshipIdName,
+					new IntegerEntityField(
+						relationshipIdName,
+						locale ->
+							"nestedFieldArray.value_long#" + objectFieldName));
+			}
+			else {
+				_getEntityField(
+					objectField
+				).ifPresent(
+					entityField -> _entityFieldsMap.put(
+						objectField.getName(), entityField)
+				);
+			}
 		}
 	}
 
@@ -96,16 +136,29 @@ public class ObjectEntryEntityModel implements EntityModel {
 						"nestedFieldArray.value_keyword#" +
 							objectField.getName()));
 		}
-		else if (Objects.equals(objectField.getType(), "Boolean")) {
+		else if (Objects.equals(
+					objectField.getBusinessType(),
+					ObjectFieldConstants.BUSINESS_TYPE_ATTACHMENT) ||
+				 Objects.equals(
+					 objectField.getDBType(),
+					 ObjectFieldConstants.DB_TYPE_CLOB) ||
+				 Objects.equals(
+					 objectField.getDBType(),
+					 ObjectFieldConstants.DB_TYPE_STRING)) {
+
 			return Optional.of(
-				new BooleanEntityField(
+				new StringEntityField(
 					objectField.getName(),
 					locale ->
-						"nestedFieldArray.value_boolean#" +
+						"nestedFieldArray.value_keyword_lowercase#" +
 							objectField.getName()));
 		}
-		else if (Objects.equals(objectField.getType(), "BigDecimal") ||
-				 Objects.equals(objectField.getType(), "Double")) {
+		else if (Objects.equals(
+					objectField.getDBType(),
+					ObjectFieldConstants.DB_TYPE_BIG_DECIMAL) ||
+				 Objects.equals(
+					 objectField.getDBType(),
+					 ObjectFieldConstants.DB_TYPE_DOUBLE)) {
 
 			return Optional.of(
 				new DoubleEntityField(
@@ -114,7 +167,21 @@ public class ObjectEntryEntityModel implements EntityModel {
 						"nestedFieldArray.value_double#" +
 							objectField.getName()));
 		}
-		else if (Objects.equals(objectField.getType(), "Date")) {
+		else if (Objects.equals(
+					objectField.getDBType(),
+					ObjectFieldConstants.DB_TYPE_BOOLEAN)) {
+
+			return Optional.of(
+				new BooleanEntityField(
+					objectField.getName(),
+					locale ->
+						"nestedFieldArray.value_boolean#" +
+							objectField.getName()));
+		}
+		else if (Objects.equals(
+					objectField.getDBType(),
+					ObjectFieldConstants.DB_TYPE_DATE)) {
+
 			return Optional.of(
 				new DateEntityField(
 					objectField.getName(),
@@ -124,7 +191,10 @@ public class ObjectEntryEntityModel implements EntityModel {
 						"nestedFieldArray.value_date#" +
 							objectField.getName()));
 		}
-		else if (Objects.equals(objectField.getType(), "Integer")) {
+		else if (Objects.equals(
+					objectField.getDBType(),
+					ObjectFieldConstants.DB_TYPE_INTEGER)) {
+
 			return Optional.of(
 				new IntegerEntityField(
 					objectField.getName(),
@@ -132,20 +202,15 @@ public class ObjectEntryEntityModel implements EntityModel {
 						"nestedFieldArray.value_integer#" +
 							objectField.getName()));
 		}
-		else if (Objects.equals(objectField.getType(), "Long")) {
+		else if (Objects.equals(
+					objectField.getDBType(),
+					ObjectFieldConstants.DB_TYPE_LONG)) {
+
 			return Optional.of(
 				new IntegerEntityField(
 					objectField.getName(),
 					locale ->
 						"nestedFieldArray.value_long#" +
-							objectField.getName()));
-		}
-		else if (Objects.equals(objectField.getType(), "String")) {
-			return Optional.of(
-				new StringEntityField(
-					objectField.getName(),
-					locale ->
-						"nestedFieldArray.value_keyword_lowercase#" +
 							objectField.getName()));
 		}
 

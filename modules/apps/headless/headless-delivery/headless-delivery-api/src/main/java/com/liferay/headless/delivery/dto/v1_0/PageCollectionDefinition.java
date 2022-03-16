@@ -22,6 +22,7 @@ import com.fasterxml.jackson.annotation.JsonValue;
 
 import com.liferay.petra.function.UnsafeSupplier;
 import com.liferay.petra.string.StringBundler;
+import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.vulcan.graphql.annotation.GraphQLField;
 import com.liferay.portal.vulcan.graphql.annotation.GraphQLName;
 import com.liferay.portal.vulcan.util.ObjectMapperUtil;
@@ -92,6 +93,70 @@ public class PageCollectionDefinition implements Serializable {
 	@GraphQLField
 	@JsonProperty(access = JsonProperty.Access.READ_WRITE)
 	protected CollectionConfig collectionConfig;
+
+	@Schema(
+		description = "Whether to show all items when pagination is disabled."
+	)
+	public Boolean getDisplayAllItems() {
+		return displayAllItems;
+	}
+
+	public void setDisplayAllItems(Boolean displayAllItems) {
+		this.displayAllItems = displayAllItems;
+	}
+
+	@JsonIgnore
+	public void setDisplayAllItems(
+		UnsafeSupplier<Boolean, Exception> displayAllItemsUnsafeSupplier) {
+
+		try {
+			displayAllItems = displayAllItemsUnsafeSupplier.get();
+		}
+		catch (RuntimeException re) {
+			throw re;
+		}
+		catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	@GraphQLField(
+		description = "Whether to show all items when pagination is disabled."
+	)
+	@JsonProperty(access = JsonProperty.Access.READ_WRITE)
+	protected Boolean displayAllItems;
+
+	@Schema(
+		description = "Whether to show all pages when pagination is enabled."
+	)
+	public Boolean getDisplayAllPages() {
+		return displayAllPages;
+	}
+
+	public void setDisplayAllPages(Boolean displayAllPages) {
+		this.displayAllPages = displayAllPages;
+	}
+
+	@JsonIgnore
+	public void setDisplayAllPages(
+		UnsafeSupplier<Boolean, Exception> displayAllPagesUnsafeSupplier) {
+
+		try {
+			displayAllPages = displayAllPagesUnsafeSupplier.get();
+		}
+		catch (RuntimeException re) {
+			throw re;
+		}
+		catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	@GraphQLField(
+		description = "Whether to show all pages when pagination is enabled."
+	)
+	@JsonProperty(access = JsonProperty.Access.READ_WRITE)
+	protected Boolean displayAllPages;
 
 	@Schema(description = "The fragment style of the page collection.")
 	@Valid
@@ -302,6 +367,38 @@ public class PageCollectionDefinition implements Serializable {
 	@JsonProperty(access = JsonProperty.Access.READ_WRITE)
 	protected Integer numberOfItemsPerPage;
 
+	@Schema(
+		description = "The maximum number of pages to show when pagination is enabled."
+	)
+	public Integer getNumberOfPages() {
+		return numberOfPages;
+	}
+
+	public void setNumberOfPages(Integer numberOfPages) {
+		this.numberOfPages = numberOfPages;
+	}
+
+	@JsonIgnore
+	public void setNumberOfPages(
+		UnsafeSupplier<Integer, Exception> numberOfPagesUnsafeSupplier) {
+
+		try {
+			numberOfPages = numberOfPagesUnsafeSupplier.get();
+		}
+		catch (RuntimeException re) {
+			throw re;
+		}
+		catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	@GraphQLField(
+		description = "The maximum number of pages to show when pagination is enabled."
+	)
+	@JsonProperty(access = JsonProperty.Access.READ_WRITE)
+	protected Integer numberOfPages;
+
 	@Schema(description = "The type of pagination.")
 	@Valid
 	public PaginationType getPaginationType() {
@@ -340,6 +437,38 @@ public class PageCollectionDefinition implements Serializable {
 	@GraphQLField(description = "The type of pagination.")
 	@JsonProperty(access = JsonProperty.Access.READ_WRITE)
 	protected PaginationType paginationType;
+
+	@Schema(
+		description = "Whether to show all items when pagination is enabled."
+	)
+	public Boolean getShowAllItems() {
+		return showAllItems;
+	}
+
+	public void setShowAllItems(Boolean showAllItems) {
+		this.showAllItems = showAllItems;
+	}
+
+	@JsonIgnore
+	public void setShowAllItems(
+		UnsafeSupplier<Boolean, Exception> showAllItemsUnsafeSupplier) {
+
+		try {
+			showAllItems = showAllItemsUnsafeSupplier.get();
+		}
+		catch (RuntimeException re) {
+			throw re;
+		}
+		catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	@GraphQLField(
+		description = "Whether to show all items when pagination is enabled."
+	)
+	@JsonProperty(access = JsonProperty.Access.READ_WRITE)
+	protected Boolean showAllItems;
 
 	@Schema(description = "The page collection's template key.")
 	public String getTemplateKey() {
@@ -405,6 +534,26 @@ public class PageCollectionDefinition implements Serializable {
 			sb.append("\"collectionConfig\": ");
 
 			sb.append(String.valueOf(collectionConfig));
+		}
+
+		if (displayAllItems != null) {
+			if (sb.length() > 1) {
+				sb.append(", ");
+			}
+
+			sb.append("\"displayAllItems\": ");
+
+			sb.append(displayAllItems);
+		}
+
+		if (displayAllPages != null) {
+			if (sb.length() > 1) {
+				sb.append(", ");
+			}
+
+			sb.append("\"displayAllPages\": ");
+
+			sb.append(displayAllPages);
 		}
 
 		if (fragmentStyle != null) {
@@ -495,6 +644,16 @@ public class PageCollectionDefinition implements Serializable {
 			sb.append(numberOfItemsPerPage);
 		}
 
+		if (numberOfPages != null) {
+			if (sb.length() > 1) {
+				sb.append(", ");
+			}
+
+			sb.append("\"numberOfPages\": ");
+
+			sb.append(numberOfPages);
+		}
+
 		if (paginationType != null) {
 			if (sb.length() > 1) {
 				sb.append(", ");
@@ -507,6 +666,16 @@ public class PageCollectionDefinition implements Serializable {
 			sb.append(paginationType);
 
 			sb.append("\"");
+		}
+
+		if (showAllItems != null) {
+			if (sb.length() > 1) {
+				sb.append(", ");
+			}
+
+			sb.append("\"showAllItems\": ");
+
+			sb.append(showAllItems);
 		}
 
 		if (templateKey != null) {
@@ -538,7 +707,7 @@ public class PageCollectionDefinition implements Serializable {
 	@GraphQLName("PaginationType")
 	public static enum PaginationType {
 
-		NONE("None"), REGULAR("Regular"), SIMPLE("Simple");
+		NONE("None"), NUMERIC("Numeric"), REGULAR("Regular"), SIMPLE("Simple");
 
 		@JsonCreator
 		public static PaginationType create(String value) {
@@ -574,9 +743,9 @@ public class PageCollectionDefinition implements Serializable {
 	}
 
 	private static String _escape(Object object) {
-		String string = String.valueOf(object);
-
-		return string.replaceAll("\"", "\\\\\"");
+		return StringUtil.replace(
+			String.valueOf(object), _JSON_ESCAPE_STRINGS[0],
+			_JSON_ESCAPE_STRINGS[1]);
 	}
 
 	private static boolean _isArray(Object value) {
@@ -602,7 +771,7 @@ public class PageCollectionDefinition implements Serializable {
 			Map.Entry<String, ?> entry = iterator.next();
 
 			sb.append("\"");
-			sb.append(entry.getKey());
+			sb.append(_escape(entry.getKey()));
 			sb.append("\": ");
 
 			Object value = entry.getValue();
@@ -634,7 +803,7 @@ public class PageCollectionDefinition implements Serializable {
 			}
 			else if (value instanceof String) {
 				sb.append("\"");
-				sb.append(value);
+				sb.append(_escape(value));
 				sb.append("\"");
 			}
 			else {
@@ -650,5 +819,10 @@ public class PageCollectionDefinition implements Serializable {
 
 		return sb.toString();
 	}
+
+	private static final String[][] _JSON_ESCAPE_STRINGS = {
+		{"\\", "\"", "\b", "\f", "\n", "\r", "\t"},
+		{"\\\\", "\\\"", "\\b", "\\f", "\\n", "\\r", "\\t"}
+	};
 
 }

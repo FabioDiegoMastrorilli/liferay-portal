@@ -51,8 +51,7 @@ long commercePriceModifierId = commercePriceListDisplayContext.getCommercePriceM
 					)
 						.then(() => {
 							Liferay.fire(events.UPDATE_DATASET_DISPLAY, {
-								id:
-									'<%= CommercePricingDataSetConstants.COMMERCE_DATA_SET_KEY_PRICE_MODIFIER_CATEGORIES %>',
+								id: '<%= CommercePricingFDSNames.PRICE_MODIFIER_CATEGORIES %>',
 							});
 						})
 						.catch((error) => {
@@ -74,7 +73,7 @@ long commercePriceModifierId = commercePriceListDisplayContext.getCommercePriceM
 					itemsKey: 'id',
 					itemCreation: false,
 					linkedDatasetsId: [
-						'<%= CommercePricingDataSetConstants.COMMERCE_DATA_SET_KEY_PRICE_MODIFIER_CATEGORIES %>',
+						'<%= CommercePricingFDSNames.PRICE_MODIFIER_CATEGORIES %>',
 					],
 					onItemSelected: selectItem,
 					pageSize: 10,
@@ -85,7 +84,7 @@ long commercePriceModifierId = commercePriceListDisplayContext.getCommercePriceM
 							fieldName: ['name'],
 						},
 					],
-					spritemap: '<%= themeDisplay.getPathThemeImages() %>/lexicon/icons.svg',
+					spritemap: '<%= themeDisplay.getPathThemeImages() %>/clay/icons.svg',
 					titleLabel: '<%= LanguageUtil.get(request, "add-existing-category") %>',
 				});
 			</aui:script>
@@ -96,11 +95,11 @@ long commercePriceModifierId = commercePriceListDisplayContext.getCommercePriceM
 				bodyClasses="p-0"
 				title='<%= LanguageUtil.get(request, "categories") %>'
 			>
-				<clay:headless-data-set-display
+				<frontend-data-set:headless-display
 					apiURL="<%= commercePriceListDisplayContext.getPriceModifierCategoriesApiUrl() %>"
-					clayDataSetActionDropdownItems="<%= commercePriceListDisplayContext.getPriceModifierCategoryClayDataSetActionDropdownItems() %>"
+					fdsActionDropdownItems="<%= commercePriceListDisplayContext.getPriceModifierCategoryFDSActionDropdownItems() %>"
 					formName="fm"
-					id="<%= CommercePricingDataSetConstants.COMMERCE_DATA_SET_KEY_PRICE_MODIFIER_CATEGORIES %>"
+					id="<%= CommercePricingFDSNames.PRICE_MODIFIER_CATEGORIES %>"
 					itemsPerPage="<%= 10 %>"
 					namespace="<%= liferayPortletResponse.getNamespace() %>"
 					pageNumber="<%= 1 %>"

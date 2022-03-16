@@ -140,11 +140,14 @@ definition {
 		task ("Configure the Container styles") {
 			PageEditor.editLayoutContainer(
 				alignItems = "Baseline",
-				backgroundColor = "Success",
 				containerWidth = "Fixed Width",
 				contentDisplay = "Flex Column",
 				height = "600px",
 				justifyContent = "Around",
+				panel = "General");
+
+			PageEditor.editLayoutContainer(
+				backgroundColor = "Success",
 				paddingBottom = "4",
 				paddingTop = "2",
 				panel = "Styles");
@@ -182,9 +185,8 @@ definition {
 				pageName = "Content Page Name",
 				siteName = "Test Site Name");
 
-			var screenWidth	= selenium.getElementWidth("//body");
-
-			var containerWidth	= selenium.getElementWidth("//div[contains(@class,'container')][contains(@class,'pb-4')][contains(@class,'pt-2')]");
+			var screenWidth = selenium.getElementWidth("//body");
+			var containerWidth = selenium.getElementWidth("//div[contains(@class,'container')][contains(@class,'pb-4')][contains(@class,'pt-2')]");
 
 			TestUtils.assertNotEquals(
 				actual = "${containerWidth}",
@@ -256,7 +258,7 @@ definition {
 				contentDisplay = "Flex Column",
 				height = "1000px",
 				justifyContent = "Between",
-				panel = "Styles");
+				panel = "General");
 		}
 
 		task ("View the Container styles") {
@@ -325,7 +327,7 @@ definition {
 				containerWidth = "Fixed Width",
 				contentDisplay = "Flex Row",
 				justifyContent = "End",
-				panel = "Styles");
+				panel = "General");
 		}
 
 		task ("View the Container styles") {
@@ -338,7 +340,7 @@ definition {
 		}
 	}
 
-	@description = "This is a test for LPS-106776, LPS-111657 and LPS-120693. Configure the Flex Row and Fluid Container styles."
+	@description = "This is a use case for LPS-106776, LPS-111657 and LPS-120693. Configure the Flex Row and Fluid Container styles."
 	@priority = "5"
 	test ConfigureFlexRowAndFluidContainerStyles {
 		property portal.acceptance = "true";
@@ -383,13 +385,16 @@ definition {
 		task ("Configure the Container styles") {
 			PageEditor.editLayoutContainer(
 				alignItems = "Center",
+				contentDisplay = "Flex Row",
+				justifyContent = "Center",
+				panel = "General");
+
+			PageEditor.editLayoutContainer(
 				backgroundColor = "Warning",
 				borderColor = "Danger",
 				borderRadius = "Border Radius Large",
 				borderWidth = "5",
 				boxShadow = "Box Shadow Large",
-				contentDisplay = "Flex Row",
-				justifyContent = "Center",
 				marginBottom = "2",
 				marginLeft = "2",
 				marginRight = "2",
@@ -462,7 +467,7 @@ definition {
 			PageEditor.viewDuplicateFragment(fragmentName = "Container");
 
 			AssertElementPresent(
-				key_elementHeader = "/div[contains(@class,'page-editor__topper')][1]/div[contains(.,'Grid')]//li[contains(@class,'title')]",
+				key_elementHeader = "//div[@aria-label='Grid']",
 				key_position = "2",
 				locator1 = "PageEditor#CONTAINER_CONTAINER_NESTED_ELEMENT");
 		}
@@ -538,7 +543,7 @@ definition {
 
 			AssertVisible(
 				key_append = "//img",
-				key_URL = "${baseURL}/web/test-site-name/w/web-content-title",
+				key_url = "${baseURL}/web/test-site-name/w/web-content-title",
 				locator1 = "Fragment#FRAGMENT_LINK");
 
 			PageEditor.clickPublish();
@@ -551,22 +556,22 @@ definition {
 
 			AssertVisible(
 				key_append = "/img",
-				key_URL = "${baseURL}/web/test-site-name/w/web-content-title",
+				key_url = "${baseURL}/web/test-site-name/w/web-content-title",
 				locator1 = "Fragment#FRAGMENT_LINK");
 
 			Click(
 				key_append = "/img",
-				key_URL = "${baseURL}/web/test-site-name/w/web-content-title",
+				key_url = "${baseURL}/web/test-site-name/w/web-content-title",
 				locator1 = "Fragment#FRAGMENT_LINK");
 
 			AssertTextEquals(
 				locator1 = "ControlMenu#HEADING",
 				value1 = "Display Page Name");
 
-			AssertVisible(
-				key_assetContent = "Web Content Content",
-				key_assetTitle = "Web Content Title",
-				locator1 = "PageEditor#ASSET_CONTENT");
+			ContentPages.viewFragmentText(
+				assetType = "journal",
+				fragmentName = "Display Page Content",
+				text = "Web Content Content");
 		}
 	}
 
@@ -644,7 +649,7 @@ definition {
 
 			AssertVisible(
 				key_append = "//img",
-				key_URL = "https://liferay.com",
+				key_url = "https://liferay.com",
 				locator1 = "Fragment#FRAGMENT_LINK");
 
 			PageEditor.clickPublish();
@@ -657,12 +662,12 @@ definition {
 
 			AssertVisible(
 				key_append = "/img",
-				key_URL = "https://liferay.com",
+				key_url = "https://liferay.com",
 				locator1 = "Fragment#FRAGMENT_LINK");
 
 			Click(
 				key_append = "/img",
-				key_URL = "https://liferay.com",
+				key_url = "https://liferay.com",
 				locator1 = "Fragment#FRAGMENT_LINK");
 
 			AssertLocation.assertPartialLocation(value1 = "https://www.liferay.com");
@@ -823,7 +828,7 @@ definition {
 		}
 
 		task ("Add a content page based on content page template") {
-			SitePages.openPagesAdmin(siteURLKey = "test-site-name");
+			PagesAdmin.openPagesAdmin(siteURLKey = "test-site-name");
 
 			ContentPages.addPage(
 				collectionName = "Page Template Collection",
@@ -924,7 +929,7 @@ definition {
 		}
 	}
 
-	@description = "This is a test for LPS-107285. When the Container fragment is duplicated, the configuration of it and its components should also be duplicated."
+	@description = "This is a test for LPS-107285 and LPS-106776. When the Container fragment is duplicated, the configuration of it and its components should also be duplicated."
 	@priority = "4"
 	test ViewConfigurationDuplicatedInDuplicatedContainerWithHeading {
 		task ("Add a Container to page") {
@@ -972,7 +977,7 @@ definition {
 				position = "2");
 
 			AssertElementPresent(
-				key_elementHeader = "//div[contains(@class,'page-editor__topper__bar') and contains(.,'Heading')]/following-sibling::div[contains(@class,'page-editor__topper__content')]//div[contains(@style,'color: var(--white)')]",
+				key_elementHeader = "//div[@aria-label='Heading']//div[contains(@class,'page-editor__topper__content')]//div[contains(@style,'color: var(--white)')]",
 				key_position = "2",
 				locator1 = "PageEditor#CONTAINER_CONTAINER_NESTED_ELEMENT");
 		}

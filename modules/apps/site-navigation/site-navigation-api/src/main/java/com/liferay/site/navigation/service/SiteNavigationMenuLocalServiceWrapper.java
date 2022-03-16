@@ -30,6 +30,10 @@ public class SiteNavigationMenuLocalServiceWrapper
 	implements ServiceWrapper<SiteNavigationMenuLocalService>,
 			   SiteNavigationMenuLocalService {
 
+	public SiteNavigationMenuLocalServiceWrapper() {
+		this(null);
+	}
+
 	public SiteNavigationMenuLocalServiceWrapper(
 		SiteNavigationMenuLocalService siteNavigationMenuLocalService) {
 
@@ -163,7 +167,9 @@ public class SiteNavigationMenuLocalServiceWrapper
 	}
 
 	@Override
-	public void deleteSiteNavigationMenus(long groupId) {
+	public void deleteSiteNavigationMenus(long groupId)
+		throws com.liferay.portal.kernel.exception.PortalException {
+
 		_siteNavigationMenuLocalService.deleteSiteNavigationMenus(groupId);
 	}
 

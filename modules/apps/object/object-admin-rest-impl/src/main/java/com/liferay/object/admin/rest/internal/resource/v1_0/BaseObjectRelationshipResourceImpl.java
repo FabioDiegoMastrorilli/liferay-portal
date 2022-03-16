@@ -16,6 +16,7 @@ package com.liferay.object.admin.rest.internal.resource.v1_0;
 
 import com.liferay.object.admin.rest.dto.v1_0.ObjectRelationship;
 import com.liferay.object.admin.rest.resource.v1_0.ObjectRelationshipResource;
+import com.liferay.petra.function.UnsafeBiConsumer;
 import com.liferay.petra.function.UnsafeConsumer;
 import com.liferay.petra.function.UnsafeFunction;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
@@ -81,6 +82,14 @@ public abstract class BaseObjectRelationshipResourceImpl
 			),
 			@io.swagger.v3.oas.annotations.Parameter(
 				in = io.swagger.v3.oas.annotations.enums.ParameterIn.QUERY,
+				name = "search"
+			),
+			@io.swagger.v3.oas.annotations.Parameter(
+				in = io.swagger.v3.oas.annotations.enums.ParameterIn.QUERY,
+				name = "filter"
+			),
+			@io.swagger.v3.oas.annotations.Parameter(
+				in = io.swagger.v3.oas.annotations.enums.ParameterIn.QUERY,
 				name = "page"
 			),
 			@io.swagger.v3.oas.annotations.Parameter(
@@ -105,6 +114,10 @@ public abstract class BaseObjectRelationshipResourceImpl
 			@javax.validation.constraints.NotNull
 			@javax.ws.rs.PathParam("objectDefinitionId")
 			Long objectDefinitionId,
+			@io.swagger.v3.oas.annotations.Parameter(hidden = true)
+			@javax.ws.rs.QueryParam("search")
+			String search,
+			@javax.ws.rs.core.Context Filter filter,
 			@javax.ws.rs.core.Context Pagination pagination)
 		throws Exception {
 
@@ -405,8 +418,14 @@ public abstract class BaseObjectRelationshipResourceImpl
 						(String)parameters.get("objectDefinitionId")),
 					objectRelationship);
 
-		for (ObjectRelationship objectRelationship : objectRelationships) {
-			objectRelationshipUnsafeConsumer.accept(objectRelationship);
+		if (contextBatchUnsafeConsumer != null) {
+			contextBatchUnsafeConsumer.accept(
+				objectRelationships, objectRelationshipUnsafeConsumer);
+		}
+		else {
+			for (ObjectRelationship objectRelationship : objectRelationships) {
+				objectRelationshipUnsafeConsumer.accept(objectRelationship);
+			}
 		}
 	}
 
@@ -444,7 +463,7 @@ public abstract class BaseObjectRelationshipResourceImpl
 
 		return getObjectDefinitionObjectRelationshipsPage(
 			Long.parseLong((String)parameters.get("objectDefinitionId")),
-			pagination);
+			search, filter, pagination);
 	}
 
 	@Override
@@ -487,6 +506,15 @@ public abstract class BaseObjectRelationshipResourceImpl
 
 	public void setContextAcceptLanguage(AcceptLanguage contextAcceptLanguage) {
 		this.contextAcceptLanguage = contextAcceptLanguage;
+	}
+
+	public void setContextBatchUnsafeConsumer(
+		UnsafeBiConsumer
+			<java.util.Collection<ObjectRelationship>,
+			 UnsafeConsumer<ObjectRelationship, Exception>, Exception>
+				contextBatchUnsafeConsumer) {
+
+		this.contextBatchUnsafeConsumer = contextBatchUnsafeConsumer;
 	}
 
 	public void setContextCompany(
@@ -637,6 +665,10 @@ public abstract class BaseObjectRelationshipResourceImpl
 	}
 
 	protected AcceptLanguage contextAcceptLanguage;
+	protected UnsafeBiConsumer
+		<java.util.Collection<ObjectRelationship>,
+		 UnsafeConsumer<ObjectRelationship, Exception>, Exception>
+			contextBatchUnsafeConsumer;
 	protected com.liferay.portal.kernel.model.Company contextCompany;
 	protected HttpServletRequest contextHttpServletRequest;
 	protected HttpServletResponse contextHttpServletResponse;

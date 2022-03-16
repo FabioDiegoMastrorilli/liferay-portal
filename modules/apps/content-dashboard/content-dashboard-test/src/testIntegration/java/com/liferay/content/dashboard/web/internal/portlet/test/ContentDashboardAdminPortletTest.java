@@ -182,8 +182,8 @@ public class ContentDashboardAdminPortletTest {
 						audienceAssetVocabulary, childAssetVocabulary)));
 		}
 		finally {
-			_assetCategoryLocalService.deleteAssetCategory(assetCategory);
-			_assetCategoryLocalService.deleteAssetCategory(childAssetCategory);
+			_assetCategoryLocalService.deleteCategory(assetCategory);
+			_assetCategoryLocalService.deleteCategory(childAssetCategory);
 		}
 	}
 
@@ -230,7 +230,7 @@ public class ContentDashboardAdminPortletTest {
 				_getAuditGraphTitle(_getMockLiferayPortletRenderRequest()));
 		}
 		finally {
-			_assetCategoryLocalService.deleteAssetCategory(assetCategory);
+			_assetCategoryLocalService.deleteCategory(assetCategory);
 		}
 	}
 
@@ -367,7 +367,7 @@ public class ContentDashboardAdminPortletTest {
 					LocaleUtil.US));
 		}
 		finally {
-			_assetCategoryLocalService.deleteAssetCategory(
+			_assetCategoryLocalService.deleteCategory(
 				assetCategory.getCategoryId());
 		}
 	}
@@ -452,8 +452,7 @@ public class ContentDashboardAdminPortletTest {
 			_group.getGroupId(), ddmStructure.getStructureId(),
 			PortalUtil.getClassNameId(JournalArticle.class),
 			TemplateConstants.LANG_TYPE_VM,
-			JournalTestUtil.getSampleTemplateXSL(),
-			LocaleUtil.getSiteDefault());
+			JournalTestUtil.getSampleTemplateVM(), LocaleUtil.getSiteDefault());
 
 		ServiceContext serviceContext =
 			ServiceContextTestUtil.getServiceContext(
@@ -699,7 +698,7 @@ public class ContentDashboardAdminPortletTest {
 					LocaleUtil.US));
 		}
 		finally {
-			_assetCategoryLocalService.deleteAssetCategory(
+			_assetCategoryLocalService.deleteCategory(
 				assetCategory.getCategoryId());
 		}
 	}
@@ -794,9 +793,9 @@ public class ContentDashboardAdminPortletTest {
 					LocaleUtil.US));
 		}
 		finally {
-			_assetCategoryLocalService.deleteAssetCategory(
+			_assetCategoryLocalService.deleteCategory(
 				assetCategory1.getCategoryId());
-			_assetCategoryLocalService.deleteAssetCategory(
+			_assetCategoryLocalService.deleteCategory(
 				assetCategory2.getCategoryId());
 		}
 	}
@@ -900,8 +899,7 @@ public class ContentDashboardAdminPortletTest {
 			_group.getGroupId(), ddmStructure1.getStructureId(),
 			PortalUtil.getClassNameId(JournalArticle.class),
 			TemplateConstants.LANG_TYPE_VM,
-			JournalTestUtil.getSampleTemplateXSL(),
-			LocaleUtil.getSiteDefault());
+			JournalTestUtil.getSampleTemplateVM(), LocaleUtil.getSiteDefault());
 
 		ServiceContext serviceContext =
 			ServiceContextTestUtil.getServiceContext(
@@ -1030,9 +1028,9 @@ public class ContentDashboardAdminPortletTest {
 					LocaleUtil.US));
 		}
 		finally {
-			_assetCategoryLocalService.deleteAssetCategory(
+			_assetCategoryLocalService.deleteCategory(
 				assetCategory1.getCategoryId());
-			_assetCategoryLocalService.deleteAssetCategory(
+			_assetCategoryLocalService.deleteCategory(
 				assetCategory2.getCategoryId());
 		}
 	}
@@ -1321,7 +1319,7 @@ public class ContentDashboardAdminPortletTest {
 			Assert.assertEquals(assetCategory, assetCategories.get(0));
 		}
 		finally {
-			_assetCategoryLocalService.deleteAssetCategory(
+			_assetCategoryLocalService.deleteCategory(
 				assetCategory.getCategoryId());
 		}
 	}
@@ -1461,8 +1459,8 @@ public class ContentDashboardAdminPortletTest {
 					String.valueOf(childAssetVocabulary.getVocabularyId())));
 		}
 		finally {
-			_assetCategoryLocalService.deleteAssetCategory(assetCategory);
-			_assetCategoryLocalService.deleteAssetCategory(childAssetCategory);
+			_assetCategoryLocalService.deleteCategory(assetCategory);
+			_assetCategoryLocalService.deleteCategory(childAssetCategory);
 		}
 	}
 
@@ -1501,7 +1499,7 @@ public class ContentDashboardAdminPortletTest {
 					String.valueOf(stageAssetVocabulary.getVocabularyId())));
 		}
 		finally {
-			_assetCategoryLocalService.deleteAssetCategory(assetCategory);
+			_assetCategoryLocalService.deleteCategory(assetCategory);
 		}
 	}
 
@@ -1548,8 +1546,8 @@ public class ContentDashboardAdminPortletTest {
 					String.valueOf(assetVocabulary.getVocabularyId())));
 		}
 		finally {
-			_assetCategoryLocalService.deleteAssetCategory(assetCategory);
-			_assetCategoryLocalService.deleteAssetCategory(childAssetCategory);
+			_assetCategoryLocalService.deleteCategory(assetCategory);
+			_assetCategoryLocalService.deleteCategory(childAssetCategory);
 		}
 	}
 

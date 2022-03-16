@@ -91,7 +91,7 @@ public class PaymentMethodCommerceCheckoutStep
 		throws Exception {
 
 		try {
-			updateCommerceOrderPaymentMethod(actionRequest);
+			_updateCommerceOrderPaymentMethod(actionRequest);
 		}
 		catch (Exception exception) {
 			if (exception instanceof CommerceOrderPaymentMethodException) {
@@ -134,7 +134,7 @@ public class PaymentMethodCommerceCheckoutStep
 		_commerceOrderModelResourcePermission = modelResourcePermission;
 	}
 
-	protected void updateCommerceOrderPaymentMethod(ActionRequest actionRequest)
+	private void _updateCommerceOrderPaymentMethod(ActionRequest actionRequest)
 		throws Exception {
 
 		String commercePaymentMethodKey = ParamUtil.getString(
@@ -165,8 +165,8 @@ public class PaymentMethodCommerceCheckoutStep
 			return;
 		}
 
-		_commerceOrderLocalService.updateCommerceOrder(
-			commerceOrder.getCommerceOrderId(),
+		commerceOrder = _commerceOrderLocalService.updateCommerceOrder(
+			null, commerceOrder.getCommerceOrderId(),
 			commerceOrder.getBillingAddressId(),
 			commerceOrder.getShippingAddressId(), commercePaymentMethodKey,
 			commerceOrder.getCommerceShippingMethodId(),
@@ -174,6 +174,12 @@ public class PaymentMethodCommerceCheckoutStep
 			commerceOrder.getPurchaseOrderNumber(), commerceOrder.getSubtotal(),
 			commerceOrder.getShippingAmount(), commerceOrder.getTotal(),
 			commerceOrder.getAdvanceStatus(), commerceContext);
+
+		_commerceOrderLocalService.resetTermsAndConditions(
+			commerceOrder.getCommerceOrderId(), false, true);
+
+		actionRequest.setAttribute(
+			CommerceCheckoutWebKeys.COMMERCE_ORDER, commerceOrder);
 	}
 
 	@Reference

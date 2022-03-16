@@ -35,7 +35,6 @@ import com.liferay.portal.kernel.service.ServiceContextThreadLocal;
 import com.liferay.portal.kernel.theme.ThemeDisplay;
 import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.WebKeys;
-import com.liferay.segments.constants.SegmentsExperienceConstants;
 
 import java.util.List;
 import java.util.Map;
@@ -43,6 +42,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 /**
  * @author Adolfo Pérez
@@ -109,8 +109,9 @@ public class InfoFieldUtil {
 		}
 
 		HttpServletRequest httpServletRequest = serviceContext.getRequest();
+		HttpServletResponse httpServletResponse = serviceContext.getResponse();
 
-		if (httpServletRequest == null) {
+		if ((httpServletRequest == null) || (httpServletResponse == null)) {
 			return _renderHtml(fragmentEntryLink, defaultElementName);
 		}
 
@@ -127,12 +128,10 @@ public class InfoFieldUtil {
 
 		defaultFragmentRendererContext.setLocale(themeDisplay.getLocale());
 		defaultFragmentRendererContext.setMode(FragmentEntryLinkConstants.EDIT);
-		defaultFragmentRendererContext.setSegmentsExperienceIds(
-			new long[] {SegmentsExperienceConstants.ID_DEFAULT});
 
 		return fragmentRendererController.render(
 			defaultFragmentRendererContext, httpServletRequest,
-			serviceContext.getResponse());
+			httpServletResponse);
 	}
 
 	private static InfoField<TextInfoFieldType> _getInfoField(

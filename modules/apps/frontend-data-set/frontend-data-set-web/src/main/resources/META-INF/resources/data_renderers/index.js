@@ -16,6 +16,7 @@ import ActionsLinkRenderer from './ActionLinkRenderer';
 import ActionsDropdownRenderer from './ActionsDropdownRenderer';
 import BooleanRenderer from './BooleanRenderer';
 import DateRenderer from './DateRenderer';
+import DateTimeRenderer from './DateTimeRenderer';
 import DefaultRenderer from './DefaultRenderer';
 import ImageRenderer from './ImageRenderer';
 import InputCheckboxRenderer from './InputCheckboxRenderer';
@@ -28,11 +29,12 @@ import QuantitySelectorRenderer from './QuantitySelectorRenderer';
 import StatusRenderer from './StatusRenderer';
 import TooltipSummaryRenderer from './TooltipSummaryRenderer';
 
-const dataRenderers = {
+export const dataRenderers = {
 	actionLink: ActionsLinkRenderer,
 	actionsDropdown: ActionsDropdownRenderer,
 	boolean: BooleanRenderer,
 	date: DateRenderer,
+	dateTime: DateTimeRenderer,
 	default: DefaultRenderer,
 	image: ImageRenderer,
 	label: LabelRenderer,
@@ -47,9 +49,4 @@ export const inputRenderers = {
 	checkbox: InputCheckboxRenderer,
 	dateTime: InputDateTimeRenderer,
 	text: InputTextRenderer,
-};
-
-export default {
-	...dataRenderers,
-	...inputRenderers,
 };

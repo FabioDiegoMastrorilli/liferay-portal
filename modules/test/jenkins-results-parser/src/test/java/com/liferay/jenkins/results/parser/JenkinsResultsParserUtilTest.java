@@ -15,7 +15,6 @@
 package com.liferay.jenkins.results.parser;
 
 import java.io.File;
-import java.io.IOException;
 
 import java.net.URI;
 import java.net.URL;
@@ -82,10 +81,18 @@ public class JenkinsResultsParserUtilTest
 
 	@Test
 	public void testFixURL() {
-		testEquals("ABC%28123", JenkinsResultsParserUtil.fixURL("ABC(123"));
-		testEquals("ABC%29123", JenkinsResultsParserUtil.fixURL("ABC)123"));
-		testEquals("ABC%5B123", JenkinsResultsParserUtil.fixURL("ABC[123"));
-		testEquals("ABC%5D123", JenkinsResultsParserUtil.fixURL("ABC]123"));
+		testEquals("ABC%28123", _fixURLMultipleTimes("ABC(123"));
+		testEquals("ABC%29123", _fixURLMultipleTimes("ABC)123"));
+		testEquals("ABC%5B123", _fixURLMultipleTimes("ABC[123"));
+		testEquals("ABC%5D123", _fixURLMultipleTimes("ABC]123"));
+		testEquals("!master", _fixURLMultipleTimes("!master"));
+		testEquals("0%201%202", _fixURLMultipleTimes("0 1 2"));
+		testEquals(
+			"https://test-1-1.liferay.com/job(master)?" +
+				"AXIS_VARIABLE=0%201&label_exp=!master&job=test%287.2.x%29",
+			_fixURLMultipleTimes(
+				"https://test-1-1.liferay.com/job(master)?" +
+					"AXIS_VARIABLE=0 1&label_exp=!master&job=test(7.2.x)"));
 	}
 
 	@Test
@@ -127,7 +134,7 @@ public class JenkinsResultsParserUtilTest
 			JenkinsResultsParserUtil.getLocalURL(
 				"http://test-4-1/ABC?123=456&xyz=abc"));
 		testEquals(
-			"http://release-1/1/ABC?123=456&xyz=abc",
+			"https://release.liferay.com/1/ABC?123=456&xyz=abc",
 			JenkinsResultsParserUtil.getLocalURL(
 				"https://release.liferay.com/1/ABC?123=456&xyz=abc"));
 		testEquals(
@@ -169,41 +176,81 @@ public class JenkinsResultsParserUtilTest
 	}
 
 	@Test
-	public void testGetProperty() throws IOException {
-		Properties properties = JenkinsResultsParserUtil.getBuildProperties();
+	public void testGetProperty() {
+		Properties properties = new Properties();
+
+		properties.setProperty("base", "0");
+		properties.setProperty("base[opt0]", "1");
+		properties.setProperty("base[opt0][opt2]", "2");
+		properties.setProperty("base[opt0][opt3]", "3");
+		properties.setProperty("base[opt1]", "4");
+		properties.setProperty("base0[opt[0]]", "5");
+		properties.setProperty("base0[opt[1][1][1]]", "6");
+		properties.setProperty("base0[opt[1][1][1]][opt[2][2][2]]", "7");
+		properties.setProperty("base1[opt1]", "8");
+		properties.setProperty("base1[opt1][opt2]", "");
+
+		_testGetProperty("0", properties, "base");
+		_testGetProperty(null, properties, "invalid");
+		_testGetProperty("1", properties, "base", "opt0", "invalid");
+		_testGetProperty("2", properties, "base[opt0]", "opt2");
+		_testGetProperty("3", properties, "base", "opt0", "opt3");
+		_testGetProperty("4", properties, "base", "opt1", null, "invalid");
+		_testGetProperty("5", properties, "base0", "opt[0]");
+		_testGetProperty("6", properties, "base0", "opt[1][1][1]", "invalid");
+		_testGetProperty(
+			"7", properties, "base0", "opt[2][2][2]", "invalid", "opt[1][1][1]",
+			null);
+		_testGetProperty("", properties, "base1", "opt1", "opt2");
 
 		testEquals(
-			"disable-dev-shm-usage disable-gpu password-store=basic",
+			"1",
+			JenkinsResultsParserUtil.getProperty(properties, "base[opt0]"));
+		testEquals(
+			"1",
 			JenkinsResultsParserUtil.getProperty(
-				properties, "portal.test.properties", "browser.chrome.bin.args",
-				"master"));
-
+				properties, "base[opt0]", true, "invalid"));
 		testEquals(
-			"/opt/google/chrome-stable-86/google-chrome",
+			null,
 			JenkinsResultsParserUtil.getProperty(
-				properties, "portal.test.properties",
-				"browser.chrome.bin.file[86.0]", "master"));
+				properties, "base[opt0]", false, "invalid"));
+	}
 
-		testEquals(
-			"chrome,edge,firefox,internetexplorer,safari",
-			JenkinsResultsParserUtil.getProperty(properties, "browser.types"));
+	@Test
+	public void testGetPropertyName() {
+		Properties properties = new Properties();
 
-		testEquals(
-			"/opt/java/zulu8",
-			JenkinsResultsParserUtil.getProperty(
-				properties, "portal.test.properties",
-				"java.jdk.home[8][x64][zulu]", "master"));
+		properties.setProperty("base", "0");
+		properties.setProperty("base[opt0]", "1");
+		properties.setProperty("base[opt0][opt2]", "2");
+		properties.setProperty("base[opt0][opt3]", "3");
+		properties.setProperty("base[opt1]", "4");
+		properties.setProperty("base0[opt[0]]", "5");
+		properties.setProperty("base0[opt[1][1][1]]", "6");
+		properties.setProperty("base0[opt[1][1][1]][opt[2][2][2]]", "7");
+		properties.setProperty("base1[opt1]", "8");
+		properties.setProperty("base1[opt1][opt2]", "");
 
-		testEquals(
-			"/opt/dev/projects/github/liferay-release-tool-ee",
-			JenkinsResultsParserUtil.getProperty(
-				properties, "release.tool.dir", "7.0.x"));
-
-		testEquals(
-			"/bin/bash",
-			JenkinsResultsParserUtil.getProperty(
-				properties, "portal.build.properties", "shell.executable",
-				"master"));
+		_testGetPropertyName("base", "0", properties, "base");
+		_testGetPropertyName("invalid", null, properties, "invalid");
+		_testGetPropertyName(
+			"base[opt0]", "1", properties, "base", "opt0", "invalid");
+		_testGetPropertyName(
+			"base[opt0][opt2]", "2", properties, "base[opt0]", "opt2");
+		_testGetPropertyName(
+			"base[opt0][opt3]", "3", properties, "base", "opt0", "opt3");
+		_testGetPropertyName(
+			"base[opt1]", "4", properties, "base", "opt1", null, "invalid");
+		_testGetPropertyName(
+			"base0[opt[0]]", "5", properties, "base0", "opt[0]");
+		_testGetPropertyName(
+			"base0[opt[1][1][1]]", "6", properties, "base0", "opt[1][1][1]",
+			"invalid");
+		_testGetPropertyName(
+			"base0[opt[1][1][1]][opt[2][2][2]]", "7", properties, "base0",
+			"opt[2][2][2]", "invalid", "opt[1][1][1]", null);
+		_testGetPropertyName(
+			"base1[opt1][opt2]", "", properties, "base1", "opt1", "opt2");
 	}
 
 	@Test
@@ -429,6 +476,38 @@ public class JenkinsResultsParserUtilTest
 		URL url = uri.toURL();
 
 		return url.toString();
+	}
+
+	private String _fixURLMultipleTimes(String urlString) {
+		return JenkinsResultsParserUtil.fixURL(
+			JenkinsResultsParserUtil.fixURL(
+				JenkinsResultsParserUtil.fixURL(urlString)));
+	}
+
+	private void _testGetProperty(
+		String expectedPropertyValue, Properties properties,
+		String basePropertyName, String... propertyOpts) {
+
+		testEquals(
+			expectedPropertyValue,
+			JenkinsResultsParserUtil.getProperty(
+				properties, basePropertyName, propertyOpts));
+	}
+
+	private void _testGetPropertyName(
+		String expectedPropertyName, String expectedPropertyValue,
+		Properties properties, String basePropertyName,
+		String... propertyOpts) {
+
+		String actualPropertyName = JenkinsResultsParserUtil.getPropertyName(
+			properties, basePropertyName, propertyOpts);
+
+		testEquals(expectedPropertyName, actualPropertyName);
+
+		testEquals(
+			expectedPropertyValue,
+			JenkinsResultsParserUtil.getProperty(
+				properties, actualPropertyName));
 	}
 
 }

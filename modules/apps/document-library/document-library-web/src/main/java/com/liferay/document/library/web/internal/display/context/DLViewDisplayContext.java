@@ -20,8 +20,8 @@ import com.liferay.asset.kernel.service.AssetVocabularyServiceUtil;
 import com.liferay.document.library.constants.DLPortletKeys;
 import com.liferay.document.library.kernel.model.DLFileEntryConstants;
 import com.liferay.document.library.kernel.model.DLFileEntryTypeConstants;
-import com.liferay.document.library.web.internal.display.context.logic.DLPortletInstanceSettingsHelper;
-import com.liferay.document.library.web.internal.display.context.util.DLRequestHelper;
+import com.liferay.document.library.web.internal.display.context.helper.DLPortletInstanceSettingsHelper;
+import com.liferay.document.library.web.internal.display.context.helper.DLRequestHelper;
 import com.liferay.document.library.web.internal.security.permission.resource.DLFolderPermission;
 import com.liferay.item.selector.ItemSelector;
 import com.liferay.item.selector.criteria.FolderItemSelectorReturnType;
@@ -215,7 +215,11 @@ public class DLViewDisplayContext {
 		folderItemSelectorCriterion.setDesiredItemSelectorReturnTypes(
 			new FolderItemSelectorReturnType());
 		folderItemSelectorCriterion.setFolderId(getFolderId());
+		folderItemSelectorCriterion.setRepositoryId(
+			_dlAdminDisplayContext.getSelectedRepositoryId());
 		folderItemSelectorCriterion.setSelectedFolderId(getFolderId());
+		folderItemSelectorCriterion.setSelectedRepositoryId(
+			_dlAdminDisplayContext.getSelectedRepositoryId());
 
 		PortletURL portletURL = itemSelector.getItemSelectorURL(
 			RequestBackedPortletURLFactoryUtil.create(_renderRequest),

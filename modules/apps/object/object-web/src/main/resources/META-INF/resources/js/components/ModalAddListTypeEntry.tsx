@@ -16,12 +16,13 @@ import ClayAlert from '@clayui/alert';
 import ClayButton from '@clayui/button';
 import ClayForm from '@clayui/form';
 import ClayModal, {ClayModalProvider, useModal} from '@clayui/modal';
+import {fetch} from 'frontend-js-web';
 import React, {useEffect, useState} from 'react';
 
 import useForm from '../hooks/useForm';
 import {normalizeLanguageId, toCamelCase} from '../utils/string';
-import Input from './form/Input';
-import InputLocalized from './form/InputLocalized/InputLocalized';
+import Input from './Form/Input';
+import InputLocalized from './Form/InputLocalized/InputLocalized';
 
 const defaultLanguageId: string = normalizeLanguageId(
 	Liferay.ThemeDisplay.getDefaultLanguageId()
@@ -53,7 +54,7 @@ const ModalAddListTypeEntry: React.FC<IProps> = ({
 	};
 
 	const onSubmit = async ({key, name_i18n}: TInitialValues) => {
-		const response = await Liferay.Util.fetch(apiURL, {
+		const response = await fetch(apiURL, {
 			body: JSON.stringify({
 				key: key || toCamelCase(name_i18n[selectedLocale.label]),
 				name_i18n,
@@ -76,7 +77,7 @@ const ModalAddListTypeEntry: React.FC<IProps> = ({
 		else {
 			const {
 				title = Liferay.Language.get('an-error-occurred'),
-			} = await response.json();
+			} = (await response.json()) as {title: string};
 
 			setError(title);
 		}
@@ -96,7 +97,7 @@ const ModalAddListTypeEntry: React.FC<IProps> = ({
 		return errors;
 	};
 
-	const {errors, handleChange, handleSubmit, values} = useForm({
+	const {errors, handleChange, handleSubmit, setValues, values} = useForm({
 		initialValues,
 		onSubmit,
 		validate,
@@ -108,6 +109,7 @@ const ModalAddListTypeEntry: React.FC<IProps> = ({
 				<ClayModal.Header>
 					{Liferay.Language.get('new-item')}
 				</ClayModal.Header>
+
 				<ClayModal.Body>
 					{error && (
 						<ClayAlert displayType="danger">{error}</ClayAlert>
@@ -119,14 +121,9 @@ const ModalAddListTypeEntry: React.FC<IProps> = ({
 						label={Liferay.Language.get('name')}
 						locales={availableLocales}
 						onSelectedLocaleChange={setSelectedLocale}
-						onTranslationsChange={(value) => {
-							handleChange({
-								target: {
-									name: 'name_i18n',
-									value,
-								},
-							} as any);
-						}}
+						onTranslationsChange={(value) =>
+							setValues({name_i18n: value})
+						}
 						required
 						selectedLocale={selectedLocale}
 						translations={values.name_i18n}
@@ -147,6 +144,7 @@ const ModalAddListTypeEntry: React.FC<IProps> = ({
 						}
 					/>
 				</ClayModal.Body>
+
 				<ClayModal.Footer
 					last={
 						<ClayButton.Group key={1} spaced>
@@ -184,8 +182,8 @@ type TLocale = {
 };
 
 type TInitialValues = {
-	name_i18n: TTranslations;
 	key?: string;
+	name_i18n: TTranslations;
 };
 
 const ModalWithProvider: React.FC<IProps> = ({apiURL}) => {

@@ -57,7 +57,7 @@ public class SamlSpSessionDestroyAction extends SessionAction {
 		}
 		catch (Exception exception) {
 			if (_log.isDebugEnabled()) {
-				_log.debug(exception, exception);
+				_log.debug(exception);
 			}
 		}
 
@@ -70,14 +70,14 @@ public class SamlSpSessionDestroyAction extends SessionAction {
 		CompanyThreadLocal.setCompanyId(userCompanyId);
 
 		try {
-			doRun(httpSession);
+			_run(httpSession);
 		}
 		finally {
 			CompanyThreadLocal.setCompanyId(companyId);
 		}
 	}
 
-	protected void doRun(HttpSession httpSession) throws ActionException {
+	private void _run(HttpSession httpSession) throws ActionException {
 		if (!_samlProviderConfigurationHelper.isEnabled() ||
 			!_samlProviderConfigurationHelper.isRoleSp()) {
 
@@ -104,7 +104,7 @@ public class SamlSpSessionDestroyAction extends SessionAction {
 		}
 		catch (Exception exception) {
 			if (_log.isDebugEnabled()) {
-				_log.debug(exception, exception);
+				_log.debug(exception);
 			}
 		}
 	}

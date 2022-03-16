@@ -31,6 +31,7 @@ const Modal = ({
 		className: 'cadmin',
 	},
 	customEvents,
+	disableAutoClose,
 	footerCssClass,
 	headerCssClass,
 	headerHTML,
@@ -177,6 +178,7 @@ const Modal = ({
 				<ClayModal
 					className="liferay-modal"
 					containerProps={{...containerProps}}
+					disableAutoClose={disableAutoClose}
 					id={id}
 					observer={observer}
 					size={url && !size ? 'full-screen' : size}
@@ -194,6 +196,7 @@ const Modal = ({
 							title
 						)}
 					</ClayModal.Header>
+
 					<div
 						className={classNames('modal-body', {
 							'modal-body-iframe': url,
@@ -224,6 +227,7 @@ const Modal = ({
 							<>{bodyHTML && <Body html={bodyHTML} />}</>
 						)}
 					</div>
+
 					{buttons && (
 						<ClayModal.Footer
 							className={footerCssClass}
@@ -345,6 +349,7 @@ const openSelectionModal = ({
 	buttonCancelLabel = Liferay.Language.get('cancel'),
 	containerProps,
 	customSelectEvent = false,
+	getSelectedItemsOnly = true,
 	height,
 	id,
 	iframeBodyCssClass,
@@ -353,6 +358,7 @@ const openSelectionModal = ({
 	onSelect,
 	selectEventName,
 	selectedData,
+	selectedDataCheckboxesDisabled = false,
 	size,
 	title,
 	url,
@@ -372,7 +378,9 @@ const openSelectionModal = ({
 			if (searchContainer) {
 				iframeWindowObj.Liferay.componentReady(searchContainer.id).then(
 					(searchContainer) => {
-						const allSelectedElements = searchContainer.select.getAllSelectedElements();
+						const allSelectedElements = getSelectedItemsOnly
+							? searchContainer.select.getAllSelectedElements()
+							: searchContainer.select._getAllElements(false);
 
 						const allSelectedNodes = allSelectedElements.getDOMNodes();
 
@@ -384,7 +392,11 @@ const openSelectionModal = ({
 									item.value = node.value;
 								}
 
-								const row = node.closest('tr, li');
+								if (!getSelectedItemsOnly && node.checked) {
+									item.checked = node.checked;
+								}
+
+								const row = node.closest('dd, tr, li');
 
 								if (row && Object.keys(row.dataset).length) {
 									item = {...item, ...row.dataset};
@@ -462,6 +474,31 @@ const openSelectionModal = ({
 						itemElement.classList.remove('disabled');
 					}
 				});
+
+				if (multiple) {
+					for (const row of iframeBody.querySelectorAll(
+						'.searchcontainer tr'
+					)) {
+						const itemId =
+							row.dataset.entityid || row.dataset.entityname;
+
+						if (selectedDataSet.has(itemId)) {
+							const checkbox = row.querySelector(
+								'input[type="checkbox"]'
+							);
+
+							if (!checkbox) {
+								continue;
+							}
+
+							checkbox.checked = true;
+
+							if (selectedDataCheckboxesDisabled) {
+								checkbox.disabled = true;
+							}
+						}
+					}
+				}
 			}
 
 			if (selectEventName) {
@@ -507,6 +544,8 @@ class Iframe extends React.Component {
 	constructor(props) {
 		super(props);
 
+		this.delegateHandlers = [];
+
 		this.iframeRef = React.createRef();
 
 		const iframeURL = new URL(props.url);
@@ -528,19 +567,27 @@ class Iframe extends React.Component {
 			Liferay.detach(this.beforeScreenFlipHandler);
 		}
 
-		if (this.delegateHandler) {
-			this.delegateHandler.dispose();
+		if (this.delegateHandlers.length) {
+			this.delegateHandlers.forEach(({dispose}) => dispose());
+			this.delegateHandlers = null;
 		}
 	}
 
 	onLoadHandler = () => {
 		const iframeWindow = this.iframeRef.current.contentWindow;
 
-		this.delegateHandler = delegate(
-			iframeWindow.document,
-			'click',
-			'.btn-cancel,.lfr-hide-dialog',
-			() => this.props.processClose()
+		this.delegateHandlers.push(
+			delegate(
+				iframeWindow.document,
+				'click',
+				'.btn-cancel,.lfr-hide-dialog',
+				() => this.props.processClose()
+			),
+			delegate(iframeWindow.document, 'keydown', 'body', (event) => {
+				if (event.key === 'Escape') {
+					this.props.processClose();
+				}
+			})
 		);
 
 		iframeWindow.document.body.classList.add(CSS_CLASS_IFRAME_BODY);

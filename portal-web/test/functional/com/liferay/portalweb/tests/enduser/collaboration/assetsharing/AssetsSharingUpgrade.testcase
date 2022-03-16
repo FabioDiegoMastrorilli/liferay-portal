@@ -6,7 +6,7 @@ definition {
 	property portal.upstream = "true";
 	property test.assert.warning.exceptions = "true";
 	property testray.component.names = "Asset Sharing";
-	property testray.main.component.name = "Upgrades Collaboration";
+	property testray.main.component.name = "Upgrades Lima";
 
 	setUp {
 		SignIn.signIn();
@@ -27,6 +27,14 @@ definition {
 		Upgrade.viewSharedDocument(dmDocumentTitle = "DM Document Title 1");
 
 		Upgrade.viewSharedBlog();
+
+		Upgrade.revokeAndUpdateSharedEntry(
+			blogsEntryTitleUpdate = "Blogs Entry Title Can Update",
+			blogsEntryTitleView = "Blogs Entry Title",
+			dmDocumentTitleUpdate = "DM Document Title Can Update",
+			dmDocumentTitleView = "DM Document Title 1");
+
+		Upgrade.viewNoShareOptionAfterDisabled();
 	}
 
 	@priority = "5"
@@ -38,6 +46,14 @@ definition {
 		Upgrade.viewSharedDocument(dmDocumentTitle = "DM Document Title 1");
 
 		Upgrade.viewSharedBlog();
+
+		Upgrade.revokeAndUpdateSharedEntry(
+			blogsEntryTitleUpdate = "Blogs Entry Title Can Update",
+			blogsEntryTitleView = "Blogs Entry Title",
+			dmDocumentTitleUpdate = "DM Document Title Can Update",
+			dmDocumentTitleView = "DM Document Title 1");
+
+		Upgrade.viewNoShareOptionAfterDisabled();
 	}
 
 }

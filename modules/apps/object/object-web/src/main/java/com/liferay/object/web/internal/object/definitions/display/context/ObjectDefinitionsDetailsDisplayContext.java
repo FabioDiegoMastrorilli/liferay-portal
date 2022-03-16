@@ -16,19 +16,22 @@ package com.liferay.object.web.internal.object.definitions.display.context;
 
 import com.liferay.application.list.PanelCategory;
 import com.liferay.application.list.PanelCategoryRegistry;
+import com.liferay.application.list.constants.PanelCategoryKeys;
 import com.liferay.object.constants.ObjectActionKeys;
 import com.liferay.object.model.ObjectDefinition;
 import com.liferay.object.scope.ObjectScopeProvider;
 import com.liferay.object.scope.ObjectScopeProviderRegistry;
 import com.liferay.object.web.internal.constants.ObjectWebKeys;
-import com.liferay.object.web.internal.display.context.util.ObjectRequestHelper;
+import com.liferay.object.web.internal.display.context.helper.ObjectRequestHelper;
 import com.liferay.petra.string.StringBundler;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.security.permission.ActionKeys;
 import com.liferay.portal.kernel.security.permission.resource.ModelResourcePermission;
 import com.liferay.portal.kernel.security.permission.resource.PortletResourcePermission;
+import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.KeyValuePair;
 import com.liferay.portal.kernel.util.ParamUtil;
+import com.liferay.portal.kernel.util.PropsUtil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -69,6 +72,13 @@ public class ObjectDefinitionsDetailsDisplayContext {
 
 		for (String panelCategoryKey :
 				objectScopeProvider.getRootPanelCategoryKeys()) {
+
+			if (panelCategoryKey.equals(PanelCategoryKeys.COMMERCE) &&
+				!GetterUtil.getBoolean(
+					PropsUtil.get("enterprise.product.commerce.enabled"))) {
+
+				continue;
+			}
 
 			PanelCategory panelCategory =
 				_panelCategoryRegistry.getPanelCategory(panelCategoryKey);

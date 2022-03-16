@@ -14,11 +14,11 @@
 
 package com.liferay.object.web.internal.list.type.display.context;
 
-import com.liferay.frontend.taglib.clay.data.set.servlet.taglib.util.ClayDataSetActionDropdownItem;
+import com.liferay.frontend.data.set.model.FDSActionDropdownItem;
 import com.liferay.frontend.taglib.clay.servlet.taglib.util.CreationMenu;
 import com.liferay.list.type.model.ListTypeDefinition;
 import com.liferay.object.web.internal.constants.ObjectWebKeys;
-import com.liferay.object.web.internal.display.context.util.ObjectRequestHelper;
+import com.liferay.object.web.internal.display.context.helper.ObjectRequestHelper;
 import com.liferay.petra.portlet.url.builder.PortletURLBuilder;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.language.LanguageUtil;
@@ -53,35 +53,6 @@ public class ViewListTypeEntriesDisplayContext {
 			_getListTypeDefinitionId() + "/list-type-entries";
 	}
 
-	public List<ClayDataSetActionDropdownItem>
-			getClayDataSetActionDropdownItems()
-		throws Exception {
-
-		return Arrays.asList(
-			new ClayDataSetActionDropdownItem(
-				PortletURLBuilder.create(
-					PortletURLUtil.clone(
-						PortletURLUtil.getCurrent(
-							_objectRequestHelper.getLiferayPortletRequest(),
-							_objectRequestHelper.getLiferayPortletResponse()),
-						_objectRequestHelper.getLiferayPortletResponse())
-				).setMVCRenderCommandName(
-					"/list_type_definitions/edit_list_type_entry"
-				).setParameter(
-					"listTypeEntryId", "{id}"
-				).setWindowState(
-					LiferayWindowState.POP_UP
-				).buildString(),
-				"view", "view",
-				LanguageUtil.get(_objectRequestHelper.getRequest(), "view"),
-				"get", null, "modal"),
-			new ClayDataSetActionDropdownItem(
-				"/o/headless-admin-list-type/v1.0/list-type-entries/{id}",
-				"trash", "delete",
-				LanguageUtil.get(_objectRequestHelper.getRequest(), "delete"),
-				"delete", "delete", "async"));
-	}
-
 	public CreationMenu getCreationMenu() throws PortalException {
 		CreationMenu creationMenu = new CreationMenu();
 
@@ -99,6 +70,34 @@ public class ViewListTypeEntriesDisplayContext {
 			});
 
 		return creationMenu;
+	}
+
+	public List<FDSActionDropdownItem> getFDSActionDropdownItems()
+		throws Exception {
+
+		return Arrays.asList(
+			new FDSActionDropdownItem(
+				PortletURLBuilder.create(
+					PortletURLUtil.clone(
+						PortletURLUtil.getCurrent(
+							_objectRequestHelper.getLiferayPortletRequest(),
+							_objectRequestHelper.getLiferayPortletResponse()),
+						_objectRequestHelper.getLiferayPortletResponse())
+				).setMVCRenderCommandName(
+					"/list_type_definitions/edit_list_type_entry"
+				).setParameter(
+					"listTypeEntryId", "{id}"
+				).setWindowState(
+					LiferayWindowState.POP_UP
+				).buildString(),
+				"view", "view",
+				LanguageUtil.get(_objectRequestHelper.getRequest(), "view"),
+				"get", null, "modal"),
+			new FDSActionDropdownItem(
+				"/o/headless-admin-list-type/v1.0/list-type-entries/{id}",
+				"trash", "delete",
+				LanguageUtil.get(_objectRequestHelper.getRequest(), "delete"),
+				"delete", "delete", "async"));
 	}
 
 	public boolean hasUpdateListTypeDefinitionPermission()

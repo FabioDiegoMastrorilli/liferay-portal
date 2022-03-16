@@ -429,16 +429,16 @@ public class ObjectDefinitionLocalServiceUtil {
 	}
 
 	public static ObjectDefinition updateCustomObjectDefinition(
-			Long objectDefinitionId, long descriptionObjectFieldId,
+			long objectDefinitionId, long descriptionObjectFieldId,
 			long titleObjectFieldId, boolean active,
 			Map<java.util.Locale, String> labelMap, String name,
-			String panelAppOrder, String panelCategoryKey,
+			String panelAppOrder, String panelCategoryKey, boolean portlet,
 			Map<java.util.Locale, String> pluralLabelMap, String scope)
 		throws PortalException {
 
 		return getService().updateCustomObjectDefinition(
 			objectDefinitionId, descriptionObjectFieldId, titleObjectFieldId,
-			active, labelMap, name, panelAppOrder, panelCategoryKey,
+			active, labelMap, name, panelAppOrder, panelCategoryKey, portlet,
 			pluralLabelMap, scope);
 	}
 
@@ -456,6 +456,14 @@ public class ObjectDefinitionLocalServiceUtil {
 		ObjectDefinition objectDefinition) {
 
 		return getService().updateObjectDefinition(objectDefinition);
+	}
+
+	public static ObjectDefinition updateTitleObjectFieldId(
+			long objectDefinitionId, long titleObjectFieldId)
+		throws PortalException {
+
+		return getService().updateTitleObjectFieldId(
+			objectDefinitionId, titleObjectFieldId);
 	}
 
 	public static ObjectDefinitionLocalService getService() {

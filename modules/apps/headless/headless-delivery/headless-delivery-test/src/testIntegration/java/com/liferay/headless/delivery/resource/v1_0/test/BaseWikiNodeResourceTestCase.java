@@ -22,6 +22,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.util.ISO8601DateFormat;
 
+import com.liferay.headless.delivery.client.dto.v1_0.Field;
 import com.liferay.headless.delivery.client.dto.v1_0.WikiNode;
 import com.liferay.headless.delivery.client.http.HttpInvoker;
 import com.liferay.headless.delivery.client.pagination.Page;
@@ -280,6 +281,38 @@ public abstract class BaseWikiNodeResourceTestCase {
 	}
 
 	@Test
+	public void testGetSiteWikiNodesPageWithFilterDoubleEquals()
+		throws Exception {
+
+		List<EntityField> entityFields = getEntityFields(
+			EntityField.Type.DOUBLE);
+
+		if (entityFields.isEmpty()) {
+			return;
+		}
+
+		Long siteId = testGetSiteWikiNodesPage_getSiteId();
+
+		WikiNode wikiNode1 = testGetSiteWikiNodesPage_addWikiNode(
+			siteId, randomWikiNode());
+
+		@SuppressWarnings("PMD.UnusedLocalVariable")
+		WikiNode wikiNode2 = testGetSiteWikiNodesPage_addWikiNode(
+			siteId, randomWikiNode());
+
+		for (EntityField entityField : entityFields) {
+			Page<WikiNode> page = wikiNodeResource.getSiteWikiNodesPage(
+				siteId, null, null,
+				getFilterString(entityField, "eq", wikiNode1),
+				Pagination.of(1, 2), null);
+
+			assertEquals(
+				Collections.singletonList(wikiNode1),
+				(List<WikiNode>)page.getItems());
+		}
+	}
+
+	@Test
 	public void testGetSiteWikiNodesPageWithFilterStringEquals()
 		throws Exception {
 
@@ -356,6 +389,16 @@ public abstract class BaseWikiNodeResourceTestCase {
 				BeanUtils.setProperty(
 					wikiNode1, entityField.getName(),
 					DateUtils.addMinutes(new Date(), -2));
+			});
+	}
+
+	@Test
+	public void testGetSiteWikiNodesPageWithSortDouble() throws Exception {
+		testGetSiteWikiNodesPageWithSort(
+			EntityField.Type.DOUBLE,
+			(entityField, wikiNode1, wikiNode2) -> {
+				BeanUtils.setProperty(wikiNode1, entityField.getName(), 0.1);
+				BeanUtils.setProperty(wikiNode2, entityField.getName(), 0.5);
 			});
 	}
 
@@ -732,9 +775,9 @@ public abstract class BaseWikiNodeResourceTestCase {
 	}
 
 	@Test
-	public void testPutSiteWikiNodePermission() throws Exception {
+	public void testPutSiteWikiNodePermissionsPage() throws Exception {
 		@SuppressWarnings("PMD.UnusedLocalVariable")
-		WikiNode wikiNode = testPutSiteWikiNodePermission_addWikiNode();
+		WikiNode wikiNode = testPutSiteWikiNodePermissionsPage_addWikiNode();
 
 		@SuppressWarnings("PMD.UnusedLocalVariable")
 		com.liferay.portal.kernel.model.Role role = RoleTestUtil.addRole(
@@ -742,7 +785,7 @@ public abstract class BaseWikiNodeResourceTestCase {
 
 		assertHttpResponseStatusCode(
 			200,
-			wikiNodeResource.putSiteWikiNodePermissionHttpResponse(
+			wikiNodeResource.putSiteWikiNodePermissionsPageHttpResponse(
 				wikiNode.getSiteId(),
 				new Permission[] {
 					new Permission() {
@@ -755,7 +798,7 @@ public abstract class BaseWikiNodeResourceTestCase {
 
 		assertHttpResponseStatusCode(
 			404,
-			wikiNodeResource.putSiteWikiNodePermissionHttpResponse(
+			wikiNodeResource.putSiteWikiNodePermissionsPageHttpResponse(
 				wikiNode.getSiteId(),
 				new Permission[] {
 					new Permission() {
@@ -767,7 +810,7 @@ public abstract class BaseWikiNodeResourceTestCase {
 				}));
 	}
 
-	protected WikiNode testPutSiteWikiNodePermission_addWikiNode()
+	protected WikiNode testPutSiteWikiNodePermissionsPage_addWikiNode()
 		throws Exception {
 
 		return wikiNodeResource.postSiteWikiNode(
@@ -923,9 +966,9 @@ public abstract class BaseWikiNodeResourceTestCase {
 	}
 
 	@Test
-	public void testPutWikiNodePermission() throws Exception {
+	public void testPutWikiNodePermissionsPage() throws Exception {
 		@SuppressWarnings("PMD.UnusedLocalVariable")
-		WikiNode wikiNode = testPutWikiNodePermission_addWikiNode();
+		WikiNode wikiNode = testPutWikiNodePermissionsPage_addWikiNode();
 
 		@SuppressWarnings("PMD.UnusedLocalVariable")
 		com.liferay.portal.kernel.model.Role role = RoleTestUtil.addRole(
@@ -933,7 +976,7 @@ public abstract class BaseWikiNodeResourceTestCase {
 
 		assertHttpResponseStatusCode(
 			200,
-			wikiNodeResource.putWikiNodePermissionHttpResponse(
+			wikiNodeResource.putWikiNodePermissionsPageHttpResponse(
 				wikiNode.getId(),
 				new Permission[] {
 					new Permission() {
@@ -946,7 +989,7 @@ public abstract class BaseWikiNodeResourceTestCase {
 
 		assertHttpResponseStatusCode(
 			404,
-			wikiNodeResource.putWikiNodePermissionHttpResponse(
+			wikiNodeResource.putWikiNodePermissionsPageHttpResponse(
 				0L,
 				new Permission[] {
 					new Permission() {
@@ -958,7 +1001,7 @@ public abstract class BaseWikiNodeResourceTestCase {
 				}));
 	}
 
-	protected WikiNode testPutWikiNodePermission_addWikiNode()
+	protected WikiNode testPutWikiNodePermissionsPage_addWikiNode()
 		throws Exception {
 
 		return wikiNodeResource.postSiteWikiNode(
@@ -1676,8 +1719,9 @@ public abstract class BaseWikiNodeResourceTestCase {
 		}
 
 		if (entityFieldName.equals("numberOfWikiPages")) {
-			throw new IllegalArgumentException(
-				"Invalid entity field " + entityFieldName);
+			sb.append(String.valueOf(wikiNode.getNumberOfWikiPages()));
+
+			return sb.toString();
 		}
 
 		if (entityFieldName.equals("siteId")) {

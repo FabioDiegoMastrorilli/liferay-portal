@@ -63,14 +63,14 @@ import com.liferay.portal.kernel.util.PortalUtil;
 import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.kernel.util.WebKeys;
-import com.liferay.segments.constants.SegmentsExperienceConstants;
-import com.liferay.segments.constants.SegmentsWebKeys;
+import com.liferay.segments.SegmentsEntryRetriever;
+import com.liferay.segments.context.RequestContextMapper;
 import com.liferay.style.book.model.StyleBookEntry;
 import com.liferay.style.book.util.DefaultStyleBookEntryUtil;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 import java.util.Objects;
 
 import javax.servlet.http.HttpServletRequest;
@@ -81,11 +81,9 @@ import javax.servlet.http.HttpServletRequest;
 public class RenderLayoutStructureDisplayContext {
 
 	public RenderLayoutStructureDisplayContext(
-		Map<String, Object> fieldValues, HttpServletRequest httpServletRequest,
-		LayoutStructure layoutStructure, String mainItemId, String mode,
-		boolean showPreview) {
+		HttpServletRequest httpServletRequest, LayoutStructure layoutStructure,
+		String mainItemId, String mode, boolean showPreview) {
 
-		_fieldValues = fieldValues;
 		_httpServletRequest = httpServletRequest;
 		_layoutStructure = layoutStructure;
 		_mainItemId = mainItemId;
@@ -94,6 +92,10 @@ public class RenderLayoutStructureDisplayContext {
 
 		_themeDisplay = (ThemeDisplay)_httpServletRequest.getAttribute(
 			WebKeys.THEME_DISPLAY);
+	}
+
+	public List<String> getCollectionStyledLayoutStructureItemIds() {
+		return _collectionStyledLayoutStructureItemIds;
 	}
 
 	public String getContainerLinkHref(
@@ -432,7 +434,9 @@ public class RenderLayoutStructureDisplayContext {
 	}
 
 	public DefaultFragmentRendererContext getDefaultFragmentRendererContext(
-		FragmentEntryLink fragmentEntryLink, String itemId) {
+		FragmentEntryLink fragmentEntryLink, String itemId,
+		List<String> collectionStyledLayoutStructureItemIds,
+		int collectionElementIndex) {
 
 		DefaultFragmentRendererContext defaultFragmentRendererContext =
 			new DefaultFragmentRendererContext(fragmentEntryLink);
@@ -445,7 +449,6 @@ public class RenderLayoutStructureDisplayContext {
 		Layout layout = _themeDisplay.getLayout();
 
 		if (!Objects.equals(layout.getType(), LayoutConstants.TYPE_PORTLET)) {
-			defaultFragmentRendererContext.setFieldValues(_fieldValues);
 			defaultFragmentRendererContext.setMode(_mode);
 			defaultFragmentRendererContext.setPreviewClassNameId(
 				_getPreviewClassNameId());
@@ -454,8 +457,8 @@ public class RenderLayoutStructureDisplayContext {
 			defaultFragmentRendererContext.setPreviewType(_getPreviewType());
 			defaultFragmentRendererContext.setPreviewVersion(
 				_getPreviewVersion());
-			defaultFragmentRendererContext.setSegmentsExperienceIds(
-				_getSegmentsExperienceIds());
+			defaultFragmentRendererContext.setSegmentsEntryIds(
+				_getSegmentsEntryIds());
 		}
 
 		if (LayoutStructureItemUtil.hasAncestor(
@@ -464,6 +467,12 @@ public class RenderLayoutStructureDisplayContext {
 
 			defaultFragmentRendererContext.setUseCachedContent(false);
 		}
+
+		defaultFragmentRendererContext.
+			setCollectionStyledLayoutStructureItemIds(
+				collectionStyledLayoutStructureItemIds);
+		defaultFragmentRendererContext.setCollectionElementIndex(
+			collectionElementIndex);
 
 		return defaultFragmentRendererContext;
 	}
@@ -1118,30 +1127,29 @@ public class RenderLayoutStructureDisplayContext {
 		return _previewVersion;
 	}
 
-	private long[] _getSegmentsExperienceIds() {
-		long[] selectedSegmentsExperienceIds = ParamUtil.getLongValues(
-			_httpServletRequest, "p_s_e_id");
-
-		if (selectedSegmentsExperienceIds.length > 0) {
-			return selectedSegmentsExperienceIds;
+	private long[] _getSegmentsEntryIds() {
+		if (_segmentsEntryIds != null) {
+			return _segmentsEntryIds;
 		}
 
-		if (_segmentsExperienceIds != null) {
-			return _segmentsExperienceIds;
-		}
+		SegmentsEntryRetriever segmentsEntryRetriever =
+			ServletContextUtil.getSegmentsEntryRetriever();
 
-		_segmentsExperienceIds = GetterUtil.getLongValues(
-			_httpServletRequest.getAttribute(
-				SegmentsWebKeys.SEGMENTS_EXPERIENCE_IDS),
-			new long[] {SegmentsExperienceConstants.ID_DEFAULT});
+		RequestContextMapper requestContextMapper =
+			ServletContextUtil.getRequestContextMapper();
 
-		return _segmentsExperienceIds;
+		_segmentsEntryIds = segmentsEntryRetriever.getSegmentsEntryIds(
+			_themeDisplay.getScopeGroupId(), _themeDisplay.getUserId(),
+			requestContextMapper.map(_httpServletRequest));
+
+		return _segmentsEntryIds;
 	}
 
 	private static final Log _log = LogFactoryUtil.getLog(
 		RenderLayoutStructureDisplayContext.class);
 
-	private final Map<String, Object> _fieldValues;
+	private final List<String> _collectionStyledLayoutStructureItemIds =
+		new ArrayList<>();
 	private JSONObject _frontendTokensJSONObject;
 	private final HttpServletRequest _httpServletRequest;
 	private final LayoutStructure _layoutStructure;
@@ -1151,7 +1159,7 @@ public class RenderLayoutStructureDisplayContext {
 	private Long _previewClassPK;
 	private Integer _previewType;
 	private String _previewVersion;
-	private long[] _segmentsExperienceIds;
+	private long[] _segmentsEntryIds;
 	private final boolean _showPreview;
 	private final ThemeDisplay _themeDisplay;
 

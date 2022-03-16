@@ -51,13 +51,14 @@ public class TestrayAttachmentRecorder {
 			return;
 		}
 
-		JenkinsResultsParserUtil.delete(getTestrayLogsDir());
+		JenkinsResultsParserUtil.delete(getRecordedFilesBaseDir());
 
 		try {
 			_recordJenkinsConsole();
 
 			if (_build instanceof TopLevelBuild) {
 				_recordBuildResult();
+				_recordJobSummary();
 				_recordJenkinsReport();
 			}
 			else {
@@ -100,24 +101,44 @@ public class TestrayAttachmentRecorder {
 			jobVariant + "start.properties");
 	}
 
-	protected File getTestrayLogsDir() {
+	protected File getRecordedFilesBaseDir() {
 		String workspace = System.getenv("WORKSPACE");
 
 		if (JenkinsResultsParserUtil.isNullOrEmpty(workspace)) {
 			throw new RuntimeException("Please set WORKSPACE");
 		}
 
-		return new File(workspace, "testray/logs");
+		return new File(workspace, "testray/recorded_logs");
 	}
 
-	private File _convertToGzipFile(File file) {
-		File gzipFile = new File(file.getParent(), file.getName() + ".gz");
+	protected String getRelativeBuildDirPath() {
+		StringBuilder sb = new StringBuilder();
 
-		JenkinsResultsParserUtil.gzip(file, gzipFile);
+		Date topLevelStartDate = new Date(
+			Long.parseLong(
+				_startProperties.getProperty("TOP_LEVEL_START_TIME")));
 
-		JenkinsResultsParserUtil.delete(file);
+		sb.append(
+			JenkinsResultsParserUtil.toDateString(
+				topLevelStartDate, "yyyy-MM", "America/Los_Angeles"));
 
-		return gzipFile;
+		sb.append("/");
+		sb.append(_startProperties.getProperty("TOP_LEVEL_MASTER_HOSTNAME"));
+		sb.append("/");
+		sb.append(_startProperties.getProperty("TOP_LEVEL_JOB_NAME"));
+		sb.append("/");
+		sb.append(_startProperties.getProperty("TOP_LEVEL_BUILD_NUMBER"));
+		sb.append("/");
+
+		if (!(_build instanceof TopLevelBuild)) {
+			sb.append(_build.getJobVariant());
+			sb.append("/");
+
+			sb.append(
+				JenkinsResultsParserUtil.getAxisVariable(_build.getBuildURL()));
+		}
+
+		return sb.toString();
 	}
 
 	private List<File> _getLiferayBundlesDirs() {
@@ -220,34 +241,8 @@ public class TestrayAttachmentRecorder {
 		return _qaWebsitesGitWorkingDirectory;
 	}
 
-	private File _getTestrayLogsBuildDir() {
-		StringBuilder sb = new StringBuilder();
-
-		Date topLevelStartDate = new Date(
-			Long.parseLong(
-				_startProperties.getProperty("TOP_LEVEL_START_TIME")));
-
-		sb.append(
-			JenkinsResultsParserUtil.toDateString(
-				topLevelStartDate, "yyyy-MM", "America/Los_Angeles"));
-
-		sb.append("/");
-		sb.append(_startProperties.getProperty("TOP_LEVEL_MASTER_HOSTNAME"));
-		sb.append("/");
-		sb.append(_startProperties.getProperty("TOP_LEVEL_JOB_NAME"));
-		sb.append("/");
-		sb.append(_startProperties.getProperty("TOP_LEVEL_BUILD_NUMBER"));
-		sb.append("/");
-
-		if (!(_build instanceof TopLevelBuild)) {
-			sb.append(_build.getJobVariant());
-			sb.append("/");
-
-			sb.append(
-				JenkinsResultsParserUtil.getAxisVariable(_build.getBuildURL()));
-		}
-
-		return new File(getTestrayLogsDir(), sb.toString());
+	private File _getRecordedFilesBuildDir() {
+		return new File(getRecordedFilesBaseDir(), getRelativeBuildDirPath());
 	}
 
 	private void _recordBuildResult() {
@@ -265,13 +260,11 @@ public class TestrayAttachmentRecorder {
 			});
 
 		File buildResultsJSONObjectFile = new File(
-			_getTestrayLogsBuildDir(), "build-result.json");
+			_getRecordedFilesBuildDir(), "build-result.json");
 
 		try {
 			JenkinsResultsParserUtil.write(
 				buildResultsJSONObjectFile, jsonObject.toString());
-
-			_convertToGzipFile(buildResultsJSONObjectFile);
 		}
 		catch (IOException ioException) {
 			throw new RuntimeException(ioException);
@@ -283,13 +276,11 @@ public class TestrayAttachmentRecorder {
 			new JenkinsConsoleTextLoader(_build.getBuildURL());
 
 		File jenkinsConsoleFile = new File(
-			_getTestrayLogsBuildDir(), "jenkins-console.txt");
+			_getRecordedFilesBuildDir(), "jenkins-console.txt");
 
 		try {
 			JenkinsResultsParserUtil.write(
 				jenkinsConsoleFile, jenkinsConsoleTextLoader.getConsoleText());
-
-			_convertToGzipFile(jenkinsConsoleFile);
 		}
 		catch (IOException ioException) {
 			throw new RuntimeException(ioException);
@@ -306,15 +297,38 @@ public class TestrayAttachmentRecorder {
 		Element jenkinsReportElement = topLevelBuild.getJenkinsReportElement();
 
 		File jenkinsReportFile = new File(
-			_getTestrayLogsBuildDir(), "jenkins-report.html");
+			_getRecordedFilesBuildDir(), "jenkins-report.html");
 
 		try {
 			JenkinsResultsParserUtil.write(
 				jenkinsReportFile,
 				StringEscapeUtils.unescapeXml(
 					Dom4JUtil.format(jenkinsReportElement, true)));
+		}
+		catch (IOException ioException) {
+			throw new RuntimeException(ioException);
+		}
+	}
 
-			_convertToGzipFile(jenkinsReportFile);
+	private void _recordJobSummary() {
+		if (!(_build instanceof TopLevelBuild)) {
+			return;
+		}
+
+		TopLevelBuild topLevelBuild = (TopLevelBuild)_build;
+
+		File jobSummaryFile = new File(
+			topLevelBuild.getJobSummaryDir(), "index.html");
+
+		if (!jobSummaryFile.exists()) {
+			return;
+		}
+
+		try {
+			JenkinsResultsParserUtil.copy(
+				jobSummaryFile,
+				new File(
+					_getRecordedFilesBuildDir(), "job-summary/index.html"));
 		}
 		catch (IOException ioException) {
 			throw new RuntimeException(ioException);
@@ -359,7 +373,7 @@ public class TestrayAttachmentRecorder {
 			}
 
 			File liferayLogFile = new File(
-				_getTestrayLogsBuildDir(),
+				_getRecordedFilesBuildDir(),
 				JenkinsResultsParserUtil.combine(
 					"liferay-log", matcher.group("bundlesSuffix"), ".txt"));
 
@@ -367,10 +381,7 @@ public class TestrayAttachmentRecorder {
 				JenkinsResultsParserUtil.write(liferayLogFile, sb.toString());
 			}
 			catch (IOException ioException) {
-				continue;
 			}
-
-			_convertToGzipFile(liferayLogFile);
 		}
 	}
 
@@ -422,7 +433,7 @@ public class TestrayAttachmentRecorder {
 			}
 
 			File liferayOSGiLogFile = new File(
-				_getTestrayLogsBuildDir(),
+				_getRecordedFilesBuildDir(),
 				JenkinsResultsParserUtil.combine(
 					"liferay-osgi-log", matcher.group("bundlesSuffix"),
 					".txt"));
@@ -432,10 +443,7 @@ public class TestrayAttachmentRecorder {
 					liferayOSGiLogFile, liferayOSGiLogFileContent);
 			}
 			catch (IOException ioException) {
-				continue;
 			}
-
-			_convertToGzipFile(liferayOSGiLogFile);
 		}
 	}
 
@@ -481,7 +489,8 @@ public class TestrayAttachmentRecorder {
 					poshiReportIndexFile.getParentFile();
 
 				File poshiReportDir = new File(
-					_getTestrayLogsBuildDir(), sourcePoshiReportDir.getName());
+					_getRecordedFilesBuildDir(),
+					sourcePoshiReportDir.getName());
 
 				try {
 					JenkinsResultsParserUtil.copy(
@@ -491,60 +500,34 @@ public class TestrayAttachmentRecorder {
 					throw new RuntimeException(ioException);
 				}
 
-				File poshiIndexFile = new File(poshiReportDir, "index.html");
+				File indexFile = new File(poshiReportDir, "index.html");
 
-				if (poshiIndexFile.exists()) {
-					try {
-						String content = JenkinsResultsParserUtil.read(
-							poshiIndexFile);
-
-						for (File poshiReportJPGFile :
-								JenkinsResultsParserUtil.findFiles(
-									poshiReportDir, ".*\\.jpg")) {
-
-							String poshiReportJPGFileName =
-								poshiReportJPGFile.getName();
-
-							if (!content.contains(
-									"/" + poshiReportJPGFileName)) {
-
-								System.out.println(
-									"Removing unreferenced file " +
-										poshiReportJPGFile);
-
-								JenkinsResultsParserUtil.delete(
-									poshiReportJPGFile);
-
-								continue;
-							}
-
-							_convertToGzipFile(poshiReportJPGFile);
-						}
-					}
-					catch (IOException ioException) {
-						throw new RuntimeException(ioException);
-					}
+				if (!indexFile.exists()) {
+					continue;
 				}
 
-				for (File poshiReportHTMLFile :
-						JenkinsResultsParserUtil.findFiles(
-							poshiReportDir, ".*\\.html")) {
+				try {
+					String content = JenkinsResultsParserUtil.read(indexFile);
 
-					try {
-						String content = JenkinsResultsParserUtil.read(
-							poshiReportHTMLFile);
+					for (File poshiReportJPGFile :
+							JenkinsResultsParserUtil.findFiles(
+								poshiReportDir, ".*\\.jpg")) {
 
-						JenkinsResultsParserUtil.write(
-							poshiReportHTMLFile,
-							content.replaceAll(
-								"(screenshots/(?:after|before)\\d+).jpg",
-								"$1.jpg.gz"));
+						String poshiReportJPGFileName =
+							poshiReportJPGFile.getName();
+
+						if (content.contains("/" + poshiReportJPGFileName)) {
+							continue;
+						}
+
+						System.out.println(
+							"Removing unreferenced file " + poshiReportJPGFile);
+
+						JenkinsResultsParserUtil.delete(poshiReportJPGFile);
 					}
-					catch (IOException ioException) {
-						throw new RuntimeException(ioException);
-					}
-
-					_convertToGzipFile(poshiReportHTMLFile);
+				}
+				catch (IOException ioException) {
+					throw new RuntimeException(ioException);
 				}
 			}
 		}
@@ -567,7 +550,7 @@ public class TestrayAttachmentRecorder {
 		}
 
 		File poshiWarningsFile = new File(
-			_getTestrayLogsBuildDir(), "poshi-warnings.xml");
+			_getRecordedFilesBuildDir(), "poshi-warnings.xml");
 
 		try {
 			JenkinsResultsParserUtil.copy(
@@ -588,8 +571,6 @@ public class TestrayAttachmentRecorder {
 		catch (IOException ioException) {
 			throw new RuntimeException(ioException);
 		}
-
-		_convertToGzipFile(poshiWarningsFile);
 	}
 
 	private static final Pattern _bundlesDirNamePattern = Pattern.compile(

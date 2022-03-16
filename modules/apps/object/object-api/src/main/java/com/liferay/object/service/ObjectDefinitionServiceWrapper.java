@@ -27,6 +27,10 @@ public class ObjectDefinitionServiceWrapper
 	implements ObjectDefinitionService,
 			   ServiceWrapper<ObjectDefinitionService> {
 
+	public ObjectDefinitionServiceWrapper() {
+		this(null);
+	}
+
 	public ObjectDefinitionServiceWrapper(
 		ObjectDefinitionService objectDefinitionService) {
 
@@ -115,18 +119,27 @@ public class ObjectDefinitionServiceWrapper
 	@Override
 	public com.liferay.object.model.ObjectDefinition
 			updateCustomObjectDefinition(
-				Long objectDefinitionId, long descriptionObjectFieldId,
+				long objectDefinitionId, long descriptionObjectFieldId,
 				long titleObjectFieldId, boolean active,
 				java.util.Map<java.util.Locale, String> labelMap, String name,
-				String panelAppOrder, String panelCategoryKey,
+				String panelAppOrder, String panelCategoryKey, boolean portlet,
 				java.util.Map<java.util.Locale, String> pluralLabelMap,
 				String scope)
 		throws com.liferay.portal.kernel.exception.PortalException {
 
 		return _objectDefinitionService.updateCustomObjectDefinition(
 			objectDefinitionId, descriptionObjectFieldId, titleObjectFieldId,
-			active, labelMap, name, panelAppOrder, panelCategoryKey,
+			active, labelMap, name, panelAppOrder, panelCategoryKey, portlet,
 			pluralLabelMap, scope);
+	}
+
+	@Override
+	public com.liferay.object.model.ObjectDefinition updateTitleObjectFieldId(
+			long objectDefinitionId, long titleObjectFieldId)
+		throws com.liferay.portal.kernel.exception.PortalException {
+
+		return _objectDefinitionService.updateTitleObjectFieldId(
+			objectDefinitionId, titleObjectFieldId);
 	}
 
 	@Override

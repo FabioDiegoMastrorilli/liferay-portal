@@ -26,6 +26,10 @@ import com.liferay.portal.kernel.service.ServiceWrapper;
 public class CommerceOrderServiceWrapper
 	implements CommerceOrderService, ServiceWrapper<CommerceOrderService> {
 
+	public CommerceOrderServiceWrapper() {
+		this(null);
+	}
+
 	public CommerceOrderServiceWrapper(
 		CommerceOrderService commerceOrderService) {
 
@@ -330,6 +334,26 @@ public class CommerceOrderServiceWrapper
 
 	@Override
 	public java.util.List<com.liferay.commerce.model.CommerceOrder>
+			getUserCommerceOrders(
+				long companyId, long groupId, String keywords, int start,
+				int end)
+		throws com.liferay.portal.kernel.exception.PortalException {
+
+		return _commerceOrderService.getUserCommerceOrders(
+			companyId, groupId, keywords, start, end);
+	}
+
+	@Override
+	public long getUserCommerceOrdersCount(
+			long companyId, long groupId, String keywords)
+		throws com.liferay.portal.kernel.exception.PortalException {
+
+		return _commerceOrderService.getUserCommerceOrdersCount(
+			companyId, groupId, keywords);
+	}
+
+	@Override
+	public java.util.List<com.liferay.commerce.model.CommerceOrder>
 			getUserPendingCommerceOrders(
 				long companyId, long groupId, String keywords, int start,
 				int end)
@@ -401,6 +425,17 @@ public class CommerceOrderServiceWrapper
 	}
 
 	@Override
+	public com.liferay.commerce.model.CommerceOrder resetTermsAndConditions(
+			long commerceOrderId, boolean deliveryCommerceTermEntry,
+			boolean paymentCommerceTermEntry)
+		throws com.liferay.portal.kernel.exception.PortalException {
+
+		return _commerceOrderService.resetTermsAndConditions(
+			commerceOrderId, deliveryCommerceTermEntry,
+			paymentCommerceTermEntry);
+	}
+
+	@Override
 	public com.liferay.commerce.model.CommerceOrder updateBillingAddress(
 			long commerceOrderId, long billingAddressId)
 		throws com.liferay.portal.kernel.exception.PortalException {
@@ -432,19 +467,26 @@ public class CommerceOrderServiceWrapper
 
 	@Override
 	public com.liferay.commerce.model.CommerceOrder updateCommerceOrder(
-			long commerceOrderId, long billingAddressId, long shippingAddressId,
+			String externalReferenceCode, long commerceOrderId,
+			long billingAddressId, long shippingAddressId,
 			String commercePaymentMethodKey, long commerceShippingMethodId,
 			String shippingOptionName, String purchaseOrderNumber,
 			java.math.BigDecimal subtotal, java.math.BigDecimal shippingAmount,
-			java.math.BigDecimal total, String advanceStatus,
+			java.math.BigDecimal taxAmount, java.math.BigDecimal total,
+			java.math.BigDecimal subtotalWithTaxAmount,
+			java.math.BigDecimal shippingWithTaxAmount,
+			java.math.BigDecimal totalWithTaxAmount,
+			java.math.BigDecimal totalDiscountAmount, String advanceStatus,
 			com.liferay.commerce.context.CommerceContext commerceContext)
 		throws com.liferay.portal.kernel.exception.PortalException {
 
 		return _commerceOrderService.updateCommerceOrder(
-			commerceOrderId, billingAddressId, shippingAddressId,
-			commercePaymentMethodKey, commerceShippingMethodId,
-			shippingOptionName, purchaseOrderNumber, subtotal, shippingAmount,
-			total, advanceStatus, commerceContext);
+			externalReferenceCode, commerceOrderId, billingAddressId,
+			shippingAddressId, commercePaymentMethodKey,
+			commerceShippingMethodId, shippingOptionName, purchaseOrderNumber,
+			subtotal, shippingAmount, taxAmount, total, subtotalWithTaxAmount,
+			shippingWithTaxAmount, totalWithTaxAmount, totalDiscountAmount,
+			advanceStatus, commerceContext);
 	}
 
 	@Override
@@ -728,6 +770,17 @@ public class CommerceOrderServiceWrapper
 		return _commerceOrderService.updateShippingAddress(
 			commerceOrderId, name, description, street1, street2, street3, city,
 			zip, regionId, countryId, phoneNumber, serviceContext);
+	}
+
+	@Override
+	public com.liferay.commerce.model.CommerceOrder updateTermsAndConditions(
+			long commerceOrderId, long deliveryCommerceTermEntryId,
+			long paymentCommerceTermEntryId, String languageId)
+		throws com.liferay.portal.kernel.exception.PortalException {
+
+		return _commerceOrderService.updateTermsAndConditions(
+			commerceOrderId, deliveryCommerceTermEntryId,
+			paymentCommerceTermEntryId, languageId);
 	}
 
 	@Override

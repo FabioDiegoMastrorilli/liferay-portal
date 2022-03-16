@@ -69,7 +69,8 @@ const timeRangeData = {
 };
 
 describe('The PerformanceByAssigneePage component having data should', () => {
-	let getAllByRole, rows;
+	let getAllByRole;
+	let rows;
 
 	beforeAll(async () => {
 		jsonSessionStorage.set('timeRanges', timeRangeData);
@@ -80,6 +81,7 @@ describe('The PerformanceByAssigneePage component having data should', () => {
 
 		fetch.mockResolvedValue({
 			json: () => Promise.resolve(data),
+			ok: true,
 			text: () => Promise.resolve(),
 		});
 

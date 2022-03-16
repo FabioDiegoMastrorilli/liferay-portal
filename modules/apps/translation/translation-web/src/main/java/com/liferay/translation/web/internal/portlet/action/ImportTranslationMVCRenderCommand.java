@@ -18,29 +18,38 @@ import com.liferay.info.field.InfoFieldValue;
 import com.liferay.info.item.InfoItemServiceTracker;
 import com.liferay.info.item.provider.InfoItemFieldValuesProvider;
 import com.liferay.info.item.provider.InfoItemObjectProvider;
-import com.liferay.info.item.provider.InfoItemWorkflowProvider;
+import com.liferay.petra.string.StringPool;
+import com.liferay.portal.configuration.metatype.bnd.util.ConfigurableUtil;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.portlet.bridges.mvc.MVCRenderCommand;
+import com.liferay.portal.kernel.service.WorkflowDefinitionLinkLocalService;
 import com.liferay.portal.kernel.theme.ThemeDisplay;
 import com.liferay.portal.kernel.util.ParamUtil;
 import com.liferay.portal.kernel.util.Portal;
 import com.liferay.portal.kernel.util.WebKeys;
 import com.liferay.translation.constants.TranslationPortletKeys;
+import com.liferay.translation.service.TranslationEntryLocalService;
+import com.liferay.translation.web.internal.configuration.FFBulkTranslationConfiguration;
 import com.liferay.translation.web.internal.display.context.ImportTranslationDisplayContext;
+import com.liferay.translation.web.internal.helper.TranslationRequestHelper;
 
 import java.util.Locale;
+import java.util.Map;
 
 import javax.portlet.PortletException;
 import javax.portlet.RenderRequest;
 import javax.portlet.RenderResponse;
 
+import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Modified;
 import org.osgi.service.component.annotations.Reference;
 
 /**
  * @author Adolfo Pérez
  */
 @Component(
+	configurationPid = "com.liferay.translation.web.internal.configuration.FFBulkTranslationConfiguration",
 	property = {
 		"javax.portlet.name=" + TranslationPortletKeys.TRANSLATION,
 		"mvc.command.name=/translation/import_translation"
@@ -58,29 +67,39 @@ public class ImportTranslationMVCRenderCommand implements MVCRenderCommand {
 			ThemeDisplay themeDisplay =
 				(ThemeDisplay)renderRequest.getAttribute(WebKeys.THEME_DISPLAY);
 
-			long classNameId = ParamUtil.getLong(renderRequest, "classNameId");
-			long classPK = ParamUtil.getLong(renderRequest, "classPK");
-			long groupId = ParamUtil.getLong(renderRequest, "groupId");
-
-			String className = _portal.getClassName(classNameId);
-
-			Object model = _getModel(className, classPK);
+			TranslationRequestHelper translationRequestHelper =
+				new TranslationRequestHelper(
+					_infoItemServiceTracker, renderRequest);
 
 			renderRequest.setAttribute(
 				ImportTranslationDisplayContext.class.getName(),
 				new ImportTranslationDisplayContext(
-					classNameId, classPK, groupId,
+					ParamUtil.getLong(renderRequest, "classNameId"),
+					translationRequestHelper.getModelClassPK(),
+					themeDisplay.getCompanyId(),
+					_ffBulkTranslationConfiguration,
+					ParamUtil.getLong(renderRequest, "groupId"),
 					_portal.getHttpServletRequest(renderRequest),
-					_infoItemServiceTracker.getFirstInfoItemService(
-						InfoItemWorkflowProvider.class, className),
-					_portal.getLiferayPortletResponse(renderResponse), model,
-					_getTitle(className, model, themeDisplay.getLocale())));
+					_portal.getLiferayPortletResponse(renderResponse),
+					_getTitle(
+						translationRequestHelper.getModelClassName(),
+						translationRequestHelper.getModelClassPKs(),
+						themeDisplay.getLocale()),
+					_translationEntryLocalService,
+					_workflowDefinitionLinkLocalService));
 
 			return "/import_translation.jsp";
 		}
 		catch (PortalException portalException) {
 			throw new PortletException(portalException);
 		}
+	}
+
+	@Activate
+	@Modified
+	protected void activate(Map<String, Object> properties) {
+		_ffBulkTranslationConfiguration = ConfigurableUtil.createConfigurable(
+			FFBulkTranslationConfiguration.class, properties);
 	}
 
 	private Object _getModel(String className, long classPK)
@@ -93,13 +112,19 @@ public class ImportTranslationMVCRenderCommand implements MVCRenderCommand {
 		return infoItemObjectProvider.getInfoItem(classPK);
 	}
 
-	private String _getTitle(String className, Object model, Locale locale) {
+	private String _getTitle(String className, long[] classPKs, Locale locale)
+		throws PortalException {
+
+		if ((classPKs.length != 1) || (classPKs[0] == 0)) {
+			return StringPool.BLANK;
+		}
+
 		InfoItemFieldValuesProvider<Object> infoItemFieldValuesProvider =
 			_infoItemServiceTracker.getFirstInfoItemService(
 				InfoItemFieldValuesProvider.class, className);
 
 		InfoFieldValue<Object> infoFieldValue = _getTitleInfoFieldValue(
-			infoItemFieldValuesProvider, model);
+			infoItemFieldValuesProvider, _getModel(className, classPKs[0]));
 
 		return (String)infoFieldValue.getValue(locale);
 	}
@@ -118,10 +143,20 @@ public class ImportTranslationMVCRenderCommand implements MVCRenderCommand {
 		return infoItemFieldValuesProvider.getInfoFieldValue(object, "name");
 	}
 
+	private volatile FFBulkTranslationConfiguration
+		_ffBulkTranslationConfiguration;
+
 	@Reference
 	private InfoItemServiceTracker _infoItemServiceTracker;
 
 	@Reference
 	private Portal _portal;
+
+	@Reference
+	private TranslationEntryLocalService _translationEntryLocalService;
+
+	@Reference
+	private WorkflowDefinitionLinkLocalService
+		_workflowDefinitionLinkLocalService;
 
 }

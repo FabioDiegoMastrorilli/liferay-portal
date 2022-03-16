@@ -1,6 +1,7 @@
-@component-name = "portal-collaboration"
+@component-name = "portal-lima"
 definition {
 
+	property portal.acceptance = "true";
 	property portal.release = "true";
 	property portal.upstream = "true";
 	property testray.main.component.name = "Message Boards";
@@ -92,7 +93,6 @@ definition {
 	@priority = "4"
 	@refactordone
 	test CanAddLinkToDocument {
-		property portal.acceptance = "true";
 		property testray.component.names = "WYSIWYG";
 
 		JSONDocument.addFileWithUploadedFile(
@@ -118,7 +118,6 @@ definition {
 	@priority = "4"
 	@refactordone
 	test CanAddLinkToPage {
-		property portal.acceptance = "true";
 		property testray.component.names = "WYSIWYG";
 
 		MessageboardsThread.addCP(
@@ -179,13 +178,25 @@ definition {
 	}
 
 	@description = "This is a test for LPS-136912. It checks that an urgent thread can be added."
-	@ignore = "true"
 	@priority = "3"
 	test CanAddUrgentThread {
-		property portal.acceptance = "false";
+		MessageboardsThread.addPG(
+			groupName = "Guest",
+			layoutName = "message-boards-page",
+			priority = "Urgent",
+			siteURLKey = "guest",
+			threadBody = "MB Thread Message Body",
+			threadSubject = "MB Thread Message Subject");
 
-		// TODO LPS-136912 CanAddUrgentThread pending implementation
+		MessageboardsThread.openToThread(
+			groupName = "Guest",
+			layoutName = "message-boards-page",
+			siteURLKey = "guest",
+			threadSubject = "MB Thread Message Subject");
 
+		MessageboardsThread.viewPG(
+			threadBody = "MB Thread Message Body",
+			threadSubject = "MB Thread Message Subject");
 	}
 
 	@priority = "5"
@@ -257,6 +268,7 @@ definition {
 	@refactordone
 	test CanDeleteThreadWithAttachment {
 		property custom.properties = "trash.entry.check.interval=1${line.separator}trash.entries.max.age=1";
+		property portal.acceptance = "false";
 
 		JSONGroup.addGroup(groupName = "Site Name");
 
@@ -322,23 +334,34 @@ definition {
 	}
 
 	@description = "This is a test for LPS-136920. It checks that a thread can be exported."
-	@ignore = "true"
 	@priority = "3"
 	test CanExportThread {
-		property portal.acceptance = "false";
+		JSONMBMessage.addMessage(
+			groupName = "Guest",
+			threadBody = "MB Thread Message Body",
+			threadSubject = "MB Thread Message Subject");
 
-		// TODO LPS-136920 CanExportThread pending implementation
+		MessageBoardsAdmin.openMessageBoardsAdmin(siteURLKey = "guest");
 
+		LAR.exportPortlet(larFileName = "ExportMBThread.lar");
+
+		MessageboardsThread.assertDownloadedFileNameFromTempFolder(exportedFileName = "ExportMBThread");
 	}
 
 	@description = "This is a test for LPS-136919. It checks that a thread can be imported."
-	@ignore = "true"
 	@priority = "3"
 	test CanImportThread {
-		property portal.acceptance = "false";
+		MessageBoardsAdmin.openMessageBoardsAdmin(siteURLKey = "guest");
 
-		// TODO LPS-136919 CanImportThread pending implementation
+		LAR.importPortlet(
+			initializeLiferayEvent = "true",
+			larFileName = "message-boards-thread.lar",
+			uploadFrom = "dependencies");
 
+		MessageboardsThread.viewCP(
+			replyCount = "0",
+			threadBody = "MB Thread Message Body",
+			threadSubject = "MB Thread Message Subject");
 	}
 
 	@priority = "4"
@@ -447,6 +470,8 @@ definition {
 	@priority = "3"
 	@refactordone
 	test CanMoveMBCategory1ThreadWithExplanationPostToCategory2 {
+		property portal.acceptance = "false";
+
 		JSONMBMessage.addCategory(
 			categoryDescription = "MB Category Description",
 			categoryName = "MB Category1 Name",
@@ -497,6 +522,8 @@ definition {
 	@description = "This test covers LPS-137634. It ensures that a user cannot publish a thread with a tag that contains Java Script."
 	@priority = "3"
 	test CannotPublishThreadWithTagContainingJavaScript {
+		property portal.acceptance = "false";
+
 		MessageboardsThread.addPG(
 			groupName = "Guest",
 			invalidCharacters = "true",
@@ -507,16 +534,6 @@ definition {
 			threadSubject = '''<script>alert(123);</script>''');
 
 		AssertAlertNotPresent();
-	}
-
-	@description = "This is a test for LPS-136915. It checks that an attachment can be restored."
-	@ignore = "true"
-	@priority = "3"
-	test CanRestoreAttachment {
-		property portal.acceptance = "false";
-
-		// TODO LPS-136915 CanRestoreAttachment pending implementation
-
 	}
 
 	@priority = "5"

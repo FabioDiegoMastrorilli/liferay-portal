@@ -56,6 +56,7 @@ import com.liferay.portal.kernel.util.ListUtil;
 import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.UnicodeProperties;
 import com.liferay.portal.kernel.util.comparator.RoleRoleIdComparator;
+import com.liferay.portal.kernel.workflow.WorkflowConstants;
 import com.liferay.portal.test.rule.Inject;
 import com.liferay.portal.test.rule.LiferayIntegrationTestRule;
 
@@ -206,6 +207,13 @@ public class RoleLocalServiceTest {
 
 		Assert.assertEquals(
 			2, _roleLocalService.getAssigneesTotal(_role.getRoleId()));
+
+		_user.setStatus(WorkflowConstants.STATUS_INACTIVE);
+
+		_user = _userLocalService.updateUser(_user);
+
+		Assert.assertEquals(
+			1, _roleLocalService.getAssigneesTotal(_role.getRoleId()));
 	}
 
 	@SuppressWarnings({"rawtypes", "unchecked"})
@@ -478,7 +486,7 @@ public class RoleLocalServiceTest {
 
 		Group group = GroupTestUtil.addGroup(
 			TestPropsValues.getUserId(), _organization.getGroupId(),
-			LayoutTestUtil.addLayout(_organization.getGroupId()));
+			LayoutTestUtil.addTypePortletLayout(_organization.getGroupId()));
 
 		assertGetTeamRoleMap(
 			_roleLocalService.getTeamRoleMap(group.getGroupId()), _team, true);
