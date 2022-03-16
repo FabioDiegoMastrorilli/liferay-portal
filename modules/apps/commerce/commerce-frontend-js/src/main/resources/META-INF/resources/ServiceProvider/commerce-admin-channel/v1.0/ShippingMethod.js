@@ -14,23 +14,22 @@
 
 import AJAX from '../../../utilities/AJAX/index';
 
-const SHIPPING_FIXED_OPTIONS_PATH = '/shipping-fixed-options';
+const CHANNELS_PATH = '/channels';
 
-const SHIPPING_FIXED_OPTION_TERMS_PATH = '/shipping-fixed-option-terms';
+const SHIPPING_METHODS_PATH = '/shipping-methods';
 
 const VERSION = 'v1.0';
 
 function resolvePath(
 	basePath = '',
-	shippingFixedOptionId = '',
-	shippingFixedOptionTermId = ''
+	channelId = ''
 ) {
-	return `${basePath}${VERSION}${SHIPPING_FIXED_OPTIONS_PATH}/${shippingFixedOptionId}${SHIPPING_FIXED_OPTION_TERMS_PATH}/${shippingFixedOptionTermId}`;
+	return `${basePath}${VERSION}${CHANNELS_PATH}/${channelId}${SHIPPING_METHODS_PATH}`;
 }
 
-export default function ShippingFixedOptionTerm(basePath) {
+export default function ShippingMethod(basePath) {
 	return {
-		addShippingFixedOptionTerm: (shippingFixedOptionId, json) =>
-			AJAX.POST(resolvePath(basePath, shippingFixedOptionId), json),
+		getShippingMethods: (channelId, json) =>
+			AJAX.GET(resolvePath(basePath, channelId), json),
 	};
 }

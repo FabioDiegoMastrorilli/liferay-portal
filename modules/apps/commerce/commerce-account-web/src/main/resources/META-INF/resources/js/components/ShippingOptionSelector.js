@@ -12,8 +12,21 @@
  * details.
  */
 
-export {default as paymentMethodGroupRelOrderTypeAPI} from './PaymentMethodGroupRelOrderType';
-export {default as paymentMethodGroupRelTermAPI} from './PaymentMethodGroupRelTerm';
-export {default as shippingFixedOptionOrderTypeAPI} from './ShippingFixedOptionOrderType';
-export {default as shippingFixedOptionTermAPI} from './ShippingFixedOptionTerm';
-export {default as shippingMethodAPI} from './ShippingMethod';
+import classnames from 'classnames';
+import PropTypes from 'prop-types';
+import React, {useEffect, useState} from 'react';
+
+
+function ShippingOptionSelector({editAccountEntryShippingOptionActionURL}) {
+	return(
+		<div>{editAccountEntryShippingOptionActionURL}</div>
+	);
+}
+
+ShippingOptionSelector.defaultProps = {
+};
+
+ShippingOptionSelector.propTypes = {
+};
+
+export default ShippingOptionSelector;
